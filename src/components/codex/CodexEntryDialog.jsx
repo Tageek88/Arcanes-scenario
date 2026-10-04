@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import ResponsiveDialog from "@/components/common/ResponsiveDialog";
 import AttachmentsField from "@/components/codex/AttachmentsField";
+import NpcRelations from "@/components/codex/NpcRelations";
 import { useToast } from "@/components/ui/use-toast";
 import { KIND_META, defaultEntry } from "@/lib/codex";
 import { NPC_ATTITUDE } from "@/lib/sceneMeta";
@@ -36,7 +37,6 @@ export default function CodexEntryDialog({
   const allLocations = locations ?? fetchedLocations;
   const meta = KIND_META[kind] || KIND_META.npc;
 
-  // Initialise le formulaire à chaque ouverture (un seul effet, pour éviter les écrasements).
   useEffect(() => {
     if (!open) return;
     setForm(
@@ -46,7 +46,6 @@ export default function CodexEntryDialog({
     );
   }, [open, kind, entry, defaultParentId]);
 
-  // Charge les lieux seulement si la page ne les fournit pas.
   useEffect(() => {
     if (locations || !open || (kind !== "location" && kind !== "npc") || !campaignId) return;
     let alive = true;
@@ -208,64 +207,42 @@ export default function CodexEntryDialog({
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Description</Label>
-              <Textarea
-                value={form.description || ""}
-                onChange={(e) => set("description", e.target.value)}
-                placeholder="Ajoutez une description du lieu…"
-                rows={6}
-              />
+              <p className="text-xs text-muted-foreground">
+                Une ville a pour parent son pays, une rue a pour parent sa ville, etc.
+              </p>
             </div>
           </>
-        )}
-
-        {kind !== "npc" && kind !== "location" && (
-          <>
-            <div className="space-y-2">
-              <Label>Description</Label>
-              <Textarea
-                value={form.description || ""}
-                onChange={(e) => set("description", e.target.value)}
-                placeholder="Ajoutez une description…"
-                rows={6}
-              />
-            </div>
-
-            <div className="flex items-center justify-between gap-3 rounded-md border p-3">
-              <div>
-                <Label className="font-medium">Découvert</Label>
-                <p className="text-xs text-muted-foreground">Le joueur l'a-t-il déjà découvert ?</p>
-              </div>
-              <Switch
-                checked={!!form.discovered}
-                onCheckedChange={(checked) => set("discovered", checked)}
-              />
-            </div>
-          </>
-        )}
-
-        {kind !== "location" && (
-          <div className="space-y-2">
-            <Label>Description</Label>
-            <Textarea
-              value={form.description || ""}
-              onChange={(e) => set("description", e.target.value)}
-              placeholder="Ajoutez une description…"
-              rows={6}
-            />
-          </div>
         )}
 
         <div className="space-y-2">
-          <AttachmentsField
-            value={form.attachments || []}
-            onChange={(next) => set("attachments", next)}
-            campaignId={campaignId}
+          <Label>Description</Label>
+          <Textarea
+            rows={4}
+            value={form.description || ""}
+            onChange={(e) => set("description", e.target.value)}
           />
         </div>
+
+        <AttachmentsField value={form.attachments || []} onChange={(files) => set("attachments", files)} />
+
+        {kind === "npc" &&
+          (entry?.id ? (
+            <NpcRelations npc={entry} campaignId={campaignId} />
+          ) : (
+            <p className="rounded-lg border border-dashed border-border p-3 text-xs text-muted-foreground">
+              Enregistrez d'abord ce PNJ pour pouvoir lui ajouter des relations.
+            </p>
+          ))}
+
+        {kind === "clue" && (
+          <div className="flex items-center justify-between rounded-lg border border-border p-3">
+            <div>
+              <Label>Indice découvert</Label>
+              <p className="text-xs text-muted-foreground">Les joueurs ont-ils déjà trouvé cet indice ?</p>
+            </div>
+            <Switch checked={!!form.discovered} onCheckedChange={(v) => set("discovered", v)} />
+          </div>
+        )}
       </div>
     </ResponsiveDialog>
   );

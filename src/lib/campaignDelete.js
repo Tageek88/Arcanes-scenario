@@ -2,6 +2,7 @@ import { api } from "@/api/localClient";
 
 // Enfants d'abord, la campagne en dernier.
 export const LINKED_ENTITIES = [
+  { entity: "NPCRelation", label: "relation entre PNJ", plural: "relations entre PNJ" },
   { entity: "Clue", label: "indice", plural: "indices" },
   { entity: "Scene", label: "scène", plural: "scènes" },
   { entity: "Act", label: "acte", plural: "actes" },

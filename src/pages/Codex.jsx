@@ -29,6 +29,7 @@ import { deleteLocation, descendantIds, parentOptions, pathOf } from "@/lib/loca
 import { getSelectedCampaignId, setSelectedCampaignId } from "@/lib/campaignStore";
 import { useToast } from "@/components/ui/use-toast";
 import { useDataRefresh } from "@/lib/RefreshContext";
+import { deleteNpcRelations } from "@/lib/npcRelations";
 
 const normalize = (value) =>
   String(value || "")
@@ -193,11 +194,22 @@ const openChild = (parent) => {
     const mode = deleteMode;
     setPendingDelete(null);
     if (!pending) return;
+
     try {
-      if (pending.kind === "location") await deleteLocation(pending.entry, items, mode);
-      else await api.entities[KIND_META[pending.kind].entity].delete(pending.entry.id);
+      if (pending.kind === "location") {
+        await deleteLocation(pending.entry, items, mode);
+      } else {
+        if (pending.kind === "npc") {
+          await deleteNpcRelations(pending.entry.campaign_id, pending.entry.id);
+        }
+        await api.entities[KIND_META[pending.kind].entity].delete(pending.entry.id);
+      }
+
       setRefreshKey((k) => k + 1);
-      toast({ title: "Élément supprimé" });
+      toast({
+        title: "Élément supprimé",
+        description: "La suppression a bien été enregistrée.",
+      });
     } catch (error) {
       console.error("Suppression impossible :", error);
       setRefreshKey((k) => k + 1);
