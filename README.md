@@ -16,11 +16,16 @@
 ## Aperçu
 
 <!-- Ajoutez vos captures d'écran dans docs/screenshots/ puis décommentez ou adaptez les lignes ci-dessous -->
-<!--
-![Arborescence et scènes](docs/screenshots/accueil.png)
-![Codex : PNJ, lieux, indices](docs/screenshots/codex.png)
-![Calendrier des sessions](docs/screenshots/calendrier.png)
--->
+
+![Arborescence et scènes](Docs\Screenshots\arborescence.png)
+![Codex : PNJ](Docs\Screenshots\PNJ.png)
+![codex : lieux](Docs\Screenshots\lieu.png)
+![codex : indices](Docs\Screenshots\indices.png)
+![Calendrier des sessions](Docs\Screenshots\calendrier.png)
+![Tables aléatoires](Docs\Screenshots\tables.png)
+![Notes du MJ](Docs\Screenshots\notes.png)
+![Parametre du compte](Docs\Screenshots\parametres.png)
+
 
 *Captures d'écran à venir.*
 
