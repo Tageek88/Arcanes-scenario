@@ -19,29 +19,49 @@ import { KIND_META, defaultEntry } from "@/lib/codex";
 import { NPC_ATTITUDE } from "@/lib/sceneMeta";
 import { parentOptions } from "@/lib/locationTree";
 
-export default function CodexEntryDialog({ open, onOpenChange, kind, campaignId, entry, onSaved }) {
+export default function CodexEntryDialog({
+  open,
+  onOpenChange,
+  kind,
+  campaignId,
+  entry,
+  onSaved,
+  defaultParentId = "",
+  locations,
+}) {
   const { toast } = useToast();
   const [form, setForm] = useState(defaultEntry(kind));
   const [saving, setSaving] = useState(false);
-  const [allLocations, setAllLocations] = useState([]);
+  const [fetchedLocations, setFetchedLocations] = useState([]);
+  const allLocations = locations ?? fetchedLocations;
   const meta = KIND_META[kind] || KIND_META.npc;
 
+  // Initialise le formulaire à chaque ouverture (un seul effet, pour éviter les écrasements).
   useEffect(() => {
-    if (open) setForm(entry ? { ...entry } : defaultEntry(kind));
-  }, [open, kind, entry]);
+    if (!open) return;
+    setForm(
+      entry
+        ? { ...entry }
+        : { ...defaultEntry(kind), parent_id: kind === "location" ? defaultParentId : "" }
+    );
+  }, [open, kind, entry, defaultParentId]);
 
+  // Charge les lieux seulement si la page ne les fournit pas.
   useEffect(() => {
-    if (!open || kind !== "location" || !campaignId) return;
+    if (locations || !open || (kind !== "location" && kind !== "npc") || !campaignId) return;
     let alive = true;
     api.entities.Location.filter({ campaign_id: campaignId }, { sort: "name", limit: 1000 }).then((res) => {
-      if (alive) setAllLocations(res.items);
+      if (alive) setFetchedLocations(res.items);
     });
     return () => {
       alive = false;
     };
-  }, [open, kind, campaignId]);
+  }, [locations, open, kind, campaignId]);
 
-  const parentChoices = useMemo(() => parentOptions(allLocations, entry?.id), [allLocations, entry?.id]);
+  const locationChoices = useMemo(
+    () => parentOptions(allLocations, kind === "location" ? entry?.id : null),
+    [allLocations, kind, entry?.id]
+  );
 
   const set = (key, value) => setForm((f) => ({ ...f, [key]: value }));
 
@@ -57,6 +77,7 @@ export default function CodexEntryDialog({ open, onOpenChange, kind, campaignId,
       payload.role = form.role || "";
       payload.description = form.description || "";
       payload.attitude = form.attitude || "neutre";
+      payload.location_id = form.location_id || "";
     } else if (kind === "location") {
       payload.type = form.type || "";
       payload.description = form.description || "";
@@ -116,6 +137,7 @@ export default function CodexEntryDialog({ open, onOpenChange, kind, campaignId,
                 placeholder="Ex. Aubergiste, espion, garde du corps…"
               />
             </div>
+
             <div className="space-y-2">
               <Label>Attitude</Label>
               <Select value={form.attitude || "neutre"} onValueChange={(v) => set("attitude", v)}>
@@ -131,6 +153,29 @@ export default function CodexEntryDialog({ open, onOpenChange, kind, campaignId,
                 </SelectContent>
               </Select>
             </div>
+
+            <div className="space-y-2">
+              <Label>Lieu d'attribution</Label>
+              <Select
+                value={form.location_id || "_none"}
+                onValueChange={(v) => set("location_id", v === "_none" ? "" : v)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="_none">Aucun lieu</SelectItem>
+                  {locationChoices.map((option) => (
+                    <SelectItem key={option.id} value={option.id}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Où trouve-t-on ce personnage ? Choisissez un lieu de l'arborescence.
+              </p>
+            </div>
           </>
         )}
 
@@ -144,6 +189,7 @@ export default function CodexEntryDialog({ open, onOpenChange, kind, campaignId,
                 placeholder="Ex. Pays, ville, rue, maison, donjon…"
               />
             </div>
+
             <div className="space-y-2">
               <Label>Lieu parent</Label>
               <Select
@@ -155,40 +201,71 @@ export default function CodexEntryDialog({ open, onOpenChange, kind, campaignId,
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="_none">Aucun (lieu de premier niveau)</SelectItem>
-                  {parentChoices.map((option) => (
+                  {locationChoices.map((option) => (
                     <SelectItem key={option.id} value={option.id}>
                       {option.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">
-                Une ville a pour parent son pays, une rue a pour parent sa ville, etc.
-              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Textarea
+                value={form.description || ""}
+                onChange={(e) => set("description", e.target.value)}
+                placeholder="Ajoutez une description du lieu…"
+                rows={6}
+              />
             </div>
           </>
         )}
 
-        <div className="space-y-2">
-          <Label>Description</Label>
-          <Textarea
-            rows={4}
-            value={form.description || ""}
-            onChange={(e) => set("description", e.target.value)}
-          />
-        </div>
-
-        <AttachmentsField value={form.attachments || []} onChange={(files) => set("attachments", files)} />
-
-        {kind === "clue" && (
-          <div className="flex items-center justify-between rounded-lg border border-border p-3">
-            <div>
-              <Label>Indice découvert</Label>
-              <p className="text-xs text-muted-foreground">Les joueurs ont-ils déjà trouvé cet indice ?</p>
+        {kind !== "npc" && kind !== "location" && (
+          <>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Textarea
+                value={form.description || ""}
+                onChange={(e) => set("description", e.target.value)}
+                placeholder="Ajoutez une description…"
+                rows={6}
+              />
             </div>
-            <Switch checked={!!form.discovered} onCheckedChange={(v) => set("discovered", v)} />
+
+            <div className="flex items-center justify-between gap-3 rounded-md border p-3">
+              <div>
+                <Label className="font-medium">Découvert</Label>
+                <p className="text-xs text-muted-foreground">Le joueur l'a-t-il déjà découvert ?</p>
+              </div>
+              <Switch
+                checked={!!form.discovered}
+                onCheckedChange={(checked) => set("discovered", checked)}
+              />
+            </div>
+          </>
+        )}
+
+        {kind !== "location" && (
+          <div className="space-y-2">
+            <Label>Description</Label>
+            <Textarea
+              value={form.description || ""}
+              onChange={(e) => set("description", e.target.value)}
+              placeholder="Ajoutez une description…"
+              rows={6}
+            />
           </div>
         )}
+
+        <div className="space-y-2">
+          <AttachmentsField
+            value={form.attachments || []}
+            onChange={(next) => set("attachments", next)}
+            campaignId={campaignId}
+          />
+        </div>
       </div>
     </ResponsiveDialog>
   );

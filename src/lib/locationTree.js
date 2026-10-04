@@ -90,6 +90,15 @@ async function removeFromScenes(campaignId, removedIds) {
 
 // mode = "promote" : les enfants directs remontent d'un niveau.
 // mode = "cascade" : le lieu et tous ses descendants sont supprimés.
+async function reassignNpcs(campaignId, removedIds, newLocationId) {
+  const gone = new Set(removedIds);
+  const res = await api.entities.NPC.filter({ campaign_id: campaignId }, { limit: 1000 });
+  for (const npc of res.items) {
+    if (gone.has(npc.location_id)) {
+      await api.entities.NPC.update(npc.id, { location_id: newLocationId });
+    }
+  }
+}
 export async function deleteLocation(location, locations, mode) {
   let removed = [location.id];
   if (mode === "cascade") {
@@ -103,4 +112,5 @@ export async function deleteLocation(location, locations, mode) {
     await api.entities.Location.delete(location.id);
   }
   await removeFromScenes(location.campaign_id, removed);
+    await reassignNpcs(location.campaign_id, removed, mode === "cascade" ? "" : parentOf(location));
 }

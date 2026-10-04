@@ -30,7 +30,13 @@ const matchValue = (actual, expected) => {
         case "$lt": return actual != null && String(actual) < String(v);
         case "$ne": return actual !== v;
         case "$in": return Array.isArray(v) && v.includes(actual);
-        default: return true;
+        case "$regex": {
+         if (actual == null) return false;
+        try {return new RegExp(v, expected.$options || "").test(String(actual));
+        } catch {
+    return String(actual).toLowerCase().includes(String(v).toLowerCase());
+  }
+}default: return true;
       }
     });
   }

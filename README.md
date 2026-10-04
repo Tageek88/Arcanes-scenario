@@ -2,7 +2,7 @@
 
 **Un atelier de préparation pour maîtres du jeu : organisez votre scénario en actes et scènes, et gardez PNJ, lieux, indices, tables aléatoires, notes et sessions sous la main, le tout hors ligne sur votre ordinateur.**
 
-![Version](https://img.shields.io/badge/version-1.1.0-d4a63c)
+![Version](https://img.shields.io/badge/version-1.1.5-d4a63c)
 ![Node](https://img.shields.io/badge/node-%3E%3D20.19-339933?logo=node.js&logoColor=white)
 ![React](https://img.shields.io/badge/React-18-61dafb?logo=react&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-8-646cff?logo=vite&logoColor=white)
@@ -80,7 +80,7 @@ Si `npm run dist` signale une erreur de lien symbolique, activez le **Mode déve
 ### Changer la version
 
 ```bash
-npm version patch --no-git-tag-version   # 1.1.0 -> 1.1.1
+npm version patch --no-git-tag-version   # 1.1.0 -> 1.1.5
 npm version minor --no-git-tag-version   # 1.1.0 -> 1.2.0
 ```
 

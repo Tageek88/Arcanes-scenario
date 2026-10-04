@@ -11,7 +11,8 @@ export const CODEX_TABS = [
 ];
 
 export const defaultEntry = (kind) => {
-  if (kind === "npc") return { name: "", role: "", description: "", attitude: "neutre", attachments: [] };
+if (kind === "npc") return { name: "", role: "", description: "", attitude: "neutre", attachments: [], location_id: "" };
 if (kind === "location") return { name: "", type: "", description: "", attachments: [], parent_id: "" };
   return { name: "", description: "", discovered: false, attachments: [] };
 };
+

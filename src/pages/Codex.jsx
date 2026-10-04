@@ -24,8 +24,8 @@ import {
 import CodexCard from "@/components/codex/CodexCard";
 import CodexEntryDialog from "@/components/codex/CodexEntryDialog";
 import LocationTree from "@/components/codex/LocationTree";
-import { CODEX_TABS, KIND_META, defaultEntry } from "@/lib/codex";
-import { deleteLocation, descendantIds, flattenTree, pathOf } from "@/lib/locationTree";
+import { CODEX_TABS, KIND_META } from "@/lib/codex";
+import { deleteLocation, descendantIds, parentOptions, pathOf } from "@/lib/locationTree";
 import { getSelectedCampaignId, setSelectedCampaignId } from "@/lib/campaignStore";
 import { useToast } from "@/components/ui/use-toast";
 import { useDataRefresh } from "@/lib/RefreshContext";
@@ -48,7 +48,9 @@ export default function Codex() {
   const [loading, setLoading] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const { refreshKey: dataRefreshKey } = useDataRefresh();
-
+  const [allLocations, setAllLocations] = useState([]);
+  const [locationFilter, setLocationFilter] = useState("all");
+  const [defaultParentId, setDefaultParentId] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [entry, setEntry] = useState(null);
   const [pendingDelete, setPendingDelete] = useState(null);
@@ -91,15 +93,56 @@ export default function Codex() {
     };
   }, [campaignId, kind.entity, refreshKey, dataRefreshKey]);
 
+  useEffect(() => {
+  if (!campaignId) {
+    setAllLocations([]);
+    return;
+  }
+  let alive = true;
+  api.entities.Location.filter({ campaign_id: campaignId }, { sort: "name", limit: 1000 }).then((res) => {
+    if (alive) setAllLocations(res.items);
+  });
+  return () => {
+    alive = false;
+  };
+}, [campaignId, refreshKey, dataRefreshKey]);
+
+useEffect(() => {
+  setLocationFilter("all");
+}, [campaignId]);
+
   const q = normalize(term.trim());
-  const visible = useMemo(
-    () => (q ? items.filter((item) => normalize(item.name).includes(q)) : items),
-    [items, q]
+  const locationLabels = useMemo(() => {
+  const labels = new Map();
+  allLocations.forEach((l) =>
+    labels.set(l.id, pathOf(allLocations, l.id).map((x) => x.name).join(" › "))
   );
-  const treeRows = useMemo(
-    () => (tab === "location" && !q ? flattenTree(items, { collapsed }) : null),
-    [tab, q, items, collapsed]
-  );
+  return labels;
+}, [allLocations]);
+
+const locationChoices = useMemo(() => parentOptions(allLocations), [allLocations]);
+
+const locationScope = useMemo(
+  () =>
+    locationFilter === "all" || locationFilter === "_none"
+      ? null
+      : new Set([locationFilter, ...descendantIds(allLocations, locationFilter)]),
+  [locationFilter, allLocations]
+);
+
+const visible = useMemo(
+  () =>
+    items.filter((item) => {
+      if (q && !normalize(item.name).includes(q)) return false;
+      if (tab !== "npc" || locationFilter === "all") return true;
+      if (locationFilter === "_none") return !item.location_id;
+      return locationScope.has(item.location_id);
+    }),
+  [items, q, tab, locationFilter, locationScope]
+);
+
+const showTree = tab === "location" && !q;
+  const treeRows = [];
   const parentIds = useMemo(
     () => new Set(items.map((item) => item.parent_id).filter(Boolean)),
     [items]
@@ -112,17 +155,20 @@ export default function Codex() {
       return next;
     });
 
-  const openNew = () => {
-    setEntry(null);
-    setDialogOpen(true);
-  };
+ const openNew = () => {
+  setEntry(null);
+  setDefaultParentId("");
+  setDialogOpen(true);
+};
 
-  const openChild = (parent) => {
-    setEntry({ ...defaultEntry("location"), parent_id: parent.id });
-    setDialogOpen(true);
-  };
+const openChild = (parent) => {
+  setEntry(null);
+  setDefaultParentId(parent.id);
+  setDialogOpen(true);
+};
 
   const openEdit = (k, e) => {
+    setDefaultParentId("");
     setTab(k);
     setEntry(e);
     setDialogOpen(true);
@@ -228,7 +274,23 @@ export default function Codex() {
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input value={term} onChange={(e) => setTerm(e.target.value)} placeholder="Rechercher…" className="pl-9" />
         </div>
-        {treeRows && parentIds.size > 0 && (
+        {tab === "npc" && allLocations.length > 0 && (
+  <Select value={locationFilter} onValueChange={setLocationFilter}>
+    <SelectTrigger className="w-full sm:w-64">
+      <SelectValue />
+    </SelectTrigger>
+    <SelectContent>
+      <SelectItem value="all">Tous les lieux</SelectItem>
+      <SelectItem value="_none">Sans lieu</SelectItem>
+      {locationChoices.map((option) => (
+        <SelectItem key={option.id} value={option.id}>
+          {option.label}
+        </SelectItem>
+      ))}
+    </SelectContent>
+  </Select>
+)}
+        {showTree && parentIds.size > 0 && (
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={() => setCollapsed(new Set(parentIds))}>
               Tout replier
@@ -254,15 +316,15 @@ export default function Codex() {
             Aucun {KIND_META[tab].singular.toLowerCase()} {q ? "ne correspond à la recherche" : "pour le moment"}.
           </p>
         </div>
-      ) : treeRows ? (
+      ) : showTree ? (
         <LocationTree
-          rows={treeRows}
-          collapsed={collapsed}
-          onToggle={toggleCollapsed}
-          onEdit={openEdit}
-          onDelete={requestDelete}
-          onAddChild={openChild}
-        />
+  locations={items}
+  collapsed={collapsed}
+  onToggle={toggleCollapsed}
+  onEdit={openEdit}
+  onDelete={requestDelete}
+  onAddChild={openChild}
+/>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {visible.map((item) => {
@@ -278,26 +340,30 @@ export default function Codex() {
                   </p>
                 )}
                 <CodexCard
-                  kind={tab}
-                  entry={item}
-                  linked={false}
-                  onEdit={openEdit}
-                  onDelete={requestDelete}
-                />
+  kind={tab}
+  entry={item}
+  linked={false}
+  locationLabel={tab === "npc" ? locationLabels.get(item.location_id) : ""}
+  onEdit={openEdit}
+  onDelete={requestDelete}
+/>
               </div>
             );
           })}
         </div>
       )}
 
-      <CodexEntryDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        kind={tab}
-        campaignId={campaignId}
-        entry={entry}
-        onSaved={() => setRefreshKey((k) => k + 1)}
-      />
+      
+<CodexEntryDialog
+  open={dialogOpen}
+  onOpenChange={setDialogOpen}
+  kind={tab}
+  campaignId={campaignId}
+  entry={entry}
+  defaultParentId={defaultParentId}
+  locations={allLocations}
+  onSaved={() => setRefreshKey((k) => k + 1)}
+/>
 
       <AlertDialog open={!!pendingDelete} onOpenChange={(open) => !open && setPendingDelete(null)}>
         <AlertDialogContent>
