@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/localClient";
 import { Plus } from "lucide-react";
 import HeroArrival from "@/components/home/HeroArrival";
 import SceneBoard from "@/components/home/SceneBoard";
@@ -97,7 +97,7 @@ export default function Home() {
   );
 
   const loadCampaigns = useCallback(async () => {
-    const res = await base44.entities.Campaign.filter({}, { sort: "-created_date", limit: 100 });
+    const res = await api.entities.Campaign.filter({}, { sort: "-created_date", limit: 100 });
     setCampaigns(res.items);
     const stored = getSelectedCampaignId();
     const valid = res.items.some((c) => c.id === stored) ? stored : res.items[0]?.id || "";
@@ -116,12 +116,12 @@ export default function Home() {
       return;
     }
     const [a, s, n, l, c, agg] = await Promise.all([
-      base44.entities.Act.filter({ campaign_id: cid }, { sort: "order", limit: 200 }),
-      base44.entities.Scene.filter({ campaign_id: cid }, { sort: "order", limit: 500 }),
-      base44.entities.NPC.filter({ campaign_id: cid }, { sort: "name", limit: 300 }),
-      base44.entities.Location.filter({ campaign_id: cid }, { sort: "name", limit: 300 }),
-      base44.entities.Clue.filter({ campaign_id: cid }, { sort: "name", limit: 300 }),
-      base44.entities.Scene.aggregate({ query: { campaign_id: cid }, groupBy: "status" }),
+      api.entities.Act.filter({ campaign_id: cid }, { sort: "order", limit: 200 }),
+      api.entities.Scene.filter({ campaign_id: cid }, { sort: "order", limit: 500 }),
+      api.entities.NPC.filter({ campaign_id: cid }, { sort: "name", limit: 300 }),
+      api.entities.Location.filter({ campaign_id: cid }, { sort: "name", limit: 300 }),
+      api.entities.Clue.filter({ campaign_id: cid }, { sort: "name", limit: 300 }),
+      api.entities.Scene.aggregate({ query: { campaign_id: cid }, groupBy: "status" }),
     ]);
     setActs(a.items);
     setScenes(s.items);
@@ -139,9 +139,9 @@ export default function Home() {
   const reloadCodex = useCallback(async () => {
     if (!campaignId) return;
     const [n, l, c] = await Promise.all([
-      base44.entities.NPC.filter({ campaign_id: campaignId }, { sort: "name", limit: 300 }),
-      base44.entities.Location.filter({ campaign_id: campaignId }, { sort: "name", limit: 300 }),
-      base44.entities.Clue.filter({ campaign_id: campaignId }, { sort: "name", limit: 300 }),
+      api.entities.NPC.filter({ campaign_id: campaignId }, { sort: "name", limit: 300 }),
+      api.entities.Location.filter({ campaign_id: campaignId }, { sort: "name", limit: 300 }),
+      api.entities.Clue.filter({ campaign_id: campaignId }, { sort: "name", limit: 300 }),
     ]);
     setNpcs(n.items);
     setLocations(l.items);
@@ -222,9 +222,9 @@ export default function Home() {
     if (!editingSceneId) setActiveSceneId(optimistic.id);
     try {
       if (editingSceneId) {
-        await base44.entities.Scene.update(editingSceneId, payload);
+        await api.entities.Scene.update(editingSceneId, payload);
       } else {
-        const created = await base44.entities.Scene.create(payload);
+        const created = await api.entities.Scene.create(payload);
         if (created?.id) {
           setScenes((prev) => prev.map((s) => (s.id === optimistic.id ? created : s)));
           setActiveSceneId(created.id);
@@ -254,7 +254,7 @@ export default function Home() {
       return next;
     });
     try {
-      await base44.entities.Scene.update(scene.id, { status });
+      await api.entities.Scene.update(scene.id, { status });
     } catch {
       setScenes(previous);
       setProgress(buildProgress(previous));
@@ -274,7 +274,7 @@ export default function Home() {
     const optimistic = { id: `act-${Date.now()}`, campaign_id: campaignId, title, order };
     setActs((prev) => [...prev, optimistic]);
     try {
-      const created = await base44.entities.Act.create({ campaign_id: campaignId, title, order });
+      const created = await api.entities.Act.create({ campaign_id: campaignId, title, order });
       setActs((prev) => prev.map((a) => (a.id === optimistic.id ? created : a)));
       toast({ title: "Acte ajouté", description: "Cliquez sur son titre pour le renommer." });
     } catch {
@@ -291,7 +291,7 @@ export default function Home() {
     const previous = acts;
     setActs((prev) => prev.map((a) => (a.id === id ? { ...a, title } : a)));
     try {
-      await base44.entities.Act.update(id, { title });
+      await api.entities.Act.update(id, { title });
     } catch {
       setActs(previous);
       toast({
@@ -313,7 +313,7 @@ export default function Home() {
       setProgress(buildProgress(remaining));
       if (activeSceneId === pending.item.id) setActiveSceneId(null);
       try {
-        await base44.entities.Scene.delete(pending.item.id);
+        await api.entities.Scene.delete(pending.item.id);
         toast({ title: "Scène supprimée" });
       } catch {
         setScenes(previous.scenes);
@@ -332,8 +332,8 @@ export default function Home() {
     setScenes(remaining);
     setProgress(buildProgress(remaining));
     try {
-      await base44.entities.Scene.deleteMany({ act_id: pending.item.id });
-      await base44.entities.Act.delete(pending.item.id);
+      await api.entities.Scene.deleteMany({ act_id: pending.item.id });
+      await api.entities.Act.delete(pending.item.id);
       toast({ title: "Acte supprimé" });
     } catch {
       setActs(previous.acts);
@@ -412,7 +412,7 @@ const confirmCampaignDelete = async () => {
 
   if (editingCampaignId) {
     try {
-      const updated = await base44.entities.Campaign.update(editingCampaignId, payload);
+      const updated = await api.entities.Campaign.update(editingCampaignId, payload);
       setCampaigns((prev) =>
         prev.map((c) => (c.id === editingCampaignId ? { ...c, ...payload, ...(updated || {}) } : c))
       );
@@ -438,7 +438,7 @@ const confirmCampaignDelete = async () => {
   setCampaignOpen(false);
   setCampaignForm(EMPTY_CAMPAIGN);
   try {
-    const created = await base44.entities.Campaign.create(payload);
+    const created = await api.entities.Campaign.create(payload);
     setCampaigns((prev) => prev.map((c) => (c.id === optimistic.id ? created : c)));
     setSelectedCampaignId(created.id);
     setActiveSceneId(null);
@@ -469,7 +469,7 @@ const confirmCampaignDelete = async () => {
     const previous = scenes;
     setScenes((prev) => prev.map((s) => (s.id === activeScene.id ? { ...s, [key]: next } : s)));
     try {
-      await base44.entities.Scene.update(activeScene.id, { [key]: next });
+      await api.entities.Scene.update(activeScene.id, { [key]: next });
     } catch {
       setScenes(previous);
       toast({

@@ -132,7 +132,7 @@ const readAsDataUrl = (file) =>
     reader.readAsDataURL(file);
   });
 
-export const base44 = {
+export const api = {
   entities: Object.fromEntries(TABLES.map((t) => [t, makeEntity(t)])),
   integrations: {
     Core: {

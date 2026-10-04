@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/localClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -50,8 +50,8 @@ export default function CodexEntryDialog({ open, onOpenChange, kind, campaignId,
     payload.discovered = !!form.discovered;
   }
   try {
-    if (entry?.id) await base44.entities[meta.entity].update(entry.id, payload);
-    else await base44.entities[meta.entity].create(payload);
+    if (entry?.id) await api.entities[meta.entity].update(entry.id, payload);
+    else await api.entities[meta.entity].create(payload);
     onOpenChange(false);
     onSaved();
   } catch (error) {

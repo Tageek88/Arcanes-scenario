@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/localClient";
 import { Search, Plus, Link2, Link2Off, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -48,7 +48,7 @@ export default function CodexSidebar({
         }
         query.id = { $in: ids };
       }
-      const res = await base44.entities[kind.entity].filter(query, { sort: "name", limit: 100 });
+      const res = await api.entities[kind.entity].filter(query, { sort: "name", limit: 100 });
       if (!alive) return;
       setItems(res.items);
       setLoading(false);

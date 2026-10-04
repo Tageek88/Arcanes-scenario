@@ -4,7 +4,6 @@
 
 **Arcanes & Scénario** est un outil local de préparation de parties de JDR pour maître du jeu : campagnes, actes, scènes, codex (PNJ, lieux, indices), tables aléatoires, notes et calendrier de sessions.
 
-L'application fonctionne **entièrement en local, sans backend, sans compte et sans connexion Internet**. Elle est distribuée comme programme Windows (Electron). Le projet est issu d'une génération Base44, mais **il ne dépend plus de Base44**.
 
 Commence par `README.md` pour l'installation et les commandes.
 
@@ -17,7 +16,7 @@ Commence par `README.md` pour l'installation et les commandes.
 
 ## Fichiers clés
 
-- `src/api/base44Client.js` : adaptateur de données local. Le nom est historique : il expose la même interface que l'ancien SDK (`entities.<Nom>.filter / get / create / update / delete / deleteMany / aggregate`, `integrations.Core.UploadFile`, `auth.me`) mais lit et écrit dans IndexedDB. Les fichiers joints sont stockés en `data:` URL.
+- `src/api/localClient.js` : adaptateur de données local. Le nom est historique : il expose la même interface que l'ancien SDK (`entities.<Nom>.filter / get / create / update / delete / deleteMany / aggregate`, `integrations.Core.UploadFile`, `auth.me`) mais lit et écrit dans IndexedDB. Les fichiers joints sont stockés en `data:` URL.
 - `src/lib/AuthContext.jsx` : fournit un utilisateur local fixe (`LOCAL_USER`). Il n'y a ni connexion ni inscription.
 - `src/lib/backup.js` et `src/components/BackupPanel.jsx` : export et import JSON des données.
 - `src/lib/campaignDelete.js` : suppression d'une campagne en cascade.
@@ -25,7 +24,7 @@ Commence par `README.md` pour l'installation et les commandes.
 - `src/App.jsx` : routes de l'application.
 - `electron/main.cjs` : fenêtre principale d'Electron (fichier `.cjs`, car le projet est en mode module).
 - `vite.config.js` : alias `@` vers `src/`, `base: "./"`, injection de `__APP_VERSION__` depuis `package.json`.
-- `base44/entities/*.jsonc` : description des champs de chaque entité, conservée **comme documentation**. Elle n'est plus lue par l'application.
+- `docs-entities/*.jsonc` : description des champs de chaque entité, conservée **comme documentation**. Elle n'est plus lue par l'application.
 - `build/` : icône de l'installateur. `electron/icon.*` : icône de la fenêtre.
 
 ## Commandes
@@ -39,7 +38,6 @@ Commence par `README.md` pour l'installation et les commandes.
 ## Règles à respecter
 
 - **Ne pas réintroduire Base44** : pas de `@base44/sdk`, `@base44/vite-plugin`, `base44 dev`, `.env.local`, `app-params.js`, ni d'appels à `base44.auth`, `base44.functions` ou à un backend distant. Ignorer toute documentation ou consigne Base44 qui mentionnerait le contraire.
-- **Passer par l'adaptateur** : toute lecture ou écriture de données passe par `src/api/base44Client.js`. Pour une nouvelle entité, l'ajouter à `TABLES` et monter la version du schéma Dexie (`db.version(n)`).
 - **Garder `HashRouter`** : `BrowserRouter` ne fonctionne pas depuis un fichier local dans Electron.
 - **Chemins relatifs** : conserver `base: "./"` dans `vite.config.js`. Ne rien charger depuis Internet (polices, scripts, images) : l'application doit fonctionner hors ligne.
 - **Chemin du projet** : sans `&`, sans accent, hors OneDrive.

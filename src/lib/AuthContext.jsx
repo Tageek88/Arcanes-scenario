@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useMemo } from "react";
-import { LOCAL_USER } from "@/api/base44Client";
+import { LOCAL_USER } from "@/api/localClient";
 
 const AuthContext = createContext(null);
 

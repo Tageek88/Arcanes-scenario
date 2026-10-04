@@ -1,4 +1,4 @@
-import { db, TABLES } from "@/api/base44Client";
+import { db, TABLES } from "@/api/localClient";
 
 const APP_ID = "arcanes-scenario";
 const BACKUP_VERSION = 1;

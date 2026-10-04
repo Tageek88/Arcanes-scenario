@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/localClient";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { addMonths, format, parseISO, startOfMonth, subMonths } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -60,7 +60,7 @@ export default function Calendrier() {
 
   useEffect(() => {
     const run = async () => {
-      const res = await base44.entities.Campaign.filter({}, { sort: "-created_date", limit: 100 });
+      const res = await api.entities.Campaign.filter({}, { sort: "-created_date", limit: 100 });
       setCampaigns(res.items);
       const stored = getSelectedCampaignId();
       const valid = res.items.some((c) => c.id === stored) ? stored : res.items[0]?.id || "";
@@ -76,7 +76,7 @@ export default function Calendrier() {
       return;
     }
     let alive = true;
-    base44.entities.Scene
+    api.entities.Scene
       .filter({ campaign_id: campaignId }, { sort: "order", limit: 300 })
       .then((res) => {
         if (alive) setScenes(res.items);
@@ -99,11 +99,11 @@ export default function Calendrier() {
       const nextMonth = format(addMonths(startOfMonth(month), 1), "yyyy-MM-dd");
       const today = format(new Date(), "yyyy-MM-dd");
       const [monthRes, upcomingRes] = await Promise.all([
-        base44.entities.GameSession.filter(
+        api.entities.GameSession.filter(
           { campaign_id: campaignId, date: { $gte: start, $lt: nextMonth } },
           { sort: "date", limit: 300 }
         ),
-        base44.entities.GameSession.filter(
+        api.entities.GameSession.filter(
           { campaign_id: campaignId, date: { $gte: today } },
           { sort: "date", limit: 6 }
         ),
@@ -187,8 +187,8 @@ export default function Calendrier() {
     setDialogOpen(false);
     try {
       const saved = form.id
-        ? await base44.entities.GameSession.update(form.id, payload)
-        : await base44.entities.GameSession.create(payload);
+        ? await api.entities.GameSession.update(form.id, payload)
+        : await api.entities.GameSession.create(payload);
       if (saved?.id) applySession(saved, optimistic.id);
       toast({ title: form.id ? "Session mise à jour" : "Session planifiée" });
     } catch {
@@ -212,7 +212,7 @@ export default function Calendrier() {
     setSessions((list) => list.filter((s) => s.id !== pending.id));
     setUpcoming((list) => list.filter((s) => s.id !== pending.id));
     try {
-      await base44.entities.GameSession.delete(pending.id);
+      await api.entities.GameSession.delete(pending.id);
       toast({ title: "Session supprimée" });
     } catch {
       setSessions(previous.sessions);

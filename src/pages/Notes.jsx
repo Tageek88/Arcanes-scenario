@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/localClient";
 import { Pin, Plus, StickyNote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -43,7 +43,7 @@ export default function Notes() {
 
   useEffect(() => {
     const run = async () => {
-      const res = await base44.entities.Campaign.filter({}, { sort: "-created_date", limit: 100 });
+      const res = await api.entities.Campaign.filter({}, { sort: "-created_date", limit: 100 });
       setCampaigns(res.items);
       const stored = getSelectedCampaignId();
       const valid = res.items.some((c) => c.id === stored) ? stored : res.items[0]?.id || "";
@@ -63,11 +63,11 @@ export default function Notes() {
     const run = async () => {
       setLoading(true);
       const [pinnedRes, restRes] = await Promise.all([
-        base44.entities.Note.filter(
+        api.entities.Note.filter(
           { campaign_id: campaignId, pinned: true },
           { sort: "-updated_date", limit: 50 }
         ),
-        base44.entities.Note.filter(
+        api.entities.Note.filter(
           { campaign_id: campaignId, pinned: false },
           { sort: "-updated_date", limit: 100 }
         ),
@@ -129,8 +129,8 @@ export default function Notes() {
     setForm(EMPTY);
     try {
       const saved = form.id
-        ? await base44.entities.Note.update(form.id, payload)
-        : await base44.entities.Note.create(payload);
+        ? await api.entities.Note.update(form.id, payload)
+        : await api.entities.Note.create(payload);
       if (saved?.id) applyNote({ ...optimistic, ...saved }, optimistic.id);
       toast({ title: form.id ? "Note mise à jour" : "Note créée" });
     } catch {
@@ -151,7 +151,7 @@ export default function Notes() {
     const pinned = !note.pinned;
     applyNote({ ...note, pinned });
     try {
-      await base44.entities.Note.update(note.id, { pinned });
+      await api.entities.Note.update(note.id, { pinned });
       toast({ title: pinned ? "Note épinglée" : "Note désépinglée" });
     } catch {
       setPinnedNotes(previous.pinnedNotes);
@@ -172,7 +172,7 @@ export default function Notes() {
     setPinnedNotes((list) => list.filter((n) => n.id !== pending.id));
     setNotes((list) => list.filter((n) => n.id !== pending.id));
     try {
-      await base44.entities.Note.delete(pending.id);
+      await api.entities.Note.delete(pending.id);
       toast({ title: "Note supprimée" });
     } catch {
       setPinnedNotes(previous.pinnedNotes);

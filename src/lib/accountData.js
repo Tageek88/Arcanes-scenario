@@ -1,4 +1,4 @@
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/localClient";
 
 const OWNED_ENTITIES = [
   "Campaign",
@@ -13,8 +13,8 @@ const OWNED_ENTITIES = [
 ];
 
 export const deleteAccountData = async () => {
-  const me = await base44.auth.me();
+  const me = await api.auth.me();
   for (const name of OWNED_ENTITIES) {
-    await base44.entities[name].deleteMany({ created_by_id: me.id });
+    await api.entities[name].deleteMany({ created_by_id: me.id });
   }
 };

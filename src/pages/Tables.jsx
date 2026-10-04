@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/localClient";
 import { Dices, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -54,7 +54,7 @@ export default function Tables() {
 
   useEffect(() => {
     const run = async () => {
-      const res = await base44.entities.Campaign.filter({}, { sort: "-created_date", limit: 100 });
+      const res = await api.entities.Campaign.filter({}, { sort: "-created_date", limit: 100 });
       const campaignList = /** @type {Array<{ id: string; name: string }>} */ (res.items || []);
       setCampaigns(campaignList);
       const stored = getSelectedCampaignId();
@@ -75,7 +75,7 @@ export default function Tables() {
       setLoading(true);
       const query = /** @type {Record<string, string>} */ ({ campaign_id: campaignId });
       if (category !== "all") query.category = category;
-      const res = await base44.entities.RollTable.filter(query, { sort: "-created_date", limit: 200 });
+      const res = await api.entities.RollTable.filter(query, { sort: "-created_date", limit: 200 });
       if (!alive) return;
       const tableList = /** @type {Array<{ id: string; name: string; category?: string; description?: string; entries?: Array<{ text?: string; weight?: number }> }>} */ (res.items || []);
       setTables(tableList);
@@ -137,8 +137,8 @@ export default function Tables() {
   };
   try {
     const saved = form.id
-      ? await base44.entities.RollTable.update(form.id, payload)
-      : await base44.entities.RollTable.create(payload);
+      ? await api.entities.RollTable.update(form.id, payload)
+      : await api.entities.RollTable.create(payload);
     console.log("RollTable enregistrée :", saved);
     if (saved?.id) {
       applyTable(saved, form.id);
@@ -146,7 +146,7 @@ export default function Tables() {
       // réponse sans id : on recharge la liste depuis le serveur
       const query = /** @type {Record<string, string>} */ ({ campaign_id: campaignId });
       if (category !== "all") query.category = category;
-      const res = await base44.entities.RollTable.filter(query, { sort: "-created_date", limit: 200 });
+      const res = await api.entities.RollTable.filter(query, { sort: "-created_date", limit: 200 });
       const tableList = /** @type {Array<{ id: string; name: string; category?: string; description?: string; entries?: Array<{ text?: string; weight?: number }> }>} */ (res.items || []);
       setTables(tableList);
     }
@@ -174,7 +174,7 @@ export default function Tables() {
     const previous = tables;
     setTables((list) => list.filter((t) => t.id !== pendingId));
     try {
-      await base44.entities.RollTable.delete(pendingId);
+      await api.entities.RollTable.delete(pendingId);
       toast({ title: "Table supprimée" });
     } catch {
       setTables(previous);

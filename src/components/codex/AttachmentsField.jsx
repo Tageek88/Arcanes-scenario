@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import { ExternalLink, FileText, Loader2, Paperclip, Trash2 } from "lucide-react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/localClient";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
@@ -33,7 +33,7 @@ export default function AttachmentsField({ value = [], onChange }) {
         continue;
       }
       try {
-        const res = await base44.integrations.Core.UploadFile({ file });
+        const res = await api.integrations.Core.UploadFile({ file });
         added.push({ name: file.name, url: res.file_url, type: file.type });
       } catch (error) {
         console.error("Échec du téléversement :", error);

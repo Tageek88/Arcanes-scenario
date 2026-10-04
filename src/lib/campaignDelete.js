@@ -1,4 +1,4 @@
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/localClient";
 
 // Enfants d'abord, la campagne en dernier.
 export const LINKED_ENTITIES = [
@@ -18,7 +18,7 @@ const PAGE = 500;
 export async function countCampaignContent(campaignId) {
   const results = await Promise.all(
     LINKED_ENTITIES.map(async ({ entity, label, plural }) => {
-      const res = await base44.entities[entity].filter({ campaign_id: campaignId }, { limit: PAGE });
+      const res = await api.entities[entity].filter({ campaign_id: campaignId }, { limit: PAGE });
       const count = res.items.length;
       return { entity, count, capped: count >= PAGE, text: `${count}${count >= PAGE ? "+" : ""} ${count > 1 ? plural : label}` };
     })
@@ -29,11 +29,11 @@ export async function countCampaignContent(campaignId) {
 // Supprime tout le contenu, vérifie qu'il ne reste rien, puis supprime la campagne.
 export async function deleteCampaignCascade(campaignId) {
   for (const { entity } of LINKED_ENTITIES) {
-    await base44.entities[entity].deleteMany({ campaign_id: campaignId });
-    const left = await base44.entities[entity].filter({ campaign_id: campaignId }, { limit: 1 });
+    await api.entities[entity].deleteMany({ campaign_id: campaignId });
+    const left = await api.entities[entity].filter({ campaign_id: campaignId }, { limit: 1 });
     if (left.items.length > 0) {
       throw new Error(`Il reste des éléments de type ${entity} : la campagne n'a pas été supprimée.`);
     }
   }
-  await base44.entities.Campaign.delete(campaignId);
+  await api.entities.Campaign.delete(campaignId);
 }

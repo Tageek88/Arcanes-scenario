@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/localClient";
 import { Search, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -47,7 +47,7 @@ export default function Codex() {
 
   useEffect(() => {
     const run = async () => {
-      const res = await base44.entities.Campaign.filter({}, { sort: "-created_date", limit: 100 });
+      const res = await api.entities.Campaign.filter({}, { sort: "-created_date", limit: 100 });
       setCampaigns(res.items);
       const stored = getSelectedCampaignId();
       const valid = res.items.some((c) => c.id === stored) ? stored : res.items[0]?.id || "";
@@ -68,7 +68,7 @@ export default function Codex() {
       const query = { campaign_id: campaignId };
       const q = term.trim();
       if (q) query.name = { $regex: q, $options: "i" };
-      const res = await base44.entities[kind.entity].filter(query, { sort: "name", limit: 200 });
+      const res = await api.entities[kind.entity].filter(query, { sort: "name", limit: 200 });
       if (!alive) return;
       setItems(res.items);
       setLoading(false);
@@ -84,7 +84,7 @@ export default function Codex() {
     const pending = pendingDelete;
     setPendingDelete(null);
     if (!pending) return;
-    await base44.entities[KIND_META[pending.kind].entity].delete(pending.entry.id);
+    await api.entities[KIND_META[pending.kind].entity].delete(pending.entry.id);
     setRefreshKey((k) => k + 1);
     toast({ title: "Élément supprimé" });
   };
