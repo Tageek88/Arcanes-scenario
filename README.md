@@ -30,6 +30,10 @@
 
 *Captures d'écran à venir.*
 
+## Guide des fonctionnalités
+
+Retrouvez le descriptif complet de l'application, onglet par onglet, dans le fichier **[Fonctionnalites.txt](./Fonctionnalites.txt)** à la racine du projet.
+
 ## Fonctionnalités
 
 - **Arborescence** : campagnes, actes et scènes avec statut d'avancement (brouillon, prête, jouée…).
@@ -41,8 +45,6 @@
 - **Notes du MJ** : bloc-notes avec épinglage.
 - **Sauvegarde** : export et import JSON depuis les Paramètres.
 - **100 % local** : aucun compte, aucun serveur, les données restent sur votre machine.
-
-Un résumé détaillé des fonctions, organisé par onglet, est disponible dans [Fonctionnalites.txt](./Fonctionnalites.txt).
 
 ## Prérequis
 

@@ -78,7 +78,7 @@ function TreeRows({ nodes, depth, selected, onToggle }) {
 
 // ---------- Boîte de dialogue ----------
 
-function PrintDialog({ open, onOpenChange, campaignId, preset, onPrint }) {
+function PrintDialog({ open, onOpenChange, campaignId, preset, onPrint, allowPdfExport }) {
     const { toast } = useToast();
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -100,9 +100,11 @@ function PrintDialog({ open, onOpenChange, campaignId, preset, onPrint }) {
             list("Location"),
             list("Clue"),
             list("Note"),
+            list("GameCharacter"),
+            api.entities.GameSheetModel.filter({ campaign_id: campaignId }, { limit: 1 }),
             loadRelations(campaignId),
         ])
-            .then(([campaign, acts, scenes, npcs, locations, clues, notes, relations]) => {
+            .then(([campaign, acts, scenes, npcs, locations, clues, notes, characters, models, relations]) => {
                 if (!alive) return;
                 const loaded = {
                     campaign,
@@ -112,6 +114,8 @@ function PrintDialog({ open, onOpenChange, campaignId, preset, onPrint }) {
                     locations: locations.items,
                     clues: clues.items,
                     notes: notes.items,
+                    characters: characters.items,
+                    gameSheetModel: models.items[0] || null,
                     relations,
                 };
                 const trees = buildTrees(loaded);
@@ -157,22 +161,27 @@ function PrintDialog({ open, onOpenChange, campaignId, preset, onPrint }) {
     const setAll = (key, on) =>
         setSelected((prev) => ({ ...prev, [key]: on ? new Set(selectableIds(trees[key])) : new Set() }));
 
-    const submit = () => {
+    const submit = (action) => {
         const sel = Object.fromEntries(SECTIONS.map((s) => [s.key, enabled[s.key] ? selected[s.key] : new Set()]));
         const model = buildPrintModel(data, sel, opts);
         if (model.blocks.length === 0) {
             toast({ title: "Rien à imprimer", description: "Cochez au moins un élément." });
             return;
         }
-        onPrint(model);
+        onPrint(model, action);
     };
 
     const footer = (
-        <div className="flex justify-end gap-2">
+        <div className="flex flex-wrap justify-end gap-2">
             <Button variant="ghost" onClick={() => onOpenChange(false)}>
                 Annuler
             </Button>
-            <Button onClick={submit} disabled={loading || !hasContent}>
+            {allowPdfExport && (
+                <Button onClick={() => submit("pdf")} disabled={loading || !hasContent}>
+                    <Printer className="mr-2 h-4 w-4" /> Créer un PDF avec champs éditables
+                </Button>
+            )}
+            <Button onClick={() => submit("print")} disabled={loading || !hasContent}>
                 <Printer className="mr-2 h-4 w-4" /> Imprimer
             </Button>
         </div>
@@ -197,8 +206,10 @@ function PrintDialog({ open, onOpenChange, campaignId, preset, onPrint }) {
         <ResponsiveDialog
             open={open}
             onOpenChange={onOpenChange}
-            title="Imprimer"
-            description="Choisissez ce qui doit figurer dans le document. Chaque section peut s'imprimer seule."
+            title={allowPdfExport ? "Imprimer ou exporter en PDF" : "Imprimer"}
+            description={allowPdfExport
+                ? "Choisissez les éléments à inclure. L’export PDF conserve du texte sélectionnable et modifiable."
+                : "Choisissez ce qui doit figurer dans le document. Chaque section peut s'imprimer seule."}
             footer={footer}
         >
             {loading || !trees ? (
@@ -265,6 +276,11 @@ function PrintDialog({ open, onOpenChange, campaignId, preset, onPrint }) {
                         {option("secrets", "Inclure les notes du MJ dans les scènes", "Notes secrètes de chaque scène, à décocher pour un document destiné aux joueurs.")}
                         {option("cluesWithScenes", "Imprimer les indices avec leur scène", "Sinon, les indices liés ne sont pas repris dans les scènes.")}
                         {option("images", "Inclure les images jointes", "Lieux, PNJ et indices. Les PDF ne sont pas imprimés.")}
+                        {allowPdfExport && (
+                            <p className="text-xs text-muted-foreground">
+                                Les champs sont préremplis et peuvent être modifiés dans un lecteur PDF compatible avec les formulaires.
+                            </p>
+                        )}
                     </div>
                 </div>
             )}
@@ -281,27 +297,66 @@ export default function PrintButton({
     variant = "outline",
     size = "default",
     className,
+    allowPdfExport = false,
 }) {
     const [open, setOpen] = useState(false);
-    const [model, setModel] = useState(null);
+    const [job, setJob] = useState(null);
+    const { toast } = useToast();
 
     useEffect(() => {
-        if (!model) return;
+        if (!job) return;
         let cancelled = false;
+        if (job.action === "pdf") {
+            import("@/lib/editablePdf")
+                .then(({ createEditablePdf }) => createEditablePdf(job.model))
+                .then(async ({ bytes, filename }) => {
+                    if (window.arcanesPdf?.save) {
+                        const result = await window.arcanesPdf.save(bytes, filename);
+                        if (!result?.ok) throw new Error(result?.error || "Le PDF n'a pas pu être enregistré.");
+                        if (!result.canceled) {
+                            toast({ title: "PDF éditable enregistré", description: result.filePath });
+                        }
+                        return;
+                    }
+
+                    const url = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
+                    const link = document.createElement("a");
+                    link.href = url;
+                    link.download = filename;
+                    link.click();
+                    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+                    toast({ title: "Téléchargement du PDF éditable lancé" });
+                })
+                .catch((error) => {
+                    console.error("Export du PDF éditable impossible :", error);
+                    toast({
+                        variant: "destructive",
+                        title: "Export PDF impossible",
+                        description: error?.message || "Le document n'a pas pu être généré.",
+                    });
+                })
+                .finally(() => {
+                    if (!cancelled) setJob(null);
+                });
+            return () => {
+                cancelled = true;
+            };
+        }
+
         const run = async () => {
             await new Promise((resolve) => setTimeout(resolve, 80));
             const imgs = Array.from(document.querySelectorAll(".print-root img"));
             await Promise.all(imgs.map((img) => (img.decode ? img.decode().catch(() => { }) : null)));
             if (!cancelled) window.print();
         };
+        const done = () => setJob(null);
         run();
-        const done = () => setModel(null);
         window.addEventListener("afterprint", done);
         return () => {
             cancelled = true;
             window.removeEventListener("afterprint", done);
         };
-    }, [model]);
+    }, [job, toast]);
 
     return (
         <>
@@ -320,12 +375,13 @@ export default function PrintButton({
                 onOpenChange={setOpen}
                 campaignId={campaignId}
                 preset={preset}
-                onPrint={(built) => {
+                allowPdfExport={allowPdfExport}
+                onPrint={(built, action) => {
                     setOpen(false);
-                    setModel(built);
+                    setJob({ model: built, action });
                 }}
             />
-            {model && createPortal(<PrintSheet model={model} />, document.body)}
+            {job?.action === "print" && createPortal(<PrintSheet model={job.model} />, document.body)}
         </>
     );
 }

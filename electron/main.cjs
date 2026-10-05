@@ -135,6 +135,25 @@ ipcMain.handle("backup:open-folder", async () => {
   await shell.openPath(backupFolder());
 });
 
+ipcMain.handle("pdf:save", async (_event, bytes, filename) => {
+  if (!(bytes instanceof Uint8Array) || bytes.length < 5 || Buffer.from(bytes.subarray(0, 5)).toString("ascii") !== "%PDF-") {
+    return { ok: false, error: "Le document PDF est invalide." };
+  }
+  try {
+    const safeName = path.basename(String(filename || "Document.pdf")).replace(/[<>:"/\\|?*\x00-\x1F]/g, "_");
+    const result = await dialog.showSaveDialog(mainWindow, {
+      title: "Enregistrer le PDF éditable",
+      defaultPath: safeName.endsWith(".pdf") ? safeName : `${safeName}.pdf`,
+      filters: [{ name: "Document PDF", extensions: ["pdf"] }],
+    });
+    if (result.canceled || !result.filePath) return { ok: true, canceled: true };
+    fs.writeFileSync(result.filePath, Buffer.from(bytes));
+    return { ok: true, filePath: result.filePath };
+  } catch (error) {
+    return { ok: false, error: String(error?.message || error) };
+  }
+});
+
 // ---------- Fenêtre ----------
 
 function createWindow() {

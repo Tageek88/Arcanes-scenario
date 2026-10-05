@@ -8,6 +8,7 @@ export const SECTIONS = [
     { key: "locations", title: "Lieux", hint: "Dans l'ordre de l'arborescence." },
     { key: "npcs", title: "PNJ", hint: "Classés par lieu, dans l'ordre des scènes, avec leurs relations." },
     { key: "notes", title: "Notes du MJ", hint: "Épinglées en premier." },
+    { key: "characters", title: "Fiches de personnages", hint: "Caractéristiques, compétences, équipements et notes." },
 ];
 
 const txt = (v) => String(v ?? "");
@@ -31,7 +32,7 @@ export function orderScenes(acts, scenes) {
 
 const leaf = (id, label, hint = "") => ({ id, label, hint, countable: true, derived: false, children: [] });
 
-export function buildTrees({ acts, scenes, npcs, locations, clues, notes }) {
+export function buildTrees({ acts, scenes, npcs, locations, clues, notes, characters = [] }) {
     let n = 0;
     const sceneNodes = orderScenes(acts, scenes).map((g) => {
         const kids = g.scenes.map((s) =>
@@ -72,6 +73,9 @@ export function buildTrees({ acts, scenes, npcs, locations, clues, notes }) {
         notes: [...notes]
             .sort((a, b) => pinnedFirst(a, b) || txt(b.updated_date).localeCompare(txt(a.updated_date)))
             .map((x) => leaf(x.id, x.title || "Note", x.pinned ? "Épinglée" : "")),
+        characters: [...characters].sort(byName).map((character) =>
+            leaf(character.id, character.name || "Personnage")
+        ),
     };
 }
 
@@ -96,7 +100,7 @@ export const countableIds = (nodes) => {
 // ---------- Modèle du document imprimé ----------
 
 export function buildPrintModel(data, sel, opts) {
-    const { campaign, acts, scenes, npcs, locations, clues, notes, relations } = data;
+    const { campaign, acts, scenes, npcs, locations, clues, notes, relations, characters = [], gameSheetModel } = data;
     const sceneById = new Map(scenes.map((s) => [s.id, s]));
     const npcById = new Map(npcs.map((p) => [p.id, p]));
     const clueById = new Map(clues.map((c) => [c.id, c]));
@@ -158,7 +162,7 @@ export function buildPrintModel(data, sel, opts) {
                     title: s.title || "Sans titre",
                     status: SCENE_STATUS[s.status]?.label || "",
                     summary: s.summary || "",
-                    gmNotes: opts.secrets ? s.gm_notes || "" : "",
+                    gmNotes: opts.secrets ? s.gm_notes || "" : null,
                     branches: (s.next_scene_ids || [])
                         .map((id) => sceneById.get(id))
                         .filter(Boolean)
@@ -240,6 +244,20 @@ export function buildPrintModel(data, sel, opts) {
         .sort((a, b) => Number(!!b.pinned) - Number(!!a.pinned) || txt(b.updated_date).localeCompare(txt(a.updated_date)))
         .map((x) => ({ title: x.title || "Note", content: x.content || "", pinned: !!x.pinned }));
     if (noteItems.length) blocks.push({ kind: "notes", notes: noteItems });
+
+    // 6. Fiches de personnages
+    const characterIds = sel.characters || new Set();
+    const selectedCharacters = characters
+        .filter((character) => characterIds.has(character.id))
+        .sort(byName)
+        .map((character) => ({
+            character,
+            characteristics: gameSheetModel?.characteristics || [],
+            skillRollModifier: !!gameSheetModel?.skillRollModifier,
+        }));
+    if (selectedCharacters.length) {
+        blocks.push({ kind: "characters", characters: selectedCharacters });
+    }
 
     return {
         campaignName: campaign?.name || "Campagne",

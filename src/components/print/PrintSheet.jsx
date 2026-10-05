@@ -30,6 +30,7 @@ const CSS = `
   .prt-character-stat h3 { font-size: 11pt; margin-bottom: 4px; }
   .prt-character-stat p, .prt-character-item p { margin: 1px 0; }
   .prt-character-notes { white-space: pre-wrap; }
+  .prt-character + .prt-character { break-before: page; }
 }
 `;
 
@@ -48,6 +49,8 @@ const Lines = ({ label, items }) =>
 const Images = ({ images }) =>
     (images || []).map((img, i) => <img key={i} className="prt-img" src={img.url} alt="" />);
 
+const hasValue = (value) => value !== "" && value !== null && value !== undefined;
+
 const Clue = ({ clue }) => (
     <div className="prt-clue">
         <span className="prt-title">
@@ -63,6 +66,22 @@ const Clue = ({ clue }) => (
 
 function Block({ block }) {
     switch (block.kind) {
+        case "characters":
+            return (
+                <section className="prt-section">
+                    <h2>Fiches de personnages</h2>
+                    {block.characters.map(({ character, characteristics, skillRollModifier }) => (
+                        <article className="prt-character" key={character.id}>
+                            <h3 className="prt-group">{character.name}</h3>
+                            <CharacterContent
+                                character={character}
+                                characteristics={characteristics}
+                                skillRollModifier={skillRollModifier}
+                            />
+                        </article>
+                    ))}
+                </section>
+            );
         case "scenes":
             return (
                 <section className="prt-section">
@@ -159,19 +178,71 @@ function Block({ block }) {
     }
 }
 
+function CharacterContent({ character, characteristics, skillRollModifier }) {
+    const stats = characteristics.flatMap((definition) => {
+        const values = character.characteristics?.[definition.name] || {};
+        const entries = [
+            ["Valeur", values.value],
+            ...(definition.modifier ? [["Modificateur", values.modifier]] : []),
+            ...(definition.test ? [["Test (seuil)", values.test]] : []),
+            ...(definition.max ? [["Maximum", values.max]] : []),
+        ].filter(([, value]) => hasValue(value));
+        return entries.length ? [{ name: definition.name, entries }] : [];
+    });
+
+    return (
+        <>
+            {stats.length > 0 && (
+                <section className="prt-section">
+                    <h2>Caractéristiques</h2>
+                    <div className="prt-character-grid">
+                        {stats.map((stat) => (
+                            <article className="prt-character-stat" key={stat.name}>
+                                <h3>{stat.name}</h3>
+                                {stat.entries.map(([label, value]) => <p key={label}><strong>{label} :</strong> {value}</p>)}
+                            </article>
+                        ))}
+                    </div>
+                </section>
+            )}
+            {(character.skills || []).length > 0 && (
+                <section className="prt-section">
+                    <h2>Compétences</h2>
+                    {character.skills.map((skill, index) => (
+                        <div className="prt-character-item" key={`${skill.name}-${index}`}>
+                            <span className="prt-title">{skill.name}</span>
+                            {skillRollModifier && hasValue(skill.roll_modifier) && <span> · Modificateur de lancer : {skill.roll_modifier}</span>}
+                        </div>
+                    ))}
+                </section>
+            )}
+            {(character.equipment || []).length > 0 && (
+                <section className="prt-section">
+                    <h2>Équipement</h2>
+                    {character.equipment.map((item, index) => (
+                        <div className="prt-character-item" key={`${item.name}-${index}`}>
+                            <div className="prt-title">{item.name}</div>
+                            {item.type && <div className="prt-meta">{item.type}</div>}
+                            {(item.fields || []).filter((field) => field.name || field.value).map((field, fieldIndex) => (
+                                <p key={`${field.name}-${fieldIndex}`}><strong>{field.name}</strong>{hasValue(field.value) && ` : ${field.value}`}</p>
+                            ))}
+                        </div>
+                    ))}
+                </section>
+            )}
+            {character.notes && (
+                <section className="prt-section">
+                    <h2>Notes</h2>
+                    <p className="prt-text prt-character-notes">{character.notes}</p>
+                </section>
+            )}
+        </>
+    );
+}
+
 export default function PrintSheet({ model }) {
     if (model.character) {
-        const { character, campaignName, characteristics: definitions, skillRollModifier } = model;
-        const stats = definitions.flatMap((definition) => {
-            const values = character.characteristics?.[definition.name] || {};
-            const entries = [
-                ["Valeur", values.value],
-                ...(definition.modifier ? [["Modificateur", values.modifier]] : []),
-                ...(definition.test ? [["Test (seuil)", values.test]] : []),
-                ...(definition.max ? [["Maximum", values.max]] : []),
-            ].filter(([, value]) => value);
-            return entries.length ? [{ name: definition.name, entries }] : [];
-        });
+        const { character, campaignName, characteristics, skillRollModifier } = model;
         return (
             <div className="print-root">
                 <style>{CSS}</style>
@@ -179,50 +250,11 @@ export default function PrintSheet({ model }) {
                     <h1>{character.name}</h1>
                     <p>{campaignName} · Fiche de personnage</p>
                 </header>
-                {stats.length > 0 && (
-                    <section className="prt-section">
-                        <h2>Caractéristiques</h2>
-                        <div className="prt-character-grid">
-                            {stats.map((stat) => (
-                                <article className="prt-character-stat" key={stat.name}>
-                                    <h3>{stat.name}</h3>
-                                    {stat.entries.map(([label, value]) => <p key={label}><strong>{label} :</strong> {value}</p>)}
-                                </article>
-                            ))}
-                        </div>
-                    </section>
-                )}
-                {(character.skills || []).length > 0 && (
-                    <section className="prt-section">
-                        <h2>Compétences</h2>
-                        {character.skills.map((skill, index) => (
-                            <div className="prt-character-item" key={`${skill.name}-${index}`}>
-                                <span className="prt-title">{skill.name}</span>
-                                {skillRollModifier && skill.roll_modifier && <span> · Modificateur de lancer : {skill.roll_modifier}</span>}
-                            </div>
-                        ))}
-                    </section>
-                )}
-                {(character.equipment || []).length > 0 && (
-                    <section className="prt-section">
-                        <h2>Équipement</h2>
-                        {character.equipment.map((item, index) => (
-                            <div className="prt-character-item" key={`${item.name}-${index}`}>
-                                <div className="prt-title">{item.name}</div>
-                                {item.type && <div className="prt-meta">{item.type}</div>}
-                                {(item.fields || []).filter((field) => field.name || field.value).map((field, fieldIndex) => (
-                                    <p key={`${field.name}-${fieldIndex}`}><strong>{field.name}</strong>{field.value && ` : ${field.value}`}</p>
-                                ))}
-                            </div>
-                        ))}
-                    </section>
-                )}
-                {character.notes && (
-                    <section className="prt-section">
-                        <h2>Notes</h2>
-                        <p className="prt-text prt-character-notes">{character.notes}</p>
-                    </section>
-                )}
+                <CharacterContent
+                    character={character}
+                    characteristics={characteristics}
+                    skillRollModifier={skillRollModifier}
+                />
             </div>
         );
     }

@@ -57,9 +57,14 @@ export default function Settings() {
       <section className="space-y-3 rounded-xl border border-border bg-card/50 p-4">
         <h2 className="font-display text-base font-semibold text-foreground">Impression</h2>
         <p className="text-sm text-muted-foreground">
-          Imprimez tout ou partie de la campagne sélectionnée : scènes, indices, lieux, PNJ et notes.
+          Imprimez ou exportez en PDF éditable les scènes, indices, lieux, PNJ, notes et fiches de personnages de la campagne sélectionnée.
         </p>
-        <PrintButton campaignId={getSelectedCampaignId()} preset="all" label="Choisir quoi imprimer" />
+        <PrintButton
+          campaignId={getSelectedCampaignId()}
+          preset="all"
+          label="Choisir les éléments"
+          allowPdfExport
+        />
       </section>
 
       <section className="rounded-xl border border-destructive/40 bg-destructive/[0.06] p-5">

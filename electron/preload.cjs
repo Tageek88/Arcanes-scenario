@@ -8,3 +8,7 @@ contextBridge.exposeInMainWorld("arcanesBackup", {
     chooseFolder: () => ipcRenderer.invoke("backup:choose-folder"),
     openFolder: () => ipcRenderer.invoke("backup:open-folder"),
 });
+
+contextBridge.exposeInMainWorld("arcanesPdf", {
+    save: (bytes, filename) => ipcRenderer.invoke("pdf:save", bytes, filename),
+});
