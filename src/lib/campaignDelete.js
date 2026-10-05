@@ -13,15 +13,21 @@ export const LINKED_ENTITIES = [
   { entity: "GameSession", label: "session de jeu", plural: "sessions de jeu" },
 ];
 
-const PAGE = 500;
+const PAGE = 5000;
 
 // Liste ce qui sera supprimé, pour la confirmation.
 export async function countCampaignContent(campaignId) {
   const results = await Promise.all(
     LINKED_ENTITIES.map(async ({ entity, label, plural }) => {
       const res = await api.entities[entity].filter({ campaign_id: campaignId }, { limit: PAGE });
-      const count = res.items.length;
-      return { entity, count, capped: count >= PAGE, text: `${count}${count >= PAGE ? "+" : ""} ${count > 1 ? plural : label}` };
+      const rows = res.items.length;
+      // Une relation est stockée en deux lignes (une par PNJ) : on compte les paires.
+      const count = entity === "NPCRelation" ? Math.ceil(rows / 2) : rows;
+      return {
+        entity,
+        count,
+        text: `${count}${rows >= PAGE ? "+" : ""} ${count > 1 ? plural : label}`,
+      };
     })
   );
   return results.filter((r) => r.count > 0);
