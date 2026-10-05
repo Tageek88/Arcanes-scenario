@@ -11,21 +11,37 @@
     "description": {
       "type": "string"
     },
+    "clue_type": {
+      "type": "string",
+      "enum": ["indice", "info"],
+      "default": "indice"
+    },
     "discovered": {
       "type": "boolean",
-      "default": false
-    }
+      "default": false,
+      "description": "Pour un indice : les joueurs l'ont-ils découvert ?"
+    },
+    "known": {
+      "type": "boolean",
+      "default": false,
+      "description": "Pour une info : les joueurs connaissent-ils cette information ?"
+    },
+    "used": {
+      "type": "boolean",
+      "default": false,
+      "description": "Pour une info : le MJ l'a-t-il déjà utilisée en jeu ?"
+    },
     "attachments": {
-  "type": "array",
-  "items": {
-    "type": "object",
-    "properties": {
-      "name": { "type": "string" },
-      "url": { "type": "string" },
-      "type": { "type": "string" }
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "url": { "type": "string" },
+          "type": { "type": "string" }
+        }
+      }
     }
-  }
-}
   },
   "required": [
     "name",

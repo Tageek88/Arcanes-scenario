@@ -144,7 +144,7 @@ export default function SceneEditor({
           emptyText="Aucun lieu dans le codex."
         />
         <LinkPicker
-          label="Indices liés"
+          label="Indices & infos liés"
           items={clues}
           selected={form.clue_ids}
           onToggle={(id) => toggleId("clue_ids", id)}

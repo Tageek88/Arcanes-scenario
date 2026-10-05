@@ -60,7 +60,13 @@ export function buildTrees({ acts, scenes, npcs, locations, clues, notes }) {
     const pinnedFirst = (a, b) => Number(!!b.pinned) - Number(!!a.pinned);
     return {
         scenes: sceneNodes,
-        clues: [...clues].sort(byName).map((c) => leaf(c.id, c.name || "Indice", c.discovered ? "Découvert" : "Caché")),
+        clues: [...clues].sort(byName).map((c) => leaf(
+            c.id,
+            c.name || (c.clue_type === "info" ? "Info" : "Indice"),
+            c.clue_type === "info"
+                ? `Info · ${c.known ? "Connue" : "Inconnue"} · ${c.used ? "Utilisée" : "Non utilisée"}`
+                : c.discovered ? "Découvert" : "Caché"
+        )),
         locations: walk("", new Set()),
         npcs: [...npcs].sort(byName).map((p) => leaf(p.id, p.name || "PNJ", p.role || "")),
         notes: [...notes]
@@ -123,7 +129,10 @@ export function buildPrintModel(data, sel, opts) {
     const toClue = (c) => ({
         name: c.name,
         description: c.description || "",
+        clueType: c.clue_type === "info" ? "info" : "indice",
         discovered: !!c.discovered,
+        known: !!c.known,
+        used: !!c.used,
         images: images(c),
     });
 

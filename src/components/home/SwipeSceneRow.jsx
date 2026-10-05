@@ -2,7 +2,7 @@ import React, { useRef } from "react";
 import { cn } from "@/lib/utils";
 import { SCENE_STATUS } from "@/lib/sceneMeta";
 
-export default function SwipeSceneRow({ scene, active, onOpen, onSelect, onToggleStatus }) {
+export default function SwipeSceneRow({ scene, active, npcs, locations, clues, onOpen, onSelect, onToggleStatus }) {
   const startX = useRef(null);
   const meta = SCENE_STATUS[scene.status] || SCENE_STATUS.brouillon;
 
@@ -27,7 +27,40 @@ export default function SwipeSceneRow({ scene, active, onOpen, onSelect, onToggl
           <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", meta.dot)} />
           <span className="truncate font-display text-sm font-semibold text-foreground">{scene.title}</span>
         </div>
-        {scene.summary && <p className="mt-1 line-clamp-1 text-xs text-muted-foreground">{scene.summary}</p>}
+        {scene.summary && (
+          <p className={cn("mt-1 text-xs text-muted-foreground", active ? "whitespace-pre-wrap" : "line-clamp-1")}>
+            {scene.summary}
+          </p>
+        )}
+        {active && scene.gm_notes && (
+          <p className="mt-2 whitespace-pre-wrap text-xs text-muted-foreground">
+            <span className="font-medium text-foreground">Notes du MJ : </span>{scene.gm_notes}
+          </p>
+        )}
+        {active && (scene.npc_ids?.length > 0 || scene.location_ids?.length > 0 || scene.clue_ids?.length > 0) && (
+          <div className="mt-2 space-y-1 text-xs text-muted-foreground">
+            {scene.npc_ids?.length > 0 && (
+              <p><span className="font-medium text-foreground">PNJ :</span> {scene.npc_ids.map((id) => npcs.find((item) => item.id === id)?.name).filter(Boolean).join(" · ")}</p>
+            )}
+            {scene.location_ids?.length > 0 && (
+              <p><span className="font-medium text-foreground">Lieux :</span> {scene.location_ids.map((id) => locations.find((item) => item.id === id)?.name).filter(Boolean).join(" · ")}</p>
+            )}
+            {scene.clue_ids?.length > 0 && (
+              <ul className="space-y-1">
+                {scene.clue_ids.map((id) => clues.find((item) => item.id === id)).filter(Boolean).map((item) => (
+                  <li key={item.id} className="flex justify-between gap-2">
+                    <span>{item.name}</span>
+                    <span className="shrink-0 font-mono uppercase">
+                      {item.clue_type === "info"
+                        ? [item.known && "Connue", item.used && "Utilisée"].filter(Boolean).join(" · ") || "Info"
+                        : item.discovered ? "Découvert" : "Caché"}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
       </button>
       <button type="button" onClick={() => onToggleStatus(scene)} className={cn("tag shrink-0 border", meta.badge)}>
         {meta.label}

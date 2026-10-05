@@ -10,10 +10,24 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 
-export default function SceneNode({ scene, active, sceneTitles, onSelect, onOpen, onCycleStatus, onDelete }) {
+export default function SceneNode({
+  scene,
+  active,
+  sceneTitles,
+  npcById,
+  locationById,
+  clueById,
+  onSelect,
+  onOpen,
+  onCycleStatus,
+  onDelete,
+}) {
   const meta = SCENE_STATUS[scene.status] || SCENE_STATUS.brouillon;
   const branches = (scene.next_scene_ids || []).map((id) => sceneTitles[id]).filter(Boolean);
   const linked = (scene.npc_ids?.length || 0) + (scene.location_ids?.length || 0) + (scene.clue_ids?.length || 0);
+  const linkedNpcs = (scene.npc_ids || []).map((id) => npcById[id]).filter(Boolean);
+  const linkedLocations = (scene.location_ids || []).map((id) => locationById[id]).filter(Boolean);
+  const linkedClues = (scene.clue_ids || []).map((id) => clueById[id]).filter(Boolean);
 
   return (
     <div
@@ -66,7 +80,7 @@ export default function SceneNode({ scene, active, sceneTitles, onSelect, onOpen
       </div>
 
       <h3 className="mt-2 font-display text-sm font-semibold leading-snug text-foreground">{scene.title}</h3>
-      {scene.summary && <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{scene.summary}</p>}
+      {!active && scene.summary && <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{scene.summary}</p>}
 
       {(linked > 0 || branches.length > 0) && (
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-xs uppercase tracking-wider text-muted-foreground">
@@ -76,6 +90,40 @@ export default function SceneNode({ scene, active, sceneTitles, onSelect, onOpen
               <ArrowRight className="h-3 w-3" />
               {branches.join(" · ")}
             </span>
+          )}
+        </div>
+      )}
+      {active && (
+        <div className="mt-3 space-y-3 border-t border-border pt-3 text-xs">
+          {scene.summary && <p className="whitespace-pre-wrap text-muted-foreground">{scene.summary}</p>}
+          {scene.gm_notes && (
+            <div>
+              <p className="mb-1 font-mono uppercase tracking-wider text-muted-foreground">Notes du MJ</p>
+              <p className="whitespace-pre-wrap text-foreground">{scene.gm_notes}</p>
+            </div>
+          )}
+          {linkedNpcs.length > 0 && (
+            <p><span className="font-medium text-foreground">PNJ :</span> {linkedNpcs.map((entry) => entry.name).join(" · ")}</p>
+          )}
+          {linkedLocations.length > 0 && (
+            <p><span className="font-medium text-foreground">Lieux :</span> {linkedLocations.map((entry) => entry.name).join(" · ")}</p>
+          )}
+          {linkedClues.length > 0 && (
+            <div>
+              <p className="mb-1 font-medium text-foreground">Indices &amp; infos</p>
+              <ul className="space-y-1">
+                {linkedClues.map((entry) => (
+                  <li key={entry.id} className="flex items-start justify-between gap-2 text-muted-foreground">
+                    <span>{entry.name}</span>
+                    <span className="shrink-0 font-mono uppercase">
+                      {entry.clue_type === "info"
+                        ? [entry.known && "Connue", entry.used && "Utilisée"].filter(Boolean).join(" · ") || "Info"
+                        : entry.discovered ? "Découvert" : "Caché"}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
         </div>
       )}

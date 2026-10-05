@@ -15,7 +15,11 @@ export default function ActColumn({
   act,
   scenes,
   sceneTitles,
+  npcById,
+  locationById,
+  clueById,
   activeSceneId,
+  expanded,
   onSelectScene,
   onOpenScene,
   onCycleStatus,
@@ -27,7 +31,10 @@ export default function ActColumn({
   const ordered = [...scenes].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
   return (
-    <div className="flex w-[290px] shrink-0 flex-col rounded-xl border border-border bg-card/50 p-4">
+    <div className={cn(
+      "flex shrink-0 flex-col rounded-xl border border-border bg-card/50 p-4 transition-[width] duration-200",
+      expanded ? "w-[380px]" : activeSceneId ? "w-[250px]" : "w-[290px]"
+    )}>
       <div className="flex items-center gap-2">
         {act ? (
           <input
@@ -84,6 +91,9 @@ export default function ActColumn({
               scene={scene}
               active={scene.id === activeSceneId}
               sceneTitles={sceneTitles}
+              npcById={npcById}
+              locationById={locationById}
+              clueById={clueById}
               onSelect={onSelectScene}
               onOpen={onOpenScene}
               onCycleStatus={onCycleStatus}

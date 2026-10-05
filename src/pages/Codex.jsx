@@ -269,7 +269,7 @@ export default function Codex() {
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <span className="tag border border-primary/40 text-primary">Codex du monde</span>
-          <h1 className="mt-3 font-display text-3xl font-bold text-foreground">PNJ, Lieux &amp; Indices</h1>
+          <h1 className="mt-3 font-display text-3xl font-bold text-foreground">PNJ, Lieux, Indices &amp; Infos</h1>
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">
             Le référentiel de votre campagne. Rattachez chaque élément aux scènes depuis l'arborescence.
           </p>

@@ -32,8 +32,8 @@
 ## Fonctionnalités
 
 - **Arborescence** : campagnes, actes et scènes avec statut d'avancement (brouillon, prête, jouée…).
-- **Codex** : fiches de PNJ, lieux et indices, liables aux scènes.
-- **Cartes et visuels** : images et PDF joints aux lieux, PNJ et indices.
+- **Codex** : fiches de PNJ, lieux, indices et informations, liables aux scènes. Les indices peuvent être marqués découverts ; les informations, connues des joueurs et utilisées en jeu.
+- **Cartes et visuels** : images et PDF joints aux lieux, PNJ, indices et informations.
 - **Tables aléatoires** : rencontres, noms, événements, objets, rumeurs, avec tirage pondéré.
 - **Calendrier** : planification des sessions de jeu, liées à une scène.
 - **Notes du MJ** : bloc-notes avec épinglage.

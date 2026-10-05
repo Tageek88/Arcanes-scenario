@@ -481,6 +481,27 @@ export default function Home() {
     }
   };
 
+  const toggleClueFlag = async (entry, field, value) => {
+    const previous = clues;
+    setClues((current) => current.map((clue) =>
+      clue.id === entry.id ? { ...clue, [field]: value } : clue
+    ));
+    try {
+      await api.entities.Clue.update(entry.id, { [field]: value });
+      setCodexRefresh((key) => key + 1);
+      return true;
+    } catch (error) {
+      console.error("Échec mise à jour de l’indice ou de l’info :", error);
+      setClues(previous);
+      toast({
+        variant: "destructive",
+        title: "Statut non enregistré",
+        description: "La fiche a repris son statut précédent.",
+      });
+      return false;
+    }
+  };
+
   useEffect(() => {
     const onKey = (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "n") {
@@ -559,8 +580,11 @@ export default function Home() {
                 <SceneBoard
                   acts={acts}
                   scenes={scenes}
+                  npcs={npcs}
+                  locations={locations}
+                  clues={clues}
                   activeSceneId={activeSceneId}
-                  onSelectScene={(scene) => setActiveSceneId(scene.id)}
+                  onSelectScene={(scene) => setActiveSceneId((id) => id === scene.id ? null : scene.id)}
                   onOpenScene={openEditScene}
                   onCycleStatus={cycleStatus}
                   onAddAct={addAct}
@@ -574,8 +598,11 @@ export default function Home() {
                 <MobileSceneList
                   acts={acts}
                   scenes={scenes}
+                  npcs={npcs}
+                  locations={locations}
+                  clues={clues}
                   activeSceneId={activeSceneId}
-                  onSelectScene={(scene) => setActiveSceneId(scene.id)}
+                  onSelectScene={(scene) => setActiveSceneId((id) => id === scene.id ? null : scene.id)}
                   onOpenScene={openEditScene}
                   onCycleStatus={cycleStatus}
                   onAddScene={openNewScene}
@@ -591,6 +618,7 @@ export default function Home() {
           activeScene={activeScene}
           refreshKey={codexRefresh}
           onToggleLink={toggleSceneLink}
+          onToggleClueFlag={toggleClueFlag}
           onAdd={(kind) => {
             setCodexKind(kind);
             setCodexEntry(null);

@@ -1,18 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { api } from "@/api/localClient";
-import { Search, Plus, Link2, Link2Off, Pencil } from "lucide-react";
+import { Search, Plus, Link2, Link2Off, Pencil, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { CODEX_TABS } from "@/lib/codex";
 import { NPC_ATTITUDE } from "@/lib/sceneMeta";
+import { isImage } from "@/components/codex/AttachmentsField";
+import { openAttachment } from "@/lib/openAttachment";
 
 export default function CodexSidebar({
   campaignId,
   activeScene,
   refreshKey,
   onToggleLink,
+  onToggleClueFlag,
   onAdd,
   onEdit,
 }) {
@@ -21,10 +24,24 @@ export default function CodexSidebar({
   const [linkedOnly, setLinkedOnly] = useState(false);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [expandedId, setExpandedId] = useState(null);
 
   const kind = CODEX_TABS.find((t) => t.key === tab) || CODEX_TABS[0];
   const linkedIds = activeScene ? activeScene[kind.linkKey] || [] : [];
   const linkedKey = linkedIds.join(",");
+
+  useEffect(() => {
+    setExpandedId(null);
+  }, [tab, activeScene?.id]);
+
+  const toggleClueFlag = async (item, field) => {
+    const updated = { ...item, [field]: !item[field] };
+    setItems((current) => current.map((entry) => entry.id === item.id ? updated : entry));
+    const saved = await onToggleClueFlag(item, field, updated[field]);
+    if (!saved) {
+      setItems((current) => current.map((entry) => entry.id === item.id ? item : entry));
+    }
+  };
 
   useEffect(() => {
     if (!campaignId) {
@@ -152,21 +169,70 @@ export default function CodexSidebar({
                 <div className="flex items-start justify-between gap-2">
                   <button
                     type="button"
-                    aria-label={`Modifier ${item.name}`}
-                    onClick={() => onEdit(tab, item)}
+                    aria-label={`${expandedId === item.id ? "Réduire" : "Développer"} ${item.name}`}
+                    aria-expanded={expandedId === item.id}
+                    onClick={() => setExpandedId((current) => current === item.id ? null : item.id)}
                     className="min-w-0 flex-1 text-left"
                   >
-                    <div className="truncate font-display text-sm font-semibold text-foreground">
-                      {item.name}
+                    <div className="flex items-center gap-1 font-display text-sm font-semibold text-foreground">
+                      {expandedId === item.id
+                        ? <ChevronUp className="h-4 w-4 shrink-0" />
+                        : <ChevronDown className="h-4 w-4 shrink-0" />}
+                      <span className={cn("min-w-0", expandedId === item.id ? "break-words" : "truncate")}>
+                        {item.name}
+                      </span>
                     </div>
                     <div className="mt-0.5 truncate font-mono text-xs uppercase tracking-wider text-muted-foreground">
                       {tab === "npc" && (item.role || "PNJ")}
                       {tab === "location" && (item.type || "Lieu")}
-                      {tab === "clue" && (item.discovered ? "Découvert" : "Caché")}
+                      {tab === "clue" && (item.clue_type === "info" ? "Info" : "Indice")}
                     </div>
                   </button>
                   {tab === "npc" && <span className={cn("tag shrink-0 border", attitude.badge)}>{attitude.label}</span>}
                 </div>
+
+                {expandedId === item.id && (
+                  <div className="mt-3 space-y-3 border-t border-border pt-3">
+                    {item.comment && <p className="text-xs italic text-muted-foreground">{item.comment}</p>}
+                    {item.description && <p className="whitespace-pre-wrap text-sm text-muted-foreground">{item.description}</p>}
+                    {(item.attachments || []).length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {item.attachments.map((file, index) => (
+                          <button
+                            type="button"
+                            key={`${file.url}-${index}`}
+                            onClick={() => openAttachment(file)}
+                            title={file.name}
+                            className="grid h-12 w-12 place-items-center overflow-hidden rounded-md border border-border bg-secondary/40 text-muted-foreground"
+                          >
+                            {isImage(file)
+                              ? <img src={file.url} alt={file.name} className="h-full w-full object-cover" loading="lazy" />
+                              : <span className="px-1 text-center text-[9px] font-mono uppercase">{file.name}</span>}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {tab === "clue" && (
+                  <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1">
+                    {(item.clue_type === "info" ? [
+                      { field: "known", label: "Connue" },
+                      { field: "used", label: "Utilisée" },
+                    ] : [{ field: "discovered", label: "Découvert" }]).map(({ field, label }) => (
+                      <label key={field} className="flex min-h-11 cursor-pointer items-center gap-2 text-xs text-muted-foreground">
+                        <input
+                          type="checkbox"
+                          checked={!!item[field]}
+                          onChange={() => toggleClueFlag(item, field)}
+                          className="h-4 w-4 accent-[hsl(var(--primary))]"
+                        />
+                        {label}
+                      </label>
+                    ))}
+                  </div>
+                )}
 
                 <div className="mt-2 flex items-center gap-2">
                   <button

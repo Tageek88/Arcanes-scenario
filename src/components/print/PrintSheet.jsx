@@ -45,7 +45,11 @@ const Images = ({ images }) =>
 
 const Clue = ({ clue }) => (
     <div className="prt-clue">
-        <span className="prt-title">{clue.discovered ? "☑" : "☐"} {clue.name}</span>
+        <span className="prt-title">
+            {clue.clueType === "info" ? (clue.known ? "☑" : "☐") : (clue.discovered ? "☑" : "☐")}
+            {" "}{clue.clueType === "info" ? "Info" : "Indice"} : {clue.name}
+        </span>
+        {clue.clueType === "info" && <span className="prt-meta"> · {clue.used ? "Utilisée" : "Non utilisée"}</span>}
         {clue.scenes && <span className="prt-meta"> · {clue.scenes}</span>}
         {clue.description && <p className="prt-text">{clue.description}</p>}
         <Images images={clue.images} />
@@ -78,7 +82,7 @@ function Block({ block }) {
                                     <Lines label="Lieux" items={s.locations} />
                                     {s.clues.length > 0 && (
                                         <>
-                                            <div className="prt-label">Indices</div>
+                                            <div className="prt-label">Indices &amp; infos</div>
                                             {s.clues.map((c, i) => (
                                                 <Clue key={i} clue={c} />
                                             ))}
@@ -93,7 +97,7 @@ function Block({ block }) {
         case "clues":
             return (
                 <section className="prt-section">
-                    <h2>Indices</h2>
+                    <h2>Indices &amp; infos</h2>
                     {block.clues.map((c, i) => (
                         <Clue key={i} clue={c} />
                     ))}

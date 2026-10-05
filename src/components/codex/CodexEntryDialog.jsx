@@ -125,7 +125,10 @@ export default function CodexEntryDialog({
       payload.parent_id = form.parent_id || "";
     } else {
       payload.description = form.description || "";
-      payload.discovered = !!form.discovered;
+      payload.clue_type = form.clue_type === "info" ? "info" : "indice";
+      payload.discovered = payload.clue_type === "indice" && !!form.discovered;
+      payload.known = payload.clue_type === "info" && !!form.known;
+      payload.used = payload.clue_type === "info" && !!form.used;
     }
     try {
       let created = null;
@@ -309,6 +312,24 @@ export default function CodexEntryDialog({
           </>
         )}
 
+        {kind === "clue" && (
+          <div className="space-y-2">
+            <Label>Type</Label>
+            <Select
+              value={form.clue_type === "info" ? "info" : "indice"}
+              onValueChange={(value) => set("clue_type", value)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="indice">Indice</SelectItem>
+                <SelectItem value="info">Info</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
         <div className="space-y-2">
           <Label>Description</Label>
           <Textarea
@@ -329,15 +350,32 @@ export default function CodexEntryDialog({
             </p>
           ))}
 
-        {kind === "clue" && (
+        {kind === "clue" && (form.clue_type !== "info" ? (
           <div className="flex items-center justify-between rounded-lg border border-border p-3">
             <div>
-              <Label>Indice découvert</Label>
-              <p className="text-xs text-muted-foreground">Les joueurs ont-ils déjà trouvé cet indice ?</p>
+              <Label>Découvert</Label>
+              <p className="text-xs text-muted-foreground">Les joueurs ont-ils trouvé cet indice ?</p>
             </div>
             <Switch checked={!!form.discovered} onCheckedChange={(v) => set("discovered", v)} />
           </div>
-        )}
+        ) : (
+          <>
+            <div className="flex items-center justify-between rounded-lg border border-border p-3">
+              <div>
+                <Label>Connue</Label>
+                <p className="text-xs text-muted-foreground">Les joueurs ont-ils cette information ?</p>
+              </div>
+              <Switch checked={!!form.known} onCheckedChange={(v) => set("known", v)} />
+            </div>
+            <div className="flex items-center justify-between rounded-lg border border-border p-3">
+              <div>
+                <Label>Utilisée</Label>
+                <p className="text-xs text-muted-foreground">Le MJ l’a-t-il déjà utilisée en jeu ?</p>
+              </div>
+              <Switch checked={!!form.used} onCheckedChange={(v) => set("used", v)} />
+            </div>
+          </>
+        ))}
       </div>
     </ResponsiveDialog>
   );

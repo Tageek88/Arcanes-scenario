@@ -27,8 +27,15 @@ export default function CodexCard({
         </div>
         {kind === "npc" && <span className={cn("tag border", attitude.badge)}>{attitude.label}</span>}
         {kind === "clue" && (
-          <span className={cn("tag border", entry.discovered ? "border-played/40 bg-played/10 text-played" : "border-border bg-secondary text-muted-foreground")}>
-            {entry.discovered ? "Découvert" : "Caché"}
+          <span className={cn(
+            "tag border",
+            (entry.clue_type === "info" ? entry.known || entry.used : entry.discovered)
+              ? "border-played/40 bg-played/10 text-played"
+              : "border-border bg-secondary text-muted-foreground"
+          )}>
+            {entry.clue_type === "info"
+              ? `Info · ${entry.known ? "Connue" : "Inconnue"} · ${entry.used ? "Utilisée" : "Non utilisée"}`
+              : `Indice · ${entry.discovered ? "Découvert" : "Caché"}`}
           </span>
         )}
       </div>

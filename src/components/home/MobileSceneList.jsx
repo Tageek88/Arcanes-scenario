@@ -12,6 +12,9 @@ import { Button } from "@/components/ui/button";
 export default function MobileSceneList({
   acts,
   scenes,
+  npcs,
+  locations,
+  clues,
   activeSceneId,
   onSelectScene,
   onOpenScene,
@@ -62,6 +65,9 @@ export default function MobileSceneList({
                     key={scene.id}
                     scene={scene}
                     active={scene.id === activeSceneId}
+                    npcs={npcs}
+                    locations={locations}
+                    clues={clues}
                     onOpen={onOpenScene}
                     onSelect={onSelectScene}
                     onToggleStatus={onCycleStatus}
