@@ -30,6 +30,7 @@ import { getSelectedCampaignId, setSelectedCampaignId } from "@/lib/campaignStor
 import { useToast } from "@/components/ui/use-toast";
 import { useDataRefresh } from "@/lib/RefreshContext";
 import { deleteNpcRelations } from "@/lib/npcRelations";
+import { loadRelations, relationsByNpc } from "@/lib/npcRelations";
 
 const normalize = (value) =>
   String(value || "")
@@ -57,8 +58,8 @@ export default function Codex() {
   const [pendingDelete, setPendingDelete] = useState(null);
   const [deleteMode, setDeleteMode] = useState("promote");
   const [collapsed, setCollapsed] = useState(() => new Set());
-
   const kind = CODEX_TABS.find((t) => t.key === tab) || CODEX_TABS[0];
+  const [relations, setRelations] = useState([]);
 
   useEffect(() => {
     const run = async () => {
@@ -95,54 +96,73 @@ export default function Codex() {
   }, [campaignId, kind.entity, refreshKey, dataRefreshKey]);
 
   useEffect(() => {
-  if (!campaignId) {
-    setAllLocations([]);
-    return;
-  }
-  let alive = true;
-  api.entities.Location.filter({ campaign_id: campaignId }, { sort: "name", limit: 1000 }).then((res) => {
-    if (alive) setAllLocations(res.items);
-  });
-  return () => {
-    alive = false;
-  };
-}, [campaignId, refreshKey, dataRefreshKey]);
+    if (!campaignId) {
+      setAllLocations([]);
+      return;
+    }
+    let alive = true;
+    api.entities.Location.filter({ campaign_id: campaignId }, { sort: "name", limit: 1000 }).then((res) => {
+      if (alive) setAllLocations(res.items);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [campaignId, refreshKey, dataRefreshKey]);
 
-useEffect(() => {
-  setLocationFilter("all");
-}, [campaignId]);
+  useEffect(() => {
+    setLocationFilter("all");
+  }, [campaignId]);
 
   const q = normalize(term.trim());
   const locationLabels = useMemo(() => {
-  const labels = new Map();
-  allLocations.forEach((l) =>
-    labels.set(l.id, pathOf(allLocations, l.id).map((x) => x.name).join(" › "))
+    const labels = new Map();
+    allLocations.forEach((l) =>
+      labels.set(l.id, pathOf(allLocations, l.id).map((x) => x.name).join(" › "))
+    );
+    return labels;
+  }, [allLocations]);
+
+  useEffect(() => {
+    if (!campaignId || tab !== "npc") {
+      setRelations([]);
+      return;
+    }
+    let alive = true;
+    loadRelations(campaignId).then((rows) => {
+      if (alive) setRelations(rows);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [campaignId, tab, refreshKey, dataRefreshKey]);
+
+  const npcRelationMap = useMemo(
+    () => (tab === "npc" ? relationsByNpc(relations, items) : new Map()),
+    [tab, relations, items]
   );
-  return labels;
-}, [allLocations]);
 
-const locationChoices = useMemo(() => parentOptions(allLocations), [allLocations]);
+  const locationChoices = useMemo(() => parentOptions(allLocations), [allLocations]);
 
-const locationScope = useMemo(
-  () =>
-    locationFilter === "all" || locationFilter === "_none"
-      ? null
-      : new Set([locationFilter, ...descendantIds(allLocations, locationFilter)]),
-  [locationFilter, allLocations]
-);
+  const locationScope = useMemo(
+    () =>
+      locationFilter === "all" || locationFilter === "_none"
+        ? null
+        : new Set([locationFilter, ...descendantIds(allLocations, locationFilter)]),
+    [locationFilter, allLocations]
+  );
 
-const visible = useMemo(
-  () =>
-    items.filter((item) => {
-      if (q && !normalize(item.name).includes(q)) return false;
-      if (tab !== "npc" || locationFilter === "all") return true;
-      if (locationFilter === "_none") return !item.location_id;
-      return locationScope.has(item.location_id);
-    }),
-  [items, q, tab, locationFilter, locationScope]
-);
+  const visible = useMemo(
+    () =>
+      items.filter((item) => {
+        if (q && !normalize(item.name).includes(q)) return false;
+        if (tab !== "npc" || locationFilter === "all") return true;
+        if (locationFilter === "_none") return !item.location_id;
+        return locationScope.has(item.location_id);
+      }),
+    [items, q, tab, locationFilter, locationScope]
+  );
 
-const showTree = tab === "location" && !q;
+  const showTree = tab === "location" && !q;
   const treeRows = [];
   const parentIds = useMemo(
     () => new Set(items.map((item) => item.parent_id).filter(Boolean)),
@@ -156,17 +176,17 @@ const showTree = tab === "location" && !q;
       return next;
     });
 
- const openNew = () => {
-  setEntry(null);
-  setDefaultParentId("");
-  setDialogOpen(true);
-};
+  const openNew = () => {
+    setEntry(null);
+    setDefaultParentId("");
+    setDialogOpen(true);
+  };
 
-const openChild = (parent) => {
-  setEntry(null);
-  setDefaultParentId(parent.id);
-  setDialogOpen(true);
-};
+  const openChild = (parent) => {
+    setEntry(null);
+    setDefaultParentId(parent.id);
+    setDialogOpen(true);
+  };
 
   const openEdit = (k, e) => {
     setDefaultParentId("");
@@ -287,21 +307,21 @@ const openChild = (parent) => {
           <Input value={term} onChange={(e) => setTerm(e.target.value)} placeholder="Rechercher…" className="pl-9" />
         </div>
         {tab === "npc" && allLocations.length > 0 && (
-  <Select value={locationFilter} onValueChange={setLocationFilter}>
-    <SelectTrigger className="w-full sm:w-64">
-      <SelectValue />
-    </SelectTrigger>
-    <SelectContent>
-      <SelectItem value="all">Tous les lieux</SelectItem>
-      <SelectItem value="_none">Sans lieu</SelectItem>
-      {locationChoices.map((option) => (
-        <SelectItem key={option.id} value={option.id}>
-          {option.label}
-        </SelectItem>
-      ))}
-    </SelectContent>
-  </Select>
-)}
+          <Select value={locationFilter} onValueChange={setLocationFilter}>
+            <SelectTrigger className="w-full sm:w-64">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tous les lieux</SelectItem>
+              <SelectItem value="_none">Sans lieu</SelectItem>
+              {locationChoices.map((option) => (
+                <SelectItem key={option.id} value={option.id}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
         {showTree && parentIds.size > 0 && (
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={() => setCollapsed(new Set(parentIds))}>
@@ -330,13 +350,13 @@ const openChild = (parent) => {
         </div>
       ) : showTree ? (
         <LocationTree
-  locations={items}
-  collapsed={collapsed}
-  onToggle={toggleCollapsed}
-  onEdit={openEdit}
-  onDelete={requestDelete}
-  onAddChild={openChild}
-/>
+          locations={items}
+          collapsed={collapsed}
+          onToggle={toggleCollapsed}
+          onEdit={openEdit}
+          onDelete={requestDelete}
+          onAddChild={openChild}
+        />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {visible.map((item) => {
@@ -352,30 +372,33 @@ const openChild = (parent) => {
                   </p>
                 )}
                 <CodexCard
-  kind={tab}
-  entry={item}
-  linked={false}
-  locationLabel={tab === "npc" ? locationLabels.get(item.location_id) : ""}
-  onEdit={openEdit}
-  onDelete={requestDelete}
-/>
+                  relations={tab === "npc" ? npcRelationMap.get(item.id) : undefined}
+                  kind={tab}
+                  entry={item}
+                  linked={false}
+                  locationLabel={tab === "npc" ? locationLabels.get(item.location_id) : ""}
+                  onEdit={openEdit}
+                  onDelete={requestDelete}
+                />
               </div>
             );
           })}
         </div>
       )}
 
-      
-<CodexEntryDialog
-  open={dialogOpen}
-  onOpenChange={setDialogOpen}
-  kind={tab}
-  campaignId={campaignId}
-  entry={entry}
-  defaultParentId={defaultParentId}
-  locations={allLocations}
-  onSaved={() => setRefreshKey((k) => k + 1)}
-/>
+
+      <CodexEntryDialog
+        open={dialogOpen}
+        onOpenChange={(value) => {
+          setDialogOpen(value);
+          if (!value) setRefreshKey((k) => k + 1);
+        }} kind={tab}
+        campaignId={campaignId}
+        entry={entry}
+        defaultParentId={defaultParentId}
+        locations={allLocations}
+        onSaved={() => setRefreshKey((k) => k + 1)}
+      />
 
       <AlertDialog open={!!pendingDelete} onOpenChange={(open) => !open && setPendingDelete(null)}>
         <AlertDialogContent>

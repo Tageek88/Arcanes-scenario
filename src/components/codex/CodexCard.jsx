@@ -1,14 +1,13 @@
 import React from "react";
 import { cn } from "@/lib/utils";
-import { Link2, Link2Off, Pencil, Trash2, MapPin } from "lucide-react";
+import { Link2, Link2Off, Pencil, Trash2, MapPin, Users } from "lucide-react";
 import { NPC_ATTITUDE } from "@/lib/sceneMeta";
 import { Paperclip } from "lucide-react";
 import { isImage } from "@/components/codex/AttachmentsField";
 import { openAttachment } from "@/lib/openAttachment";
 
-export default function CodexCard({ kind, entry, linked, locationLabel, onEdit, onDelete, onToggleLink }) 
-{
-    const attitude = NPC_ATTITUDE[entry.attitude] || NPC_ATTITUDE.neutre;
+export default function CodexCard({ kind, entry, linked, locationLabel, relations, onEdit, onDelete, onToggleLink }) {
+  const attitude = NPC_ATTITUDE[entry.attitude] || NPC_ATTITUDE.neutre;
 
   return (
     <div className={cn("flex flex-col rounded-xl border bg-card/50 p-4 transition-colors", linked ? "corner-accent border-primary/50" : "border-border")}>
@@ -29,11 +28,28 @@ export default function CodexCard({ kind, entry, linked, locationLabel, onEdit, 
       )}
       {entry.description && <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">{entry.description}</p>}
       {locationLabel && (
-  <p className="mt-2 flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-muted-foreground">
-    <MapPin className="h-3 w-3 shrink-0" />
-    <span className="truncate">{locationLabel}</span>
-  </p>
-)}
+        <p className="mt-2 flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-muted-foreground">
+          <MapPin className="h-3 w-3 shrink-0" />
+          <span className="truncate">{locationLabel}</span>
+        </p>
+      )}
+
+      {relations?.length > 0 && (
+        <ul className="mt-2 space-y-0.5">
+          {relations.slice(0, 3).map((r) => (
+            <li key={r.id} className="flex items-start gap-1.5 text-xs text-muted-foreground">
+              <Users className="mt-0.5 h-3 w-3 shrink-0" />
+              <span className="truncate">{r.text}</span>
+            </li>
+          ))}
+          {relations.length > 3 && (
+            <li className="pl-[18px] font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+              + {relations.length - 3} autre{relations.length - 3 > 1 ? "s" : ""}
+            </li>
+          )}
+        </ul>
+      )}
+
       {(entry.attachments || []).length > 0 && (
         <div className="mt-3 flex flex-wrap items-center gap-2">
           {entry.attachments.slice(0, 3).map((file, index) => (

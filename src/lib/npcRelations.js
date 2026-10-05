@@ -1,6 +1,5 @@
 import { api } from "@/api/localClient";
-import { CUSTOM_TYPE, inverseOf, parentEdge } from "@/lib/relationMeta";
-
+import { CUSTOM_TYPE, groupIndex, inverseOf, parentEdge, relationLabel } from "@/lib/relationMeta";
 const table = () => api.entities.NPCRelation;
 
 const uid = () =>
@@ -79,7 +78,7 @@ export async function createRelation(
       custom_label: type === CUSTOM_TYPE ? inverseLabel : "",
     });
   } catch (error) {
-    await table().delete(first.id).catch(() => {});
+    await table().delete(first.id).catch(() => { });
     throw error;
   }
 }
@@ -136,4 +135,23 @@ export async function deleteNpcRelations(campaignId, npcId) {
   const pairs = new Set(all.filter((r) => r.from_id === npcId || r.to_id === npcId).map((r) => r.pair_id));
   const ids = all.filter((r) => pairs.has(r.pair_id)).map((r) => r.id);
   if (ids.length) await table().deleteMany({ id: { $in: ids } });
+}
+
+// Relations de chaque PNJ, triées (famille d'abord), pour l'affichage sur les cartes.
+export function relationsByNpc(relations, npcs) {
+  const names = new Map(npcs.map((n) => [n.id, n.name]));
+  const map = new Map();
+  relations.forEach((r) => {
+    if (!names.has(r.from_id) || !names.has(r.to_id)) return;
+    if (!map.has(r.from_id)) map.set(r.from_id, []);
+    map.get(r.from_id).push({
+      id: r.id,
+      order: groupIndex(r.type),
+      text: `${relationLabel(r)} ${names.get(r.to_id)}`,
+    });
+  });
+  map.forEach((list) =>
+    list.sort((a, b) => a.order - b.order || a.text.localeCompare(b.text, "fr"))
+  );
+  return map;
 }
