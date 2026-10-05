@@ -15,6 +15,8 @@ import BackupPanel from "@/components/BackupPanel";
 import { deleteAccountData } from "@/lib/accountData";
 import { setSelectedCampaignId } from "@/lib/campaignStore";
 import { useToast } from "@/components/ui/use-toast";
+import PrintButton from "@/components/print/PrintButton";
+import { getSelectedCampaignId } from "@/lib/campaignStore";
 
 export default function Settings() {
   const { toast } = useToast();
@@ -50,6 +52,14 @@ export default function Settings() {
       </header>
 
       <BackupPanel />
+
+      <section className="space-y-3 rounded-xl border border-border bg-card/50 p-4">
+        <h2 className="font-display text-base font-semibold text-foreground">Impression</h2>
+        <p className="text-sm text-muted-foreground">
+          Imprimez tout ou partie de la campagne sélectionnée : scènes, indices, lieux, PNJ et notes.
+        </p>
+        <PrintButton campaignId={getSelectedCampaignId()} preset="all" label="Choisir quoi imprimer" />
+      </section>
 
       <section className="rounded-xl border border-destructive/40 bg-destructive/[0.06] p-5">
         <div className="flex items-start gap-3">
@@ -92,7 +102,7 @@ export default function Settings() {
       <section className="rounded-xl border border-border bg-card/50 p-4">
         <h2 className="font-display text-base font-semibold text-foreground">À propos</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-            Arcanes &amp; Scénario · version{" "}
+          Arcanes &amp; Scénario · version{" "}
           <span className="font-mono text-foreground">{__APP_VERSION__}</span>
         </p>
       </section>

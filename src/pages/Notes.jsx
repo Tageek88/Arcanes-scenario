@@ -24,6 +24,7 @@ import NoteEditor from "@/components/notes/NoteEditor";
 import { getSelectedCampaignId, setSelectedCampaignId } from "@/lib/campaignStore";
 import { useToast } from "@/components/ui/use-toast";
 import { useDataRefresh } from "@/lib/RefreshContext";
+import PrintButton from "@/components/print/PrintButton";
 
 const EMPTY = { title: "", content: "", pinned: false };
 
@@ -219,6 +220,7 @@ export default function Notes() {
               </SelectContent>
             </Select>
           )}
+          <PrintButton campaignId={campaignId} preset="notes" />
           <Button onClick={openNew} disabled={!campaignId}>
             <Plus className="mr-2 h-4 w-4" /> Nouvelle note
           </Button>

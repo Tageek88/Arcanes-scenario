@@ -1,0 +1,240 @@
+import { childrenMap, flattenTree, pathOf } from "@/lib/locationTree";
+import { groupIndex, relationLabel } from "@/lib/relationMeta";
+import { NPC_ATTITUDE, SCENE_STATUS } from "@/lib/sceneMeta";
+
+export const SECTIONS = [
+    { key: "scenes", title: "Scènes et actes", hint: "Chaque scène est imprimée avec ses indices liés." },
+    { key: "clues", title: "Indices", hint: "Uniquement ceux non imprimés avec une scène." },
+    { key: "locations", title: "Lieux", hint: "Dans l'ordre de l'arborescence." },
+    { key: "npcs", title: "PNJ", hint: "Classés par lieu, dans l'ordre des scènes, avec leurs relations." },
+    { key: "notes", title: "Notes du MJ", hint: "Épinglées en premier." },
+];
+
+const txt = (v) => String(v ?? "");
+const byName = (a, b) => txt(a.name).localeCompare(txt(b.name), "fr", { numeric: true });
+const byOrder = (a, b) =>
+    (Number(a.order) || 0) - (Number(b.order) || 0) ||
+    txt(a.title).localeCompare(txt(b.title), "fr", { numeric: true });
+
+// Actes dans l'ordre, chacun avec ses scènes ; les scènes sans acte forment un dernier groupe.
+export function orderScenes(acts, scenes) {
+    const actIds = new Set(acts.map((a) => a.id));
+    const groups = [...acts]
+        .sort(byOrder)
+        .map((act) => ({ act, scenes: scenes.filter((s) => s.act_id === act.id).sort(byOrder) }));
+    const orphans = scenes.filter((s) => !s.act_id || !actIds.has(s.act_id)).sort(byOrder);
+    if (orphans.length) groups.push({ act: null, scenes: orphans });
+    return groups;
+}
+
+// ---------- Arbres de sélection (pour la boîte de dialogue) ----------
+
+const leaf = (id, label, hint = "") => ({ id, label, hint, countable: true, derived: false, children: [] });
+
+export function buildTrees({ acts, scenes, npcs, locations, clues, notes }) {
+    let n = 0;
+    const sceneNodes = orderScenes(acts, scenes).map((g) => {
+        const kids = g.scenes.map((s) =>
+            leaf(s.id, `${++n}. ${s.title || "Sans titre"}`, SCENE_STATUS[s.status]?.label || "")
+        );
+        if (!g.act) return { id: "__noact__", label: "Sans acte", hint: "", countable: false, derived: true, children: kids };
+        return {
+            id: g.act.id,
+            label: g.act.title || "Acte",
+            hint: "Acte",
+            derived: kids.length > 0, // un acte qui contient des scènes n'est pas un élément à lui seul
+            countable: kids.length === 0,
+            children: kids,
+        };
+    });
+
+    const map = childrenMap(locations);
+    const walk = (parentId, seen) =>
+        (map.get(parentId) || [])
+            .filter((l) => !seen.has(l.id))
+            .map((l) => ({
+                ...leaf(l.id, l.name || "Lieu", l.type || ""),
+                children: walk(l.id, new Set(seen).add(l.id)),
+            }));
+
+    const pinnedFirst = (a, b) => Number(!!b.pinned) - Number(!!a.pinned);
+    return {
+        scenes: sceneNodes,
+        clues: [...clues].sort(byName).map((c) => leaf(c.id, c.name || "Indice", c.discovered ? "Découvert" : "Caché")),
+        locations: walk("", new Set()),
+        npcs: [...npcs].sort(byName).map((p) => leaf(p.id, p.name || "PNJ", p.role || "")),
+        notes: [...notes]
+            .sort((a, b) => pinnedFirst(a, b) || txt(b.updated_date).localeCompare(txt(a.updated_date)))
+            .map((x) => leaf(x.id, x.title || "Note", x.pinned ? "Épinglée" : "")),
+    };
+}
+
+const walkNodes = (nodes, fn) =>
+    nodes.forEach((node) => {
+        fn(node);
+        walkNodes(node.children || [], fn);
+    });
+
+export const selectableIds = (nodes) => {
+    const out = [];
+    walkNodes(nodes, (node) => !node.derived && out.push(node.id));
+    return out;
+};
+
+export const countableIds = (nodes) => {
+    const out = [];
+    walkNodes(nodes, (node) => node.countable && out.push(node.id));
+    return out;
+};
+
+// ---------- Modèle du document imprimé ----------
+
+export function buildPrintModel(data, sel, opts) {
+    const { campaign, acts, scenes, npcs, locations, clues, notes, relations } = data;
+    const sceneById = new Map(scenes.map((s) => [s.id, s]));
+    const npcById = new Map(npcs.map((p) => [p.id, p]));
+    const clueById = new Map(clues.map((c) => [c.id, c]));
+    const locById = new Map(locations.map((l) => [l.id, l]));
+    const locPath = (id) => pathOf(locations, id).map((l) => l.name).join(" › ");
+    const images = (entity) =>
+        opts.images
+            ? (entity.attachments || []).filter((a) => (a.type || "").startsWith("image/")).map((a) => ({ url: a.url, name: a.name }))
+            : [];
+
+    const groups = orderScenes(acts, scenes);
+    const number = new Map();
+    let n = 0;
+    groups.forEach((g) => g.scenes.forEach((s) => number.set(s.id, ++n)));
+
+    // Première apparition de chaque PNJ / indice dans le déroulé.
+    const npcFirst = new Map();
+    const clueFirst = new Map();
+    const clueScenes = new Map();
+    groups.forEach((g) =>
+        g.scenes.forEach((s) => {
+            (s.npc_ids || []).forEach((id) => !npcFirst.has(id) && npcFirst.set(id, number.get(s.id)));
+            (s.clue_ids || []).forEach((id) => {
+                if (!clueFirst.has(id)) clueFirst.set(id, number.get(s.id));
+                clueScenes.set(id, [...(clueScenes.get(id) || []), `Scène ${number.get(s.id)}`]);
+            });
+        })
+    );
+
+    const toClue = (c) => ({
+        name: c.name,
+        description: c.description || "",
+        discovered: !!c.discovered,
+        images: images(c),
+    });
+
+    const blocks = [];
+    const printedClues = new Set();
+
+    // 1. Scènes et actes
+    const sceneIds = sel.scenes || new Set();
+    const sceneGroups = [];
+    groups.forEach((g) => {
+        const picked = g.scenes.filter((s) => sceneIds.has(s.id));
+        const emptyActSelected = g.act && g.scenes.length === 0 && sceneIds.has(g.act.id);
+        if (!picked.length && !emptyActSelected) return;
+        sceneGroups.push({
+            actTitle: g.act ? g.act.title || "Acte" : "Sans acte",
+            scenes: picked.map((s) => {
+                const sceneClues = opts.cluesWithScenes
+                    ? (s.clue_ids || []).map((id) => clueById.get(id)).filter(Boolean)
+                    : [];
+                sceneClues.forEach((c) => printedClues.add(c.id));
+                return {
+                    number: number.get(s.id),
+                    title: s.title || "Sans titre",
+                    status: SCENE_STATUS[s.status]?.label || "",
+                    summary: s.summary || "",
+                    gmNotes: opts.secrets ? s.gm_notes || "" : "",
+                    branches: (s.next_scene_ids || [])
+                        .map((id) => sceneById.get(id))
+                        .filter(Boolean)
+                        .map((t) => `Scène ${number.get(t.id)} : ${t.title}`),
+                    npcs: (s.npc_ids || [])
+                        .map((id) => npcById.get(id))
+                        .filter(Boolean)
+                        .map((p) => (p.role ? `${p.name} (${p.role})` : p.name)),
+                    locations: (s.location_ids || []).filter((id) => locById.has(id)).map(locPath),
+                    clues: sceneClues.map(toClue),
+                };
+            }),
+        });
+    });
+    if (sceneGroups.length) blocks.push({ kind: "scenes", groups: sceneGroups });
+
+    // 2. Indices non déjà imprimés avec leur scène
+    const clueIds = sel.clues || new Set();
+    const standalone = clues
+        .filter((c) => clueIds.has(c.id) && !printedClues.has(c.id))
+        .sort((a, b) => (clueFirst.get(a.id) ?? Infinity) - (clueFirst.get(b.id) ?? Infinity) || byName(a, b))
+        .map((c) => ({ ...toClue(c), scenes: (clueScenes.get(c.id) || []).join(", ") }));
+    if (standalone.length) blocks.push({ kind: "clues", clues: standalone });
+
+    // 3. Lieux, dans l'ordre de l'arborescence
+    const locIds = sel.locations || new Set();
+    const placeItems = flattenTree(locations)
+        .filter(({ location }) => locIds.has(location.id))
+        .map(({ location }) => ({
+            path: locPath(location.id),
+            type: location.type || "",
+            description: location.description || "",
+            images: images(location),
+        }));
+    if (placeItems.length) blocks.push({ kind: "locations", items: placeItems });
+
+    // 4. PNJ par lieu, dans l'ordre d'apparition dans les scènes
+    const npcIds = sel.npcs || new Set();
+    const first = (p) => npcFirst.get(p.id) ?? Infinity;
+    const byLocation = new Map();
+    npcs
+        .filter((p) => npcIds.has(p.id))
+        .forEach((p) => {
+            const key = locById.has(p.location_id) ? p.location_id : "";
+            byLocation.set(key, [...(byLocation.get(key) || []), p]);
+        });
+    const npcGroups = [...byLocation]
+        .map(([key, list]) => {
+            list.sort((a, b) => first(a) - first(b) || byName(a, b));
+            return {
+                key,
+                rank: first(list[0]),
+                label: key ? locPath(key) : "Sans lieu",
+                npcs: list.map((p) => ({
+                    name: p.name,
+                    role: p.role || "",
+                    attitude: NPC_ATTITUDE[p.attitude]?.label || "",
+                    description: p.description || "",
+                    images: images(p),
+                    relations: relations
+                        .filter((r) => r.from_id === p.id && npcById.has(r.to_id))
+                        .sort((a, b) => groupIndex(a.type) - groupIndex(b.type))
+                        .map((r) => `${relationLabel(r)} ${npcById.get(r.to_id).name}`),
+                })),
+            };
+        })
+        .sort(
+            (a, b) =>
+                Number(a.key === "") - Number(b.key === "") ||
+                a.rank - b.rank ||
+                a.label.localeCompare(b.label, "fr")
+        );
+    if (npcGroups.length) blocks.push({ kind: "npcs", groups: npcGroups });
+
+    // 5. Notes du MJ
+    const noteIds = sel.notes || new Set();
+    const noteItems = notes
+        .filter((x) => noteIds.has(x.id))
+        .sort((a, b) => Number(!!b.pinned) - Number(!!a.pinned) || txt(b.updated_date).localeCompare(txt(a.updated_date)))
+        .map((x) => ({ title: x.title || "Note", content: x.content || "", pinned: !!x.pinned }));
+    if (noteItems.length) blocks.push({ kind: "notes", notes: noteItems });
+
+    return {
+        campaignName: campaign?.name || "Campagne",
+        dateLabel: new Date().toLocaleDateString("fr-FR", { dateStyle: "long" }),
+        blocks,
+    };
+}

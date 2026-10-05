@@ -18,6 +18,7 @@ import { TABLE_CATEGORIES } from "@/lib/tableMeta";
 import { getSelectedCampaignId, setSelectedCampaignId } from "@/lib/campaignStore";
 import { useToast } from "@/components/ui/use-toast";
 import { useDataRefresh } from "@/lib/RefreshContext";
+import PrintButton from "@/components/print/PrintButton";
 
 const SafeAlertDialogContent = (
   /** @type {React.ComponentProps<typeof AlertDialogContent>} */ props
@@ -35,12 +36,12 @@ export default function Tables() {
   const { toast } = useToast();
   const { refreshKey: dataRefreshKey } = useDataRefresh();
   const [campaigns, setCampaigns] = useState(
-    /** @type {Array<{ id: string; name: string }>} */ ([])
+    /** @type {Array<{ id: string; name: string }>} */([])
   );
   const [campaignId, setCampaignId] = useState(getSelectedCampaignId());
   const [category, setCategory] = useState("all");
   const [tables, setTables] = useState(
-    /** @type {Array<{ id: string; name: string; category?: string; description?: string; entries?: Array<{ text?: string; weight?: number }> }>} */ ([])
+    /** @type {Array<{ id: string; name: string; category?: string; description?: string; entries?: Array<{ text?: string; weight?: number }> }>} */([])
   );
   const [loading, setLoading] = useState(false);
 
@@ -49,7 +50,7 @@ export default function Tables() {
   const [saving, setSaving] = useState(false);
   const [pendingDelete, setPendingDelete] = useState(
     /** @type {{ id: string; name: string; category?: string; description?: string; entries?: Array<{ text?: string; weight?: number }> } | null} */
-      (null)
+    (null)
   );
 
   useEffect(() => {
@@ -120,50 +121,50 @@ export default function Tables() {
   };
 
   const save = async () => {
-  if (!form.name.trim() || !campaignId) return;
-  setSaving(true);
-  const entries = (form.entries || [])
-    .filter((entry) => entry.text?.trim())
-    .map((entry) => ({
-      text: entry.text.trim(),
-      weight: Number(entry.weight) > 0 ? Number(entry.weight) : 1,
-    }));
-  const payload = {
-    campaign_id: campaignId,
-    name: form.name.trim(),
-    category: form.category || "autre",
-    description: form.description || "",
-    entries,
-  };
-  try {
-    const saved = form.id
-      ? await api.entities.RollTable.update(form.id, payload)
-      : await api.entities.RollTable.create(payload);
-    console.log("RollTable enregistrée :", saved);
-    if (saved?.id) {
-      applyTable(saved, form.id);
-    } else {
-      // réponse sans id : on recharge la liste depuis le serveur
-      const query = /** @type {Record<string, string>} */ ({ campaign_id: campaignId });
-      if (category !== "all") query.category = category;
-      const res = await api.entities.RollTable.filter(query, { sort: "-created_date", limit: 200 });
-      const tableList = /** @type {Array<{ id: string; name: string; category?: string; description?: string; entries?: Array<{ text?: string; weight?: number }> }>} */ (res.items || []);
-      setTables(tableList);
+    if (!form.name.trim() || !campaignId) return;
+    setSaving(true);
+    const entries = (form.entries || [])
+      .filter((entry) => entry.text?.trim())
+      .map((entry) => ({
+        text: entry.text.trim(),
+        weight: Number(entry.weight) > 0 ? Number(entry.weight) : 1,
+      }));
+    const payload = {
+      campaign_id: campaignId,
+      name: form.name.trim(),
+      category: form.category || "autre",
+      description: form.description || "",
+      entries,
+    };
+    try {
+      const saved = form.id
+        ? await api.entities.RollTable.update(form.id, payload)
+        : await api.entities.RollTable.create(payload);
+      console.log("RollTable enregistrée :", saved);
+      if (saved?.id) {
+        applyTable(saved, form.id);
+      } else {
+        // réponse sans id : on recharge la liste depuis le serveur
+        const query = /** @type {Record<string, string>} */ ({ campaign_id: campaignId });
+        if (category !== "all") query.category = category;
+        const res = await api.entities.RollTable.filter(query, { sort: "-created_date", limit: 200 });
+        const tableList = /** @type {Array<{ id: string; name: string; category?: string; description?: string; entries?: Array<{ text?: string; weight?: number }> }>} */ (res.items || []);
+        setTables(tableList);
+      }
+      setOpen(false);
+      setForm({ ...EMPTY, entries: [] });
+      toast({ title: form.id ? "Table mise à jour" : "Table créée" });
+    } catch (error) {
+      console.error("Échec enregistrement RollTable :", error);
+      toast({
+        variant: "destructive",
+        title: "Enregistrement impossible",
+        description: "La table n'a pas été enregistrée.",
+      });
+    } finally {
+      setSaving(false);
     }
-    setOpen(false);
-    setForm({ ...EMPTY, entries: [] });
-    toast({ title: form.id ? "Table mise à jour" : "Table créée" });
-  } catch (error) {
-    console.error("Échec enregistrement RollTable :", error);
-    toast({
-      variant: "destructive",
-      title: "Enregistrement impossible",
-      description: "La table n'a pas été enregistrée.",
-    });
-  } finally {
-    setSaving(false);
-  }
-};
+  };
 
   const removeTable = async () => {
     const pending = pendingDelete;

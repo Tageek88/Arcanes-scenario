@@ -31,6 +31,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useDataRefresh } from "@/lib/RefreshContext";
 import { deleteNpcRelations } from "@/lib/npcRelations";
 import { loadRelations, relationsByNpc } from "@/lib/npcRelations";
+import PrintButton from "@/components/print/PrintButton";
 
 const normalize = (value) =>
   String(value || "")
@@ -280,6 +281,9 @@ export default function Codex() {
               </SelectContent>
             </Select>
           )}
+
+          <PrintButton campaignId={campaignId} preset={tab} />
+
           <Button disabled={!campaignId} onClick={openNew}>
             <Plus className="mr-2 h-4 w-4" /> Nouveau {KIND_META[tab].singular}
           </Button>

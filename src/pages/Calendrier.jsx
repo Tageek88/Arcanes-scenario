@@ -29,6 +29,7 @@ import { dateKey, sessionStatusMeta } from "@/lib/sessionMeta";
 import { getSelectedCampaignId, setSelectedCampaignId } from "@/lib/campaignStore";
 import { useToast } from "@/components/ui/use-toast";
 import { useDataRefresh } from "@/lib/RefreshContext";
+import PrintButton from "@/components/print/PrintButton";
 
 const emptyForm = (date) => ({
   title: "",
@@ -257,6 +258,7 @@ export default function Calendrier() {
               </SelectContent>
             </Select>
           )}
+          <PrintButton campaignId={campaignId} preset="scenes" />
           <Button onClick={() => openNew()} disabled={!campaignId}>
             <Plus className="mr-2 h-4 w-4" /> Nouvelle session
           </Button>

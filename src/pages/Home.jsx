@@ -25,6 +25,7 @@ import { nextStatus } from "@/lib/sceneMeta";
 import { useDataRefresh } from "@/lib/RefreshContext";
 import { Pencil } from "lucide-react";
 import { countCampaignContent, deleteCampaignCascade } from "@/lib/campaignDelete";
+import PrintButton from "@/components/print/PrintButton";
 
 const EMPTY_SCENE = {
   title: "",
@@ -58,14 +59,14 @@ export default function Home() {
   const { toast } = useToast();
   const { refreshKey: dataRefreshKey } = useDataRefresh();
 
-  const [campaigns, setCampaigns] = useState(/** @type {any[]} */ ([]));
+  const [campaigns, setCampaigns] = useState(/** @type {any[]} */([]));
   const [campaignId, setCampaignId] = useState(getSelectedCampaignId());
-  const [acts, setActs] = useState(/** @type {any[]} */ ([]));
-  const [scenes, setScenes] = useState(/** @type {any[]} */ ([]));
-  const [npcs, setNpcs] = useState(/** @type {any[]} */ ([]));
-  const [locations, setLocations] = useState(/** @type {any[]} */ ([]));
-  const [clues, setClues] = useState(/** @type {any[]} */ ([]));
-  const [progress, setProgress] = useState(/** @type {{ total: number, [key: string]: number }} */ ({ total: 0 }));
+  const [acts, setActs] = useState(/** @type {any[]} */([]));
+  const [scenes, setScenes] = useState(/** @type {any[]} */([]));
+  const [npcs, setNpcs] = useState(/** @type {any[]} */([]));
+  const [locations, setLocations] = useState(/** @type {any[]} */([]));
+  const [clues, setClues] = useState(/** @type {any[]} */([]));
+  const [progress, setProgress] = useState(/** @type {{ total: number, [key: string]: number }} */({ total: 0 }));
   const [activeSceneId, setActiveSceneId] = useState(null);
   const [codexRefresh, setCodexRefresh] = useState(0);
 
@@ -348,112 +349,112 @@ export default function Home() {
   };
 
   const openNewCampaign = () => {
-  setEditingCampaignId(null);
-  setCampaignForm(EMPTY_CAMPAIGN);
-  setCampaignOpen(true);
-};
+    setEditingCampaignId(null);
+    setCampaignForm(EMPTY_CAMPAIGN);
+    setCampaignOpen(true);
+  };
 
-const openEditCampaign = () => {
-  if (!campaign) return;
-  setEditingCampaignId(campaign.id);
-  setCampaignForm({
-    name: campaign.name || "",
-    system: campaign.system || "",
-    summary: campaign.summary || "",
-  });
-  setCampaignOpen(true);
-};
-
-const requestDeleteCampaign = async () => {
-  if (!campaign) return;
-  const target = campaign;
-  setCampaignOpen(false);
-  setPendingCampaignDelete({ campaign: target, counts: null, countError: false });
-  try {
-    const counts = await countCampaignContent(target.id);
-    setPendingCampaignDelete((p) => (p ? { ...p, counts } : p));
-  } catch (error) {
-    console.error("Comptage impossible :", error);
-    setPendingCampaignDelete((p) => (p ? { ...p, counts: [], countError: true } : p));
-  }
-};
-
-const confirmCampaignDelete = async () => {
-  const target = pendingCampaignDelete?.campaign;
-  if (!target) return;
-  setDeletingCampaign(true);
-  try {
-    await deleteCampaignCascade(target.id);
-    const remaining = campaigns.filter((c) => c.id !== target.id);
-    const nextId = remaining[0]?.id || "";
-    setCampaigns(remaining);
-    setCampaignId(nextId);
-    setSelectedCampaignId(nextId);
-    setActiveSceneId(null);
-    setPendingCampaignDelete(null);
-    toast({ title: "Campagne supprimée", description: `« ${target.name} » et son contenu ont été supprimés.`, duration: 4000, });
-  } catch (error) {
-    console.error("Échec suppression campagne :", error);
-    loadTree(target.id);
-    toast({
-      variant: "destructive",
-      title: "Suppression incomplète",
-      description: "Une partie du contenu a pu être supprimée. Vous pouvez relancer la suppression.",
+  const openEditCampaign = () => {
+    if (!campaign) return;
+    setEditingCampaignId(campaign.id);
+    setCampaignForm({
+      name: campaign.name || "",
+      system: campaign.system || "",
+      summary: campaign.summary || "",
     });
-  } finally {
-    setDeletingCampaign(false);
-  }
-};
+    setCampaignOpen(true);
+  };
 
-  const saveCampaign = async () => {
-  if (!campaignForm.name.trim()) return;
-  setSavingCampaign(true);
-  const payload = { ...campaignForm, name: campaignForm.name.trim() };
-
-  if (editingCampaignId) {
+  const requestDeleteCampaign = async () => {
+    if (!campaign) return;
+    const target = campaign;
+    setCampaignOpen(false);
+    setPendingCampaignDelete({ campaign: target, counts: null, countError: false });
     try {
-      const updated = await api.entities.Campaign.update(editingCampaignId, payload);
-      setCampaigns((prev) =>
-        prev.map((c) => (c.id === editingCampaignId ? { ...c, ...payload, ...(updated || {}) } : c))
-      );
-      setCampaignOpen(false);
-      setEditingCampaignId(null);
-      toast({ title: "Campagne mise à jour" });
+      const counts = await countCampaignContent(target.id);
+      setPendingCampaignDelete((p) => (p ? { ...p, counts } : p));
     } catch (error) {
-      console.error("Échec modification campagne :", error);
+      console.error("Comptage impossible :", error);
+      setPendingCampaignDelete((p) => (p ? { ...p, counts: [], countError: true } : p));
+    }
+  };
+
+  const confirmCampaignDelete = async () => {
+    const target = pendingCampaignDelete?.campaign;
+    if (!target) return;
+    setDeletingCampaign(true);
+    try {
+      await deleteCampaignCascade(target.id);
+      const remaining = campaigns.filter((c) => c.id !== target.id);
+      const nextId = remaining[0]?.id || "";
+      setCampaigns(remaining);
+      setCampaignId(nextId);
+      setSelectedCampaignId(nextId);
+      setActiveSceneId(null);
+      setPendingCampaignDelete(null);
+      toast({ title: "Campagne supprimée", description: `« ${target.name} » et son contenu ont été supprimés.`, duration: 4000, });
+    } catch (error) {
+      console.error("Échec suppression campagne :", error);
+      loadTree(target.id);
       toast({
         variant: "destructive",
-        title: "Modification impossible",
+        title: "Suppression incomplète",
+        description: "Une partie du contenu a pu être supprimée. Vous pouvez relancer la suppression.",
+      });
+    } finally {
+      setDeletingCampaign(false);
+    }
+  };
+
+  const saveCampaign = async () => {
+    if (!campaignForm.name.trim()) return;
+    setSavingCampaign(true);
+    const payload = { ...campaignForm, name: campaignForm.name.trim() };
+
+    if (editingCampaignId) {
+      try {
+        const updated = await api.entities.Campaign.update(editingCampaignId, payload);
+        setCampaigns((prev) =>
+          prev.map((c) => (c.id === editingCampaignId ? { ...c, ...payload, ...(updated || {}) } : c))
+        );
+        setCampaignOpen(false);
+        setEditingCampaignId(null);
+        toast({ title: "Campagne mise à jour" });
+      } catch (error) {
+        console.error("Échec modification campagne :", error);
+        toast({
+          variant: "destructive",
+          title: "Modification impossible",
+          description: "La campagne n'a pas été enregistrée.",
+        });
+      } finally {
+        setSavingCampaign(false);
+      }
+      return;
+    }
+
+    const previous = campaigns;
+    const optimistic = { ...payload, id: `campaign-${Date.now()}` };
+    setCampaigns((prev) => [optimistic, ...prev]);
+    setCampaignOpen(false);
+    setCampaignForm(EMPTY_CAMPAIGN);
+    try {
+      const created = await api.entities.Campaign.create(payload);
+      setCampaigns((prev) => prev.map((c) => (c.id === optimistic.id ? created : c)));
+      setSelectedCampaignId(created.id);
+      setActiveSceneId(null);
+      toast({ title: "Campagne créée" });
+    } catch {
+      setCampaigns(previous);
+      toast({
+        variant: "destructive",
+        title: "Création impossible",
         description: "La campagne n'a pas été enregistrée.",
       });
     } finally {
       setSavingCampaign(false);
     }
-    return;
-  }
-
-  const previous = campaigns;
-  const optimistic = { ...payload, id: `campaign-${Date.now()}` };
-  setCampaigns((prev) => [optimistic, ...prev]);
-  setCampaignOpen(false);
-  setCampaignForm(EMPTY_CAMPAIGN);
-  try {
-    const created = await api.entities.Campaign.create(payload);
-    setCampaigns((prev) => prev.map((c) => (c.id === optimistic.id ? created : c)));
-    setSelectedCampaignId(created.id);
-    setActiveSceneId(null);
-    toast({ title: "Campagne créée" });
-  } catch {
-    setCampaigns(previous);
-    toast({
-      variant: "destructive",
-      title: "Création impossible",
-      description: "La campagne n'a pas été enregistrée.",
-    });
-  } finally {
-    setSavingCampaign(false);
-  }
-};
+  };
 
   const toggleSceneLink = async (kind, entryId) => {
     if (!activeScene) {
@@ -521,16 +522,17 @@ const confirmCampaignDelete = async () => {
           <header className="mb-4 flex flex-wrap items-center justify-between gap-2">
             <h2 className="font-display text-lg font-semibold text-foreground">Arborescence &amp; Scènes</h2>
             {campaign && (
-  <div className="flex items-center gap-3">
-    <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
-      {acts.length} acte{acts.length > 1 ? "s" : ""} · {scenes.length} scène
-      {scenes.length > 1 ? "s" : ""}
-    </span>
-    <Button size="sm" variant="outline" onClick={openEditCampaign}>
-      <Pencil className="mr-2 h-3.5 w-3.5" /> Modifier la campagne
-    </Button>
-  </div>
-)}
+              <div className="flex items-center gap-3">
+                <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
+                  {acts.length} acte{acts.length > 1 ? "s" : ""} · {scenes.length} scène
+                  {scenes.length > 1 ? "s" : ""}
+                </span>
+                <Button size="sm" variant="outline" onClick={openEditCampaign}>
+                  <Pencil className="mr-2 h-3.5 w-3.5" /> Modifier la campagne
+                </Button>
+                <PrintButton campaignId={campaignId} preset="scenes" size="sm" />
+              </div>
+            )}
           </header>
 
           {!campaignId ? (
@@ -619,15 +621,15 @@ const confirmCampaignDelete = async () => {
       />
 
       <CampaignDialog
-  open={campaignOpen}
-  onOpenChange={setCampaignOpen}
-  form={campaignForm}
-  setField={(key, value) => setCampaignForm((f) => ({ ...f, [key]: value }))}
-  saving={savingCampaign}
-  onSave={saveCampaign}
-  editing={!!editingCampaignId}
-  onDelete={requestDeleteCampaign}
-/>
+        open={campaignOpen}
+        onOpenChange={setCampaignOpen}
+        form={campaignForm}
+        setField={(key, value) => setCampaignForm((f) => ({ ...f, [key]: value }))}
+        saving={savingCampaign}
+        onSave={saveCampaign}
+        editing={!!editingCampaignId}
+        onDelete={requestDeleteCampaign}
+      />
 
       <CodexEntryDialog
         open={codexOpen}
@@ -661,51 +663,51 @@ const confirmCampaignDelete = async () => {
       </AlertDialog>
 
       <AlertDialog
-  open={!!pendingCampaignDelete}
-  onOpenChange={(isOpen) => {
-    if (!isOpen && !deletingCampaign) setPendingCampaignDelete(null);
-  }}
->
-  <AlertDialogContent>
-    <AlertDialogHeader>
-      <AlertDialogTitle>Supprimer la campagne « {pendingCampaignDelete?.campaign?.name} » ?</AlertDialogTitle>
-      <AlertDialogDescription asChild>
-        <div className="space-y-3 text-sm text-muted-foreground">
-          {pendingCampaignDelete?.counts === null ? (
-            <p>Calcul du contenu à supprimer…</p>
-          ) : pendingCampaignDelete?.countError ? (
-            <p>Impossible de lister le contenu, mais tout ce qui est rattaché à cette campagne sera supprimé.</p>
-          ) : pendingCampaignDelete?.counts.length === 0 ? (
-            <p>Cette campagne est vide : seule la campagne sera supprimée.</p>
-          ) : (
-            <>
-              <p>Seront définitivement supprimés :</p>
-              <ul className="list-disc pl-5">
-                {(pendingCampaignDelete?.counts ?? []).map((c) => (                  
-                  <li key={c.entity}>{c.text}</li>
-                ))}
-              </ul>
-            </>
-          )}
-          <p className="font-medium text-destructive">Cette action est irréversible.</p>
-        </div>
-      </AlertDialogDescription>
-    </AlertDialogHeader>
-    <AlertDialogFooter>
-      <AlertDialogCancel disabled={deletingCampaign}>Annuler</AlertDialogCancel>
-      <AlertDialogAction
-        disabled={deletingCampaign || pendingCampaignDelete?.counts === null}
-        onClick={(e) => {
-          e.preventDefault();
-          confirmCampaignDelete();
+        open={!!pendingCampaignDelete}
+        onOpenChange={(isOpen) => {
+          if (!isOpen && !deletingCampaign) setPendingCampaignDelete(null);
         }}
-        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
       >
-        {deletingCampaign ? "Suppression…" : "Tout supprimer"}
-      </AlertDialogAction>
-    </AlertDialogFooter>
-  </AlertDialogContent>
-</AlertDialog>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer la campagne « {pendingCampaignDelete?.campaign?.name} » ?</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-3 text-sm text-muted-foreground">
+                {pendingCampaignDelete?.counts === null ? (
+                  <p>Calcul du contenu à supprimer…</p>
+                ) : pendingCampaignDelete?.countError ? (
+                  <p>Impossible de lister le contenu, mais tout ce qui est rattaché à cette campagne sera supprimé.</p>
+                ) : pendingCampaignDelete?.counts.length === 0 ? (
+                  <p>Cette campagne est vide : seule la campagne sera supprimée.</p>
+                ) : (
+                  <>
+                    <p>Seront définitivement supprimés :</p>
+                    <ul className="list-disc pl-5">
+                      {(pendingCampaignDelete?.counts ?? []).map((c) => (
+                        <li key={c.entity}>{c.text}</li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+                <p className="font-medium text-destructive">Cette action est irréversible.</p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deletingCampaign}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={deletingCampaign || pendingCampaignDelete?.counts === null}
+              onClick={(e) => {
+                e.preventDefault();
+                confirmCampaignDelete();
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deletingCampaign ? "Suppression…" : "Tout supprimer"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {campaignId && (
         <button
