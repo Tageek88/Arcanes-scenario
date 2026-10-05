@@ -17,6 +17,7 @@ import { setSelectedCampaignId } from "@/lib/campaignStore";
 import { useToast } from "@/components/ui/use-toast";
 import PrintButton from "@/components/print/PrintButton";
 import { getSelectedCampaignId } from "@/lib/campaignStore";
+import AutosavePanel from "@/components/AutosavePanel";
 
 export default function Settings() {
   const { toast } = useToast();
@@ -50,7 +51,7 @@ export default function Settings() {
           Sauvegardez vos données de jeu ou repartez de zéro. Tout est stocké dans ce navigateur.
         </p>
       </header>
-
+      <AutosavePanel />
       <BackupPanel />
 
       <section className="space-y-3 rounded-xl border border-border bg-card/50 p-4">

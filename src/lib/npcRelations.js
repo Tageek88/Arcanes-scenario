@@ -155,3 +155,21 @@ export function relationsByNpc(relations, npcs) {
   );
   return map;
 }
+
+// Reprend sur un nouveau PNJ les relations d'un PNJ existant (côté inverse compris).
+export async function copyNpcRelations(campaignId, sourceId, newId) {
+  const all = await loadRelations(campaignId);
+  const mine = all.filter((r) => r.from_id === sourceId && r.to_id !== newId);
+  for (const row of mine) {
+    const mirror = mirrorOf(row, all);
+    await createRelation(campaignId, {
+      fromId: newId,
+      toId: row.to_id,
+      type: row.type,
+      label: row.custom_label || "",
+      inverseLabel: mirror?.custom_label || "",
+      notes: row.notes || "",
+      oneSided: !mirror,
+    });
+  }
+}

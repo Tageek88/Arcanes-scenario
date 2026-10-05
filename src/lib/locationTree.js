@@ -112,5 +112,19 @@ export async function deleteLocation(location, locations, mode) {
     await api.entities.Location.delete(location.id);
   }
   await removeFromScenes(location.campaign_id, removed);
-    await reassignNpcs(location.campaign_id, removed, mode === "cascade" ? "" : parentOf(location));
+  await reassignNpcs(location.campaign_id, removed, mode === "cascade" ? "" : parentOf(location));
+}
+
+// Copie tous les sous-lieux d'un lieu sous un nouveau parent (nouveaux identifiants).
+export async function copyLocationSubtree(locations, sourceId, newParentId) {
+  const map = childrenMap(locations);
+  const walk = async (oldParentId, newParent, depth) => {
+    if (depth > 30) return;
+    for (const child of map.get(oldParentId) || []) {
+      const { id, created_date, updated_date, created_by_id, created_by, ...rest } = child;
+      const copy = await api.entities.Location.create({ ...rest, parent_id: newParent });
+      await walk(child.id, copy.id, depth + 1);
+    }
+  };
+  await walk(sourceId, newParentId, 0);
 }

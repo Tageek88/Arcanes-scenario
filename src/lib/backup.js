@@ -2,9 +2,9 @@ import { db, TABLES } from "@/api/localClient";
 
 const APP_ID = "arcanes-scenario";
 const BACKUP_VERSION = 1;
-const MAX_BACKUP_SIZE = 10 * 1024 * 1024;
+const MAX_BACKUP_SIZE = 500 * 1024 * 1024;
 
-function validateBackupPayload(parsed) {
+export function validateBackupPayload(parsed) {
   if (!parsed || typeof parsed !== "object") throw new Error("Fichier de sauvegarde invalide.");
   if (parsed.app !== APP_ID) throw new Error("Ce fichier n'est pas une sauvegarde de cette application.");
   if (parsed.version !== BACKUP_VERSION) throw new Error("Version de sauvegarde incompatible.");
@@ -18,11 +18,25 @@ function validateBackupPayload(parsed) {
   }
 }
 
-export async function exportBackup() {
+export async function buildBackupPayload() {
   const data = {};
   for (const t of TABLES) data[t] = await db.table(t).toArray();
+  return { app: APP_ID, version: BACKUP_VERSION, exported_at: new Date().toISOString(), data };
+}
 
-  const payload = { app: APP_ID, version: BACKUP_VERSION, exported_at: new Date().toISOString(), data };
+export async function restoreFromPayload(parsed) {
+  validateBackupPayload(parsed);
+  await db.transaction("rw", TABLES.map((t) => db.table(t)), async () => {
+    for (const t of TABLES) {
+      await db.table(t).clear();
+      const rows = parsed.data[t] || [];
+      if (rows.length) await db.table(t).bulkPut(rows);
+    }
+  });
+}
+
+export async function exportBackup() {
+  const payload = await buildBackupPayload();
   const json = JSON.stringify(payload, null, 2);
   const url = URL.createObjectURL(new Blob([json], { type: "application/json" }));
   const a = document.createElement("a");
@@ -48,13 +62,5 @@ export async function importBackup(file) {
     throw new Error("Le fichier de sauvegarde est invalide ou corrompu.");
   }
 
-  validateBackupPayload(parsed);
-
-  await db.transaction("rw", TABLES.map((t) => db.table(t)), async () => {
-    for (const t of TABLES) {
-      await db.table(t).clear();
-      const rows = parsed.data[t] || [];
-      if (rows.length) await db.table(t).bulkPut(rows);
-    }
-  });
+  await restoreFromPayload(parsed);
 }

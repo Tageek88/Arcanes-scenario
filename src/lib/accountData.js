@@ -1,20 +1,10 @@
-import { api } from "@/api/localClient";
-
-const OWNED_ENTITIES = [
-  "Campaign",
-  "Act",
-  "Scene",
-  "NPC",
-  "Location",
-  "Clue",
-  "RollTable",
-  "GameSession",
-  "Note",
-];
+import { db, TABLES } from "@/api/localClient";
+import { saveNow } from "@/lib/autosave";
 
 export const deleteAccountData = async () => {
-  const me = await api.auth.me();
-  for (const name of OWNED_ENTITIES) {
-    await api.entities[name].deleteMany({ created_by_id: me.id });
-  }
+  await saveNow({ force: true });
+  await db.transaction("rw", TABLES.map((t) => db.table(t)), async () => {
+    for (const t of TABLES) await db.table(t).clear();
+  });
+  await saveNow();
 };

@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import CodexCard from "@/components/codex/CodexCard";
 import { childrenMap } from "@/lib/locationTree";
 
-export default function LocationTree({ locations, collapsed, onToggle, onEdit, onDelete, onAddChild }) {
+export default function LocationTree({ locations, collapsed, onToggle, onEdit, onDelete, onDuplicate, onAddChild }) {
   const map = useMemo(() => childrenMap(locations), [locations]);
   const byId = useMemo(() => new Map(locations.map((l) => [l.id, l])), [locations]);
 
@@ -33,7 +33,7 @@ export default function LocationTree({ locations, collapsed, onToggle, onEdit, o
             {path}
           </p>
         )}
-        <CodexCard kind="location" entry={location} linked={false} onEdit={onEdit} onDelete={onDelete} />
+        <CodexCard kind="location" entry={location} linked={false} onEdit={onEdit} onDelete={onDelete} onDuplicate={onDuplicate} />
         <div className="mt-1 flex items-center gap-3 px-1">
           <button
             type="button"

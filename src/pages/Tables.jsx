@@ -217,6 +217,7 @@ export default function Tables() {
               ))}
             </select>
           )}
+          <PrintButton campaignId={campaignId} preset="scenes" />
           <button
             type="button"
             onClick={openNew}

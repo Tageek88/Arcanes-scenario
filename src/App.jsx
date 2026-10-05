@@ -8,6 +8,7 @@ import PageNotFound from "./lib/PageNotFound";
 import { AuthProvider } from "@/lib/AuthContext";
 import ScrollToTop from "./components/ScrollToTop";
 import Layout from "@/components/Layout";
+import RestorePrompt from "@/components/RestorePrompt";
 
 const Home = lazy(() => import("@/pages/Home"));
 const Codex = lazy(() => import("@/pages/Codex"));
@@ -37,6 +38,7 @@ function App() {
               </Routes>
             </Suspense>
           </Router>
+          <RestorePrompt />
           <Toaster />
         </QueryClientProvider>
       </AuthProvider>

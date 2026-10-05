@@ -16,9 +16,27 @@ import ResponsiveDialog from "@/components/common/ResponsiveDialog";
 import AttachmentsField from "@/components/codex/AttachmentsField";
 import NpcRelations from "@/components/codex/NpcRelations";
 import { useToast } from "@/components/ui/use-toast";
-import { KIND_META, defaultEntry } from "@/lib/codex";
+import { KIND_META, defaultEntry, duplicateDraft } from "@/lib/codex";
 import { NPC_ATTITUDE } from "@/lib/sceneMeta";
-import { parentOptions } from "@/lib/locationTree";
+import { copyLocationSubtree, descendantIds, parentOptions } from "@/lib/locationTree";
+import { copyNpcRelations, loadRelations } from "@/lib/npcRelations";
+
+function CopyOption({ checked, onChange, title, hint }) {
+  return (
+    <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-border p-3">
+      <input
+        type="checkbox"
+        className="mt-0.5 h-4 w-4 shrink-0 accent-[hsl(var(--primary))]"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+      />
+      <span>
+        <span className="block text-sm text-foreground">{title}</span>
+        <span className="block text-xs text-muted-foreground">{hint}</span>
+      </span>
+    </label>
+  );
+}
 
 export default function CodexEntryDialog({
   open,
@@ -28,23 +46,27 @@ export default function CodexEntryDialog({
   entry,
   onSaved,
   defaultParentId = "",
+  duplicateOf = null,
   locations,
 }) {
   const { toast } = useToast();
   const [form, setForm] = useState(defaultEntry(kind));
   const [saving, setSaving] = useState(false);
   const [fetchedLocations, setFetchedLocations] = useState([]);
+  const [copyRelations, setCopyRelations] = useState(true);
+  const [copyChildren, setCopyChildren] = useState(true);
+  const [sourceRelationCount, setSourceRelationCount] = useState(0);
   const allLocations = locations ?? fetchedLocations;
   const meta = KIND_META[kind] || KIND_META.npc;
 
   useEffect(() => {
     if (!open) return;
-    setForm(
-      entry
-        ? { ...entry }
-        : { ...defaultEntry(kind), parent_id: kind === "location" ? defaultParentId : "" }
-    );
-  }, [open, kind, entry, defaultParentId]);
+    if (entry) setForm({ ...entry });
+    else if (duplicateOf) setForm(duplicateDraft(kind, duplicateOf));
+    else setForm({ ...defaultEntry(kind), parent_id: kind === "location" ? defaultParentId : "" });
+    setCopyRelations(true);
+    setCopyChildren(true);
+  }, [open, kind, entry, defaultParentId, duplicateOf]);
 
   useEffect(() => {
     if (locations || !open || (kind !== "location" && kind !== "npc") || !campaignId) return;
@@ -57,9 +79,28 @@ export default function CodexEntryDialog({
     };
   }, [locations, open, kind, campaignId]);
 
+  useEffect(() => {
+    if (!open || !duplicateOf || kind !== "npc" || !campaignId) {
+      setSourceRelationCount(0);
+      return;
+    }
+    let alive = true;
+    loadRelations(campaignId).then((rows) => {
+      if (alive) setSourceRelationCount(rows.filter((r) => r.from_id === duplicateOf.id).length);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [open, duplicateOf, kind, campaignId]);
+
   const locationChoices = useMemo(
     () => parentOptions(allLocations, kind === "location" ? entry?.id : null),
     [allLocations, kind, entry?.id]
+  );
+
+  const childCount = useMemo(
+    () => (duplicateOf && kind === "location" ? descendantIds(allLocations, duplicateOf.id).length : 0),
+    [duplicateOf, kind, allLocations]
   );
 
   const set = (key, value) => setForm((f) => ({ ...f, [key]: value }));
@@ -70,6 +111,7 @@ export default function CodexEntryDialog({
     const payload = {
       campaign_id: campaignId,
       name: form.name.trim(),
+      comment: form.comment?.trim() || "",
       attachments: form.attachments || [],
     };
     if (kind === "npc") {
@@ -86,8 +128,24 @@ export default function CodexEntryDialog({
       payload.discovered = !!form.discovered;
     }
     try {
+      let created = null;
       if (entry?.id) await api.entities[meta.entity].update(entry.id, payload);
-      else await api.entities[meta.entity].create(payload);
+      else created = await api.entities[meta.entity].create(payload);
+
+      if (created && duplicateOf) {
+        try {
+          if (kind === "npc" && copyRelations) await copyNpcRelations(campaignId, duplicateOf.id, created.id);
+          if (kind === "location" && copyChildren)
+            await copyLocationSubtree(allLocations, duplicateOf.id, created.id);
+        } catch (copyError) {
+          console.error("Copie incomplète :", copyError);
+          toast({
+            variant: "destructive",
+            title: "Copie incomplète",
+            description: "L'élément a été créé, mais ses relations ou sous-lieux n'ont pas tous été copiés.",
+          });
+        }
+      }
       onOpenChange(false);
       onSaved();
     } catch (error) {
@@ -108,16 +166,27 @@ export default function CodexEntryDialog({
         Annuler
       </Button>
       <Button onClick={save} disabled={saving || !form.name?.trim()}>
-        {saving ? "Enregistrement…" : "Enregistrer"}
+        {saving ? "Enregistrement…" : duplicateOf ? "Créer la copie" : "Enregistrer"}
       </Button>
     </div>
   );
+
+  const title = entry?.id
+    ? `Modifier — ${meta.singular}`
+    : duplicateOf
+      ? `Dupliquer — ${meta.singular}`
+      : `Nouveau ${meta.singular}`;
 
   return (
     <ResponsiveDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={entry?.id ? `Modifier — ${meta.singular}` : `Nouveau ${meta.singular}`}
+      title={title}
+      description={
+        duplicateOf
+          ? `Copie de « ${duplicateOf.name} ». Renseignez le commentaire pour distinguer les deux éléments.`
+          : undefined
+      }
       footer={footer}
     >
       <div className="space-y-4 py-1">
@@ -125,6 +194,32 @@ export default function CodexEntryDialog({
           <Label>{meta.nameLabel}</Label>
           <Input value={form.name || ""} onChange={(e) => set("name", e.target.value)} />
         </div>
+
+        <div className="space-y-2">
+          <Label>Commentaire (facultatif)</Label>
+          <Input
+            value={form.comment || ""}
+            onChange={(e) => set("comment", e.target.value)}
+            placeholder="Ex. n°2, version corrompue, archétype de garde…"
+          />
+        </div>
+
+        {duplicateOf && kind === "npc" && (
+          <CopyOption
+            checked={copyRelations}
+            onChange={setCopyRelations}
+            title={`Copier aussi les relations (${sourceRelationCount})`}
+            hint="Le PNJ dupliqué aura les mêmes relations que l'original avec les autres PNJ. Son lieu d'attribution est conservé."
+          />
+        )}
+        {duplicateOf && kind === "location" && (
+          <CopyOption
+            checked={copyChildren}
+            onChange={setCopyChildren}
+            title={`Copier aussi les sous-lieux (${childCount})`}
+            hint="Toute l'arborescence sous ce lieu est copiée. Les PNJ qui y sont rattachés ne sont pas copiés."
+          />
+        )}
 
         {kind === "npc" && (
           <>

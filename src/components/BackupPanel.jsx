@@ -3,6 +3,7 @@ import { Download, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { exportBackup, importBackup } from "@/lib/backup";
+import { saveNow } from "@/lib/autosave";
 
 export default function BackupPanel() {
   const { toast } = useToast();
@@ -14,7 +15,9 @@ export default function BackupPanel() {
     if (!file) return;
     if (!window.confirm("Remplacer toutes les données actuelles par cette sauvegarde ?")) return;
     try {
+      await saveNow({ force: true });
       await importBackup(file);
+      await saveNow();
       toast({ title: "Sauvegarde importée", description: "Les données ont bien été restaurées." });
       window.location.reload();
     } catch (error) {
@@ -26,9 +29,9 @@ export default function BackupPanel() {
 
   return (
     <div className="space-y-3 rounded-xl border border-border bg-card/50 p-4">
-      <h2 className="font-display text-base font-semibold text-foreground">Sauvegarde</h2>
+      <h2 className="font-display text-base font-semibold text-foreground">Export et import manuels</h2>
       <p className="text-sm text-muted-foreground">
-        Vos données sont stockées uniquement dans ce navigateur. Exportez-les régulièrement.
+        Créez un fichier de sauvegarde à conserver ailleurs (clé USB, cloud), ou restaurez-en un.
       </p>
       <div className="flex flex-wrap gap-2">
         <Button type="button" variant="outline" onClick={exportBackup}>

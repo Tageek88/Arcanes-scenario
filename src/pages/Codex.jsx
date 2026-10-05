@@ -24,14 +24,13 @@ import {
 import CodexCard from "@/components/codex/CodexCard";
 import CodexEntryDialog from "@/components/codex/CodexEntryDialog";
 import LocationTree from "@/components/codex/LocationTree";
+import PrintButton from "@/components/print/PrintButton";
 import { CODEX_TABS, KIND_META } from "@/lib/codex";
 import { deleteLocation, descendantIds, parentOptions, pathOf } from "@/lib/locationTree";
+import { deleteNpcRelations, loadRelations, relationsByNpc } from "@/lib/npcRelations";
 import { getSelectedCampaignId, setSelectedCampaignId } from "@/lib/campaignStore";
 import { useToast } from "@/components/ui/use-toast";
 import { useDataRefresh } from "@/lib/RefreshContext";
-import { deleteNpcRelations } from "@/lib/npcRelations";
-import { loadRelations, relationsByNpc } from "@/lib/npcRelations";
-import PrintButton from "@/components/print/PrintButton";
 
 const normalize = (value) =>
   String(value || "")
@@ -43,6 +42,7 @@ const count = (n, one, many) => `${n} ${n > 1 ? many : one}`;
 
 export default function Codex() {
   const { toast } = useToast();
+  const { refreshKey: dataRefreshKey } = useDataRefresh();
   const [campaigns, setCampaigns] = useState([]);
   const [campaignId, setCampaignId] = useState(getSelectedCampaignId());
   const [tab, setTab] = useState("npc");
@@ -50,17 +50,20 @@ export default function Codex() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
-  const { refreshKey: dataRefreshKey } = useDataRefresh();
-  const [allLocations, setAllLocations] = useState([]);
-  const [locationFilter, setLocationFilter] = useState("all");
-  const [defaultParentId, setDefaultParentId] = useState("");
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [entry, setEntry] = useState(null);
+  const [defaultParentId, setDefaultParentId] = useState("");
+  const [duplicateOf, setDuplicateOf] = useState(null);
+
   const [pendingDelete, setPendingDelete] = useState(null);
   const [deleteMode, setDeleteMode] = useState("promote");
   const [collapsed, setCollapsed] = useState(() => new Set());
-  const kind = CODEX_TABS.find((t) => t.key === tab) || CODEX_TABS[0];
+  const [allLocations, setAllLocations] = useState([]);
+  const [locationFilter, setLocationFilter] = useState("all");
   const [relations, setRelations] = useState([]);
+
+  const kind = CODEX_TABS.find((t) => t.key === tab) || CODEX_TABS[0];
 
   useEffect(() => {
     const run = async () => {
@@ -114,15 +117,6 @@ export default function Codex() {
     setLocationFilter("all");
   }, [campaignId]);
 
-  const q = normalize(term.trim());
-  const locationLabels = useMemo(() => {
-    const labels = new Map();
-    allLocations.forEach((l) =>
-      labels.set(l.id, pathOf(allLocations, l.id).map((x) => x.name).join(" › "))
-    );
-    return labels;
-  }, [allLocations]);
-
   useEffect(() => {
     if (!campaignId || tab !== "npc") {
       setRelations([]);
@@ -137,10 +131,15 @@ export default function Codex() {
     };
   }, [campaignId, tab, refreshKey, dataRefreshKey]);
 
-  const npcRelationMap = useMemo(
-    () => (tab === "npc" ? relationsByNpc(relations, items) : new Map()),
-    [tab, relations, items]
-  );
+  const q = normalize(term.trim());
+
+  const locationLabels = useMemo(() => {
+    const labels = new Map();
+    allLocations.forEach((l) =>
+      labels.set(l.id, pathOf(allLocations, l.id).map((x) => x.name).join(" › "))
+    );
+    return labels;
+  }, [allLocations]);
 
   const locationChoices = useMemo(() => parentOptions(allLocations), [allLocations]);
 
@@ -163,8 +162,13 @@ export default function Codex() {
     [items, q, tab, locationFilter, locationScope]
   );
 
+  const npcRelationMap = useMemo(
+    () => (tab === "npc" ? relationsByNpc(relations, items) : new Map()),
+    [tab, relations, items]
+  );
+
   const showTree = tab === "location" && !q;
-  const treeRows = [];
+
   const parentIds = useMemo(
     () => new Set(items.map((item) => item.parent_id).filter(Boolean)),
     [items]
@@ -180,19 +184,30 @@ export default function Codex() {
   const openNew = () => {
     setEntry(null);
     setDefaultParentId("");
+    setDuplicateOf(null);
     setDialogOpen(true);
   };
 
   const openChild = (parent) => {
     setEntry(null);
     setDefaultParentId(parent.id);
+    setDuplicateOf(null);
     setDialogOpen(true);
   };
 
   const openEdit = (k, e) => {
-    setDefaultParentId("");
     setTab(k);
     setEntry(e);
+    setDefaultParentId("");
+    setDuplicateOf(null);
+    setDialogOpen(true);
+  };
+
+  const openDuplicate = (k, e) => {
+    setTab(k);
+    setEntry(null);
+    setDefaultParentId("");
+    setDuplicateOf(e);
     setDialogOpen(true);
   };
 
@@ -215,22 +230,15 @@ export default function Codex() {
     const mode = deleteMode;
     setPendingDelete(null);
     if (!pending) return;
-
     try {
       if (pending.kind === "location") {
         await deleteLocation(pending.entry, items, mode);
       } else {
-        if (pending.kind === "npc") {
-          await deleteNpcRelations(pending.entry.campaign_id, pending.entry.id);
-        }
+        if (pending.kind === "npc") await deleteNpcRelations(pending.entry.campaign_id, pending.entry.id);
         await api.entities[KIND_META[pending.kind].entity].delete(pending.entry.id);
       }
-
       setRefreshKey((k) => k + 1);
-      toast({
-        title: "Élément supprimé",
-        description: "La suppression a bien été enregistrée.",
-      });
+      toast({ title: "Élément supprimé" });
     } catch (error) {
       console.error("Suppression impossible :", error);
       setRefreshKey((k) => k + 1);
@@ -266,7 +274,7 @@ export default function Codex() {
             Le référentiel de votre campagne. Rattachez chaque élément aux scènes depuis l'arborescence.
           </p>
         </div>
-        <div className="flex w-full items-center gap-2 sm:w-auto">
+        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
           {campaigns.length > 0 && (
             <Select value={campaignId} onValueChange={(id) => { setCampaignId(id); setSelectedCampaignId(id); }}>
               <SelectTrigger className="w-full sm:w-56">
@@ -281,9 +289,7 @@ export default function Codex() {
               </SelectContent>
             </Select>
           )}
-
           <PrintButton campaignId={campaignId} preset={tab} />
-
           <Button disabled={!campaignId} onClick={openNew}>
             <Plus className="mr-2 h-4 w-4" /> Nouveau {KIND_META[tab].singular}
           </Button>
@@ -359,6 +365,7 @@ export default function Codex() {
           onToggle={toggleCollapsed}
           onEdit={openEdit}
           onDelete={requestDelete}
+          onDuplicate={openDuplicate}
           onAddChild={openChild}
         />
       ) : (
@@ -376,13 +383,14 @@ export default function Codex() {
                   </p>
                 )}
                 <CodexCard
-                  relations={tab === "npc" ? npcRelationMap.get(item.id) : undefined}
                   kind={tab}
                   entry={item}
                   linked={false}
                   locationLabel={tab === "npc" ? locationLabels.get(item.location_id) : ""}
+                  relations={tab === "npc" ? npcRelationMap.get(item.id) : undefined}
                   onEdit={openEdit}
                   onDelete={requestDelete}
+                  onDuplicate={openDuplicate}
                 />
               </div>
             );
@@ -390,16 +398,17 @@ export default function Codex() {
         </div>
       )}
 
-
       <CodexEntryDialog
         open={dialogOpen}
         onOpenChange={(value) => {
           setDialogOpen(value);
           if (!value) setRefreshKey((k) => k + 1);
-        }} kind={tab}
+        }}
+        kind={tab}
         campaignId={campaignId}
         entry={entry}
         defaultParentId={defaultParentId}
+        duplicateOf={duplicateOf}
         locations={allLocations}
         onSaved={() => setRefreshKey((k) => k + 1)}
       />

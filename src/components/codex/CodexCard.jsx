@@ -1,18 +1,30 @@
 import React from "react";
 import { cn } from "@/lib/utils";
-import { Link2, Link2Off, Pencil, Trash2, MapPin, Users } from "lucide-react";
+import { Copy, Link2, Link2Off, MapPin, Paperclip, Pencil, Trash2, Users } from "lucide-react";
 import { NPC_ATTITUDE } from "@/lib/sceneMeta";
-import { Paperclip } from "lucide-react";
 import { isImage } from "@/components/codex/AttachmentsField";
 import { openAttachment } from "@/lib/openAttachment";
 
-export default function CodexCard({ kind, entry, linked, locationLabel, relations, onEdit, onDelete, onToggleLink }) {
+export default function CodexCard({
+  kind,
+  entry,
+  linked,
+  locationLabel,
+  relations,
+  onEdit,
+  onDelete,
+  onDuplicate,
+  onToggleLink,
+}) {
   const attitude = NPC_ATTITUDE[entry.attitude] || NPC_ATTITUDE.neutre;
 
   return (
     <div className={cn("flex flex-col rounded-xl border bg-card/50 p-4 transition-colors", linked ? "corner-accent border-primary/50" : "border-border")}>
       <div className="flex items-start justify-between gap-3">
-        <h3 className="font-display text-base font-semibold text-foreground">{entry.name}</h3>
+        <div className="min-w-0">
+          <h3 className="font-display text-base font-semibold text-foreground">{entry.name}</h3>
+          {entry.comment && <p className="text-xs italic text-muted-foreground">{entry.comment}</p>}
+        </div>
         {kind === "npc" && <span className={cn("tag border", attitude.badge)}>{attitude.label}</span>}
         {kind === "clue" && (
           <span className={cn("tag border", entry.discovered ? "border-played/40 bg-played/10 text-played" : "border-border bg-secondary text-muted-foreground")}>
@@ -27,6 +39,7 @@ export default function CodexCard({ kind, entry, linked, locationLabel, relation
         </span>
       )}
       {entry.description && <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">{entry.description}</p>}
+
       {locationLabel && (
         <p className="mt-2 flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-muted-foreground">
           <MapPin className="h-3 w-3 shrink-0" />
@@ -58,13 +71,9 @@ export default function CodexCard({ kind, entry, linked, locationLabel, relation
               key={`${file.url}-${index}`}
               onClick={() => openAttachment(file)}
               title={file.name}
-              className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg border border-border bg-secondary text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+              className="grid h-12 w-12 place-items-center overflow-hidden rounded-md border border-border bg-secondary/40 text-muted-foreground hover:border-primary/50"
             >
-              {isImage(file) ? (
-                <img src={file.url} alt={file.name} className="h-full w-full object-cover" />
-              ) : (
-                <Paperclip className="h-4 w-4" />
-              )}
+              {isImage(file) ? <img src={file.url} alt={file.name} className="h-full w-full object-cover" loading="lazy" /> : <span className="text-[10px] font-mono uppercase">PDF</span>}
             </button>
           ))}
           {entry.attachments.length > 3 && (
@@ -89,6 +98,11 @@ export default function CodexCard({ kind, entry, linked, locationLabel, relation
         <button type="button" aria-label={`Modifier ${entry.name}`} onClick={() => onEdit(kind, entry)} className="tag min-touch border border-border text-muted-foreground transition-colors hover:text-foreground">
           <Pencil className="mr-1.5 h-3 w-3" /> Modifier
         </button>
+        {onDuplicate && (
+          <button type="button" aria-label={`Dupliquer ${entry.name}`} onClick={() => onDuplicate(kind, entry)} className="tag min-touch border border-border text-muted-foreground transition-colors hover:text-foreground">
+            <Copy className="mr-1.5 h-3 w-3" /> Dupliquer
+          </button>
+        )}
         <button type="button" aria-label={`Supprimer ${entry.name}`} onClick={() => onDelete(kind, entry)} className="tag min-touch border border-border text-muted-foreground transition-colors hover:border-destructive/40 hover:text-destructive">
           <Trash2 className="mr-1.5 h-3 w-3" /> Supprimer
         </button>

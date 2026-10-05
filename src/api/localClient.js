@@ -35,12 +35,14 @@ const matchValue = (actual, expected) => {
         case "$ne": return actual !== v;
         case "$in": return Array.isArray(v) && v.includes(actual);
         case "$regex": {
-         if (actual == null) return false;
-        try {return new RegExp(v, expected.$options || "").test(String(actual));
-        } catch {
-    return String(actual).toLowerCase().includes(String(v).toLowerCase());
-  }
-}default: return true;
+          if (actual == null) return false;
+          try {
+            return new RegExp(v, expected.$options || "").test(String(actual));
+          } catch {
+            return String(actual).toLowerCase().includes(String(v).toLowerCase());
+          }
+        }
+        default: return true;
       }
     });
   }
@@ -153,7 +155,7 @@ export const api = {
   auth: {
     me: async () => LOCAL_USER,
     isAuthenticated: async () => true,
-    logout: () => {},
-    redirectToLogin: () => {},
+    logout: () => { },
+    redirectToLogin: () => { },
   },
 };

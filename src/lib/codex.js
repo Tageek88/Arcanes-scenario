@@ -11,8 +11,15 @@ export const CODEX_TABS = [
 ];
 
 export const defaultEntry = (kind) => {
-if (kind === "npc") return { name: "", role: "", description: "", attitude: "neutre", attachments: [], location_id: "" };
-if (kind === "location") return { name: "", type: "", description: "", attachments: [], parent_id: "" };
-  return { name: "", description: "", discovered: false, attachments: [] };
+  if (kind === "npc")
+    return { name: "", comment: "", role: "", description: "", attitude: "neutre", attachments: [], location_id: "" };
+  if (kind === "location")
+    return { name: "", comment: "", type: "", description: "", attachments: [], parent_id: "" };
+  return { name: "", comment: "", description: "", discovered: false, attachments: [] };
 };
 
+// Copie d'un élément pour la duplication : sans identifiant, avec un commentaire vide à remplir.
+export const duplicateDraft = (kind, source) => {
+  const { id, created_date, updated_date, created_by_id, created_by, ...rest } = source;
+  return { ...rest, comment: "", ...(kind === "clue" ? { discovered: false } : {}) };
+};
