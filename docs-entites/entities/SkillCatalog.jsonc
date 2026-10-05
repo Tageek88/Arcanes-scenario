@@ -1,0 +1,10 @@
+{
+  "name": "SkillCatalog",
+  "type": "object",
+  "properties": {
+    "campaign_id": { "type": "string" },
+    "name": { "type": "string" },
+    "roll_modifier": { "type": "string" }
+  },
+  "required": ["campaign_id", "name"]
+}

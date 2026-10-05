@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { GitBranch, BookMarked, CalendarDays, Dices, StickyNote, Settings } from "lucide-react";
+import { GitBranch, BookMarked, CalendarDays, Dices, StickyNote, Settings, Swords } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const ITEMS = [
@@ -9,6 +9,7 @@ const ITEMS = [
   { to: "/calendrier", label: "Calendrier", icon: CalendarDays },
   { to: "/tables", label: "Tables", icon: Dices },
   { to: "/notes", label: "Notes", icon: StickyNote },
+  { to: "/jeu", label: "Jeu", icon: Swords },
 ];
 
 export default function SideRail() {

@@ -1,0 +1,53 @@
+{
+  "name": "GameCharacter",
+  "type": "object",
+  "properties": {
+    "campaign_id": { "type": "string" },
+    "name": { "type": "string" },
+    "notes": { "type": "string" },
+    "characteristics": {
+      "type": "object",
+      "description": "Valeurs propres au personnage, indexées par nom de caractéristique. Le champ test est un seuil saisi manuellement.",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "value": { "type": "string" },
+          "modifier": { "type": "string" },
+          "test": { "type": "string" },
+          "max": { "type": "string" }
+        }
+      }
+    },
+    "skills": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "roll_modifier": { "type": "string" }
+        }
+      }
+    },
+    "equipment": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "type": { "type": "string" },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "value": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "required": ["campaign_id", "name"]
+}

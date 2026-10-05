@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { GitBranch, BookMarked, CalendarDays, Dices, StickyNote } from "lucide-react";
+import { GitBranch, BookMarked, CalendarDays, Dices, StickyNote, Swords } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTabStacks } from "@/lib/TabStackContext";
 
@@ -10,6 +10,7 @@ const TABS = [
   { to: "/calendrier", label: "Agenda", icon: CalendarDays },
   { to: "/tables", label: "Tables", icon: Dices },
   { to: "/notes", label: "Notes", icon: StickyNote },
+  { to: "/jeu", label: "Jeu", icon: Swords },
 ];
 
 export default function MobileNav() {

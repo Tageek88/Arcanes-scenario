@@ -2,7 +2,7 @@
 
 **Un atelier de préparation pour maîtres du jeu : organisez votre scénario en actes et scènes, et gardez PNJ, lieux, indices, tables aléatoires, notes et sessions sous la main, le tout hors ligne sur votre ordinateur.**
 
-![Version](https://img.shields.io/badge/version-1.3.0-d4a63c)
+![Version](https://img.shields.io/badge/version-1.3.2-d4a63c)
 ![Node](https://img.shields.io/badge/node-%3E%3D20.19-339933?logo=node.js&logoColor=white)
 ![React](https://img.shields.io/badge/React-18-61dafb?logo=react&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-8-646cff?logo=vite&logoColor=white)
@@ -33,6 +33,7 @@
 
 - **Arborescence** : campagnes, actes et scènes avec statut d'avancement (brouillon, prête, jouée…).
 - **Codex** : fiches de PNJ, lieux, indices et informations, liables aux scènes. Les indices peuvent être marqués découverts ; les informations, connues des joueurs et utilisées en jeu.
+- **Système de jeu** : modèle de fiche par campagne, fiches de personnages, caractéristiques, compétences et équipements. Les seuils de test sont saisis manuellement ; compétences et équipements sont retenus dans un catalogue local.
 - **Cartes et visuels** : images et PDF joints aux lieux, PNJ, indices et informations.
 - **Tables aléatoires** : rencontres, noms, événements, objets, rumeurs, avec tirage pondéré.
 - **Calendrier** : planification des sessions de jeu, liées à une scène.
@@ -139,4 +140,4 @@ Ne committez jamais `node_modules`, `dist` ni `release` (déjà exclus par `.git
 
 ## Licence
 
-Distribué sous licence **MIT**. Ajoutez un fichier `LICENSE` à la racine avec le texte de la licence et votre nom. Vous pouvez choisir une autre licence si vous préférez (Apache 2.0, GPL…) : pensez alors à mettre à jour le badge et cette section.
+Distribué sous licence **MIT**.

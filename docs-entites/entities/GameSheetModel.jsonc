@@ -1,0 +1,27 @@
+{
+  "name": "GameSheetModel",
+  "type": "object",
+  "properties": {
+    "campaign_id": {
+      "type": "string"
+    },
+    "characteristics": {
+      "type": "array",
+      "description": "Caractéristiques et colonnes facultatives affichées sur les fiches de la campagne.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "modifier": { "type": "boolean" },
+          "test": { "type": "boolean" },
+          "max": { "type": "boolean" }
+        }
+      }
+    },
+    "skillRollModifier": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": ["campaign_id"]
+}

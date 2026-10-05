@@ -3,6 +3,10 @@ import { api } from "@/api/localClient";
 // Enfants d'abord, la campagne en dernier.
 export const LINKED_ENTITIES = [
   { entity: "NPCRelation", label: "relation entre PNJ", plural: "relations entre PNJ" },
+  { entity: "GameCharacter", label: "personnage", plural: "personnages" },
+  { entity: "GameSheetModel", label: "modèle de fiche", plural: "modèles de fiche" },
+  { entity: "SkillCatalog", label: "compétence du catalogue", plural: "compétences du catalogue" },
+  { entity: "EquipmentCatalog", label: "équipement du catalogue", plural: "équipements du catalogue" },
   { entity: "Clue", label: "indice", plural: "indices" },
   { entity: "Scene", label: "scène", plural: "scènes" },
   { entity: "Act", label: "acte", plural: "actes" },

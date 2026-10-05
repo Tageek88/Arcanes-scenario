@@ -16,6 +16,7 @@ const Tables = lazy(() => import("@/pages/Tables"));
 const Calendrier = lazy(() => import("@/pages/Calendrier"));
 const Notes = lazy(() => import("@/pages/Notes"));
 const Settings = lazy(() => import("@/pages/Settings"));
+const Game = lazy(() => import("@/pages/Jeu"));
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
                   <Route path="/tables" element={<Tables />} />
                   <Route path="/calendrier" element={<Calendrier />} />
                   <Route path="/notes" element={<Notes />} />
+                  <Route path="/jeu" element={<Game />} />
                   <Route path="/settings" element={<Settings />} />
                 </Route>
                 <Route path="*" element={<PageNotFound />} />

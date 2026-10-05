@@ -1,0 +1,24 @@
+{
+  "name": "EquipmentCatalog",
+  "type": "object",
+  "properties": {
+    "campaign_id": { "type": "string" },
+    "name": { "type": "string" },
+    "type": { "type": "string" },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "value": { "type": "string" }
+        }
+      }
+    },
+    "field_names": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "required": ["campaign_id", "name"]
+}

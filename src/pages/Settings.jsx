@@ -69,7 +69,8 @@ export default function Settings() {
             <h2 className="font-display text-lg font-semibold text-foreground">Effacer toutes les données</h2>
             <p className="text-sm text-muted-foreground">
               Cette action supprime définitivement toutes les données de ce navigateur : campagnes,
-              actes, scènes, PNJ, lieux, indices, tables aléatoires, sessions et notes.
+              actes, scènes, PNJ, lieux, indices, personnages, modèles et catalogues de jeu,
+              tables aléatoires, sessions et notes.
             </p>
             <Button
               variant="destructive"
@@ -110,4 +111,3 @@ export default function Settings() {
     </div>
   );
 }
-

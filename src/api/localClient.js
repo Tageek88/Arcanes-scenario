@@ -4,14 +4,16 @@ const BASE_TABLES = [
   "Campaign", "Act", "Scene", "NPC", "Location", "Clue", "RollTable", "GameSession", "Note",
 ];
 
-export const TABLES = [...BASE_TABLES, "NPCRelation"];
+const RELATION_TABLES = [...BASE_TABLES, "NPCRelation"];
+export const TABLES = [...RELATION_TABLES, "GameSheetModel", "GameCharacter", "SkillCatalog", "EquipmentCatalog"];
 
 export const LOCAL_USER = { id: "local-user", email: "local@arcanes", full_name: "MJ", role: "admin" };
 
 export const db = new Dexie("arcanes_scenario");
 // La version 1 doit rester déclarée : elle permet de mettre à niveau les bases existantes.
 db.version(1).stores(Object.fromEntries(BASE_TABLES.map((t) => [t, "id, campaign_id"])));
-db.version(2).stores(Object.fromEntries(TABLES.map((t) => [t, "id, campaign_id"])));
+db.version(2).stores(Object.fromEntries(RELATION_TABLES.map((t) => [t, "id, campaign_id"])));
+db.version(3).stores(Object.fromEntries(TABLES.map((t) => [t, "id, campaign_id"])));
 
 // Demande au navigateur de ne pas effacer les données automatiquement (au mieux).
 try {
