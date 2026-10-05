@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Copy, Pencil, Plus, Shield, Trash2, UserRound } from "lucide-react";
+import { createPortal } from "react-dom";
+import { Copy, Pencil, Plus, Printer, Shield, Trash2, UserRound } from "lucide-react";
 import { api } from "@/api/localClient";
 import { Button } from "@/components/ui/button";
+import PrintSheet from "@/components/print/PrintSheet";
 import {
   Select,
   SelectTrigger,
@@ -44,7 +46,24 @@ export default function Jeu() {
   const [modelOpen, setModelOpen] = useState(false);
   const [characterOpen, setCharacterOpen] = useState(false);
   const [characterDraft, setCharacterDraft] = useState(null);
+  const [characterToPrint, setCharacterToPrint] = useState(null);
   const [pendingDelete, setPendingDelete] = useState(null);
+
+  useEffect(() => {
+    if (!characterToPrint) return;
+    let cancelled = false;
+    const print = async () => {
+      await new Promise((resolve) => setTimeout(resolve, 80));
+      if (!cancelled) window.print();
+    };
+    print();
+    const done = () => setCharacterToPrint(null);
+    window.addEventListener("afterprint", done);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("afterprint", done);
+    };
+  }, [characterToPrint]);
 
   const loadCampaigns = useCallback(async () => {
     try {
@@ -370,6 +389,9 @@ export default function Jeu() {
                       </p>
                     </div>
                     <div className="flex shrink-0 gap-1">
+                      <Button size="icon" variant="ghost" aria-label={`Imprimer ${character.name}`} onClick={() => setCharacterToPrint(character)}>
+                        <Printer className="h-4 w-4" />
+                      </Button>
                       <Button size="icon" variant="ghost" aria-label={`Modifier ${character.name}`} onClick={() => { setCharacterDraft(character); setCharacterOpen(true); }}>
                         <Pencil className="h-4 w-4" />
                       </Button>
@@ -464,6 +486,17 @@ export default function Jeu() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      {characterToPrint && createPortal(
+        <PrintSheet
+          model={{
+            character: characterToPrint,
+            campaignName: campaign?.name || "",
+            characteristics: model.characteristics,
+            skillRollModifier: model.skillRollModifier,
+          }}
+        />,
+        document.body
+      )}
     </div>
   );
 }
