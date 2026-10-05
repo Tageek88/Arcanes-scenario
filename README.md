@@ -42,6 +42,8 @@
 - **Sauvegarde** : export et import JSON depuis les Paramètres.
 - **100 % local** : aucun compte, aucun serveur, les données restent sur votre machine.
 
+Un résumé détaillé des fonctions, organisé par onglet, est disponible dans [Fonctionnalites.txt](./Fonctionnalites.txt).
+
 ## Prérequis
 
 | Outil | Version |
