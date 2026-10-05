@@ -25,6 +25,7 @@
 ![Tables aléatoires](Docs\Screenshots\tables.png)
 ![Notes du MJ](Docs\Screenshots\notes.png)
 ![Parametre du compte](Docs\Screenshots\parametres.png)
+![Feuille de personnages](Docs\Screenshots\FeuillesPJ.png)
 
 
 *Captures d'écran à venir.*
