@@ -78,7 +78,10 @@ export default function CodexSidebar({
   }, [campaignId, tab, term, linkedOnly, refreshKey, linkedKey, kind.entity, kind.linkKey, activeScene]);
 
   return (
-    <aside className="glass-panel flex max-h-[calc(100vh-3rem)] min-h-[420px] flex-col rounded-xl lg:sticky lg:top-6">
+    <aside
+      data-keep-expanded
+      className="glass-panel flex max-h-[calc(100vh-3rem)] min-h-[420px] flex-col rounded-xl lg:sticky lg:top-6"
+    >
       <div className="border-b border-border p-4">
         <div className="flex items-center justify-between">
           <h2 className="font-display text-sm font-semibold text-foreground">Codex du MJ</h2>
