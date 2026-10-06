@@ -2,6 +2,7 @@ import { api } from "@/api/localClient";
 
 const SERVICE_URL_KEY = "arcanes_poll_service_url";
 const DEFAULT_SERVICE_URL = "https://arcanes-planification.pages.dev";
+const AVAILABILITY_VALUES = new Set(["available", "maybe", "unavailable"]);
 
 export function getPollServiceUrl() {
   try {
@@ -34,7 +35,7 @@ export function normalizePollServiceUrl(value) {
   }
   const localHttp = ["localhost", "127.0.0.1"].includes(url.hostname);
   if ((url.protocol !== "https:" && !(localHttp && url.protocol === "http:")) ||
-      url.pathname !== "/" || url.search || url.hash) {
+    url.pathname !== "/" || url.search || url.hash) {
     throw new Error("L'adresse doit être l'origine HTTPS du site de sondage, sans chemin supplémentaire.");
   }
   return url.origin;
@@ -79,4 +80,20 @@ export async function refreshSessionPoll(poll, baseUrl) {
   };
   await api.entities.SessionPoll.update(poll.id, updated);
   return { ...poll, ...updated };
+}
+
+/**
+ * Décompte les réponses enregistrées pour une proposition de date.
+ * @param {Array<{ choices?: Record<string, string> }> | null | undefined} votes
+ * @param {string} slotId
+ * @returns {{ available: number, maybe: number, unavailable: number }}
+ */
+export function tallyVotes(votes, slotId) {
+  const counts = { available: 0, maybe: 0, unavailable: 0 };
+  if (!slotId) return counts;
+  for (const vote of votes || []) {
+    const availability = vote?.choices?.[slotId];
+    if (AVAILABILITY_VALUES.has(availability)) counts[availability] += 1;
+  }
+  return counts;
 }

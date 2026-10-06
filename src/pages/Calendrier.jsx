@@ -25,8 +25,9 @@ import { useDataRefresh } from "@/lib/RefreshContext";
 import PrintButton from "@/components/print/PrintButton";
 import SessionPollDialog from "@/components/calendar/SessionPollDialog";
 import CampaignSelect from "@/components/common/CampaignSelect";
-import { getPollServiceUrl, pollRequest, refreshSessionPoll } from "@/lib/sessionPolls";
+import { getPollServiceUrl, pollRequest, refreshSessionPoll, tallyVotes } from "@/lib/sessionPolls";
 import { useExpandedCardState } from "@/lib/ExpandedCardContext";
+
 
 const emptyForm = (date) => ({
   title: "",
@@ -524,22 +525,25 @@ export default function Calendrier() {
                           timeZone: poll.timezone || "UTC",
                         }).format(new Date(poll.expires_at))}
                       </p>
-                      {(poll.slots || []).map((slot) => (
-                        <div key={slot.id} className="mt-2 rounded-md border border-border/70 bg-card/40 px-2 py-1.5">
-                          <p className="text-xs font-medium text-foreground">
-                            {new Intl.DateTimeFormat("fr-FR", {
-                              dateStyle: "medium",
-                              timeStyle: "short",
-                              timeZone: "UTC",
-                            }).format(new Date(`${slot.date}T${slot.time}:00Z`))}
-                          </p>
-                          <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs">
-                            <span className="text-green-500">Présent : {slot.available || 0}</span>
-                            <span className="text-amber-500">Peut-être : {slot.maybe || 0}</span>
-                            <span className="text-muted-foreground">Absent : {slot.unavailable || 0}</span>
+                      {(poll.slots || []).map((slot) => {
+                        const counts = tallyVotes(poll.votes, slot.id);
+                        return (
+                          <div key={slot.id} className="mt-2 rounded-md border border-border/70 bg-card/40 px-2 py-1.5">
+                            <p className="text-xs font-medium text-foreground">
+                              {new Intl.DateTimeFormat("fr-FR", {
+                                dateStyle: "medium",
+                                timeStyle: "short",
+                                timeZone: "UTC",
+                              }).format(new Date(`${slot.date}T${slot.time}:00Z`))}
+                            </p>
+                            <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs">
+                              <span className="text-green-500">Présent : {counts.available}</span>
+                              <span className="text-amber-500">Peut-être : {counts.maybe}</span>
+                              <span className="text-muted-foreground">Indisponible : {counts.unavailable}</span>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </li>
                   ))}
                 </ul>

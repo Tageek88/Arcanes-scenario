@@ -1,6 +1,6 @@
 ## Arcanes & Scénario 1.4.2
 
-Cette version harmonise l'expansion des cartes, la sélection de campagne et l'impression dans les onglets de préparation.
+Cette version harmonise l'expansion des cartes, la sélection de campagne et l'impression dans les onglets de préparation, et corrige plusieurs défauts de la 1.4.1.
 
 ### Nouveautés
 
@@ -14,13 +14,19 @@ Cette version harmonise l'expansion des cartes, la sélection de campagne et l'i
 
 - **Impression depuis Tables** : le bouton imprime maintenant les tables sélectionnées au lieu des scènes.
 
-- **Sélection de campagne homogène** : le même sélecteur est utilisé dans l'arborescence, le codex, le calendrier, les tables, les notes, le système de jeu et les paramètres.
+- **Création d'une campagne après suppression** : après avoir supprimé une campagne, le formulaire de création n'est plus resté en mode modification. Créer une nouvelle campagne fonctionne désormais, y compris quand il ne reste aucune campagne, et depuis tous les boutons de création de l'accueil.
+
+- **Caractères accentués dans le PDF éditable** : les caractères comme « œ », « › », les guillemets typographiques et les tirets longs sont conservés dans le PDF au lieu d'être remplacés par un point d'interrogation.
+
+- **Page introuvable** : le bouton de retour ramène à l'accueil sans quitter l'application. Le message est désormais en français.
+
+- **Partage par e-mail** : les liens de partage de sondage par e-mail ouvrent le client de messagerie depuis le programme Windows. Les liens externes autres que web, e-mail et SMS sont bloqués.
+
+- **Calendrier** : suppression d'un attribut d'accessibilité en double sur les jours du calendrier.
 
 ### Améliorations
 
 - **Sections d'impression cohérentes** : les impressions contextuelles sélectionnent les contenus de l'onglet courant. Les paramètres permettent toujours de composer un document complet, incluant les tables et les sessions.
-
-- **Navigation entre cartes** : l'état d'expansion est partagé entre les onglets de contenu. Le clavier peut également développer ou replier les cartes focalisées.
 
 ### Utilisation
 
