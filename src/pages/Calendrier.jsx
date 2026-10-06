@@ -6,13 +6,6 @@ import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -31,7 +24,9 @@ import { useToast } from "@/components/ui/use-toast";
 import { useDataRefresh } from "@/lib/RefreshContext";
 import PrintButton from "@/components/print/PrintButton";
 import SessionPollDialog from "@/components/calendar/SessionPollDialog";
+import CampaignSelect from "@/components/common/CampaignSelect";
 import { getPollServiceUrl, pollRequest, refreshSessionPoll } from "@/lib/sessionPolls";
+import { useExpandedCardState } from "@/lib/ExpandedCardContext";
 
 const emptyForm = (date) => ({
   title: "",
@@ -45,6 +40,7 @@ const emptyForm = (date) => ({
 
 export default function Calendrier() {
   const { toast } = useToast();
+  const { expandedCardId, setExpandedCardId } = useExpandedCardState();
   const { refreshKey: dataRefreshKey } = useDataRefresh();
   const [campaigns, setCampaigns] = useState([]);
   const [campaignId, setCampaignId] = useState(getSelectedCampaignId());
@@ -117,16 +113,24 @@ export default function Calendrier() {
   }, [campaignId, toast]);
 
   useEffect(() => {
+    let alive = true;
     const run = async () => {
-      const res = await api.entities.Campaign.filter({}, { sort: "-created_date", limit: 100 });
-      setCampaigns(res.items);
-      const stored = getSelectedCampaignId();
-      const valid = res.items.some((c) => c.id === stored) ? stored : res.items[0]?.id || "";
-      setCampaignId(valid);
-      setSelectedCampaignId(valid);
+      try {
+        const res = await api.entities.Campaign.filter({}, { sort: "-created_date", limit: 100 });
+        if (!alive) return;
+        setCampaigns(res.items);
+        const stored = getSelectedCampaignId();
+        const valid = res.items.some((c) => c.id === stored) ? stored : res.items[0]?.id || "";
+        setCampaignId(valid);
+        setSelectedCampaignId(valid);
+      } catch (error) {
+        console.error("Chargement des campagnes impossible :", error);
+        if (alive) toast({ variant: "destructive", title: "Campagnes indisponibles", description: "Impossible de charger les campagnes locales." });
+      }
     };
     run();
-  }, [dataRefreshKey]);
+    return () => { alive = false; };
+  }, [dataRefreshKey, toast]);
 
   useEffect(() => {
     if (!campaignId) {
@@ -134,15 +138,20 @@ export default function Calendrier() {
       return;
     }
     let alive = true;
+    setScenes([]);
     api.entities.Scene
       .filter({ campaign_id: campaignId }, { sort: "order", limit: 300 })
       .then((res) => {
         if (alive) setScenes(res.items);
+      })
+      .catch((error) => {
+        console.error("Chargement des scènes impossible :", error);
+        if (alive) toast({ variant: "destructive", title: "Scènes indisponibles", description: "Impossible de charger les scènes de cette campagne." });
       });
     return () => {
       alive = false;
     };
-  }, [campaignId, dataRefreshKey]);
+  }, [campaignId, dataRefreshKey, toast]);
 
   useEffect(() => {
     if (!campaignId) {
@@ -152,31 +161,39 @@ export default function Calendrier() {
       return;
     }
     let alive = true;
+    setSessions([]);
+    setUpcoming([]);
     const run = async () => {
       setLoading(true);
-      const start = format(startOfMonth(month), "yyyy-MM-dd");
-      const nextMonth = format(addMonths(startOfMonth(month), 1), "yyyy-MM-dd");
-      const today = format(new Date(), "yyyy-MM-dd");
-      const [monthRes, upcomingRes] = await Promise.all([
-        api.entities.GameSession.filter(
-          { campaign_id: campaignId, date: { $gte: start, $lt: nextMonth } },
-          { sort: "date", limit: 300 }
-        ),
-        api.entities.GameSession.filter(
-          { campaign_id: campaignId, date: { $gte: today } },
-          { sort: "date", limit: 6 }
-        ),
-      ]);
-      if (!alive) return;
-      setSessions(monthRes.items);
-      setUpcoming(upcomingRes.items);
-      setLoading(false);
+      try {
+        const start = format(startOfMonth(month), "yyyy-MM-dd");
+        const nextMonth = format(addMonths(startOfMonth(month), 1), "yyyy-MM-dd");
+        const today = format(new Date(), "yyyy-MM-dd");
+        const [monthRes, upcomingRes] = await Promise.all([
+          api.entities.GameSession.filter(
+            { campaign_id: campaignId, date: { $gte: start, $lt: nextMonth } },
+            { sort: "date", limit: 300 }
+          ),
+          api.entities.GameSession.filter(
+            { campaign_id: campaignId, date: { $gte: today } },
+            { sort: "date", limit: 6 }
+          ),
+        ]);
+        if (!alive) return;
+        setSessions(monthRes.items);
+        setUpcoming(upcomingRes.items);
+      } catch (error) {
+        console.error("Chargement des sessions impossible :", error);
+        if (alive) toast({ variant: "destructive", title: "Sessions indisponibles", description: "Impossible de charger le calendrier de cette campagne." });
+      } finally {
+        if (alive) setLoading(false);
+      }
     };
     run();
     return () => {
       alive = false;
     };
-  }, [campaignId, monthKey, month, dataRefreshKey]);
+  }, [campaignId, monthKey, month, dataRefreshKey, toast]);
 
   const sessionsByDate = useMemo(() => {
     const map = {};
@@ -198,8 +215,14 @@ export default function Calendrier() {
 
   const selectCalendarDay = (day) => {
     const key = format(day, "yyyy-MM-dd");
-    setSelectedDate((current) => current === key ? "" : key);
+    const next = selectedDate === key ? "" : key;
+    setSelectedDate(next);
+    setExpandedCardId(next ? `calendar-day:${next}` : null);
   };
+
+  useEffect(() => {
+    if (!expandedCardId?.startsWith("calendar-day:")) setSelectedDate("");
+  }, [expandedCardId]);
 
   const updatePollCard = (poll, removedId) => {
     if (!poll || poll.state !== "open") {
@@ -349,31 +372,19 @@ export default function Calendrier() {
           </p>
         </div>
         <div className="flex w-full items-center gap-2 sm:w-auto">
-          {campaigns.length > 0 && (
-            <Select
-              value={campaignId}
-              onValueChange={(id) => {
-                setCampaignId(id);
-                setSelectedCampaignId(id);
-                setSelectedDate("");
-              }}
-            >
-              <SelectTrigger className="w-full sm:w-56">
-                <SelectValue placeholder="Campagne" />
-              </SelectTrigger>
-              <SelectContent>
-                {campaigns.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>
-                    {c.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
+          <CampaignSelect
+            campaigns={campaigns}
+            value={campaignId}
+            onValueChange={(id) => {
+              setCampaignId(id);
+              setSelectedCampaignId(id);
+              setSelectedDate("");
+            }}
+          />
           <Button variant="outline" onClick={() => setPollDialogOpen(true)} disabled={!campaignId}>
             Sondage des joueurs
           </Button>
-          <PrintButton campaignId={campaignId} preset="scenes" />
+          <PrintButton campaignId={campaignId} preset="sessions" />
           <Button onClick={() => openNew()} disabled={!campaignId}>
             <Plus className="mr-2 h-4 w-4" /> Nouvelle session
           </Button>

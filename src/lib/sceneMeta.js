@@ -18,6 +18,7 @@ export const SCENE_STATUS = {
 
 export const SCENE_STATUS_ORDER = ["brouillon", "joue", "clef"];
 
+/** @param {string} status */
 export const nextStatus = (status) =>
   SCENE_STATUS_ORDER[(SCENE_STATUS_ORDER.indexOf(status) + 1) % SCENE_STATUS_ORDER.length];
 

@@ -25,6 +25,7 @@ import CodexCard from "@/components/codex/CodexCard";
 import CodexEntryDialog from "@/components/codex/CodexEntryDialog";
 import LocationTree from "@/components/codex/LocationTree";
 import PrintButton from "@/components/print/PrintButton";
+import CampaignSelect from "@/components/common/CampaignSelect";
 import { CODEX_TABS, KIND_META } from "@/lib/codex";
 import { deleteLocation, descendantIds, parentOptions, pathOf } from "@/lib/locationTree";
 import { deleteNpcRelations, loadRelations, relationsByNpc } from "@/lib/npcRelations";
@@ -66,38 +67,53 @@ export default function Codex() {
   const kind = CODEX_TABS.find((t) => t.key === tab) || CODEX_TABS[0];
 
   useEffect(() => {
+    let alive = true;
     const run = async () => {
-      const res = await api.entities.Campaign.filter({}, { sort: "-created_date", limit: 100 });
-      setCampaigns(res.items);
-      const stored = getSelectedCampaignId();
-      const valid = res.items.some((c) => c.id === stored) ? stored : res.items[0]?.id || "";
-      setCampaignId(valid);
-      setSelectedCampaignId(valid);
+      try {
+        const res = await api.entities.Campaign.filter({}, { sort: "-created_date", limit: 100 });
+        if (!alive) return;
+        setCampaigns(res.items);
+        const stored = getSelectedCampaignId();
+        const valid = res.items.some((c) => c.id === stored) ? stored : res.items[0]?.id || "";
+        setCampaignId(valid);
+        setSelectedCampaignId(valid);
+      } catch (error) {
+        console.error("Chargement des campagnes impossible :", error);
+        if (alive) toast({ variant: "destructive", title: "Campagnes indisponibles", description: "Impossible de charger les campagnes locales." });
+      }
     };
     run();
-  }, [dataRefreshKey]);
+    return () => { alive = false; };
+  }, [dataRefreshKey, toast]);
 
   useEffect(() => {
     if (!campaignId) {
       setItems([]);
+      setLoading(false);
       return;
     }
     let alive = true;
     const run = async () => {
       setLoading(true);
-      const res = await api.entities[kind.entity].filter(
-        { campaign_id: campaignId },
-        { sort: "name", limit: 1000 }
-      );
-      if (!alive) return;
-      setItems(res.items);
-      setLoading(false);
+      setItems([]);
+      try {
+        const res = await api.entities[kind.entity].filter(
+          { campaign_id: campaignId },
+          { sort: "name", limit: 1000 }
+        );
+        if (alive) setItems(res.items);
+      } catch (error) {
+        console.error("Chargement du codex impossible :", error);
+        if (alive) toast({ variant: "destructive", title: "Codex indisponible", description: "Impossible de charger les éléments de cette campagne." });
+      } finally {
+        if (alive) setLoading(false);
+      }
     };
     run();
     return () => {
       alive = false;
     };
-  }, [campaignId, kind.entity, refreshKey, dataRefreshKey]);
+  }, [campaignId, kind.entity, refreshKey, dataRefreshKey, toast]);
 
   useEffect(() => {
     if (!campaignId) {
@@ -105,13 +121,19 @@ export default function Codex() {
       return;
     }
     let alive = true;
-    api.entities.Location.filter({ campaign_id: campaignId }, { sort: "name", limit: 1000 }).then((res) => {
-      if (alive) setAllLocations(res.items);
-    });
+    setAllLocations([]);
+    api.entities.Location.filter({ campaign_id: campaignId }, { sort: "name", limit: 1000 })
+      .then((res) => {
+        if (alive) setAllLocations(res.items);
+      })
+      .catch((error) => {
+        console.error("Chargement des lieux impossible :", error);
+        if (alive) toast({ variant: "destructive", title: "Lieux indisponibles", description: "Impossible de charger la hiérarchie des lieux." });
+      });
     return () => {
       alive = false;
     };
-  }, [campaignId, refreshKey, dataRefreshKey]);
+  }, [campaignId, refreshKey, dataRefreshKey, toast]);
 
   useEffect(() => {
     setLocationFilter("all");
@@ -123,13 +145,19 @@ export default function Codex() {
       return;
     }
     let alive = true;
-    loadRelations(campaignId).then((rows) => {
-      if (alive) setRelations(rows);
-    });
+    setRelations([]);
+    loadRelations(campaignId)
+      .then((rows) => {
+        if (alive) setRelations(rows);
+      })
+      .catch((error) => {
+        console.error("Chargement des relations impossible :", error);
+        if (alive) toast({ variant: "destructive", title: "Relations indisponibles", description: "Les relations entre PNJ n'ont pas pu être chargées." });
+      });
     return () => {
       alive = false;
     };
-  }, [campaignId, tab, refreshKey, dataRefreshKey]);
+  }, [campaignId, tab, refreshKey, dataRefreshKey, toast]);
 
   const q = normalize(term.trim());
 
@@ -275,20 +303,11 @@ export default function Codex() {
           </p>
         </div>
         <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
-          {campaigns.length > 0 && (
-            <Select value={campaignId} onValueChange={(id) => { setCampaignId(id); setSelectedCampaignId(id); }}>
-              <SelectTrigger className="w-full sm:w-56">
-                <SelectValue placeholder="Campagne" />
-              </SelectTrigger>
-              <SelectContent>
-                {campaigns.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>
-                    {c.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
+          <CampaignSelect
+            campaigns={campaigns}
+            value={campaignId}
+            onValueChange={(id) => { setCampaignId(id); setSelectedCampaignId(id); }}
+          />
           <PrintButton campaignId={campaignId} preset={tab} />
           <Button disabled={!campaignId} onClick={openNew}>
             <Plus className="mr-2 h-4 w-4" /> Nouveau {KIND_META[tab].singular}

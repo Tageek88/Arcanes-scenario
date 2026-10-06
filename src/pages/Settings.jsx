@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { api } from "@/api/localClient";
 import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,16 +14,38 @@ import {
 } from "@/components/ui/alert-dialog";
 import BackupPanel from "@/components/BackupPanel";
 import { deleteAccountData } from "@/lib/accountData";
-import { setSelectedCampaignId } from "@/lib/campaignStore";
+import { getSelectedCampaignId, setSelectedCampaignId } from "@/lib/campaignStore";
 import { useToast } from "@/components/ui/use-toast";
 import PrintButton from "@/components/print/PrintButton";
-import { getSelectedCampaignId } from "@/lib/campaignStore";
 import AutosavePanel from "@/components/AutosavePanel";
+import CampaignSelect from "@/components/common/CampaignSelect";
 
 export default function Settings() {
   const { toast } = useToast();
+  const [campaigns, setCampaigns] = useState([]);
+  const [campaignId, setCampaignId] = useState(getSelectedCampaignId());
   const [open, setOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    api.entities.Campaign.filter({}, { sort: "-created_date", limit: 100 })
+      .then((result) => {
+        if (!alive) return;
+        setCampaigns(result.items);
+        const stored = getSelectedCampaignId();
+        const selected = result.items.some((campaign) => campaign.id === stored)
+          ? stored
+          : result.items[0]?.id || "";
+        setCampaignId(selected);
+        setSelectedCampaignId(selected);
+      })
+      .catch((error) => {
+        console.error("Chargement des campagnes impossible :", error);
+        if (alive) toast({ variant: "destructive", title: "Campagnes indisponibles", description: "Impossible de charger les campagnes locales." });
+      });
+    return () => { alive = false; };
+  }, [toast]);
 
   const confirmDelete = async () => {
     setDeleting(true);
@@ -56,11 +79,16 @@ export default function Settings() {
 
       <section className="space-y-3 rounded-xl border border-border bg-card/50 p-4">
         <h2 className="font-display text-base font-semibold text-foreground">Impression</h2>
+        <CampaignSelect
+          campaigns={campaigns}
+          value={campaignId}
+          onValueChange={(id) => { setCampaignId(id); setSelectedCampaignId(id); }}
+        />
         <p className="text-sm text-muted-foreground">
-          Imprimez ou exportez en PDF éditable les scènes, indices, lieux, PNJ, notes et fiches de personnages de la campagne sélectionnée.
+          Imprimez ou exportez en PDF éditable les scènes, indices, lieux, PNJ, notes, tables, sessions et fiches de personnages de la campagne sélectionnée.
         </p>
         <PrintButton
-          campaignId={getSelectedCampaignId()}
+          campaignId={campaignId}
           preset="all"
           label="Choisir les éléments"
           allowPdfExport

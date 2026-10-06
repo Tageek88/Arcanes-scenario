@@ -1,6 +1,5 @@
 import React, { Suspense, useCallback } from "react";
 import { useLocation } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
 import SideRail from "@/components/nav/SideRail";
 import MobileNav from "@/components/nav/MobileNav";
 import MobileBackBar from "@/components/MobileBackBar";
@@ -8,10 +7,12 @@ import PageLoader from "@/components/PageLoader";
 import PullToRefresh from "@/components/PullToRefresh";
 import { queryClientInstance } from "@/lib/query-client";
 import { useDataRefresh } from "@/lib/RefreshContext";
+import { useExpandedCardState } from "@/lib/ExpandedCardContext";
 
 export default function AppShell({ children }) {
   const { pathname } = useLocation();
   const { refresh } = useDataRefresh();
+  const { setExpandedCardId } = useExpandedCardState();
 
   const handleRefresh = useCallback(async () => {
     queryClientInstance.invalidateQueries();
@@ -25,17 +26,15 @@ export default function AppShell({ children }) {
         <MobileBackBar />
         <PullToRefresh onRefresh={handleRefresh}>
           <Suspense fallback={<PageLoader />}>
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={pathname}
-                initial={{ opacity: 0, x: 24 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -24 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
+            <div key={pathname} className="page-transition">
+              <div
+                onClick={(event) => {
+                  if (!event.target.closest("[data-expandable-card], [data-keep-expanded], [role='dialog'], [role='alertdialog'], [role='menu'], [role='listbox']")) setExpandedCardId(null);
+                }}
               >
                 {children}
-              </motion.div>
-            </AnimatePresence>
+              </div>
+            </div>
           </Suspense>
         </PullToRefresh>
       </main>

@@ -7,17 +7,27 @@ export const TABLE_CATEGORIES = [
   { key: "autre", label: "Autre", badge: "border-border bg-secondary text-muted-foreground" },
 ];
 
+/** @param {string} key */
 export const categoryMeta = (key) =>
   TABLE_CATEGORIES.find((c) => c.key === key) || TABLE_CATEGORIES[TABLE_CATEGORIES.length - 1];
 
+/**
+ * @param {{ entries?: Array<{ text?: string; weight?: number }> } | null | undefined} table
+ * @returns {Array<{ text?: string; weight?: number }>}
+ */
 export const validEntries = (table) =>
   (table?.entries || []).filter((entry) => entry?.text?.trim());
 
+/** @param {{ weight?: number } | null | undefined} entry */
 const weightOf = (entry) => {
   const weight = Number(entry?.weight);
   return weight > 0 ? weight : 1;
 };
 
+/**
+ * @param {Array<{ text?: string; weight?: number }> | null | undefined} entries
+ * @returns {{ text?: string; weight?: number } | null}
+ */
 export const rollTable = (entries) => {
   const pool = (entries || []).filter((entry) => entry?.text?.trim());
   if (pool.length === 0) return null;

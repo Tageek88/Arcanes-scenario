@@ -16,7 +16,16 @@ import {
     selectableIds,
 } from "@/lib/printModel";
 
-const PRESETS = { scenes: "scenes", clue: "clues", location: "locations", npc: "npcs", notes: "notes" };
+const PRESETS = {
+    scenes: "scenes",
+    clue: "clues",
+    location: "locations",
+    npc: "npcs",
+    notes: "notes",
+    tables: "tables",
+    sessions: "sessions",
+    characters: "characters",
+};
 const LIMIT = 5000;
 
 // ---------- Arbre à cases à cocher ----------
@@ -100,11 +109,13 @@ function PrintDialog({ open, onOpenChange, campaignId, preset, onPrint, allowPdf
             list("Location"),
             list("Clue"),
             list("Note"),
+            list("RollTable"),
+            list("GameSession"),
             list("GameCharacter"),
             api.entities.GameSheetModel.filter({ campaign_id: campaignId }, { limit: 1 }),
             loadRelations(campaignId),
         ])
-            .then(([campaign, acts, scenes, npcs, locations, clues, notes, characters, models, relations]) => {
+            .then(([campaign, acts, scenes, npcs, locations, clues, notes, tables, sessions, characters, models, relations]) => {
                 if (!alive) return;
                 const loaded = {
                     campaign,
@@ -114,6 +125,8 @@ function PrintDialog({ open, onOpenChange, campaignId, preset, onPrint, allowPdf
                     locations: locations.items,
                     clues: clues.items,
                     notes: notes.items,
+                    tables: tables.items,
+                    sessions: sessions.items,
                     characters: characters.items,
                     gameSheetModel: models.items[0] || null,
                     relations,

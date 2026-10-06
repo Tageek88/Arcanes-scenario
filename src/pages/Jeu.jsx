@@ -5,13 +5,6 @@ import { api } from "@/api/localClient";
 import { Button } from "@/components/ui/button";
 import PrintSheet from "@/components/print/PrintSheet";
 import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -26,6 +19,9 @@ import GameCharacterEditor from "@/components/game/GameCharacterEditor";
 import { getSelectedCampaignId, setSelectedCampaignId } from "@/lib/campaignStore";
 import { useDataRefresh } from "@/lib/RefreshContext";
 import { useToast } from "@/components/ui/use-toast";
+import CampaignSelect from "@/components/common/CampaignSelect";
+import PrintButton from "@/components/print/PrintButton";
+import { useExpandedCardState } from "@/lib/ExpandedCardContext";
 
 const EMPTY_MODEL = { characteristics: [], skillRollModifier: false };
 const normalize = (value) => String(value || "").trim().toLocaleLowerCase("fr");
@@ -33,6 +29,7 @@ const normalize = (value) => String(value || "").trim().toLocaleLowerCase("fr");
 export default function Jeu() {
   const { toast } = useToast();
   const { refreshKey } = useDataRefresh();
+  const { expandedCardId, setExpandedCardId } = useExpandedCardState();
   const [campaigns, setCampaigns] = useState([]);
   const [campaignId, setCampaignId] = useState(getSelectedCampaignId());
   const [model, setModel] = useState(EMPTY_MODEL);
@@ -312,14 +309,12 @@ export default function Jeu() {
           </p>
         </div>
         <div className="flex w-full flex-wrap gap-2 sm:w-auto">
-          {campaigns.length > 0 && (
-            <Select value={campaignId} onValueChange={(id) => { setCampaignId(id); setSelectedCampaignId(id); }}>
-              <SelectTrigger className="w-full sm:w-56"><SelectValue placeholder="Campagne" /></SelectTrigger>
-              <SelectContent>
-                {campaigns.map((item) => <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          )}
+          <CampaignSelect
+            campaigns={campaigns}
+            value={campaignId}
+            onValueChange={(id) => { setCampaignId(id); setSelectedCampaignId(id); }}
+          />
+          <PrintButton campaignId={campaignId} preset="characters" />
           {campaignId && (
             <Button variant="outline" onClick={() => setModelOpen(true)}>
               <Shield className="h-4 w-4" /> {modelId ? "Modifier le modèle" : "Définir le modèle"}
@@ -380,7 +375,23 @@ export default function Jeu() {
           ) : (
             <div className="grid gap-4 md:grid-cols-2">
               {characters.map((character) => (
-                <article key={character.id} className="rounded-xl border border-border bg-card/50 p-4">
+                <article
+                  key={character.id}
+                  data-expandable-card={`character:${character.id}`}
+                  aria-expanded={expandedCardId === `character:${character.id}`}
+                  tabIndex={0}
+                  onClick={(event) => {
+                    if (event.target.closest("button, a, input, select, textarea, [role='button']")) return;
+                    setExpandedCardId((current) => current === `character:${character.id}` ? null : `character:${character.id}`);
+                  }}
+                  onKeyDown={(event) => {
+                    if ((event.key === "Enter" || event.key === " ") && event.target === event.currentTarget) {
+                      event.preventDefault();
+                      setExpandedCardId((current) => current === `character:${character.id}` ? null : `character:${character.id}`);
+                    }
+                  }}
+                  className={`cursor-pointer rounded-xl border border-border bg-card/50 p-4 ${expandedCardId === `character:${character.id}` ? "ring-2 ring-primary/50" : ""}`}
+                >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <h2 className="break-words font-display text-lg font-semibold">{character.name}</h2>
@@ -447,7 +458,7 @@ export default function Jeu() {
                       </ul>
                     </div>
                   )}
-                  {character.notes && <p className="mt-3 line-clamp-3 whitespace-pre-wrap text-sm text-muted-foreground">{character.notes}</p>}
+                  {character.notes && <p className={`mt-3 whitespace-pre-wrap text-sm text-muted-foreground ${expandedCardId === `character:${character.id}` ? "" : "line-clamp-3"}`}>{character.notes}</p>}
                 </article>
               ))}
             </div>

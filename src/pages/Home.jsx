@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "@/api/localClient";
 import { Plus } from "lucide-react";
 import HeroArrival from "@/components/home/HeroArrival";
@@ -26,6 +26,7 @@ import { useDataRefresh } from "@/lib/RefreshContext";
 import { Pencil } from "lucide-react";
 import { countCampaignContent, deleteCampaignCascade } from "@/lib/campaignDelete";
 import PrintButton from "@/components/print/PrintButton";
+import { useExpandedCardState } from "@/lib/ExpandedCardContext";
 
 const EMPTY_SCENE = {
   title: "",
@@ -58,6 +59,9 @@ const buildProgress = (list) => {
 export default function Home() {
   const { toast } = useToast();
   const { refreshKey: dataRefreshKey } = useDataRefresh();
+  const campaignRequest = useRef(0);
+  const treeRequest = useRef(0);
+  const codexRequest = useRef(0);
 
   const [campaigns, setCampaigns] = useState(/** @type {any[]} */([]));
   const [campaignId, setCampaignId] = useState(getSelectedCampaignId());
@@ -67,7 +71,13 @@ export default function Home() {
   const [locations, setLocations] = useState(/** @type {any[]} */([]));
   const [clues, setClues] = useState(/** @type {any[]} */([]));
   const [progress, setProgress] = useState(/** @type {{ total: number, [key: string]: number }} */({ total: 0 }));
-  const [activeSceneId, setActiveSceneId] = useState(null);
+  const { expandedCardId, setExpandedCardId } = useExpandedCardState();
+  const activeSceneId = expandedCardId?.startsWith("scene:") ? expandedCardId.slice(6) : null;
+  const setActiveSceneId = (next) => setExpandedCardId((current) => {
+    const currentId = current?.startsWith("scene:") ? current.slice(6) : null;
+    const nextId = typeof next === "function" ? next(currentId) : next;
+    return nextId ? `scene:${nextId}` : null;
+  });
   const [codexRefresh, setCodexRefresh] = useState(0);
 
   const [editorOpen, setEditorOpen] = useState(false);
@@ -98,15 +108,23 @@ export default function Home() {
   );
 
   const loadCampaigns = useCallback(async () => {
-    const res = await api.entities.Campaign.filter({}, { sort: "-created_date", limit: 100 });
-    setCampaigns(res.items);
-    const stored = getSelectedCampaignId();
-    const valid = res.items.some((c) => c.id === stored) ? stored : res.items[0]?.id || "";
-    setCampaignId(valid);
-    setSelectedCampaignId(valid);
-  }, []);
+    const requestId = ++campaignRequest.current;
+    try {
+      const res = await api.entities.Campaign.filter({}, { sort: "-created_date", limit: 100 });
+      if (requestId !== campaignRequest.current) return;
+      setCampaigns(res.items);
+      const stored = getSelectedCampaignId();
+      const valid = res.items.some((c) => c.id === stored) ? stored : res.items[0]?.id || "";
+      setCampaignId(valid);
+      setSelectedCampaignId(valid);
+    } catch (error) {
+      console.error("Chargement des campagnes impossible :", error);
+      toast({ variant: "destructive", title: "Campagnes indisponibles", description: "Impossible de charger les campagnes locales." });
+    }
+  }, [toast]);
 
   const loadTree = useCallback(async (cid) => {
+    const requestId = ++treeRequest.current;
     if (!cid) {
       setActs([]);
       setScenes([]);
@@ -116,47 +134,76 @@ export default function Home() {
       setProgress({ total: 0 });
       return;
     }
-    const [a, s, n, l, c, agg] = await Promise.all([
-      api.entities.Act.filter({ campaign_id: cid }, { sort: "order", limit: 200 }),
-      api.entities.Scene.filter({ campaign_id: cid }, { sort: "order", limit: 500 }),
-      api.entities.NPC.filter({ campaign_id: cid }, { sort: "name", limit: 300 }),
-      api.entities.Location.filter({ campaign_id: cid }, { sort: "name", limit: 300 }),
-      api.entities.Clue.filter({ campaign_id: cid }, { sort: "name", limit: 300 }),
-      api.entities.Scene.aggregate({ query: { campaign_id: cid }, groupBy: "status" }),
-    ]);
-    setActs(a.items);
-    setScenes(s.items);
-    setNpcs(n.items);
-    setLocations(l.items);
-    setClues(c.items);
-    const next = { total: 0 };
-    (agg.rows || []).forEach((row) => {
-      next[row.status] = row.count;
-      next.total += row.count;
-    });
-    setProgress(next);
-  }, []);
+    setActs([]);
+    setScenes([]);
+    setNpcs([]);
+    setLocations([]);
+    setClues([]);
+    setProgress({ total: 0 });
+    try {
+      const [a, s, n, l, c, agg] = await Promise.all([
+        api.entities.Act.filter({ campaign_id: cid }, { sort: "order", limit: 200 }),
+        api.entities.Scene.filter({ campaign_id: cid }, { sort: "order", limit: 500 }),
+        api.entities.NPC.filter({ campaign_id: cid }, { sort: "name", limit: 300 }),
+        api.entities.Location.filter({ campaign_id: cid }, { sort: "name", limit: 300 }),
+        api.entities.Clue.filter({ campaign_id: cid }, { sort: "name", limit: 300 }),
+        api.entities.Scene.aggregate({ query: { campaign_id: cid }, groupBy: "status" }),
+      ]);
+      if (requestId !== treeRequest.current) return;
+      setActs(a.items);
+      setScenes(s.items);
+      setNpcs(n.items);
+      setLocations(l.items);
+      setClues(c.items);
+      const next = { total: 0 };
+      (agg.rows || []).forEach((row) => {
+        next[row.status] = row.count;
+        next.total += row.count;
+      });
+      setProgress(next);
+    } catch (error) {
+      console.error("Chargement de l'arborescence impossible :", error);
+      if (requestId === treeRequest.current) {
+        toast({ variant: "destructive", title: "Campagne indisponible", description: "Impossible de charger tout le contenu de cette campagne." });
+      }
+    }
+  }, [toast]);
 
   const reloadCodex = useCallback(async () => {
     if (!campaignId) return;
-    const [n, l, c] = await Promise.all([
-      api.entities.NPC.filter({ campaign_id: campaignId }, { sort: "name", limit: 300 }),
-      api.entities.Location.filter({ campaign_id: campaignId }, { sort: "name", limit: 300 }),
-      api.entities.Clue.filter({ campaign_id: campaignId }, { sort: "name", limit: 300 }),
-    ]);
-    setNpcs(n.items);
-    setLocations(l.items);
-    setClues(c.items);
-    setCodexRefresh((k) => k + 1);
-  }, [campaignId]);
+    const requestId = ++codexRequest.current;
+    try {
+      const [n, l, c] = await Promise.all([
+        api.entities.NPC.filter({ campaign_id: campaignId }, { sort: "name", limit: 300 }),
+        api.entities.Location.filter({ campaign_id: campaignId }, { sort: "name", limit: 300 }),
+        api.entities.Clue.filter({ campaign_id: campaignId }, { sort: "name", limit: 300 }),
+      ]);
+      if (requestId !== codexRequest.current) return;
+      setNpcs(n.items);
+      setLocations(l.items);
+      setClues(c.items);
+      setCodexRefresh((k) => k + 1);
+    } catch (error) {
+      console.error("Actualisation du codex impossible :", error);
+      if (requestId === codexRequest.current) {
+        toast({ variant: "destructive", title: "Codex non actualisé", description: "Les changements n'ont pas pu être rechargés." });
+      }
+    }
+  }, [campaignId, toast]);
 
   useEffect(() => {
     loadCampaigns();
+    return () => { campaignRequest.current += 1; };
   }, [loadCampaigns, dataRefreshKey]);
 
   useEffect(() => {
     loadTree(campaignId);
+    return () => { treeRequest.current += 1; };
   }, [campaignId, loadTree, dataRefreshKey]);
+
+  useEffect(() => {
+    codexRequest.current += 1;
+  }, [campaignId]);
 
   const selectCampaign = (id) => {
     if (id === "__new__") {
@@ -522,8 +569,8 @@ export default function Home() {
         campaigns={campaigns}
         onSelectCampaign={selectCampaign}
         progress={progress}
-        onCreateScene={() => (campaignId ? openNewScene(null) : setCampaignOpen(true))}
-        onCreateNpc={() => {
+        onCreateScene={() => (campaignId ? openNewScene(null) : openNewCampaign())}
+        onCreateCampaign={openNewCampaign} onCreateNpc={() => {
           setCodexKind("npc");
           setCodexEntry(null);
           setCodexOpen(true);

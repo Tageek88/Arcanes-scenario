@@ -8,6 +8,15 @@ export default function SwipeSceneRow({ scene, active, npcs, locations, clues, o
 
   return (
     <div
+      data-expandable-card={`scene:${scene.id}`}
+      aria-expanded={active}
+      tabIndex={0}
+      onKeyDown={(event) => {
+        if ((event.key === "Enter" || event.key === " ") && event.target === event.currentTarget) {
+          event.preventDefault();
+          onSelect(scene);
+        }
+      }}
       onTouchStart={(e) => {
         startX.current = e.touches[0].clientX;
       }}

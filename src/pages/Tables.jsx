@@ -19,6 +19,7 @@ import { getSelectedCampaignId, setSelectedCampaignId } from "@/lib/campaignStor
 import { useToast } from "@/components/ui/use-toast";
 import { useDataRefresh } from "@/lib/RefreshContext";
 import PrintButton from "@/components/print/PrintButton";
+import CampaignSelect from "@/components/common/CampaignSelect";
 
 const SafeAlertDialogContent = (
   /** @type {React.ComponentProps<typeof AlertDialogContent>} */ props
@@ -54,39 +55,55 @@ export default function Tables() {
   );
 
   useEffect(() => {
+    let alive = true;
     const run = async () => {
-      const res = await api.entities.Campaign.filter({}, { sort: "-created_date", limit: 100 });
-      const campaignList = /** @type {Array<{ id: string; name: string }>} */ (res.items || []);
-      setCampaigns(campaignList);
-      const stored = getSelectedCampaignId();
-      const valid = campaignList.some((c) => c.id === stored) ? stored : campaignList[0]?.id || "";
-      setCampaignId(valid);
-      setSelectedCampaignId(valid);
+      try {
+        const res = await api.entities.Campaign.filter({}, { sort: "-created_date", limit: 100 });
+        if (!alive) return;
+        const campaignList = /** @type {Array<{ id: string; name: string }>} */ (res.items || []);
+        setCampaigns(campaignList);
+        const stored = getSelectedCampaignId();
+        const valid = campaignList.some((c) => c.id === stored) ? stored : campaignList[0]?.id || "";
+        setCampaignId(valid);
+        setSelectedCampaignId(valid);
+      } catch (error) {
+        console.error("Chargement des campagnes impossible :", error);
+        if (alive) toast({ variant: "destructive", title: "Campagnes indisponibles", description: "Impossible de charger les campagnes locales." });
+      }
     };
     run();
-  }, [dataRefreshKey]);
+    return () => { alive = false; };
+  }, [dataRefreshKey, toast]);
 
   useEffect(() => {
     if (!campaignId) {
       setTables([]);
+      setLoading(false);
       return;
     }
     let alive = true;
+    setTables([]);
     const run = async () => {
       setLoading(true);
       const query = /** @type {Record<string, string>} */ ({ campaign_id: campaignId });
       if (category !== "all") query.category = category;
-      const res = await api.entities.RollTable.filter(query, { sort: "-created_date", limit: 200 });
-      if (!alive) return;
-      const tableList = /** @type {Array<{ id: string; name: string; category?: string; description?: string; entries?: Array<{ text?: string; weight?: number }> }>} */ (res.items || []);
-      setTables(tableList);
-      setLoading(false);
+      try {
+        const res = await api.entities.RollTable.filter(query, { sort: "-created_date", limit: 200 });
+        if (!alive) return;
+        const tableList = /** @type {Array<{ id: string; name: string; category?: string; description?: string; entries?: Array<{ text?: string; weight?: number }> }>} */ (res.items || []);
+        setTables(tableList);
+      } catch (error) {
+        console.error("Chargement des tables impossible :", error);
+        if (alive) toast({ variant: "destructive", title: "Tables indisponibles", description: "Impossible de charger les tables de cette campagne." });
+      } finally {
+        if (alive) setLoading(false);
+      }
     };
     run();
     return () => {
       alive = false;
     };
-  }, [campaignId, category, dataRefreshKey]);
+  }, [campaignId, category, dataRefreshKey, toast]);
 
   const openNew = () => {
     setForm({ ...EMPTY, entries: [] });
@@ -199,25 +216,12 @@ export default function Tables() {
           </p>
         </div>
         <div className="flex w-full items-center gap-2 sm:w-auto">
-          {campaigns.length > 0 && (
-            <select
-              value={campaignId}
-              onChange={(event) => {
-                const id = event.target.value;
-                setCampaignId(id);
-                setSelectedCampaignId(id);
-              }}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 sm:w-56"
-            >
-              <option value="">Campagne</option>
-              {campaigns.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          )}
-          <PrintButton campaignId={campaignId} preset="scenes" />
+          <CampaignSelect
+            campaigns={campaigns}
+            value={campaignId}
+            onValueChange={(id) => { setCampaignId(id); setSelectedCampaignId(id); }}
+          />
+          <PrintButton campaignId={campaignId} preset="tables" />
           <button
             type="button"
             onClick={openNew}

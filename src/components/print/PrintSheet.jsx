@@ -173,6 +173,41 @@ function Block({ block }) {
                     ))}
                 </section>
             );
+        case "tables":
+            return (
+                <section className="prt-section">
+                    <h2>Tables aléatoires</h2>
+                    {block.tables.map((table, index) => (
+                        <article key={`${table.name}-${index}`} className="prt-item">
+                            <div className="prt-title">{table.name}</div>
+                            {table.category && <div className="prt-meta">{table.category}</div>}
+                            {table.description && <p className="prt-text">{table.description}</p>}
+                            <ol className="prt-list">
+                                {table.entries.map((entry, entryIndex) => (
+                                    <li key={`${entry.text}-${entryIndex}`}>
+                                        {entry.text}{entry.weight !== 1 ? ` (poids : ${entry.weight})` : ""}
+                                    </li>
+                                ))}
+                            </ol>
+                        </article>
+                    ))}
+                </section>
+            );
+        case "sessions":
+            return (
+                <section className="prt-section">
+                    <h2>Sessions</h2>
+                    {block.sessions.map((session, index) => (
+                        <article key={`${session.date}-${session.title}-${index}`} className="prt-item">
+                            <div className="prt-title">{session.title}</div>
+                            <div className="prt-meta">
+                                {[session.date, session.time, session.location, session.status].filter(Boolean).join(" · ")}
+                            </div>
+                            {session.notes && <p className="prt-text">{session.notes}</p>}
+                        </article>
+                    ))}
+                </section>
+            );
         default:
             return null;
     }

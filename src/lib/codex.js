@@ -10,6 +10,7 @@ export const CODEX_TABS = [
   { key: "clue", label: "Indices & infos", entity: "Clue", linkKey: "clue_ids" },
 ];
 
+/** @param {"npc" | "location" | "clue"} kind */
 export const defaultEntry = (kind) => {
   if (kind === "npc")
     return { name: "", comment: "", role: "", description: "", attitude: "neutre", attachments: [], location_id: "" };
@@ -28,6 +29,11 @@ export const defaultEntry = (kind) => {
 };
 
 // Copie d'un élément pour la duplication : sans identifiant, avec un commentaire vide à remplir.
+/**
+ * @param {"npc" | "location" | "clue"} kind
+ * @param {Record<string, unknown>} source
+ * @returns {Record<string, unknown>}
+ */
 export const duplicateDraft = (kind, source) => {
   const { id, created_date, updated_date, created_by_id, created_by, ...rest } = source;
   return {

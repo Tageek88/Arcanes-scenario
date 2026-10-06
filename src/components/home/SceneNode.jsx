@@ -9,6 +9,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+import { useExpandedCard } from "@/lib/ExpandedCardContext";
 
 export default function SceneNode({
   scene,
@@ -22,6 +23,7 @@ export default function SceneNode({
   onCycleStatus,
   onDelete,
 }) {
+  const { expanded, cardProps } = useExpandedCard(`scene:${scene.id}`);
   const meta = SCENE_STATUS[scene.status] || SCENE_STATUS.brouillon;
   const branches = (scene.next_scene_ids || []).map((id) => sceneTitles[id]).filter(Boolean);
   const linked = (scene.npc_ids?.length || 0) + (scene.location_ids?.length || 0) + (scene.clue_ids?.length || 0);
@@ -31,8 +33,8 @@ export default function SceneNode({
 
   return (
     <div
+      {...cardProps}
       role="button"
-      tabIndex={0}
       onClick={() => onSelect(scene)}
       onDoubleClick={() => onOpen(scene)}
       onKeyDown={(e) => {
@@ -40,7 +42,7 @@ export default function SceneNode({
       }}
       className={cn(
         "group flex-1 cursor-pointer rounded-lg border bg-background/70 p-3 transition-colors",
-        active ? "corner-accent border-primary/60 bg-primary/[0.06]" : "border-border hover:border-primary/30"
+        active || expanded ? "corner-accent border-primary/60 bg-primary/[0.06] ring-2 ring-primary/40" : "border-border hover:border-primary/30"
       )}
     >
       <div className="flex items-start justify-between gap-2">
@@ -80,7 +82,7 @@ export default function SceneNode({
       </div>
 
       <h3 className="mt-2 font-display text-sm font-semibold leading-snug text-foreground">{scene.title}</h3>
-      {!active && scene.summary && <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{scene.summary}</p>}
+      {!active && scene.summary && <p className={cn("mt-1 text-xs text-muted-foreground", !expanded && "line-clamp-2")}>{scene.summary}</p>}
 
       {(linked > 0 || branches.length > 0) && (
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-xs uppercase tracking-wider text-muted-foreground">
@@ -93,7 +95,7 @@ export default function SceneNode({
           )}
         </div>
       )}
-      {active && (
+      {(active || expanded) && (
         <div className="mt-3 space-y-3 border-t border-border pt-3 text-xs">
           {scene.summary && <p className="whitespace-pre-wrap text-muted-foreground">{scene.summary}</p>}
           {scene.gm_notes && (

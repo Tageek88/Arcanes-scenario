@@ -1,6 +1,7 @@
 import { childrenMap, flattenTree, pathOf } from "@/lib/locationTree";
 import { groupIndex, relationLabel } from "@/lib/relationMeta";
 import { NPC_ATTITUDE, SCENE_STATUS } from "@/lib/sceneMeta";
+import { sessionStatusMeta } from "@/lib/sessionMeta";
 
 export const SECTIONS = [
     { key: "scenes", title: "Scènes et actes", hint: "Chaque scène est imprimée avec ses indices liés." },
@@ -8,6 +9,8 @@ export const SECTIONS = [
     { key: "locations", title: "Lieux", hint: "Dans l'ordre de l'arborescence." },
     { key: "npcs", title: "PNJ", hint: "Classés par lieu, dans l'ordre des scènes, avec leurs relations." },
     { key: "notes", title: "Notes du MJ", hint: "Épinglées en premier." },
+    { key: "tables", title: "Tables aléatoires", hint: "Entrées et poids de tirage." },
+    { key: "sessions", title: "Sessions", hint: "Dates, heures, lieux et notes." },
     { key: "characters", title: "Fiches de personnages", hint: "Caractéristiques, compétences, équipements et notes." },
 ];
 
@@ -32,7 +35,7 @@ export function orderScenes(acts, scenes) {
 
 const leaf = (id, label, hint = "") => ({ id, label, hint, countable: true, derived: false, children: [] });
 
-export function buildTrees({ acts, scenes, npcs, locations, clues, notes, characters = [] }) {
+export function buildTrees({ acts, scenes, npcs, locations, clues, notes, tables = [], sessions = [], characters = [] }) {
     let n = 0;
     const sceneNodes = orderScenes(acts, scenes).map((g) => {
         const kids = g.scenes.map((s) =>
@@ -73,6 +76,12 @@ export function buildTrees({ acts, scenes, npcs, locations, clues, notes, charac
         notes: [...notes]
             .sort((a, b) => pinnedFirst(a, b) || txt(b.updated_date).localeCompare(txt(a.updated_date)))
             .map((x) => leaf(x.id, x.title || "Note", x.pinned ? "Épinglée" : "")),
+        tables: [...tables].sort(byName).map((table) =>
+            leaf(table.id, table.name || "Table", `${table.category || "autre"} · ${(table.entries || []).length} entrées`)
+        ),
+        sessions: [...sessions]
+            .sort((a, b) => txt(a.date).localeCompare(txt(b.date)) || txt(a.time).localeCompare(txt(b.time)))
+            .map((session) => leaf(session.id, session.title || "Session", `${session.date || ""} ${session.time || ""}`.trim())),
         characters: [...characters].sort(byName).map((character) =>
             leaf(character.id, character.name || "Personnage")
         ),
@@ -100,7 +109,7 @@ export const countableIds = (nodes) => {
 // ---------- Modèle du document imprimé ----------
 
 export function buildPrintModel(data, sel, opts) {
-    const { campaign, acts, scenes, npcs, locations, clues, notes, relations, characters = [], gameSheetModel } = data;
+    const { campaign, acts, scenes, npcs, locations, clues, notes, tables = [], sessions = [], relations, characters = [], gameSheetModel } = data;
     const sceneById = new Map(scenes.map((s) => [s.id, s]));
     const npcById = new Map(npcs.map((p) => [p.id, p]));
     const clueById = new Map(clues.map((c) => [c.id, c]));
@@ -245,7 +254,35 @@ export function buildPrintModel(data, sel, opts) {
         .map((x) => ({ title: x.title || "Note", content: x.content || "", pinned: !!x.pinned }));
     if (noteItems.length) blocks.push({ kind: "notes", notes: noteItems });
 
-    // 6. Fiches de personnages
+    // 6. Tables aléatoires
+    const tableIds = sel.tables || new Set();
+    const tableItems = tables.filter((table) => tableIds.has(table.id)).sort(byName).map((table) => ({
+        name: table.name || "Table",
+        category: table.category || "",
+        description: table.description || "",
+        entries: (table.entries || []).map((entry) => ({
+            text: entry.text || "",
+            weight: Number(entry.weight) > 0 ? Number(entry.weight) : 1,
+        })),
+    }));
+    if (tableItems.length) blocks.push({ kind: "tables", tables: tableItems });
+
+    // 7. Sessions
+    const sessionIds = sel.sessions || new Set();
+    const sessionItems = sessions
+        .filter((session) => sessionIds.has(session.id))
+        .sort((a, b) => txt(a.date).localeCompare(txt(b.date)) || txt(a.time).localeCompare(txt(b.time)))
+        .map((session) => ({
+            title: session.title || "Session",
+            date: session.date || "",
+            time: session.time || "",
+            location: session.location || "",
+            status: sessionStatusMeta(session.status).label,
+            notes: session.notes || "",
+        }));
+    if (sessionItems.length) blocks.push({ kind: "sessions", sessions: sessionItems });
+
+    // 8. Fiches de personnages
     const characterIds = sel.characters || new Set();
     const selectedCharacters = characters
         .filter((character) => characterIds.has(character.id))

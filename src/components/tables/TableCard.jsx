@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { Dices, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { categoryMeta, rollTable, validEntries } from "@/lib/tableMeta";
+import { useExpandedCard } from "@/lib/ExpandedCardContext";
 
 /**
  * @typedef {Object} TableCardProps
@@ -15,6 +16,7 @@ import { categoryMeta, rollTable, validEntries } from "@/lib/tableMeta";
 
 /** @param {TableCardProps} props */
 export default function TableCard({ table, onEdit, onDelete }) {
+  const { expanded, cardProps } = useExpandedCard(`table:${table.id}`);
   const [result, setResult] = useState(null);
   const [rolling, setRolling] = useState(false);
 
@@ -33,7 +35,7 @@ export default function TableCard({ table, onEdit, onDelete }) {
   };
 
   return (
-    <div className="flex flex-col rounded-xl border border-border bg-card/50 p-4">
+    <div {...cardProps} className={cn("flex cursor-pointer flex-col rounded-xl border border-border bg-card/50 p-4", expanded && "ring-2 ring-primary/50")}>
       <div className="flex items-start justify-between gap-3">
         <h3 className="font-display text-base font-semibold text-foreground">{table.name}</h3>
         <span className={cn("tag shrink-0 border", meta.badge)}>{meta.label}</span>
@@ -44,7 +46,13 @@ export default function TableCard({ table, onEdit, onDelete }) {
       </span>
 
       {table.description && (
-        <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{table.description}</p>
+        <p className={cn("mt-2 text-sm text-muted-foreground", !expanded && "line-clamp-2")}>{table.description}</p>
+      )}
+
+      {expanded && entries.length > 0 && (
+        <ol className="mt-3 list-inside list-decimal space-y-1 text-xs text-muted-foreground">
+          {entries.map((entry, index) => <li key={`${entry.text}-${index}`}>{entry.text}</li>)}
+        </ol>
       )}
 
       <div className="mt-4 flex-1" />

@@ -1,13 +1,7 @@
 import React from "react";
 import { Plus, UserPlus, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
+import CampaignSelect from "@/components/common/CampaignSelect";
 import ProgressTracker from "@/components/home/ProgressTracker";
 
 export default function HeroArrival({
@@ -44,19 +38,14 @@ export default function HeroArrival({
                 <Plus className="mr-2 h-4 w-4" /> Créer une campagne
               </Button>
             ) : (
-              <Select value={campaign?.id || ""} onValueChange={onSelectCampaign}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Choisir une campagne" />
-                </SelectTrigger>
-                <SelectContent>
-                  {campaigns.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.name}
-                    </SelectItem>
-                  ))}
-                  <SelectItem value="__new__">＋ Nouvelle campagne…</SelectItem>
-                </SelectContent>
-              </Select>
+              <CampaignSelect
+                campaigns={campaigns}
+                value={campaign?.id}
+                onValueChange={onSelectCampaign}
+                className="w-full"
+                placeholder="Choisir une campagne"
+                allowCreate
+              />
             )}
           </div>
           <ProgressTracker progress={progress} />

@@ -58,15 +58,6 @@ export default function SessionPollDialog({
     [playerNames]
   );
 
-  const loadLocalPolls = async () => {
-    if (!campaignId) {
-      setPolls([]);
-      return;
-    }
-    const result = await api.entities.SessionPoll.filter({ campaign_id: campaignId }, { sort: "-created_date" });
-    setPolls(result.items);
-  };
-
   const saveServiceUrl = () => {
     const normalized = normalizePollServiceUrl(serviceUrl);
     savePollServiceUrl(normalized);

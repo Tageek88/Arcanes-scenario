@@ -18,9 +18,9 @@ release
 liste-fichiers.txt
 recherche-base44.txt
 fichiers-non-references.txt
-fichiers-non-references.txt
 fichiers-inutilises.mjs
 fichiers-a-envoyer.txt
+recherche-base44.txt
 
 dist-ssr
 *.local

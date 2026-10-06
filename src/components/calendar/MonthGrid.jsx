@@ -50,6 +50,8 @@ export default function MonthGrid({
           return (
             <div
               key={key}
+              data-expandable-card={`calendar-day:${key}`}
+              aria-expanded={expanded}
               role="button"
               tabIndex={0}
               onClick={(event) => {
@@ -68,7 +70,6 @@ export default function MonthGrid({
                 outside && "bg-background/40",
                 expanded && "relative z-10 rounded-lg bg-card shadow-lg ring-2 ring-primary/60"
               )}
-              aria-expanded={expanded}
               aria-label={`${format(day, "d MMMM yyyy")} : ${daySessions.length} session${daySessions.length === 1 ? "" : "s"}`}
             >
               <div className="flex items-center justify-between">

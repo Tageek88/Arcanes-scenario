@@ -3,17 +3,21 @@ import { Pencil, Pin, PinOff, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { useExpandedCard } from "@/lib/ExpandedCardContext";
 
 export default function NoteCard({ note, onEdit, onDelete, onTogglePin }) {
+  const { expanded, cardProps } = useExpandedCard(`note:${note.id}`);
   const updated = note.updated_date
     ? format(new Date(note.updated_date), "d MMM yyyy", { locale: fr })
     : "";
 
   return (
     <article
+      {...cardProps}
       className={cn(
-        "glass-panel corner-accent flex flex-col rounded-xl p-4",
-        note.pinned && "ring-1 ring-primary/40"
+        "glass-panel corner-accent flex cursor-pointer flex-col rounded-xl p-4",
+        note.pinned && "ring-1 ring-primary/40",
+        expanded && "ring-2 ring-primary/50"
       )}
     >
       <header className="flex items-start justify-between gap-3">
@@ -35,7 +39,7 @@ export default function NoteCard({ note, onEdit, onDelete, onTogglePin }) {
       </header>
 
       {note.content ? (
-        <p className="mt-2 line-clamp-5 whitespace-pre-wrap text-sm text-muted-foreground">
+        <p className={cn("mt-2 whitespace-pre-wrap text-sm text-muted-foreground", !expanded && "line-clamp-5")}>
           {note.content}
         </p>
       ) : (

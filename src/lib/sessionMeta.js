@@ -23,6 +23,8 @@ export const SESSION_STATUS = {
 
 export const SESSION_STATUS_ORDER = ["planifiee", "confirmee", "jouee", "annulee"];
 
+/** @param {keyof typeof SESSION_STATUS} status */
 export const sessionStatusMeta = (status) => SESSION_STATUS[status] || SESSION_STATUS.planifiee;
 
+/** @param {string | null | undefined} value */
 export const dateKey = (value) => String(value || "").slice(0, 10);

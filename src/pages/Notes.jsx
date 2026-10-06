@@ -3,13 +3,6 @@ import { api } from "@/api/localClient";
 import { Pin, Plus, StickyNote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -25,6 +18,7 @@ import { getSelectedCampaignId, setSelectedCampaignId } from "@/lib/campaignStor
 import { useToast } from "@/components/ui/use-toast";
 import { useDataRefresh } from "@/lib/RefreshContext";
 import PrintButton from "@/components/print/PrintButton";
+import CampaignSelect from "@/components/common/CampaignSelect";
 
 const EMPTY = { title: "", content: "", pinned: false };
 
@@ -43,46 +37,63 @@ export default function Notes() {
   const [pendingDelete, setPendingDelete] = useState(null);
 
   useEffect(() => {
+    let alive = true;
     const run = async () => {
-      const res = await api.entities.Campaign.filter({}, { sort: "-created_date", limit: 100 });
-      setCampaigns(res.items);
-      const stored = getSelectedCampaignId();
-      const valid = res.items.some((c) => c.id === stored) ? stored : res.items[0]?.id || "";
-      setCampaignId(valid);
-      setSelectedCampaignId(valid);
+      try {
+        const res = await api.entities.Campaign.filter({}, { sort: "-created_date", limit: 100 });
+        if (!alive) return;
+        setCampaigns(res.items);
+        const stored = getSelectedCampaignId();
+        const valid = res.items.some((c) => c.id === stored) ? stored : res.items[0]?.id || "";
+        setCampaignId(valid);
+        setSelectedCampaignId(valid);
+      } catch (error) {
+        console.error("Chargement des campagnes impossible :", error);
+        if (alive) toast({ variant: "destructive", title: "Campagnes indisponibles", description: "Impossible de charger les campagnes locales." });
+      }
     };
     run();
-  }, [dataRefreshKey]);
+    return () => { alive = false; };
+  }, [dataRefreshKey, toast]);
 
   useEffect(() => {
     if (!campaignId) {
       setPinnedNotes([]);
       setNotes([]);
+      setLoading(false);
       return;
     }
     let alive = true;
+    setPinnedNotes([]);
+    setNotes([]);
     const run = async () => {
       setLoading(true);
-      const [pinnedRes, restRes] = await Promise.all([
-        api.entities.Note.filter(
-          { campaign_id: campaignId, pinned: true },
-          { sort: "-updated_date", limit: 50 }
-        ),
-        api.entities.Note.filter(
-          { campaign_id: campaignId, pinned: false },
-          { sort: "-updated_date", limit: 100 }
-        ),
-      ]);
-      if (!alive) return;
-      setPinnedNotes(pinnedRes.items);
-      setNotes(restRes.items);
-      setLoading(false);
+      try {
+        const [pinnedRes, restRes] = await Promise.all([
+          api.entities.Note.filter(
+            { campaign_id: campaignId, pinned: true },
+            { sort: "-updated_date", limit: 50 }
+          ),
+          api.entities.Note.filter(
+            { campaign_id: campaignId, pinned: false },
+            { sort: "-updated_date", limit: 100 }
+          ),
+        ]);
+        if (!alive) return;
+        setPinnedNotes(pinnedRes.items);
+        setNotes(restRes.items);
+      } catch (error) {
+        console.error("Chargement des notes impossible :", error);
+        if (alive) toast({ variant: "destructive", title: "Notes indisponibles", description: "Impossible de charger les notes de cette campagne." });
+      } finally {
+        if (alive) setLoading(false);
+      }
     };
     run();
     return () => {
       alive = false;
     };
-  }, [campaignId, dataRefreshKey]);
+  }, [campaignId, dataRefreshKey, toast]);
 
   const openNew = () => {
     setForm(EMPTY);
@@ -200,26 +211,11 @@ export default function Notes() {
           </p>
         </div>
         <div className="flex w-full items-center gap-2 sm:w-auto">
-          {campaigns.length > 0 && (
-            <Select
-              value={campaignId}
-              onValueChange={(id) => {
-                setCampaignId(id);
-                setSelectedCampaignId(id);
-              }}
-            >
-              <SelectTrigger className="w-full sm:w-56">
-                <SelectValue placeholder="Campagne" />
-              </SelectTrigger>
-              <SelectContent>
-                {campaigns.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>
-                    {c.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
+          <CampaignSelect
+            campaigns={campaigns}
+            value={campaignId}
+            onValueChange={(id) => { setCampaignId(id); setSelectedCampaignId(id); }}
+          />
           <PrintButton campaignId={campaignId} preset="notes" />
           <Button onClick={openNew} disabled={!campaignId}>
             <Plus className="mr-2 h-4 w-4" /> Nouvelle note

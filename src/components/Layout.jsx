@@ -3,6 +3,7 @@ import { useOutlet } from "react-router-dom";
 import AppShell from "@/components/AppShell";
 import { RefreshProvider } from "@/lib/RefreshContext";
 import { TabStackProvider } from "@/lib/TabStackContext";
+import { ExpandedCardProvider } from "@/lib/ExpandedCardContext";
 
 export default function Layout() {
   const outlet = useOutlet();
@@ -10,7 +11,9 @@ export default function Layout() {
   return (
     <RefreshProvider>
       <TabStackProvider>
-        <AppShell>{outlet}</AppShell>
+        <ExpandedCardProvider>
+          <AppShell>{outlet}</AppShell>
+        </ExpandedCardProvider>
       </TabStackProvider>
     </RefreshProvider>
   );

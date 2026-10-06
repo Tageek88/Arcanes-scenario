@@ -288,6 +288,28 @@ export async function createEditablePdf(model) {
                     drawField("Contenu", note.content, { multiline: true, height: 96 });
                 }
                 break;
+            case "tables":
+                drawHeading("Tables aléatoires");
+                for (const table of block.tables) {
+                    drawHeading(table.name, 3);
+                    if (table.category) drawText(table.category, { size: 8, color: MUTED_COLOR });
+                    if (table.description) drawText(table.description);
+                    table.entries.forEach((entry, index) => {
+                        drawText(`${index + 1}. ${entry.text}${entry.weight !== 1 ? ` (poids : ${entry.weight})` : ""}`);
+                    });
+                }
+                break;
+            case "sessions":
+                drawHeading("Sessions");
+                for (const session of block.sessions) {
+                    drawHeading(session.title, 3);
+                    drawText([session.date, session.time, session.location, session.status].filter(Boolean).join(" · "), {
+                        size: 8,
+                        color: MUTED_COLOR,
+                    });
+                    if (session.notes) drawField("Notes", session.notes, { multiline: true, height: 72 });
+                }
+                break;
             case "characters":
                 drawHeading("Fiches de personnages");
                 for (const { character, characteristics, skillRollModifier } of block.characters) {

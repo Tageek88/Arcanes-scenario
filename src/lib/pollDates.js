@@ -1,3 +1,4 @@
+/** @param {string} value @returns {string} */
 export function toPollIsoDate(value) {
   const match = /^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/.exec(String(value || "").trim());
   if (!match) return "";
@@ -9,6 +10,7 @@ export function toPollIsoDate(value) {
   return !Number.isNaN(date.valueOf()) && date.toISOString().slice(0, 10) === isoDate ? isoDate : "";
 }
 
+/** @param {string} value @returns {string} */
 export function formatPollDateInput(value) {
   const digits = String(value || "").replace(/\D/g, "").slice(0, 8);
   if (digits.length <= 2) return digits;

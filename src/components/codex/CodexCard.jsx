@@ -4,6 +4,7 @@ import { Copy, Link2, Link2Off, MapPin, Paperclip, Pencil, Trash2, Users } from 
 import { NPC_ATTITUDE } from "@/lib/sceneMeta";
 import { isImage } from "@/components/codex/AttachmentsField";
 import { openAttachment } from "@/lib/openAttachment";
+import { useExpandedCard } from "@/lib/ExpandedCardContext";
 
 export default function CodexCard({
   kind,
@@ -17,9 +18,10 @@ export default function CodexCard({
   onToggleLink,
 }) {
   const attitude = NPC_ATTITUDE[entry.attitude] || NPC_ATTITUDE.neutre;
+  const { expanded, cardProps } = useExpandedCard(`codex:${entry.id}`);
 
   return (
-    <div className={cn("flex flex-col rounded-xl border bg-card/50 p-4 transition-colors", linked ? "corner-accent border-primary/50" : "border-border")}>
+    <div {...cardProps} className={cn("flex cursor-pointer flex-col rounded-xl border bg-card/50 p-4 transition-colors", linked ? "corner-accent border-primary/50" : "border-border", expanded && "ring-2 ring-primary/50")}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h3 className="font-display text-base font-semibold text-foreground">{entry.name}</h3>
@@ -45,7 +47,7 @@ export default function CodexCard({
           {entry.role || entry.type}
         </span>
       )}
-      {entry.description && <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">{entry.description}</p>}
+      {entry.description && <p className={cn("mt-2 text-sm text-muted-foreground", !expanded && "line-clamp-3")}>{entry.description}</p>}
 
       {locationLabel && (
         <p className="mt-2 flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-muted-foreground">
@@ -56,7 +58,7 @@ export default function CodexCard({
 
       {relations?.length > 0 && (
         <ul className="mt-2 space-y-0.5">
-          {relations.slice(0, 3).map((r) => (
+          {(expanded ? relations : relations.slice(0, 3)).map((r) => (
             <li key={r.id} className="flex items-start gap-1.5 text-xs text-muted-foreground">
               <Users className="mt-0.5 h-3 w-3 shrink-0" />
               <span className="truncate">{r.text}</span>
@@ -72,7 +74,7 @@ export default function CodexCard({
 
       {(entry.attachments || []).length > 0 && (
         <div className="mt-3 flex flex-wrap items-center gap-2">
-          {entry.attachments.slice(0, 3).map((file, index) => (
+          {(expanded ? entry.attachments : entry.attachments.slice(0, 3)).map((file, index) => (
             <button
               type="button"
               key={`${file.url}-${index}`}
