@@ -2,6 +2,7 @@ import { api } from "@/api/localClient";
 
 // Enfants d'abord, la campagne en dernier.
 export const LINKED_ENTITIES = [
+  { entity: "SessionPoll", label: "sondage", plural: "sondages" },
   { entity: "NPCRelation", label: "relation entre PNJ", plural: "relations entre PNJ" },
   { entity: "GameCharacter", label: "personnage", plural: "personnages" },
   { entity: "GameSheetModel", label: "modèle de fiche", plural: "modèles de fiche" },

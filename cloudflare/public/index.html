@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="referrer" content="no-referrer" />
+    <meta name="theme-color" content="#101016" />
+    <title>Sondage de session — Arcanes &amp; Scénario</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <script type="module" src="/survey.js"></script>
+  </head>
+  <body>
+    <main class="page">
+      <header class="brand">
+        <span class="eyebrow">Arcanes &amp; Scénario</span>
+        <h1 id="poll-title">Sondage de session</h1>
+        <p id="poll-status" role="status" aria-live="polite">Chargement du sondage…</p>
+      </header>
+
+      <section id="survey" class="panel" hidden>
+        <p id="poll-timezone" class="muted"></p>
+        <p id="poll-expiry" class="muted"></p>
+        <div id="results" class="results" aria-live="polite"></div>
+
+        <form id="vote-form" class="vote-form">
+          <label for="player">Votre nom</label>
+          <select id="player" name="player" required>
+            <option value="">Choisissez votre nom</option>
+          </select>
+          <p class="hint">Le MJ a préparé la liste des joueurs attendus. Un nouveau vote remplacera votre réponse précédente.</p>
+          <fieldset id="availability" class="availability">
+            <legend>Vos disponibilités</legend>
+          </fieldset>
+          <button id="submit" type="submit">Envoyer mes disponibilités</button>
+          <p id="form-message" class="form-message" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <footer>Les réponses servent uniquement à organiser cette session.</footer>
+    </main>
+  </body>
+</html>

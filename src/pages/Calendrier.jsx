@@ -30,6 +30,8 @@ import { getSelectedCampaignId, setSelectedCampaignId } from "@/lib/campaignStor
 import { useToast } from "@/components/ui/use-toast";
 import { useDataRefresh } from "@/lib/RefreshContext";
 import PrintButton from "@/components/print/PrintButton";
+import SessionPollDialog from "@/components/calendar/SessionPollDialog";
+import { getPollServiceUrl, refreshSessionPoll } from "@/lib/sessionPolls";
 
 const emptyForm = (date) => ({
   title: "",
@@ -53,11 +55,54 @@ export default function Calendrier() {
   const [loading, setLoading] = useState(false);
 
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [pollDialogOpen, setPollDialogOpen] = useState(false);
   const [form, setForm] = useState(emptyForm());
   const [saving, setSaving] = useState(false);
   const [pendingDelete, setPendingDelete] = useState(null);
 
   const monthKey = format(month, "yyyy-MM");
+
+  useEffect(() => {
+    if (!campaignId) return;
+    const serviceUrl = getPollServiceUrl();
+    let alive = true;
+    const refreshPolls = async () => {
+      try {
+        const { items } = await api.entities.SessionPoll.filter({ campaign_id: campaignId }, { limit: 100 });
+        let failed = 0;
+        for (const poll of items) {
+          const pollUrl = poll.service_url || serviceUrl;
+          if (!pollUrl) continue;
+          try {
+            await refreshSessionPoll(poll, pollUrl);
+          } catch (error) {
+            failed += 1;
+            console.error(`Actualisation du sondage « ${poll.title} » impossible :`, error);
+          }
+        }
+        if (alive && failed > 0) {
+          toast({
+            variant: "destructive",
+            title: "Certains sondages n'ont pas été actualisés",
+            description: "Le calendrier local reste disponible. Vérifiez la connexion et actualisez les sondages plus tard.",
+          });
+        }
+      } catch (error) {
+        console.error("Synchronisation des sondages impossible :", error);
+        if (alive) {
+          toast({
+            variant: "destructive",
+            title: "Synchronisation des sondages impossible",
+            description: "Le calendrier local reste disponible.",
+          });
+        }
+      }
+    };
+    refreshPolls();
+    return () => {
+      alive = false;
+    };
+  }, [campaignId, toast]);
 
   useEffect(() => {
     const run = async () => {
@@ -149,6 +194,16 @@ export default function Calendrier() {
       notes: session.notes || "",
       scene_id: session.scene_id || "",
     });
+    setDialogOpen(true);
+  };
+
+  const planifyPollSlot = (poll, slot) => {
+    setForm({
+      ...emptyForm(slot.date),
+      title: poll.title,
+      time: slot.time,
+    });
+    setPollDialogOpen(false);
     setDialogOpen(true);
   };
 
@@ -258,6 +313,9 @@ export default function Calendrier() {
               </SelectContent>
             </Select>
           )}
+          <Button variant="outline" onClick={() => setPollDialogOpen(true)} disabled={!campaignId}>
+            Sondage des joueurs
+          </Button>
           <PrintButton campaignId={campaignId} preset="scenes" />
           <Button onClick={() => openNew()} disabled={!campaignId}>
             <Plus className="mr-2 h-4 w-4" /> Nouvelle session
@@ -362,6 +420,13 @@ export default function Calendrier() {
           setDialogOpen(false);
           setPendingDelete(form);
         }}
+      />
+
+      <SessionPollDialog
+        open={pollDialogOpen}
+        onOpenChange={setPollDialogOpen}
+        campaignId={campaignId}
+        onPlanify={planifyPollSlot}
       />
 
       <AlertDialog open={!!pendingDelete} onOpenChange={(open) => !open && setPendingDelete(null)}>

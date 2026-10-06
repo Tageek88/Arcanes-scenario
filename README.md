@@ -1,8 +1,8 @@
 # Arcanes & Scénario
 
-**Un atelier de préparation pour maîtres du jeu : organisez votre scénario en actes et scènes, et gardez PNJ, lieux, indices, tables aléatoires, notes et sessions sous la main, le tout hors ligne sur votre ordinateur.**
+**Un atelier de préparation pour maîtres du jeu : organisez votre scénario en actes et scènes, et gardez PNJ, lieux, indices, tables aléatoires, notes et sessions sous la main, avec vos campagnes conservées hors ligne sur votre ordinateur.**
 
-![Version](https://img.shields.io/badge/version-1.3.4-d4a63c)
+![Version](https://img.shields.io/badge/version-1.4.0-d4a63c)
 ![Node](https://img.shields.io/badge/node-%3E%3D20.19-339933?logo=node.js&logoColor=white)
 ![React](https://img.shields.io/badge/React-18-61dafb?logo=react&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-8-646cff?logo=vite&logoColor=white)
@@ -41,10 +41,10 @@ Retrouvez le descriptif complet de l'application, onglet par onglet, dans le fic
 - **Système de jeu** : modèle de fiche par campagne, fiches de personnages, caractéristiques, compétences et équipements. Les seuils de test sont saisis manuellement ; compétences et équipements sont retenus dans un catalogue local.
 - **Cartes et visuels** : images et PDF joints aux lieux, PNJ, indices et informations.
 - **Tables aléatoires** : rencontres, noms, événements, objets, rumeurs, avec tirage pondéré.
-- **Calendrier** : planification des sessions de jeu, liées à une scène.
+- **Calendrier** : planification des sessions liées à une scène et sondages de disponibilités partagés par lien.
 - **Notes du MJ** : bloc-notes avec épinglage.
 - **Sauvegarde** : export et import JSON depuis les Paramètres.
-- **100 % local** : aucun compte, aucun serveur, les données restent sur votre machine.
+- **Données de campagne locales** : aucun compte n'est nécessaire et les campagnes restent sur votre machine. Les sondages partagés sont hébergés sur Cloudflare uniquement si vous configurez ce service (voir [CLOUDFLARE.md](./CLOUDFLARE.md)).
 
 ## Prérequis
 
@@ -106,6 +106,8 @@ Exportez régulièrement depuis **Paramètres > Exporter**, et restaurez avec **
 ## Configuration
 
 Aucune variable d'environnement n'est nécessaire.
+
+Le service gratuit de sondage Cloudflare Pages/D1 et sa configuration sont décrits dans [CLOUDFLARE.md](./CLOUDFLARE.md).
 
 | Fichier | Contenu |
 |---|---|
