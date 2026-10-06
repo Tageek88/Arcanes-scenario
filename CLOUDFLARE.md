@@ -43,7 +43,7 @@ Les routes publiques limitent les créations de sondage et les votes par adresse
 node -p "require('node:crypto').randomBytes(32).toString('hex')"
 ```
 
-Dans le projet Pages, ouvrez **Settings > Variables and Secrets**, ajoutez `RATE_LIMIT_SECRET` comme **secret** et collez la valeur générée. Faites-le pour Production et Preview. Ne mettez pas cette valeur dans le dépôt, le code client ou une capture d'écran. Un nouveau déploiement applique le changement de configuration.
+`RATE_LIMIT_SECRET` est déjà défini comme secret dans les environnements Production et Preview du projet Pages. Pour le remplacer, générez-en un nouveau avec la commande ci-dessus, puis utilisez `npx wrangler pages secret put RATE_LIMIT_SECRET --project-name arcanes-planification` (ajoutez `--env preview` pour les aperçus). Ne mettez jamais cette valeur dans le dépôt, le code client ou une capture d'écran. Après modification, déclenchez un nouveau déploiement pour que le secret soit disponible dans les fonctions.
 
 ## Premier lancement
 
