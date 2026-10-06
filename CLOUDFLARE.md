@@ -8,28 +8,28 @@ Dans **Workers & Pages**, créez ou ouvrez le projet Pages relié au dépôt Git
 
 | Paramètre | Valeur |
 |---|---|
-| Branche de production | `main` |
-| Branche de prévisualisation | `calendrier-dynamique` |
+| Nom du projet Pages | `arcanes-planification` |
+| Branche de production actuelle | `calendrier-dynamique` (à basculer sur `main` après l'intégration des fichiers à `main`) |
+| Branches de prévisualisation | autres branches du dépôt |
 | Répertoire racine | `cloudflare` |
 | Commande de build | laisser vide |
 | Répertoire de sortie | `public` |
 
 Le site utilise une page HTML statique et des Pages Functions. Aucun `npm install` ni build Vite n'est nécessaire pour ce sous-projet. Les liens du sondage ont la forme `https://<projet>.pages.dev/s/<identifiant>`.
+Le projet Pages créé pour cette application est accessible à l'adresse `https://arcanes-planification.pages.dev`.
 
 ## Base D1
 
-1. Dans le projet Pages, ouvrez **Settings > Bindings > Add > D1 database**.
-2. Nommez la variable de liaison `DB` et sélectionnez la base `planification`.
-3. Ajoutez la liaison dans les environnements **Production** et **Preview**, puis redéployez Pages.
-4. Pour éviter que des essais de prévisualisation apparaissent dans les sondages réels, créez de préférence une seconde base gratuite (par exemple `planification-preview`) et liez-la uniquement à **Preview**.
-5. À la racine du dépôt, avec Wrangler authentifié au compte Cloudflare, appliquez le schéma à la base de production :
+La liaison `DB` vers `planification` est déclarée dans [cloudflare/wrangler.jsonc](./cloudflare/wrangler.jsonc) et s'applique aux déploiements du projet. Pour isoler les essais, crée une base gratuite distincte et configure une liaison séparée pour les aperçus dans les paramètres Pages.
+
+À la racine du dépôt, avec Wrangler authentifié au compte Cloudflare, applique le schéma à la base :
 
    ```powershell
    npx wrangler login
    npx wrangler d1 execute planification --remote --file=cloudflare/migrations/0001_planification.sql
    ```
 
-   Si vous utilisez une base distincte de prévisualisation, exécutez aussi :
+   Si tu utilises une base distincte de prévisualisation, exécute aussi :
 
    ```powershell
    npx wrangler d1 execute planification-preview --remote --file=cloudflare/migrations/0001_planification.sql
