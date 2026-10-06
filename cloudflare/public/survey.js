@@ -1,5 +1,6 @@
 const status = document.querySelector("#poll-status");
 const title = document.querySelector("#poll-title");
+const comment = document.querySelector("#poll-comment");
 const timezone = document.querySelector("#poll-timezone");
 const expiry = document.querySelector("#poll-expiry");
 const survey = document.querySelector("#survey");
@@ -38,9 +39,17 @@ const addAvailabilityChoice = (slotId, value, label, checked = false) => {
 function renderPoll(data) {
   poll = data;
   title.textContent = data.title;
-  status.textContent = data.state === "open" ? "Indiquez vos disponibilités pour aider le MJ à choisir une date." : "Ce sondage est clôturé.";
+  comment.textContent = data.comment || "";
+  comment.hidden = !data.comment;
+  status.textContent = data.state === "open"
+    ? "Indiquez vos disponibilités pour aider le MJ à choisir une date."
+    : "Ce sondage est clôturé. Les dates et le récapitulatif des réponses restent consultables.";
   timezone.textContent = `Les dates et heures sont indiquées dans le fuseau du MJ : ${data.timezone}.`;
-  expiry.textContent = `Le sondage sera conservé jusqu'au ${new Date(data.expiresAt).toLocaleDateString("fr-FR")}.`;
+  const expiresOn = new Intl.DateTimeFormat("fr-FR", {
+    dateStyle: "long",
+    timeZone: data.timezone,
+  }).format(new Date(data.expiresAt));
+  expiry.textContent = `Les dates et résultats resteront consultables jusqu'au ${expiresOn} inclus (heure du MJ).`;
   results.replaceChildren();
   results.setAttribute("aria-label", "Résumé des disponibilités");
   data.slots.forEach((slot) => {

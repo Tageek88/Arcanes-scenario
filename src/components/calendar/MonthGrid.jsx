@@ -10,10 +10,18 @@ import {
   startOfWeek,
 } from "date-fns";
 import { sessionStatusMeta } from "@/lib/sessionMeta";
+import { Button } from "@/components/ui/button";
 
 const WEEK_DAYS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
 
-export default function MonthGrid({ month, sessionsByDate, onSelectDay, onSelectSession }) {
+export default function MonthGrid({
+  month,
+  sessionsByDate,
+  selectedDate,
+  onSelectDay,
+  onSelectSession,
+  onAddSession,
+}) {
   const start = startOfWeek(startOfMonth(month), { weekStartsOn: 1 });
   const end = endOfWeek(endOfMonth(month), { weekStartsOn: 1 });
   const days = eachDayOfInterval({ start, end });
@@ -37,21 +45,31 @@ export default function MonthGrid({ month, sessionsByDate, onSelectDay, onSelect
           const daySessions = sessionsByDate[key] || [];
           const outside = !isSameMonth(day, month);
           const lastColumn = (index + 1) % 7 === 0;
+          const expanded = selectedDate === key;
 
           return (
             <div
               key={key}
               role="button"
               tabIndex={0}
-              onClick={() => onSelectDay(day)}
+              onClick={(event) => {
+                event.stopPropagation();
+                onSelectDay(day);
+              }}
               onKeyDown={(e) => {
-                if (e.key === "Enter") onSelectDay(day);
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  onSelectDay(day);
+                }
               }}
               className={cn(
-                "min-h-[74px] cursor-pointer border-b border-border p-1.5 transition-colors hover:bg-secondary/40 sm:min-h-[116px]",
+                "min-h-[74px] cursor-pointer border-b border-border p-1.5 text-left align-top transition-[background-color,box-shadow] hover:bg-secondary/40 sm:min-h-[116px]",
                 !lastColumn && "border-r",
-                outside && "bg-background/40"
+                outside && "bg-background/40",
+                expanded && "relative z-10 rounded-lg bg-card shadow-lg ring-2 ring-primary/60"
               )}
+              aria-expanded={expanded}
+              aria-label={`${format(day, "d MMMM yyyy")} : ${daySessions.length} session${daySessions.length === 1 ? "" : "s"}`}
             >
               <div className="flex items-center justify-between">
                 <span
@@ -74,7 +92,7 @@ export default function MonthGrid({ month, sessionsByDate, onSelectDay, onSelect
               </div>
 
               <div className="mt-1 space-y-1">
-                {daySessions.slice(0, 3).map((session) => {
+                {(expanded ? daySessions : daySessions.slice(0, 3)).map((session) => {
                   const meta = sessionStatusMeta(session.status);
                   return (
                     <button
@@ -103,6 +121,49 @@ export default function MonthGrid({ month, sessionsByDate, onSelectDay, onSelect
                   </span>
                 )}
               </div>
+              {expanded && (
+                <div className="mt-2 space-y-2 border-t border-border pt-2">
+                  {daySessions.length === 0 ? (
+                    <p className="px-1 text-xs text-muted-foreground">Aucune session prévue ce jour.</p>
+                  ) : (
+                    daySessions.map((session) => {
+                      const meta = sessionStatusMeta(session.status);
+                      return (
+                        <button
+                          key={`detail-${session.id}`}
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            onSelectSession(session);
+                          }}
+                          className="block w-full rounded-md border border-border bg-background/80 p-2 text-left hover:border-primary/50"
+                        >
+                          <span className="flex flex-wrap items-center justify-between gap-1">
+                            <span className="font-display text-xs font-semibold text-foreground">
+                              {session.time ? `${session.time} · ` : ""}{session.title}
+                            </span>
+                            <span className={cn("tag border text-[10px]", meta.badge)}>{meta.label}</span>
+                          </span>
+                          {session.location && <span className="mt-1 block text-xs text-muted-foreground">{session.location}</span>}
+                          {session.notes && <span className="mt-1 block whitespace-pre-wrap text-xs text-muted-foreground">{session.notes}</span>}
+                        </button>
+                      );
+                    })
+                  )}
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    className="h-8 w-full justify-start text-xs"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onAddSession(day);
+                    }}
+                  >
+                    + Planifier une session
+                  </Button>
+                </div>
+              )}
             </div>
           );
         })}

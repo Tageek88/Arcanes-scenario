@@ -41,6 +41,7 @@ h1 { margin: 10px 0 8px; font-family: Georgia, serif; font-size: clamp(1.7rem, 6
 
 .muted, .hint { color: var(--muted); font-size: .9rem; line-height: 1.5; }
 .muted { margin: 0 0 6px; }
+.poll-comment { margin: 0 0 18px; padding: 14px 16px; border-left: 3px solid var(--accent); border-radius: 4px; background: #10101680; line-height: 1.55; white-space: pre-wrap; }
 .results { display: grid; gap: 10px; margin: 22px 0 28px; }
 .result-card { padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px; }
 .result-card h2 { margin: 0 0 8px; font-size: 1rem; }

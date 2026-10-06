@@ -1,13 +1,14 @@
 import { api } from "@/api/localClient";
 
 const SERVICE_URL_KEY = "arcanes_poll_service_url";
+const DEFAULT_SERVICE_URL = "https://arcanes-planification.pages.dev";
 
 export function getPollServiceUrl() {
   try {
-    return localStorage.getItem(SERVICE_URL_KEY) || "";
+    return localStorage.getItem(SERVICE_URL_KEY) || DEFAULT_SERVICE_URL;
   } catch (error) {
     console.error("Lecture de l'adresse du service de sondage impossible :", error);
-    return "";
+    return DEFAULT_SERVICE_URL;
   }
 }
 
@@ -67,6 +68,7 @@ export async function refreshSessionPoll(poll, baseUrl) {
     headers: { Authorization: `Bearer ${poll.owner_token}` },
   });
   const updated = {
+    comment: results.comment || "",
     expected_players: results.players,
     slots: results.slots,
     votes: results.votes,

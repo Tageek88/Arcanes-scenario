@@ -441,6 +441,7 @@ export default function Home() {
     try {
       const created = await api.entities.Campaign.create(payload);
       setCampaigns((prev) => prev.map((c) => (c.id === optimistic.id ? created : c)));
+      setCampaignId(created.id);
       setSelectedCampaignId(created.id);
       setActiveSceneId(null);
       toast({ title: "Campagne créée" });

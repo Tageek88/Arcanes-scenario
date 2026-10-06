@@ -33,6 +33,7 @@ export async function onRequestGet({ params, env }) {
     return json({
       id: poll.id,
       title: poll.title,
+      comment: poll.comment,
       players: JSON.parse(poll.expected_players),
       timezone: poll.timezone,
       state: poll.state,

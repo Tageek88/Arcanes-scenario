@@ -130,7 +130,7 @@ export async function handleApiError(error) {
 
 export async function requirePoll(db, pollId) {
   const poll = await db
-    .prepare("SELECT id, title, expected_players, timezone, state, expires_at FROM polls WHERE id = ?1")
+    .prepare("SELECT id, title, comment, expected_players, timezone, state, expires_at FROM polls WHERE id = ?1")
     .bind(pollId)
     .first();
   if (!poll) throw new ApiError(404, "Ce sondage est introuvable ou a expiré.");

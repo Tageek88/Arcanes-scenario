@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { api } from "@/api/localClient";
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Trash2 } from "lucide-react";
 import { addMonths, format, parseISO, startOfMonth, subMonths } from "date-fns";
 import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -31,7 +31,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useDataRefresh } from "@/lib/RefreshContext";
 import PrintButton from "@/components/print/PrintButton";
 import SessionPollDialog from "@/components/calendar/SessionPollDialog";
-import { getPollServiceUrl, refreshSessionPoll } from "@/lib/sessionPolls";
+import { getPollServiceUrl, pollRequest, refreshSessionPoll } from "@/lib/sessionPolls";
 
 const emptyForm = (date) => ({
   title: "",
@@ -52,6 +52,8 @@ export default function Calendrier() {
   const [month, setMonth] = useState(startOfMonth(new Date()));
   const [sessions, setSessions] = useState([]);
   const [upcoming, setUpcoming] = useState([]);
+  const [polls, setPolls] = useState([]);
+  const [selectedDate, setSelectedDate] = useState("");
   const [loading, setLoading] = useState(false);
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -59,22 +61,32 @@ export default function Calendrier() {
   const [form, setForm] = useState(emptyForm());
   const [saving, setSaving] = useState(false);
   const [pendingDelete, setPendingDelete] = useState(null);
+  const [deletingPollId, setDeletingPollId] = useState("");
 
   const monthKey = format(month, "yyyy-MM");
 
   useEffect(() => {
-    if (!campaignId) return;
+    if (!campaignId) {
+      setPolls([]);
+      return;
+    }
     const serviceUrl = getPollServiceUrl();
     let alive = true;
     const refreshPolls = async () => {
       try {
         const { items } = await api.entities.SessionPoll.filter({ campaign_id: campaignId }, { limit: 100 });
+        if (alive) setPolls(items.filter((poll) => poll.state === "open"));
         let failed = 0;
         for (const poll of items) {
           const pollUrl = poll.service_url || serviceUrl;
           if (!pollUrl) continue;
           try {
-            await refreshSessionPoll(poll, pollUrl);
+            const updated = await refreshSessionPoll(poll, pollUrl);
+            if (alive) {
+              setPolls((current) => updated.state === "open"
+                ? [updated, ...current.filter((item) => item.id !== updated.id)]
+                : current.filter((item) => item.id !== updated.id));
+            }
           } catch (error) {
             failed += 1;
             console.error(`Actualisation du sondage « ${poll.title} » impossible :`, error);
@@ -136,6 +148,7 @@ export default function Calendrier() {
     if (!campaignId) {
       setSessions([]);
       setUpcoming([]);
+      setSelectedDate("");
       return;
     }
     let alive = true;
@@ -181,6 +194,49 @@ export default function Calendrier() {
   const openNew = (date) => {
     setForm(emptyForm(date));
     setDialogOpen(true);
+  };
+
+  const selectCalendarDay = (day) => {
+    const key = format(day, "yyyy-MM-dd");
+    setSelectedDate((current) => current === key ? "" : key);
+  };
+
+  const updatePollCard = (poll, removedId) => {
+    if (!poll || poll.state !== "open") {
+      setPolls((current) => current.filter((item) => item.id !== (poll?.id || removedId)));
+      return;
+    }
+    setPolls((current) => [poll, ...current.filter((item) => item.id !== poll.id)]);
+  };
+
+  const deletePoll = async (poll) => {
+    if (!window.confirm(`Supprimer le sondage « ${poll.title} » et toutes ses réponses ?`)) return;
+    setDeletingPollId(poll.id);
+    try {
+      await pollRequest(poll.service_url || getPollServiceUrl(), `/api/polls/${poll.poll_id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${poll.owner_token}` },
+      });
+      await api.entities.SessionPoll.delete(poll.id);
+      setPolls((current) => current.filter((item) => item.id !== poll.id));
+      toast({ title: "Sondage supprimé" });
+    } catch (error) {
+      if (error.status === 404) {
+        try {
+          await api.entities.SessionPoll.delete(poll.id);
+          setPolls((current) => current.filter((item) => item.id !== poll.id));
+          toast({ title: "Référence locale supprimée", description: "Le sondage distant a déjà expiré ou été supprimé." });
+        } catch (localError) {
+          console.error("Suppression de la référence locale au sondage impossible :", localError);
+          toast({ variant: "destructive", title: "Suppression impossible", description: "La référence locale au sondage n'a pas pu être supprimée." });
+        }
+      } else {
+        console.error("Suppression du sondage impossible :", error);
+        toast({ variant: "destructive", title: "Suppression impossible", description: error.message });
+      }
+    } finally {
+      setDeletingPollId("");
+    }
   };
 
   const openEdit = (session) => {
@@ -299,6 +355,7 @@ export default function Calendrier() {
               onValueChange={(id) => {
                 setCampaignId(id);
                 setSelectedCampaignId(id);
+                setSelectedDate("");
               }}
             >
               <SelectTrigger className="w-full sm:w-56">
@@ -328,14 +385,20 @@ export default function Calendrier() {
           Créez une campagne depuis l'arborescence pour planifier vos sessions.
         </div>
       ) : (
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,2.2fr)_minmax(0,1fr)]">
+        <div
+          className="grid gap-6 lg:grid-cols-[minmax(0,2.2fr)_minmax(0,1fr)]"
+          onClick={() => setSelectedDate("")}
+        >
           <section className="space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={() => setMonth((m) => subMonths(m, 1))}
+                  onClick={() => {
+                    setSelectedDate("");
+                    setMonth((m) => subMonths(m, 1));
+                  }}
                   aria-label="Mois précédent"
                 >
                   <ChevronLeft className="h-4 w-4" />
@@ -346,12 +409,18 @@ export default function Calendrier() {
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={() => setMonth((m) => addMonths(m, 1))}
+                  onClick={() => {
+                    setSelectedDate("");
+                    setMonth((m) => addMonths(m, 1));
+                  }}
                   aria-label="Mois suivant"
                 >
                   <ChevronRight className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => setMonth(startOfMonth(new Date()))}>
+                <Button variant="ghost" size="sm" onClick={() => {
+                  setSelectedDate("");
+                  setMonth(startOfMonth(new Date()));
+                }}>
                   Aujourd'hui
                 </Button>
               </div>
@@ -365,8 +434,10 @@ export default function Calendrier() {
             <MonthGrid
               month={month}
               sessionsByDate={sessionsByDate}
-              onSelectDay={openNew}
+              selectedDate={selectedDate}
+              onSelectDay={selectCalendarDay}
               onSelectSession={openEdit}
+              onAddSession={openNew}
             />
           </section>
 
@@ -403,6 +474,66 @@ export default function Calendrier() {
                 </ul>
               </div>
             )}
+
+            <section className="rounded-xl border border-border bg-card/50 p-4">
+              <h2 className="font-display text-sm font-semibold text-foreground">Sondages en cours</h2>
+              {polls.length === 0 ? (
+                <p className="mt-3 rounded-lg border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
+                  Aucun sondage en cours pour cette campagne.
+                </p>
+              ) : (
+                <ul className="mt-3 space-y-2">
+                  {polls.map((poll) => (
+                    <li key={poll.id} className="rounded-lg border border-border bg-background/60 p-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <a
+                          href={poll.public_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="font-display text-sm font-semibold text-foreground underline decoration-primary/50 underline-offset-4 hover:text-primary"
+                        >
+                          {poll.title}
+                        </a>
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 shrink-0 text-destructive hover:text-destructive"
+                          aria-label={`Supprimer le sondage ${poll.title}`}
+                          disabled={deletingPollId === poll.id}
+                          onClick={() => deletePoll(poll)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {`Réponses reçues : ${(poll.votes || []).length}/${(poll.expected_players || []).length}`} · jusqu'au{" "}
+                        {new Intl.DateTimeFormat("fr-FR", {
+                          dateStyle: "medium",
+                          timeZone: poll.timezone || "UTC",
+                        }).format(new Date(poll.expires_at))}
+                      </p>
+                      {(poll.slots || []).map((slot) => (
+                        <div key={slot.id} className="mt-2 rounded-md border border-border/70 bg-card/40 px-2 py-1.5">
+                          <p className="text-xs font-medium text-foreground">
+                            {new Intl.DateTimeFormat("fr-FR", {
+                              dateStyle: "medium",
+                              timeStyle: "short",
+                              timeZone: "UTC",
+                            }).format(new Date(`${slot.date}T${slot.time}:00Z`))}
+                          </p>
+                          <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs">
+                            <span className="text-green-500">Présent : {slot.available || 0}</span>
+                            <span className="text-amber-500">Peut-être : {slot.maybe || 0}</span>
+                            <span className="text-muted-foreground">Absent : {slot.unavailable || 0}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
           </div>
         </div>
       )}
@@ -427,6 +558,7 @@ export default function Calendrier() {
         onOpenChange={setPollDialogOpen}
         campaignId={campaignId}
         onPlanify={planifyPollSlot}
+        onPollChange={updatePollCard}
       />
 
       <AlertDialog open={!!pendingDelete} onOpenChange={(open) => !open && setPendingDelete(null)}>

@@ -27,12 +27,14 @@ La liaison `DB` vers `planification` est déclarée dans [cloudflare/wrangler.js
    ```powershell
    npx wrangler login
    npx wrangler d1 execute planification --remote --file=cloudflare/migrations/0001_planification.sql
+   npx wrangler d1 execute planification --remote --file=cloudflare/migrations/0002_poll_comment.sql
    ```
 
    Si tu utilises une base distincte de prévisualisation, exécute aussi :
 
    ```powershell
    npx wrangler d1 execute planification-preview --remote --file=cloudflare/migrations/0001_planification.sql
+   npx wrangler d1 execute planification-preview --remote --file=cloudflare/migrations/0002_poll_comment.sql
    ```
 
 ## Secret anti-abus
@@ -53,10 +55,11 @@ Après le déploiement, ouvrez l'URL `pages.dev` du projet. Dans **Calendrier > 
 
 ## Données et limites
 
-- À la création, le MJ saisit le titre, les noms attendus et au moins deux dates/heures dans son fuseau horaire.
+- À la création, le MJ saisit le titre, un commentaire facultatif visible par les participants, les noms attendus, au moins deux dates/heures et une date d'expiration dans son fuseau horaire. Les dates sont saisies au format `jj/mm/aaaa`. Le sondage et ses résultats restent consultables jusqu'à la fin de cette date incluse.
 - Les joueurs choisissent un nom dans cette liste et répondent « Disponible », « Peut-être » ou « Indisponible ». Un nouveau vote remplace le précédent pour ce nom.
+- La clôture arrête les nouveaux votes, mais ne masque pas les dates ni le récapitulatif des réponses aux participants. Les données restent consultables jusqu'à la date d'expiration choisie par le MJ.
 - Le lien du sondage est public : toute personne qui le possède peut répondre au nom de n'importe quel joueur de la liste. La liste ne prouve pas l'identité des joueurs.
-- Les sondages deviennent inaccessibles après 30 jours. Leurs données sont effacées lorsqu'un sondage expiré est consulté ou lors de la création d'un nouveau sondage. Le MJ peut aussi les clôturer ou les supprimer depuis le calendrier.
+- Les sondages deviennent inaccessibles après la date d'expiration choisie par le MJ. Leurs données sont effacées lorsqu'un sondage expiré est consulté ou lors de la création d'un nouveau sondage. Le MJ peut aussi les clôturer ou les supprimer depuis le calendrier.
 - Le jeton de gestion reste local à l'application et figure dans ses sauvegardes JSON. Traitez ces sauvegardes comme privées.
 - Supprimer une campagne ou toutes les données locales supprime la référence locale au sondage, mais ne supprime pas automatiquement la copie distante. Celle-ci expirera, ou devra être supprimée depuis le calendrier avant d'effacer la référence.
 - Pour partager, WhatsApp ouvre un message prérempli, le courriel ouvre le logiciel de messagerie et Discord copie le lien à coller. L'application n'envoie pas de message à la place du MJ.

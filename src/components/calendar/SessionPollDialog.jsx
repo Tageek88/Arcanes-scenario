@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/api/localClient";
+import { formatPollDateInput, toPollIsoDate } from "@/lib/pollDates";
 import {
   getPollServiceUrl,
   normalizePollServiceUrl,
@@ -39,12 +40,15 @@ export default function SessionPollDialog({
   onOpenChange,
   campaignId,
   onPlanify,
+  onPollChange,
 }) {
   const { toast } = useToast();
   const [serviceUrl, setServiceUrl] = useState(getPollServiceUrl);
   const [title, setTitle] = useState("");
+  const [comment, setComment] = useState("");
   const [playerNames, setPlayerNames] = useState("");
   const [slots, setSlots] = useState([newSlot(), newSlot()]);
+  const [expiresOn, setExpiresOn] = useState("");
   const [polls, setPolls] = useState([]);
   const [busyPoll, setBusyPoll] = useState("");
   const [creating, setCreating] = useState(false);
@@ -129,28 +133,36 @@ export default function SessionPollDialog({
       toast({ variant: "destructive", title: "Liste de joueurs invalide", description: "Indiquez de 1 à 40 noms uniques, un par ligne." });
       return;
     }
-    if (slots.length < 2 || slots.some((slot) => !slot.date || !slot.time)) {
-      toast({ variant: "destructive", title: "Dates incomplètes", description: "Renseignez au moins deux propositions de date et d'heure." });
+    if (slots.length < 2 || slots.some((slot) => !toPollIsoDate(slot.date) || !slot.time)) {
+      toast({ variant: "destructive", title: "Dates incomplètes ou invalides", description: "Renseignez au moins deux dates au format jj/mm/aaaa et leurs heures." });
+      return;
+    }
+    if (!toPollIsoDate(expiresOn)) {
+      toast({ variant: "destructive", title: "Date d'expiration invalide", description: "Choisissez une date valide au format jj/mm/aaaa jusqu'à laquelle le sondage et ses résultats resteront accessibles." });
       return;
     }
     setCreating(true);
     try {
       const baseUrl = saveServiceUrl();
-      const uniqueSlots = new Set(slots.map((slot) => `${slot.date}T${slot.time}`));
+      const normalizedSlots = slots.map((slot) => ({ ...slot, date: toPollIsoDate(slot.date) }));
+      const uniqueSlots = new Set(normalizedSlots.map((slot) => `${slot.date}T${slot.time}`));
       if (uniqueSlots.size !== slots.length) throw new Error("Les propositions de date doivent être uniques.");
       const created = await pollRequest(baseUrl, "/api/polls", {
         method: "POST",
         body: JSON.stringify({
           title: title.trim(),
+          comment: comment.trim(),
           players: parsedPlayers,
-          slots,
+          slots: normalizedSlots,
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
+          expiresOn: toPollIsoDate(expiresOn),
         }),
       });
       const saved = await api.entities.SessionPoll.create({
         campaign_id: campaignId,
         poll_id: created.id,
         title: created.title,
+        comment: created.comment,
         public_url: created.publicUrl,
         service_url: baseUrl,
         owner_token: created.ownerToken,
@@ -162,9 +174,12 @@ export default function SessionPollDialog({
         expires_at: created.expiresAt,
       });
       setPolls((current) => [saved, ...current]);
+      onPollChange?.(saved);
       setTitle("");
+      setComment("");
       setPlayerNames("");
       setSlots([newSlot(), newSlot()]);
+      setExpiresOn("");
       toast({ title: "Sondage créé", description: "Le lien est prêt à être partagé avec les joueurs." });
       await refreshPoll(saved);
     } catch (error) {
@@ -198,6 +213,7 @@ export default function SessionPollDialog({
       });
       const updated = await refreshSessionPoll({ ...poll, state: "closed" }, poll.service_url);
       setPolls((current) => current.map((item) => item.id === poll.id ? updated : item));
+      onPollChange?.(updated);
       toast({ title: "Sondage clôturé", description: "Les joueurs ne peuvent plus modifier leur réponse." });
     } catch (error) {
       console.error("Clôture du sondage impossible :", error);
@@ -217,12 +233,14 @@ export default function SessionPollDialog({
       });
       await api.entities.SessionPoll.delete(poll.id);
       setPolls((current) => current.filter((item) => item.id !== poll.id));
+      onPollChange?.(null, poll.id);
       toast({ title: "Sondage supprimé" });
     } catch (error) {
       if (error.status === 404) {
         try {
           await api.entities.SessionPoll.delete(poll.id);
           setPolls((current) => current.filter((item) => item.id !== poll.id));
+          onPollChange?.(null, poll.id);
           toast({ title: "Référence locale supprimée", description: "Le sondage distant n'existe plus ou a expiré." });
         } catch (localError) {
           console.error("Suppression de la référence locale impossible :", localError);
@@ -285,6 +303,17 @@ export default function SessionPollDialog({
             <Input id="poll-title-input" value={title} maxLength={120} onChange={(event) => setTitle(event.target.value)} placeholder="Ex. Session 5 — La tour oubliée" />
           </div>
           <div className="space-y-2">
+            <Label htmlFor="poll-comment">Commentaire visible par les participants (facultatif)</Label>
+            <Textarea
+              id="poll-comment"
+              rows={3}
+              maxLength={1000}
+              value={comment}
+              onChange={(event) => setComment(event.target.value)}
+              placeholder="Ajoutez des précisions sur la séance ou le choix des dates…"
+            />
+          </div>
+          <div className="space-y-2">
             <Label htmlFor="poll-players">Joueurs attendus (un nom par ligne)</Label>
             <Textarea id="poll-players" rows={4} value={playerNames} onChange={(event) => setPlayerNames(event.target.value)} placeholder={"Léa\nMarc\nNora"} />
             <p className="text-xs text-muted-foreground">Les joueurs choisiront un nom dans cette liste. Un même nom met à jour sa réponse.</p>
@@ -294,10 +323,13 @@ export default function SessionPollDialog({
             {slots.map((slot, index) => (
               <div key={index} className="flex items-center gap-2">
                 <Input
-                  aria-label={`Date proposée ${index + 1}`}
-                  type="date"
+                      aria-label={`Date proposée ${index + 1}`}
+                      type="text"
+                  inputMode="numeric"
+                  placeholder="jj/mm/aaaa"
+                  maxLength={10}
                   value={slot.date}
-                  onChange={(event) => setSlots((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, date: event.target.value } : item))}
+                  onChange={(event) => setSlots((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, date: formatPollDateInput(event.target.value) } : item))}
                 />
                 <Input
                   aria-label={`Heure proposée ${index + 1}`}
@@ -313,6 +345,22 @@ export default function SessionPollDialog({
             <Button type="button" variant="outline" size="sm" disabled={slots.length >= 30} onClick={() => setSlots((current) => [...current, newSlot()])}>
               <Plus className="mr-2 h-4 w-4" /> Ajouter une date
             </Button>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="poll-expires-on">Conserver le sondage et ses résultats jusqu'au (heure du MJ)</Label>
+            <Input
+              id="poll-expires-on"
+              type="text"
+              inputMode="numeric"
+              placeholder="jj/mm/aaaa"
+              maxLength={10}
+              value={expiresOn}
+              onChange={(event) => setExpiresOn(formatPollDateInput(event.target.value))}
+              required
+            />
+            <p className="text-xs text-muted-foreground">
+              Après la clôture, les joueurs pourront toujours consulter les dates et le récapitulatif des réponses jusqu'à cette date incluse.
+            </p>
           </div>
           <Button type="button" onClick={createPoll} disabled={creating || !campaignId}>
             {creating ? "Création…" : "Créer le sondage"}
@@ -331,7 +379,8 @@ export default function SessionPollDialog({
                     <div>
                       <h4 className="font-display font-semibold text-foreground">{poll.title}</h4>
                       <p className="text-xs text-muted-foreground">
-                        {poll.state === "closed" ? "Clôturé" : "Ouvert"} · expiration le {new Date(poll.expires_at).toLocaleDateString("fr-FR")}
+                        {poll.state === "closed" ? "Clôturé · résultats consultables jusqu'au" : "Ouvert · résultats consultables jusqu'au"}{" "}
+                        {new Intl.DateTimeFormat("fr-FR", { dateStyle: "long", timeZone: poll.timezone || "UTC" }).format(new Date(poll.expires_at))}
                       </p>
                     </div>
                     <div className="flex flex-wrap gap-1">
