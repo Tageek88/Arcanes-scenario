@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { api } from "@/api/localClient";
-import { ChevronLeft, ChevronRight, Plus, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pencil, Plus, Trash2 } from "lucide-react";
 import { addMonths, format, parseISO, startOfMonth, subMonths } from "date-fns";
 import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -55,6 +55,7 @@ export default function Calendrier() {
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [pollDialogOpen, setPollDialogOpen] = useState(false);
+  const [pollToEdit, setPollToEdit] = useState(null);
   const [form, setForm] = useState(emptyForm());
   const [saving, setSaving] = useState(false);
   const [pendingDelete, setPendingDelete] = useState(null);
@@ -506,17 +507,32 @@ export default function Calendrier() {
                         >
                           {poll.title}
                         </a>
-                        <Button
-                          type="button"
-                          size="icon"
-                          variant="ghost"
-                          className="h-8 w-8 shrink-0 text-destructive hover:text-destructive"
-                          aria-label={`Supprimer le sondage ${poll.title}`}
-                          disabled={deletingPollId === poll.id}
-                          onClick={() => deletePoll(poll)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <div className="flex shrink-0 items-center gap-1">
+                          <Button
+                            type="button"
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8"
+                            aria-label={`Modifier le sondage ${poll.title}`}
+                            onClick={() => {
+                              setPollToEdit(poll);
+                              setPollDialogOpen(true);
+                            }}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            type="button"
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8 text-destructive hover:text-destructive"
+                            aria-label={`Supprimer le sondage ${poll.title}`}
+                            disabled={deletingPollId === poll.id}
+                            onClick={() => deletePoll(poll)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                       <p className="mt-1 text-xs text-muted-foreground">
                         {`Réponses reçues : ${(poll.votes || []).length}/${(poll.expected_players || []).length}`} · jusqu'au{" "}
@@ -570,8 +586,12 @@ export default function Calendrier() {
 
       <SessionPollDialog
         open={pollDialogOpen}
-        onOpenChange={setPollDialogOpen}
+        onOpenChange={(open) => {
+          setPollDialogOpen(open);
+          if (!open) setPollToEdit(null);
+        }}
         campaignId={campaignId}
+        pollToEdit={pollToEdit}
         onPlanify={planifyPollSlot}
         onPollChange={updatePollCard}
       />

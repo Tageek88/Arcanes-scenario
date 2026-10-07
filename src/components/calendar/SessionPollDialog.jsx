@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { CalendarPlus, Copy, Mail, MessageCircle, Plus, RefreshCw, Trash2 } from "lucide-react";
 import ResponsiveDialog from "@/components/common/ResponsiveDialog";
 import { Button } from "@/components/ui/button";
@@ -35,10 +35,16 @@ const displaySlot = (slot, timezone) => {
 const normalizePlayer = (name) =>
   String(name || "").normalize("NFKC").trim().replace(/\s+/g, " ").toLocaleLowerCase("fr-FR");
 
+const pollDateInput = (value) => {
+  const [year, month, day] = value.split("-");
+  return formatPollDateInput(`${day}/${month}/${year}`);
+};
+
 export default function SessionPollDialog({
   open,
   onOpenChange,
   campaignId,
+  pollToEdit,
   onPlanify,
   onPollChange,
 }) {
@@ -49,9 +55,13 @@ export default function SessionPollDialog({
   const [playerNames, setPlayerNames] = useState("");
   const [slots, setSlots] = useState([newSlot(), newSlot()]);
   const [expiresOn, setExpiresOn] = useState("");
+  const [timezone, setTimezone] = useState(() => Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC");
   const [polls, setPolls] = useState([]);
   const [busyPoll, setBusyPoll] = useState("");
   const [creating, setCreating] = useState(false);
+  const [editingPoll, setEditingPoll] = useState(null);
+  const [editLoading, setEditLoading] = useState(false);
+  const [editLoadError, setEditLoadError] = useState("");
 
   const parsedPlayers = useMemo(
     () => playerNames.split(/\r?\n/).map((name) => name.normalize("NFKC").trim().replace(/\s+/g, " ")).filter(Boolean),
@@ -64,6 +74,15 @@ export default function SessionPollDialog({
     setServiceUrl(normalized);
     return normalized;
   };
+
+  const resetForm = useCallback(() => {
+    setTitle("");
+    setComment("");
+    setPlayerNames("");
+    setSlots([newSlot(), newSlot()]);
+    setExpiresOn("");
+    setTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC");
+  }, []);
 
   const refreshPoll = async (poll) => {
     setBusyPoll(poll.id);
@@ -112,7 +131,62 @@ export default function SessionPollDialog({
     };
   }, [open, campaignId, toast]);
 
-  const createPoll = async () => {
+  useEffect(() => {
+    if (!open || !pollToEdit) {
+      if (!pollToEdit) {
+        setEditingPoll(null);
+        setEditLoadError("");
+        setEditLoading(false);
+        resetForm();
+      }
+      return;
+    }
+    let alive = true;
+    setEditingPoll(pollToEdit);
+    setEditLoading(true);
+    setEditLoadError("");
+    const baseUrl = pollToEdit.service_url || getPollServiceUrl();
+    pollRequest(baseUrl, `/api/polls/${pollToEdit.poll_id}/results`, {
+      headers: { Authorization: `Bearer ${pollToEdit.owner_token}` },
+    })
+      .then((details) => {
+        if (!alive) return;
+        const expiryParts = Object.fromEntries(
+          new Intl.DateTimeFormat("en-CA", {
+            timeZone: details.timezone,
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+          }).formatToParts(new Date(details.expiresAt)).map(({ type, value }) => [type, value])
+        );
+        setServiceUrl(baseUrl);
+        setTitle(details.title);
+        setComment(details.comment || "");
+        setPlayerNames(details.players.join("\n"));
+        setSlots(details.slots.map((slot) => ({
+          date: pollDateInput(slot.date),
+          time: slot.time,
+        })));
+        setTimezone(details.timezone);
+        setExpiresOn(formatPollDateInput(`${expiryParts.day}/${expiryParts.month}/${expiryParts.year}`));
+        setEditLoadError("");
+      })
+      .catch((error) => {
+        console.error("Chargement du sondage à modifier impossible :", error);
+        if (alive) {
+          setEditLoadError(error.message || "Les données du sondage n'ont pas pu être chargées.");
+          toast({ variant: "destructive", title: "Modification impossible", description: error.message });
+        }
+      })
+      .finally(() => {
+        if (alive) setEditLoading(false);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [open, pollToEdit, resetForm, toast]);
+
+  const savePoll = async () => {
     if (!campaignId) return;
     const normalizedPlayers = parsedPlayers.map(normalizePlayer);
     if (!title.trim() || title.trim().length > 120) {
@@ -138,16 +212,65 @@ export default function SessionPollDialog({
       const normalizedSlots = slots.map((slot) => ({ ...slot, date: toPollIsoDate(slot.date) }));
       const uniqueSlots = new Set(normalizedSlots.map((slot) => `${slot.date}T${slot.time}`));
       if (uniqueSlots.size !== slots.length) throw new Error("Les propositions de date doivent être uniques.");
+      const payload = {
+        title: title.trim(),
+        comment: comment.trim(),
+        players: parsedPlayers,
+        slots: normalizedSlots,
+        timezone,
+        expiresOn: toPollIsoDate(expiresOn),
+      };
+      if (editingPoll) {
+        let remoteSaved = false;
+        try {
+          const response = await pollRequest(baseUrl, `/api/polls/${editingPoll.poll_id}`, {
+            method: "PUT",
+            headers: { Authorization: `Bearer ${editingPoll.owner_token}` },
+            body: JSON.stringify(payload),
+          });
+          remoteSaved = true;
+          const saved = await api.entities.SessionPoll.update(editingPoll.id, {
+            title: payload.title,
+            comment: payload.comment,
+            timezone: payload.timezone,
+            expected_players: payload.players,
+            expires_at: response.expiresAt,
+            slots: [],
+            votes: [],
+          });
+          setPolls((current) => current.map((item) => item.id === saved.id ? saved : item));
+          onPollChange?.(saved);
+          setEditingPoll(null);
+          resetForm();
+          onOpenChange(false);
+          toast({ title: "Sondage modifié" });
+          try {
+            const refreshed = await refreshSessionPoll(saved, baseUrl);
+            setPolls((current) => current.map((item) => item.id === refreshed.id ? refreshed : item));
+            onPollChange?.(refreshed);
+          } catch (error) {
+            console.error("Actualisation du sondage modifié impossible :", error);
+            toast({
+              variant: "destructive",
+              title: "Sondage modifié, résultats non actualisés",
+              description: error.message,
+            });
+          }
+        } catch (error) {
+          console.error("Modification du sondage impossible :", error);
+          toast({
+            variant: "destructive",
+            title: remoteSaved ? "Sondage modifié, synchronisation locale impossible" : "Sondage non modifié",
+            description: error instanceof TypeError
+              ? "Impossible de joindre le service Cloudflare. Vérifiez la connexion; si elle fonctionne, déployez la dernière version du dossier cloudflare, qui autorise la modification des sondages."
+              : error.message || "Vérifiez la connexion et la configuration Cloudflare.",
+          });
+        }
+        return;
+      }
       const created = await pollRequest(baseUrl, "/api/polls", {
         method: "POST",
-        body: JSON.stringify({
-          title: title.trim(),
-          comment: comment.trim(),
-          players: parsedPlayers,
-          slots: normalizedSlots,
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
-          expiresOn: toPollIsoDate(expiresOn),
-        }),
+        body: JSON.stringify(payload),
       });
       const saved = await api.entities.SessionPoll.create({
         campaign_id: campaignId,
@@ -166,11 +289,7 @@ export default function SessionPollDialog({
       });
       setPolls((current) => [saved, ...current]);
       onPollChange?.(saved);
-      setTitle("");
-      setComment("");
-      setPlayerNames("");
-      setSlots([newSlot(), newSlot()]);
-      setExpiresOn("");
+      resetForm();
       toast({ title: "Sondage créé", description: "Le lien est prêt à être partagé avec les joueurs." });
       await refreshPoll(saved);
     } catch (error) {
@@ -288,7 +407,11 @@ export default function SessionPollDialog({
         </section>
 
         <section className="space-y-4 rounded-lg border border-border p-3">
-          <h3 className="font-display text-base font-semibold text-foreground">Créer un sondage</h3>
+          <h3 className="font-display text-base font-semibold text-foreground">
+            {editingPoll ? "Modifier le sondage" : "Créer un sondage"}
+          </h3>
+          {editLoading && <p className="text-sm text-muted-foreground">Chargement des données du sondage…</p>}
+          {editLoadError && <p className="text-sm text-destructive">{editLoadError}</p>}
           <div className="space-y-2">
             <Label htmlFor="poll-title-input">Nom de la session</Label>
             <Input id="poll-title-input" value={title} maxLength={120} onChange={(event) => setTitle(event.target.value)} placeholder="Ex. Session 5 — La tour oubliée" />
@@ -308,6 +431,10 @@ export default function SessionPollDialog({
             <Label htmlFor="poll-players">Joueurs attendus (un nom par ligne)</Label>
             <Textarea id="poll-players" rows={4} value={playerNames} onChange={(event) => setPlayerNames(event.target.value)} placeholder={"Léa\nMarc\nNora"} />
             <p className="text-xs text-muted-foreground">Les joueurs choisiront un nom dans cette liste. Un même nom met à jour sa réponse.</p>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="poll-timezone">Fuseau horaire du MJ</Label>
+            <Input id="poll-timezone" value={timezone} onChange={(event) => setTimezone(event.target.value)} placeholder="Europe/Paris" />
           </div>
           <div className="space-y-2">
             <Label>Dates et heures proposées (heure du MJ)</Label>
@@ -353,9 +480,25 @@ export default function SessionPollDialog({
               Après la clôture, les joueurs pourront toujours consulter les dates et le récapitulatif des réponses jusqu'à cette date incluse.
             </p>
           </div>
-          <Button type="button" onClick={createPoll} disabled={creating || !campaignId}>
-            {creating ? "Création…" : "Créer le sondage"}
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button type="button" onClick={savePoll} disabled={creating || editLoading || !!editLoadError || !campaignId}>
+              {creating ? "Enregistrement…" : editingPoll ? "Enregistrer les modifications" : "Créer le sondage"}
+            </Button>
+            {editingPoll && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setEditingPoll(null);
+                  setEditLoadError("");
+                  resetForm();
+                  onOpenChange(false);
+                }}
+              >
+                Annuler
+              </Button>
+            )}
+          </div>
         </section>
 
         {polls.length > 0 && (

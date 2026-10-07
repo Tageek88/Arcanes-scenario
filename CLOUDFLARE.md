@@ -56,6 +56,7 @@ Après le déploiement, ouvrez l'URL `pages.dev` du projet. Dans **Calendrier > 
 ## Données et limites
 
 - À la création, le MJ saisit le titre, un commentaire facultatif visible par les participants, les noms attendus, au moins deux dates/heures et une date d'expiration dans son fuseau horaire. Les dates sont saisies au format `jj/mm/aaaa`. Le sondage et ses résultats restent consultables jusqu'à la fin de cette date incluse.
+- La modification d'un sondage existant utilise la méthode `PUT` de l'API. Pour l'activer, déployez la dernière version du dossier `cloudflare/` sur Pages; elle autorise aussi `PUT` dans les requêtes CORS.
 - Les joueurs choisissent un nom dans cette liste et répondent « Disponible », « Peut-être » ou « Indisponible ». Un nouveau vote remplace le précédent pour ce nom.
 - La clôture arrête les nouveaux votes, mais ne masque pas les dates ni le récapitulatif des réponses aux participants. Les données restent consultables jusqu'à la date d'expiration choisie par le MJ.
 - Le lien du sondage est public : toute personne qui le possède peut répondre au nom de n'importe quel joueur de la liste. La liste ne prouve pas l'identité des joueurs.

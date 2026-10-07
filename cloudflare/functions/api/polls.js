@@ -62,7 +62,7 @@ export function validatePollPayload(payload) {
   };
 }
 
-function endOfDayInTimezone(date, timezone) {
+export function endOfDayInTimezone(date, timezone) {
   const target = Date.parse(`${date}T23:59:59.000Z`);
   const formatter = new Intl.DateTimeFormat("en-CA", {
     timeZone: timezone,

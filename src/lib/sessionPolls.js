@@ -69,6 +69,7 @@ export async function refreshSessionPoll(poll, baseUrl) {
     headers: { Authorization: `Bearer ${poll.owner_token}` },
   });
   const updated = {
+    title: results.title || poll.title,
     comment: results.comment || "",
     expected_players: results.players,
     slots: results.slots,
