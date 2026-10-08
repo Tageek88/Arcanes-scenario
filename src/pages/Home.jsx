@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "@/api/localClient";
-import { Plus } from "lucide-react";
-import HeroArrival from "@/components/home/HeroArrival";
+import { Plus, Pencil } from "lucide-react";
 import SceneBoard from "@/components/home/SceneBoard";
 import MobileSceneList from "@/components/home/MobileSceneList";
 import SceneEditor from "@/components/home/SceneEditor";
@@ -23,10 +22,11 @@ import { useToast } from "@/components/ui/use-toast";
 import { getSelectedCampaignId, setSelectedCampaignId } from "@/lib/campaignStore";
 import { nextStatus } from "@/lib/sceneMeta";
 import { useDataRefresh } from "@/lib/RefreshContext";
-import { Pencil } from "lucide-react";
 import { countCampaignContent, deleteCampaignCascade } from "@/lib/campaignDelete";
 import PrintButton from "@/components/print/PrintButton";
+import CampaignSelect from "@/components/common/CampaignSelect";
 import { useExpandedCardState } from "@/lib/ExpandedCardContext";
+import { usePageFilter } from "@/lib/PageFilterContext";
 
 const EMPTY_SCENE = {
   title: "",
@@ -61,10 +61,13 @@ export default function Home() {
   const { refreshKey: dataRefreshKey } = useDataRefresh();
   const campaignRequest = useRef(0);
   const treeRequest = useRef(0);
+  const loadedTreeFor = useRef("");
   const codexRequest = useRef(0);
 
   const [campaigns, setCampaigns] = useState(/** @type {any[]} */([]));
   const [campaignId, setCampaignId] = useState(getSelectedCampaignId());
+  const [locationFilter] = usePageFilter(`codex.location.${campaignId}`, "all");
+  const [codexLinkedOnly] = usePageFilter("home.codex.linkedOnly", false);
   const [acts, setActs] = useState(/** @type {any[]} */([]));
   const [scenes, setScenes] = useState(/** @type {any[]} */([]));
   const [npcs, setNpcs] = useState(/** @type {any[]} */([]));
@@ -106,6 +109,7 @@ export default function Home() {
     () => scenes.find((s) => s.id === activeSceneId) || null,
     [scenes, activeSceneId]
   );
+  const createLocationId = locationFilter === "all" || locationFilter === "_none" ? "" : locationFilter;
 
   const loadCampaigns = useCallback(async () => {
     const requestId = ++campaignRequest.current;
@@ -126,6 +130,7 @@ export default function Home() {
   const loadTree = useCallback(async (cid) => {
     const requestId = ++treeRequest.current;
     if (!cid) {
+      loadedTreeFor.current = "";
       setActs([]);
       setScenes([]);
       setNpcs([]);
@@ -134,12 +139,15 @@ export default function Home() {
       setProgress({ total: 0 });
       return;
     }
-    setActs([]);
-    setScenes([]);
-    setNpcs([]);
-    setLocations([]);
-    setClues([]);
-    setProgress({ total: 0 });
+    // Un simple rechargement après écriture garde l'écran affiché ; seul un changement de campagne le vide.
+    if (loadedTreeFor.current !== cid) {
+      setActs([]);
+      setScenes([]);
+      setNpcs([]);
+      setLocations([]);
+      setClues([]);
+      setProgress({ total: 0 });
+    }
     try {
       const [a, s, n, l, c, agg] = await Promise.all([
         api.entities.Act.filter({ campaign_id: cid }, { sort: "order", limit: 200 }),
@@ -161,6 +169,7 @@ export default function Home() {
         next.total += row.count;
       });
       setProgress(next);
+      loadedTreeFor.current = cid;
     } catch (error) {
       console.error("Chargement de l'arborescence impossible :", error);
       if (requestId === treeRequest.current) {
@@ -439,7 +448,7 @@ export default function Home() {
       setSelectedCampaignId(nextId);
       setActiveSceneId(null);
       setPendingCampaignDelete(null);
-      toast({ title: "Campagne supprimée", description: `« ${target.name} » et son contenu ont été supprimés.`, duration: 4000, });
+      toast({ title: "Campagne supprimée", description: `« ${target.name} » et son contenu ont été supprimés.`, duration: 4000 });
     } catch (error) {
       console.error("Échec suppression campagne :", error);
       loadTree(target.id);
@@ -529,6 +538,13 @@ export default function Home() {
     }
   };
 
+  const handleCodexSaved = async (created) => {
+    await reloadCodex();
+    if (created && codexLinkedOnly && activeScene) {
+      await toggleSceneLink(codexKind, created.id);
+    }
+  };
+
   const toggleClueFlag = async (entry, field, value) => {
     const previous = clues;
     setClues((current) => current.map((clue) =>
@@ -564,46 +580,32 @@ export default function Home() {
 
   return (
     <div className="mx-auto w-full max-w-[1600px] space-y-6 px-4 py-6 md:px-8 md:py-8">
-      <HeroArrival
-        campaign={campaign}
-        campaigns={campaigns}
-        onSelectCampaign={selectCampaign}
-        progress={progress}
-        onCreateScene={() => (campaignId ? openNewScene(null) : openNewCampaign())}
-        onCreateCampaign={openNewCampaign} onCreateNpc={() => {
-          setCodexKind("npc");
-          setCodexEntry(null);
-          setCodexOpen(true);
-        }}
-        onCreateLocation={() => {
-          setCodexKind("location");
-          setCodexEntry(null);
-          setCodexOpen(true);
-        }}
-        onCreateCampaign={() => {
-          setCampaignForm(EMPTY_CAMPAIGN);
-          setCampaignOpen(true);
-        }}
-      />
+      {/* HEADER STANDARDISÉ CONFORME AUX RÈGLES */}
+      <header className="space-y-3">
+        <span className="tag">Campagne</span>
+        <h1 className="font-display text-3xl font-bold text-foreground">
+          {campaign?.name || "Aucune campagne"}
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Gérez vos actes, scènes et éléments de campagne.
+        </p>
+        <div className="flex flex-wrap items-center gap-3">
+          <CampaignSelect
+            campaigns={campaigns}
+            value={campaignId}
+            onValueChange={selectCampaign}
+            allowCreate
+          />
+          <PrintButton campaignId={campaignId} preset="scenes" />
+          <Button onClick={() => (campaignId ? openNewScene(null) : openNewCampaign())}>
+            <Plus className="mr-2 h-4 w-4" />
+            {campaignId ? "Nouvelle scène" : "Nouvelle campagne"}
+          </Button>
+        </div>
+      </header>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1.9fr)_minmax(0,1fr)]">
         <section>
-          <header className="mb-4 flex flex-wrap items-center justify-between gap-2">
-            <h2 className="font-display text-lg font-semibold text-foreground">Arborescence &amp; Scènes</h2>
-            {campaign && (
-              <div className="flex items-center gap-3">
-                <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
-                  {acts.length} acte{acts.length > 1 ? "s" : ""} · {scenes.length} scène
-                  {scenes.length > 1 ? "s" : ""}
-                </span>
-                <Button size="sm" variant="outline" onClick={openEditCampaign}>
-                  <Pencil className="mr-2 h-3.5 w-3.5" /> Modifier la campagne
-                </Button>
-                <PrintButton campaignId={campaignId} preset="scenes" size="sm" />
-              </div>
-            )}
-          </header>
-
           {!campaignId ? (
             <div className="rounded-xl border border-dashed border-border p-10 text-center">
               <h3 className="font-display text-lg font-semibold text-foreground">
@@ -713,7 +715,10 @@ export default function Home() {
         kind={codexKind}
         campaignId={campaignId}
         entry={codexEntry}
-        onSaved={reloadCodex}
+        defaultParentId={codexKind === "location" ? createLocationId : ""}
+        defaultLocationId={createLocationId}
+        locations={locations}
+        onSaved={handleCodexSaved}
       />
 
       <AlertDialog open={!!pendingDelete} onOpenChange={(open) => !open && setPendingDelete(null)}>

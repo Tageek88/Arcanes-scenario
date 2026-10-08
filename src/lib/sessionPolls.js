@@ -79,7 +79,7 @@ export async function refreshSessionPoll(poll, baseUrl) {
     expires_at: results.expiresAt,
     synced_at: new Date().toISOString(),
   };
-  await api.entities.SessionPoll.update(poll.id, updated);
+  await api.entities.SessionPoll.update(poll.id, updated, { silent: true });
   return { ...poll, ...updated };
 }
 

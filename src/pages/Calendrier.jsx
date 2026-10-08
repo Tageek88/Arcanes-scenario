@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "@/api/localClient";
 import { ChevronLeft, ChevronRight, Pencil, Plus, Trash2 } from "lucide-react";
 import { addMonths, format, parseISO, startOfMonth, subMonths } from "date-fns";
@@ -60,6 +60,7 @@ export default function Calendrier() {
   const [saving, setSaving] = useState(false);
   const [pendingDelete, setPendingDelete] = useState(null);
   const [deletingPollId, setDeletingPollId] = useState("");
+  const loadedFor = useRef("");
 
   const monthKey = format(month, "yyyy-MM");
 
@@ -114,6 +115,20 @@ export default function Calendrier() {
     };
   }, [campaignId, toast]);
 
+  // Relecture locale (sans appel réseau) à chaque changement de données.
+  useEffect(() => {
+    if (!campaignId) return;
+    let alive = true;
+    api.entities.SessionPoll.filter({ campaign_id: campaignId }, { limit: 100 })
+      .then(({ items }) => {
+        if (alive) setPolls(items.filter((poll) => poll.state === "open"));
+      })
+      .catch((error) => console.error("Rechargement des sondages impossible :", error));
+    return () => {
+      alive = false;
+    };
+  }, [campaignId, dataRefreshKey]);
+
   useEffect(() => {
     let alive = true;
     const run = async () => {
@@ -163,10 +178,14 @@ export default function Calendrier() {
       return;
     }
     let alive = true;
-    setSessions([]);
-    setUpcoming([]);
+    const contextKey = `${campaignId}|${monthKey}`;
+    const initial = loadedFor.current !== contextKey;
+    if (initial) {
+      setSessions([]);
+      setUpcoming([]);
+    }
     const run = async () => {
-      setLoading(true);
+      if (initial) setLoading(true);
       try {
         const start = format(startOfMonth(month), "yyyy-MM-dd");
         const nextMonth = format(addMonths(startOfMonth(month), 1), "yyyy-MM-dd");
@@ -184,11 +203,12 @@ export default function Calendrier() {
         if (!alive) return;
         setSessions(monthRes.items);
         setUpcoming(upcomingRes.items);
+        loadedFor.current = contextKey;
       } catch (error) {
         console.error("Chargement des sessions impossible :", error);
         if (alive) toast({ variant: "destructive", title: "Sessions indisponibles", description: "Impossible de charger le calendrier de cette campagne." });
       } finally {
-        if (alive) setLoading(false);
+        if (alive && initial) setLoading(false);
       }
     };
     run();

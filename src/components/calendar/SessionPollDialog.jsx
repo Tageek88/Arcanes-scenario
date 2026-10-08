@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/api/localClient";
+import { withDataBatch } from "@/lib/dataEvents";
 import { formatPollDateInput, toPollIsoDate } from "@/lib/pollDates";
 import {
   getPollServiceUrl,
@@ -55,6 +56,7 @@ export default function SessionPollDialog({
   const [playerNames, setPlayerNames] = useState("");
   const [slots, setSlots] = useState([newSlot(), newSlot()]);
   const [expiresOn, setExpiresOn] = useState("");
+  const [expiryManuallySet, setExpiryManuallySet] = useState(false);
   const [timezone, setTimezone] = useState(() => Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC");
   const [polls, setPolls] = useState([]);
   const [busyPoll, setBusyPoll] = useState("");
@@ -81,6 +83,7 @@ export default function SessionPollDialog({
     setPlayerNames("");
     setSlots([newSlot(), newSlot()]);
     setExpiresOn("");
+    setExpiryManuallySet(false);
     setTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC");
   }, []);
 
@@ -90,6 +93,7 @@ export default function SessionPollDialog({
       const baseUrl = poll.service_url || saveServiceUrl();
       const updated = await refreshSessionPoll(poll, baseUrl);
       setPolls((current) => current.map((item) => item.id === poll.id ? updated : item));
+      onPollChange?.(updated);
     } catch (error) {
       console.error("Actualisation du sondage impossible :", error);
       toast({ variant: "destructive", title: "Résultats indisponibles", description: error.message });
@@ -186,7 +190,18 @@ export default function SessionPollDialog({
     };
   }, [open, pollToEdit, resetForm, toast]);
 
-  const savePoll = async () => {
+  useEffect(() => {
+    if (pollToEdit || editingPoll || expiryManuallySet) return;
+    const latestSlotDate = slots.reduce((latest, slot) => {
+      const date = toPollIsoDate(slot.date);
+      return date > latest ? date : latest;
+    }, "");
+    setExpiresOn(latestSlotDate ? pollDateInput(latestSlotDate) : "");
+  }, [editingPoll, expiryManuallySet, pollToEdit, slots]);
+
+  const savePoll = () => withDataBatch(savePollUnbatched);
+
+  const savePollUnbatched = async () => {
     if (!campaignId) return;
     const normalizedPlayers = parsedPlayers.map(normalizePlayer);
     if (!title.trim() || title.trim().length > 120) {
@@ -290,6 +305,7 @@ export default function SessionPollDialog({
       setPolls((current) => [saved, ...current]);
       onPollChange?.(saved);
       resetForm();
+      onOpenChange(false);
       toast({ title: "Sondage créé", description: "Le lien est prêt à être partagé avec les joueurs." });
       await refreshPoll(saved);
     } catch (error) {
@@ -473,7 +489,10 @@ export default function SessionPollDialog({
               placeholder="jj/mm/aaaa"
               maxLength={10}
               value={expiresOn}
-              onChange={(event) => setExpiresOn(formatPollDateInput(event.target.value))}
+              onChange={(event) => {
+                setExpiryManuallySet(true);
+                setExpiresOn(formatPollDateInput(event.target.value));
+              }}
               required
             />
             <p className="text-xs text-muted-foreground">

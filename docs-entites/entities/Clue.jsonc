@@ -11,6 +11,10 @@
     "description": {
       "type": "string"
     },
+    "location_id": {
+      "type": "string",
+      "description": "Lieu d'attribution de l'indice ou de l'information."
+    },
     "clue_type": {
       "type": "string",
       "enum": ["indice", "info"],

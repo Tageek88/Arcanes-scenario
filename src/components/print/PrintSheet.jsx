@@ -12,6 +12,8 @@ const CSS = `
   .prt-header h1 { font-size: 20pt; }
   .prt-header p { margin: 2px 0 0; color: #555; font-size: 9pt; }
   .prt-section { margin-top: 18px; }
+  .prt-block-break { break-before: page; }
+  .prt-block-break > .prt-section { margin-top: 0; }
   .prt-section > h2 { font-size: 14pt; border-bottom: 1px solid #999; padding-bottom: 3px; margin-bottom: 10px; }
   .prt-act { margin: 14px 0 8px; font-size: 12pt; text-transform: uppercase; letter-spacing: 0.06em; color: #444; }
   .prt-scene { margin: 0 0 14px; padding: 8px 10px; border: 1px solid #888; border-left: 4px solid #111; border-radius: 3px; }
@@ -25,7 +27,8 @@ const CSS = `
   .prt-group { margin: 12px 0 6px; font-size: 11.5pt; }
   .prt-img { max-height: 60mm; max-width: 100%; margin-top: 6px; }
   .prt-title { font-weight: 700; }
-  .prt-character-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .prt-character-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(48mm, 1fr)); gap: 8px; }
+  .prt-blank { display: inline-block; min-width: 14mm; height: 5mm; border: 1px solid #666; vertical-align: middle; }
   .prt-character-stat, .prt-character-item { border: 1px solid #bbb; border-radius: 3px; padding: 6px 8px; break-inside: avoid; }
   .prt-character-stat h3 { font-size: 11pt; margin-bottom: 4px; }
   .prt-character-stat p, .prt-character-item p { margin: 1px 0; }
@@ -214,15 +217,15 @@ function Block({ block }) {
 }
 
 function CharacterContent({ character, characteristics, skillRollModifier }) {
-    const stats = characteristics.flatMap((definition) => {
+    const stats = characteristics.map((definition) => {
         const values = character.characteristics?.[definition.name] || {};
         const entries = [
             ["Valeur", values.value],
             ...(definition.modifier ? [["Modificateur", values.modifier]] : []),
             ...(definition.test ? [["Test (seuil)", values.test]] : []),
             ...(definition.max ? [["Maximum", values.max]] : []),
-        ].filter(([, value]) => hasValue(value));
-        return entries.length ? [{ name: definition.name, entries }] : [];
+        ];
+        return { name: definition.name, entries };
     });
 
     return (
@@ -234,7 +237,12 @@ function CharacterContent({ character, characteristics, skillRollModifier }) {
                         {stats.map((stat) => (
                             <article className="prt-character-stat" key={stat.name}>
                                 <h3>{stat.name}</h3>
-                                {stat.entries.map(([label, value]) => <p key={label}><strong>{label} :</strong> {value}</p>)}
+                                {stat.entries.map(([label, value]) => (
+                                    <p key={label}>
+                                        <strong>{label} :</strong>{" "}
+                                        {hasValue(value) ? value : <span className="prt-blank" />}
+                                    </p>
+                                ))}
                             </article>
                         ))}
                     </div>
@@ -302,7 +310,9 @@ export default function PrintSheet({ model }) {
                 <p>Document de préparation · {model.dateLabel}</p>
             </header>
             {model.blocks.map((block, i) => (
-                <Block key={i} block={block} />
+                <div key={i} className={i > 0 ? "prt-block prt-block-break" : "prt-block"}>
+                    <Block block={block} />
+                </div>
             ))}
         </div>
     );

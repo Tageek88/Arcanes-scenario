@@ -20,6 +20,7 @@ export const defaultEntry = (kind) => {
     name: "",
     comment: "",
     description: "",
+    location_id: "",
     clue_type: "indice",
     discovered: false,
     known: false,

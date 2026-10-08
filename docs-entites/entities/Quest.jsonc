@@ -1,0 +1,70 @@
+{
+  "name": "Quest",
+  "label": "quête",
+  "plural": "quêtes",
+  "description": "Représente une quête dans une campagne de jeu de rôle.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "string",
+      "description": "Identifiant unique de la quête."
+    },
+    {
+      "name": "campaign_id",
+      "type": "string",
+      "description": "Identifiant de la campagne à laquelle cette quête appartient."
+    },
+    {
+      "name": "title",
+      "type": "string",
+      "description": "Titre de la quête."
+    },
+    {
+      "name": "description",
+      "type": "string",
+      "description": "Description détaillée de la quête."
+    },
+    {
+      "name": "status",
+      "type": "string",
+      "description": "Statut de la quête : brouillon, en_cours, ou terminee.",
+      "enum": ["brouillon", "en_cours", "terminee"]
+    },
+    {
+      "name": "priority",
+      "type": "string",
+      "description": "Priorité de la quête : faible, moyenne, ou haute.",
+      "enum": ["faible", "moyenne", "haute"]
+    },
+    {
+      "name": "due_date",
+      "type": "string",
+      "description": "Date d'échéance de la quête (format ISO)."
+    },
+    {
+      "name": "gm_notes",
+      "type": "string",
+      "description": "Notes du MJ (Game Master)."
+    },
+    {
+      "name": "created_date",
+      "type": "string",
+      "description": "Date de création de la quête."
+    },
+    {
+      "name": "updated_date",
+      "type": "string",
+      "description": "Date de dernière modification."
+    },
+    {
+      "name": "created_by_id",
+      "type": "string",
+      "description": "Identifiant de l'utilisateur qui a créé la quête."
+    },
+    {
+      "name": "created_by",
+      "type": "string",
+      "description": "Email de l'utilisateur qui a créé la quête."
+    }
+  ]
+}

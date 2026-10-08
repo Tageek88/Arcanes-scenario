@@ -1,0 +1,49 @@
+# ⚠️ CRITICAL RULES (READ FIRST - NEVER VIOLATE)
+
+## This is a LOCAL-FIRST app
+- NO backend server. NO REST API. NO routes. NO models folder. NO controllers.
+- NO authentication. NO login pages. NO user management.
+- NO TypeScript (except src/utils/index.ts).
+- NO Base44. NO @base44/sdk. NO base44 folder.
+- NO cloud services (except Cloudflare for session polls).
+- Data lives ONLY in IndexedDB via Dexie.
+
+## Data layer: api.entities.<Name> ONLY
+- NEVER access Dexie directly. ALWAYS use api.entities.<Name>.
+- Methods: filter, list, get, create, update, delete, deleteMany, aggregate.
+- create auto-adds: id, created_date, updated_date, created_by_id, created_by.
+
+## ADD A NEW ENTITY (follow EXACTLY this order)
+1. src/api/localClient.js → add name to TABLES array + new db.version(N+1).stores(...)
+2. src/lib/campaignDelete.js → add to LINKED_ENTITIES (children before parents)
+3. If printable → src/lib/printModel.js, src/components/print/PrintSheet.jsx, src/components/print/PrintButton.jsx, src/lib/editablePdf.js
+4. docs-entites/entities/<Name>.jsonc (documentation only)
+
+## NEVER DO THESE (instant failure)
+- NEVER create src/models/, src/routes/, src/controllers/, src/services/
+- NEVER add authentication or login/logout
+- NEVER propose REST endpoints (GET/POST/PUT/DELETE)
+- NEVER suggest Express, Fastify, Prisma, Firebase, Supabase
+- NEVER use <Tag> component (use <span className="tag">)
+- NEVER use navigate(-1) in MobileBackBar (use useTabStacks + openTab)
+- NEVER use @lib/... imports (use @/lib/... with slash)
+
+## Page header structure (MANDATORY)
+<span className="tag">Label</span>
+<h1>Title</h1>
+<p>Description</p>
+<CampaignSelect />
+<PrintButton preset="..." />
+<Button>Action</Button>
+
+## Tech stack
+React 18, Vite 8, Tailwind 3, shadcn/ui, lucide-react, Dexie, Electron (CommonJS), HashRouter.
+JavaScript only (.jsx/.js). Alias @/ for src/.
+
+## Code style
+2-space indent, double quotes, semicolons, const by default, early returns.
+Functional components with hooks. Default export per file.
+console.error in catch blocks (never console.log).
+
+## Windows
+PowerShell only. No &&, rm -rf, grep.

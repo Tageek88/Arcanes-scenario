@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { api } from "@/api/localClient";
 import { Dices, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -20,6 +20,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useDataRefresh } from "@/lib/RefreshContext";
 import PrintButton from "@/components/print/PrintButton";
 import CampaignSelect from "@/components/common/CampaignSelect";
+import { usePageFilter } from "@/lib/PageFilterContext";
 
 const SafeAlertDialogContent = (
   /** @type {React.ComponentProps<typeof AlertDialogContent>} */ props
@@ -40,11 +41,12 @@ export default function Tables() {
     /** @type {Array<{ id: string; name: string }>} */([])
   );
   const [campaignId, setCampaignId] = useState(getSelectedCampaignId());
-  const [category, setCategory] = useState("all");
+  const [category, setCategory] = usePageFilter("tables.category", "all");
   const [tables, setTables] = useState(
     /** @type {Array<{ id: string; name: string; category?: string; description?: string; entries?: Array<{ text?: string; weight?: number }> }>} */([])
   );
   const [loading, setLoading] = useState(false);
+  const loadedFor = useRef("");
 
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(EMPTY);
@@ -82,9 +84,11 @@ export default function Tables() {
       return;
     }
     let alive = true;
-    setTables([]);
+    const contextKey = `${campaignId}|${category}`;
+    const initial = loadedFor.current !== contextKey;
+    if (initial) setTables([]);
     const run = async () => {
-      setLoading(true);
+      if (initial) setLoading(true);
       const query = /** @type {Record<string, string>} */ ({ campaign_id: campaignId });
       if (category !== "all") query.category = category;
       try {
@@ -92,11 +96,12 @@ export default function Tables() {
         if (!alive) return;
         const tableList = /** @type {Array<{ id: string; name: string; category?: string; description?: string; entries?: Array<{ text?: string; weight?: number }> }>} */ (res.items || []);
         setTables(tableList);
+        loadedFor.current = contextKey;
       } catch (error) {
         console.error("Chargement des tables impossible :", error);
         if (alive) toast({ variant: "destructive", title: "Tables indisponibles", description: "Impossible de charger les tables de cette campagne." });
       } finally {
-        if (alive) setLoading(false);
+        if (alive && initial) setLoading(false);
       }
     };
     run();
@@ -106,7 +111,7 @@ export default function Tables() {
   }, [campaignId, category, dataRefreshKey, toast]);
 
   const openNew = () => {
-    setForm({ ...EMPTY, entries: [] });
+    setForm({ ...EMPTY, category: category === "all" ? EMPTY.category : category, entries: [] });
     setOpen(true);
   };
 

@@ -1,5 +1,6 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "@/api/localClient";
+import { withDataBatch } from "@/lib/dataEvents";
 import { Search, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -32,6 +33,7 @@ import { deleteNpcRelations, loadRelations, relationsByNpc } from "@/lib/npcRela
 import { getSelectedCampaignId, setSelectedCampaignId } from "@/lib/campaignStore";
 import { useToast } from "@/components/ui/use-toast";
 import { useDataRefresh } from "@/lib/RefreshContext";
+import { usePageFilter } from "@/lib/PageFilterContext";
 
 const normalize = (value) =>
   String(value || "")
@@ -46,10 +48,11 @@ export default function Codex() {
   const { refreshKey: dataRefreshKey } = useDataRefresh();
   const [campaigns, setCampaigns] = useState([]);
   const [campaignId, setCampaignId] = useState(getSelectedCampaignId());
-  const [tab, setTab] = useState("npc");
-  const [term, setTerm] = useState("");
+  const [tab, setTab] = usePageFilter("codex.tab", "npc");
+  const [term, setTerm] = usePageFilter("codex.term", "");
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
+  const loadedFor = useRef("");
   const [refreshKey, setRefreshKey] = useState(0);
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -61,7 +64,7 @@ export default function Codex() {
   const [deleteMode, setDeleteMode] = useState("promote");
   const [collapsed, setCollapsed] = useState(() => new Set());
   const [allLocations, setAllLocations] = useState([]);
-  const [locationFilter, setLocationFilter] = useState("all");
+  const [locationFilter, setLocationFilter] = usePageFilter(`codex.location.${campaignId}`, "all");
   const [relations, setRelations] = useState([]);
 
   const kind = CODEX_TABS.find((t) => t.key === tab) || CODEX_TABS[0];
@@ -93,20 +96,27 @@ export default function Codex() {
       return;
     }
     let alive = true;
+    const contextKey = `${campaignId}|${kind.entity}`;
+    const initial = loadedFor.current !== contextKey;
     const run = async () => {
-      setLoading(true);
-      setItems([]);
+      if (initial) {
+        setLoading(true);
+        setItems([]);
+      }
       try {
         const res = await api.entities[kind.entity].filter(
           { campaign_id: campaignId },
           { sort: "name", limit: 1000 }
         );
-        if (alive) setItems(res.items);
+        if (alive) {
+          setItems(res.items);
+          loadedFor.current = contextKey;
+        }
       } catch (error) {
         console.error("Chargement du codex impossible :", error);
         if (alive) toast({ variant: "destructive", title: "Codex indisponible", description: "Impossible de charger les éléments de cette campagne." });
       } finally {
-        if (alive) setLoading(false);
+        if (alive && initial) setLoading(false);
       }
     };
     run();
@@ -134,10 +144,6 @@ export default function Codex() {
       alive = false;
     };
   }, [campaignId, refreshKey, dataRefreshKey, toast]);
-
-  useEffect(() => {
-    setLocationFilter("all");
-  }, [campaignId]);
 
   useEffect(() => {
     if (!campaignId || tab !== "npc") {
@@ -178,12 +184,13 @@ export default function Codex() {
         : new Set([locationFilter, ...descendantIds(allLocations, locationFilter)]),
     [locationFilter, allLocations]
   );
+  const createLocationId = locationFilter === "all" || locationFilter === "_none" ? "" : locationFilter;
 
   const visible = useMemo(
     () =>
       items.filter((item) => {
         if (q && !normalize(item.name).includes(q)) return false;
-        if (tab !== "npc" || locationFilter === "all") return true;
+        if ((tab !== "npc" && tab !== "clue") || locationFilter === "all") return true;
         if (locationFilter === "_none") return !item.location_id;
         return locationScope.has(item.location_id);
       }),
@@ -211,7 +218,7 @@ export default function Codex() {
 
   const openNew = () => {
     setEntry(null);
-    setDefaultParentId("");
+    setDefaultParentId(tab === "location" ? createLocationId : "");
     setDuplicateOf(null);
     setDialogOpen(true);
   };
@@ -259,12 +266,14 @@ export default function Codex() {
     setPendingDelete(null);
     if (!pending) return;
     try {
-      if (pending.kind === "location") {
-        await deleteLocation(pending.entry, items, mode);
-      } else {
-        if (pending.kind === "npc") await deleteNpcRelations(pending.entry.campaign_id, pending.entry.id);
-        await api.entities[KIND_META[pending.kind].entity].delete(pending.entry.id);
-      }
+      await withDataBatch(async () => {
+        if (pending.kind === "location") {
+          await deleteLocation(pending.entry, items, mode);
+        } else {
+          if (pending.kind === "npc") await deleteNpcRelations(pending.entry.campaign_id, pending.entry.id);
+          await api.entities[KIND_META[pending.kind].entity].delete(pending.entry.id);
+        }
+      });
       setRefreshKey((k) => k + 1);
       toast({ title: "Élément supprimé" });
     } catch (error) {
@@ -335,7 +344,7 @@ export default function Codex() {
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input value={term} onChange={(e) => setTerm(e.target.value)} placeholder="Rechercher…" className="pl-9" />
         </div>
-        {tab === "npc" && allLocations.length > 0 && (
+        {(tab === "npc" || tab === "clue") && allLocations.length > 0 && (
           <Select value={locationFilter} onValueChange={setLocationFilter}>
             <SelectTrigger className="w-full sm:w-64">
               <SelectValue />
@@ -405,7 +414,7 @@ export default function Codex() {
                   kind={tab}
                   entry={item}
                   linked={false}
-                  locationLabel={tab === "npc" ? locationLabels.get(item.location_id) : ""}
+                  locationLabel={tab === "npc" || tab === "clue" ? locationLabels.get(item.location_id) : ""}
                   relations={tab === "npc" ? npcRelationMap.get(item.id) : undefined}
                   onEdit={openEdit}
                   onDelete={requestDelete}
@@ -427,6 +436,7 @@ export default function Codex() {
         campaignId={campaignId}
         entry={entry}
         defaultParentId={defaultParentId}
+        defaultLocationId={createLocationId}
         duplicateOf={duplicateOf}
         locations={allLocations}
         onSaved={() => setRefreshKey((k) => k + 1)}

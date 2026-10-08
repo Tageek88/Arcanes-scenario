@@ -16,6 +16,7 @@ const Tables = lazy(() => import("@/pages/Tables"));
 const Calendrier = lazy(() => import("@/pages/Calendrier"));
 const Notes = lazy(() => import("@/pages/Notes"));
 const Settings = lazy(() => import("@/pages/Settings"));
+
 const Game = lazy(() => import("@/pages/Jeu"));
 
 function App() {

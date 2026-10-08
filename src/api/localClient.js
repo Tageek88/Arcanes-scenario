@@ -1,4 +1,5 @@
 import Dexie from "dexie";
+import { notifyDataChanged } from "@/lib/dataEvents";
 
 const BASE_TABLES = [
   "Campaign", "Act", "Scene", "NPC", "Location", "Clue", "RollTable", "GameSession", "Note",
@@ -6,7 +7,8 @@ const BASE_TABLES = [
 
 const RELATION_TABLES = [...BASE_TABLES, "NPCRelation"];
 const VERSION_3_TABLES = [...RELATION_TABLES, "GameSheetModel", "GameCharacter", "SkillCatalog", "EquipmentCatalog"];
-export const TABLES = [...VERSION_3_TABLES, "SessionPoll"];
+const VERSION_4_TABLES = [...VERSION_3_TABLES, "SessionPoll"];
+export const TABLES = [...VERSION_4_TABLES, "Quest"];
 
 export const LOCAL_USER = { id: "local-user", email: "local@arcanes", full_name: "MJ", role: "admin" };
 
@@ -15,7 +17,8 @@ export const db = new Dexie("arcanes_scenario");
 db.version(1).stores(Object.fromEntries(BASE_TABLES.map((t) => [t, "id, campaign_id"])));
 db.version(2).stores(Object.fromEntries(RELATION_TABLES.map((t) => [t, "id, campaign_id"])));
 db.version(3).stores(Object.fromEntries(VERSION_3_TABLES.map((t) => [t, "id, campaign_id"])));
-db.version(4).stores(Object.fromEntries(TABLES.map((t) => [t, "id, campaign_id"])));
+db.version(4).stores(Object.fromEntries(VERSION_4_TABLES.map((t) => [t, "id, campaign_id"])));
+db.version(5).stores(Object.fromEntries(TABLES.map((t) => [t, "id, campaign_id"])));
 
 // Demande au navigateur de ne pas effacer les données automatiquement (au mieux).
 try {
@@ -102,7 +105,7 @@ const makeEntity = (name) => {
       if (!row) throw notFound(id);
       return row;
     },
-    async create(data) {
+    async create(data, options = {}) {
       const now = new Date().toISOString();
       const row = {
         ...data,
@@ -113,22 +116,26 @@ const makeEntity = (name) => {
         created_by: LOCAL_USER.email,
       };
       await table.add(row);
+      if (!options.silent) notifyDataChanged();
       return row;
     },
-    async update(id, data) {
+    async update(id, data, options = {}) {
       const existing = await table.get(id);
       if (!existing) throw notFound(id);
       const row = { ...existing, ...data, id, updated_date: new Date().toISOString() };
       await table.put(row);
+      if (!options.silent) notifyDataChanged();
       return row;
     },
-    async delete(id) {
+    async delete(id, options = {}) {
       await table.delete(id);
+      if (!options.silent) notifyDataChanged();
       return { success: true };
     },
-    async deleteMany(query = {}) {
+    async deleteMany(query = {}, options = {}) {
       const rows = await select(query);
       await table.bulkDelete(rows.map((r) => r.id));
+      if (!options.silent) notifyDataChanged();
       return { deleted: rows.length };
     },
     async aggregate({ query = {}, groupBy } = {}) {

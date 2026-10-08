@@ -1,7 +1,8 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Copy, Pencil, Plus, Printer, Shield, Trash2, UserRound } from "lucide-react";
 import { api } from "@/api/localClient";
+import { withDataBatch } from "@/lib/dataEvents";
 import { Button } from "@/components/ui/button";
 import PrintSheet from "@/components/print/PrintSheet";
 import {
@@ -38,6 +39,7 @@ export default function Jeu() {
   const [skillCatalog, setSkillCatalog] = useState([]);
   const [equipmentCatalog, setEquipmentCatalog] = useState([]);
   const [loading, setLoading] = useState(false);
+  const loadedFor = useRef("");
   const [savingModel, setSavingModel] = useState(false);
   const [savingCharacter, setSavingCharacter] = useState(false);
   const [modelOpen, setModelOpen] = useState(false);
@@ -90,8 +92,9 @@ export default function Jeu() {
       return;
     }
     let alive = true;
+    const initial = loadedFor.current !== campaignId;
     const load = async () => {
-      setLoading(true);
+      if (initial) setLoading(true);
       try {
         const [models, people, skills, equipment] = await Promise.all([
           api.entities.GameSheetModel.filter({ campaign_id: campaignId }, { limit: 10 }),
@@ -109,18 +112,21 @@ export default function Jeu() {
         setCharacters(people.items);
         setSkillCatalog(skills.items);
         setEquipmentCatalog(equipment.items);
+        loadedFor.current = campaignId;
       } catch (error) {
         console.error("Chargement des fiches de jeu impossible :", error);
         if (alive) toast({ variant: "destructive", title: "Fiches indisponibles", description: "Impossible de charger les données de jeu de cette campagne." });
       } finally {
-        if (alive) setLoading(false);
+        if (alive && initial) setLoading(false);
       }
     };
     load();
     return () => { alive = false; };
   }, [campaignId, refreshKey, toast]);
 
-  const saveModel = async (nextModel) => {
+  const saveModel = (nextModel) => withDataBatch(() => saveModelUnbatched(nextModel));
+
+  const saveModelUnbatched = async (nextModel) => {
     if (!campaignId) return;
     setSavingModel(true);
     try {
@@ -206,7 +212,9 @@ export default function Jeu() {
     return api.entities[entity].create({ campaign_id: campaignId, ...payload });
   };
 
-  const saveCharacter = async (draft) => {
+  const saveCharacter = (draft) => withDataBatch(() => saveCharacterUnbatched(draft));
+
+  const saveCharacterUnbatched = async (draft) => {
     if (!campaignId) return false;
     setSavingCharacter(true);
     const payload = {

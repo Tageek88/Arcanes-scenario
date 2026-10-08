@@ -8,6 +8,7 @@ const BODY_COLOR = rgb(0.08, 0.08, 0.08);
 const MUTED_COLOR = rgb(0.32, 0.32, 0.32);
 const FIELD_BORDER = rgb(0.55, 0.55, 0.55);
 const FIELD_BACKGROUND = rgb(1, 1, 1);
+const FIELD_FONT_SIZE = 10;
 
 const safeFieldText = (value) =>
     String(value ?? "")
@@ -155,6 +156,7 @@ export async function createEditablePdf(model) {
             backgroundColor: FIELD_BACKGROUND,
             textColor: BODY_COLOR,
         });
+        field.setFontSize(FIELD_FONT_SIZE);
         cursorY -= height + 9;
     };
 
@@ -186,8 +188,75 @@ export async function createEditablePdf(model) {
                 backgroundColor: FIELD_BACKGROUND,
                 textColor: BODY_COLOR,
             });
+            field.setFontSize(FIELD_FONT_SIZE);
         });
         cursorY -= 54;
+    };
+
+    // Static (non-editable) grid: filled values are printed, empty ones become a frame to fill by hand.
+    const drawCharacteristics = (items) => {
+        if (!items.length) return;
+        const gap = 8;
+        const pad = 6;
+        const rowHeight = 16;
+        const titleSize = 9;
+        const textSize = 9;
+        const minBox = 36;
+        const cells = items.map((item) => {
+            const rows = item.rows.map(([label, value]) => {
+                const text = safeFieldText(value === null || value === undefined ? "" : value);
+                const labelText = `${safeFieldText(label)} :`;
+                const labelWidth = regular.widthOfTextAtSize(labelText, textSize);
+                const valueWidth = text ? regular.widthOfTextAtSize(text, textSize) : minBox;
+                return { labelText, labelWidth, text, width: labelWidth + 4 + Math.max(valueWidth, minBox) };
+            });
+            const width = Math.max(
+                bold.widthOfTextAtSize(safeFieldText(item.name), titleSize),
+                ...rows.map((row) => row.width)
+            ) + pad * 2;
+            return { name: safeFieldText(item.name), rows, width, height: 18 + rows.length * rowHeight + 4 };
+        });
+
+        const cellWidth = Math.min(CONTENT_WIDTH, Math.max(...cells.map((cell) => cell.width)));
+        const columns = Math.max(1, Math.floor((CONTENT_WIDTH + gap) / (cellWidth + gap)));
+        const width = (CONTENT_WIDTH - gap * (columns - 1)) / columns;
+
+        for (let start = 0; start < cells.length; start += columns) {
+            const line = cells.slice(start, start + columns);
+            const height = Math.max(...line.map((cell) => cell.height));
+            ensureSpace(height + gap);
+            line.forEach((cell, index) => {
+                const x = MARGIN + index * (width + gap);
+                const top = cursorY;
+                page.drawRectangle({
+                    x,
+                    y: top - height,
+                    width,
+                    height,
+                    borderWidth: 0.75,
+                    borderColor: FIELD_BORDER,
+                });
+                page.drawText(cell.name, { x: x + pad, y: top - 12, size: titleSize, font: bold, color: BODY_COLOR });
+                cell.rows.forEach((row, rowIndex) => {
+                    const y = top - 18 - (rowIndex + 1) * rowHeight + 4;
+                    page.drawText(row.labelText, { x: x + pad, y: y + 3, size: textSize, font: regular, color: MUTED_COLOR });
+                    const valueX = x + pad + row.labelWidth + 4;
+                    if (row.text) {
+                        page.drawText(row.text, { x: valueX, y: y + 3, size: textSize, font: regular, color: BODY_COLOR });
+                    } else {
+                        page.drawRectangle({
+                            x: valueX,
+                            y,
+                            width: x + width - pad - valueX,
+                            height: rowHeight - 3,
+                            borderWidth: 0.75,
+                            borderColor: FIELD_BORDER,
+                        });
+                    }
+                });
+            });
+            cursorY -= height + gap;
+        }
     };
 
     const drawImages = async (images = []) => {
@@ -231,7 +300,8 @@ export async function createEditablePdf(model) {
     drawHeading(model.campaignName || "Campagne", 1);
     drawText(`Document de préparation - ${model.dateLabel || ""}`, { size: 9, color: MUTED_COLOR });
 
-    for (const block of model.blocks) {
+    for (const [blockIndex, block] of model.blocks.entries()) {
+        if (blockIndex > 0) addPage();
         switch (block.kind) {
             case "scenes":
                 drawHeading("Scènes et actes");
@@ -312,22 +382,20 @@ export async function createEditablePdf(model) {
                 break;
             case "characters":
                 drawHeading("Fiches de personnages");
-                for (const { character, characteristics, skillRollModifier } of block.characters) {
+                for (const [characterIndex, { character, characteristics, skillRollModifier }] of block.characters.entries()) {
+                    if (characterIndex > 0) addPage();
                     drawHeading(character.name, 2);
                     drawHeading("Caractéristiques", 3);
-                    for (const definition of characteristics) {
-                        const values = character.characteristics?.[definition.name] || {};
-                        const parts = [["Valeur", values.value]];
-                        if (definition.modifier) parts.push(["Modificateur", values.modifier]);
-                        if (definition.test) parts.push(["Test (seuil)", values.test]);
-                        if (definition.max) parts.push(["Maximum", values.max]);
-                        const value = parts
-                            .filter(([, part]) => part !== null && part !== undefined && part !== "")
-                            .map(([label, part]) => `${label} : ${part}`)
-                            .join(" | ");
-                        drawField(definition.name, value);
-                    }
-
+                    drawCharacteristics(
+                        characteristics.map((definition) => {
+                            const values = character.characteristics?.[definition.name] || {};
+                            const rows = [["Valeur", values.value]];
+                            if (definition.modifier) rows.push(["Modificateur", values.modifier]);
+                            if (definition.test) rows.push(["Test (seuil)", values.test]);
+                            if (definition.max) rows.push(["Maximum", values.max]);
+                            return { name: definition.name, rows };
+                        })
+                    );
                     drawHeading("Compétences", 3);
                     for (const skill of character.skills || []) {
                         const modifier = skillRollModifier && skill.roll_modifier !== null && skill.roll_modifier !== undefined

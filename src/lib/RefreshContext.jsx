@@ -1,4 +1,5 @@
-import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { subscribeDataChanged } from "@/lib/dataEvents";
 
 // Durée minimale d'affichage de l'indicateur, le temps que les données reviennent.
 const SETTLE_MS = 600;
@@ -13,6 +14,9 @@ export function RefreshProvider({ children }) {
     setRefreshKey((key) => key + 1);
     await new Promise((resolve) => setTimeout(resolve, SETTLE_MS));
   }, []);
+
+  // Toute création, modification ou suppression relance les chargements de la page affichée.
+  useEffect(() => subscribeDataChanged(() => setRefreshKey((key) => key + 1)), []);
 
   const value = useMemo(() => ({ refreshKey, refresh }), [refreshKey, refresh]);
 

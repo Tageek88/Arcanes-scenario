@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { api } from "@/api/localClient";
 import { Pin, Plus, StickyNote } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -35,6 +35,7 @@ export default function Notes() {
   const [form, setForm] = useState(EMPTY);
   const [saving, setSaving] = useState(false);
   const [pendingDelete, setPendingDelete] = useState(null);
+  const loadedFor = useRef("");
 
   useEffect(() => {
     let alive = true;
@@ -64,10 +65,13 @@ export default function Notes() {
       return;
     }
     let alive = true;
-    setPinnedNotes([]);
-    setNotes([]);
+    const initial = loadedFor.current !== campaignId;
+    if (initial) {
+      setPinnedNotes([]);
+      setNotes([]);
+    }
     const run = async () => {
-      setLoading(true);
+      if (initial) setLoading(true);
       try {
         const [pinnedRes, restRes] = await Promise.all([
           api.entities.Note.filter(
@@ -82,11 +86,12 @@ export default function Notes() {
         if (!alive) return;
         setPinnedNotes(pinnedRes.items);
         setNotes(restRes.items);
+        loadedFor.current = campaignId;
       } catch (error) {
         console.error("Chargement des notes impossible :", error);
         if (alive) toast({ variant: "destructive", title: "Notes indisponibles", description: "Impossible de charger les notes de cette campagne." });
       } finally {
-        if (alive) setLoading(false);
+        if (alive && initial) setLoading(false);
       }
     };
     run();

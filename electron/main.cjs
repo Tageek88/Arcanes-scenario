@@ -169,8 +169,54 @@ function createWindow() {
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
+      spellcheck: true,
       preload: path.join(__dirname, "preload.cjs"),
     },
+  });
+
+  // Correcteur orthographique intégré à Chromium (hors ligne, dictionnaires téléchargés par Electron si besoin).
+  try {
+    mainWindow.webContents.session.setSpellCheckerLanguages(["fr", "fr-FR", "en-US"].filter((l) =>
+      mainWindow.webContents.session.availableSpellCheckerLanguages.includes(l)
+    ));
+  } catch {
+    /* langue indisponible : on garde la configuration par défaut */
+  }
+
+  mainWindow.webContents.on("context-menu", (_event, params) => {
+    if (!params.isEditable && !params.selectionText) return;
+    const wc = mainWindow.webContents;
+    const items = [];
+    if (params.misspelledWord) {
+      if (params.dictionarySuggestions.length) {
+        for (const s of params.dictionarySuggestions) {
+          items.push({ label: s, click: () => wc.replaceMisspelling(s) });
+        }
+      } else {
+        items.push({ label: "Aucune suggestion", enabled: false });
+      }
+      items.push({
+        label: "Ajouter au dictionnaire",
+        click: () => wc.session.addWordToSpellCheckerDictionary(params.misspelledWord),
+      });
+      items.push({ type: "separator" });
+    }
+    if (params.isEditable) {
+      items.push(
+        { label: "Annuler", role: "undo", enabled: params.editFlags.canUndo },
+        { label: "Rétablir", role: "redo", enabled: params.editFlags.canRedo },
+        { type: "separator" },
+        { label: "Couper", role: "cut", enabled: params.editFlags.canCut }
+      );
+    }
+    items.push({ label: "Copier", role: "copy", enabled: params.editFlags.canCopy });
+    if (params.isEditable) {
+      items.push(
+        { label: "Coller", role: "paste", enabled: params.editFlags.canPaste },
+        { label: "Tout sélectionner", role: "selectAll" }
+      );
+    }
+    Menu.buildFromTemplate(items).popup({ window: mainWindow });
   });
 
   mainWindow.loadFile(path.join(__dirname, "..", "dist", "index.html"));

@@ -9,6 +9,7 @@ import { CODEX_TABS } from "@/lib/codex";
 import { NPC_ATTITUDE } from "@/lib/sceneMeta";
 import { isImage } from "@/components/codex/AttachmentsField";
 import { openAttachment } from "@/lib/openAttachment";
+import { usePageFilter } from "@/lib/PageFilterContext";
 
 export default function CodexSidebar({
   campaignId,
@@ -19,9 +20,9 @@ export default function CodexSidebar({
   onAdd,
   onEdit,
 }) {
-  const [tab, setTab] = useState("npc");
-  const [term, setTerm] = useState("");
-  const [linkedOnly, setLinkedOnly] = useState(false);
+  const [tab, setTab] = usePageFilter("home.codex.tab", "npc");
+  const [term, setTerm] = usePageFilter("home.codex.term", "");
+  const [linkedOnly, setLinkedOnly] = usePageFilter("home.codex.linkedOnly", false);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [expandedId, setExpandedId] = useState(null);
@@ -125,7 +126,7 @@ export default function CodexSidebar({
           />
         </div>
 
-        {activeScene && (
+        {(activeScene || linkedOnly) && (
           <button
             type="button"
             aria-label={linkedOnly ? "Afficher tout le codex" : "N'afficher que les éléments liés à la scène"}
@@ -136,7 +137,7 @@ export default function CodexSidebar({
             )}
           >
             {linkedOnly ? <Link2 className="mr-1.5 h-3 w-3" /> : <Link2Off className="mr-1.5 h-3 w-3" />}
-            Liées à la scène ({linkedIds.length})
+            {activeScene ? `Liées à la scène (${linkedIds.length})` : "Filtre de scène actif"}
           </button>
         )}
       </div>

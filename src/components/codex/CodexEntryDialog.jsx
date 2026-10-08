@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { api } from "@/api/localClient";
+import { withDataBatch } from "@/lib/dataEvents";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -46,6 +47,7 @@ export default function CodexEntryDialog({
   entry,
   onSaved,
   defaultParentId = "",
+  defaultLocationId = "",
   duplicateOf = null,
   locations,
 }) {
@@ -63,13 +65,17 @@ export default function CodexEntryDialog({
     if (!open) return;
     if (entry) setForm({ ...entry });
     else if (duplicateOf) setForm(duplicateDraft(kind, duplicateOf));
-    else setForm({ ...defaultEntry(kind), parent_id: kind === "location" ? defaultParentId : "" });
+    else setForm({
+      ...defaultEntry(kind),
+      parent_id: kind === "location" ? defaultParentId : "",
+      location_id: kind === "npc" || kind === "clue" ? defaultLocationId : "",
+    });
     setCopyRelations(true);
     setCopyChildren(true);
-  }, [open, kind, entry, defaultParentId, duplicateOf]);
+  }, [open, kind, entry, defaultParentId, defaultLocationId, duplicateOf]);
 
   useEffect(() => {
-    if (locations || !open || (kind !== "location" && kind !== "npc") || !campaignId) return;
+    if (locations || !open || (kind !== "location" && kind !== "npc" && kind !== "clue") || !campaignId) return;
     let alive = true;
     api.entities.Location.filter({ campaign_id: campaignId }, { sort: "name", limit: 1000 }).then((res) => {
       if (alive) setFetchedLocations(res.items);
@@ -129,28 +135,31 @@ export default function CodexEntryDialog({
       payload.discovered = payload.clue_type === "indice" && !!form.discovered;
       payload.known = payload.clue_type === "info" && !!form.known;
       payload.used = payload.clue_type === "info" && !!form.used;
+      payload.location_id = form.location_id || "";
     }
     try {
       let created = null;
-      if (entry?.id) await api.entities[meta.entity].update(entry.id, payload);
-      else created = await api.entities[meta.entity].create(payload);
+      await withDataBatch(async () => {
+        if (entry?.id) await api.entities[meta.entity].update(entry.id, payload);
+        else created = await api.entities[meta.entity].create(payload);
 
-      if (created && duplicateOf) {
-        try {
-          if (kind === "npc" && copyRelations) await copyNpcRelations(campaignId, duplicateOf.id, created.id);
-          if (kind === "location" && copyChildren)
-            await copyLocationSubtree(allLocations, duplicateOf.id, created.id);
-        } catch (copyError) {
-          console.error("Copie incomplète :", copyError);
-          toast({
-            variant: "destructive",
-            title: "Copie incomplète",
-            description: "L'élément a été créé, mais ses relations ou sous-lieux n'ont pas tous été copiés.",
-          });
+        if (created && duplicateOf) {
+          try {
+            if (kind === "npc" && copyRelations) await copyNpcRelations(campaignId, duplicateOf.id, created.id);
+            if (kind === "location" && copyChildren)
+              await copyLocationSubtree(allLocations, duplicateOf.id, created.id);
+          } catch (copyError) {
+            console.error("Copie incomplète :", copyError);
+            toast({
+              variant: "destructive",
+              title: "Copie incomplète",
+              description: "L'élément a été créé, mais ses relations ou sous-lieux n'ont pas tous été copiés.",
+            });
+          }
         }
-      }
+      });
       onOpenChange(false);
-      onSaved();
+      await onSaved(created);
     } catch (error) {
       console.error("Échec enregistrement :", error);
       toast({
@@ -313,21 +322,42 @@ export default function CodexEntryDialog({
         )}
 
         {kind === "clue" && (
-          <div className="space-y-2">
-            <Label>Type</Label>
-            <Select
-              value={form.clue_type === "info" ? "info" : "indice"}
-              onValueChange={(value) => set("clue_type", value)}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="indice">Indice</SelectItem>
-                <SelectItem value="info">Info</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <>
+            <div className="space-y-2">
+              <Label>Type</Label>
+              <Select
+                value={form.clue_type === "info" ? "info" : "indice"}
+                onValueChange={(value) => set("clue_type", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="indice">Indice</SelectItem>
+                  <SelectItem value="info">Info</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Lieu d'attribution</Label>
+              <Select
+                value={form.location_id || "_none"}
+                onValueChange={(value) => set("location_id", value === "_none" ? "" : value)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="_none">Aucun lieu</SelectItem>
+                  {locationChoices.map((option) => (
+                    <SelectItem key={option.id} value={option.id}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </>
         )}
 
         <div className="space-y-2">

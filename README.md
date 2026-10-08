@@ -2,7 +2,7 @@
 
 **Un atelier de préparation pour maîtres du jeu : organisez votre scénario en actes et scènes, et gardez PNJ, lieux, indices, tables aléatoires, notes et sessions sous la main, avec vos campagnes conservées hors ligne sur votre ordinateur.**
 
-![Version](https://img.shields.io/badge/version-1.4.2-d4a63c)
+![Version](https://img.shields.io/badge/version-1.4.4-d4a63c)
 ![Node](https://img.shields.io/badge/node-%3E%3D20.19-339933?logo=node.js&logoColor=white)
 ![React](https://img.shields.io/badge/React-18-61dafb?logo=react&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-8-646cff?logo=vite&logoColor=white)
@@ -15,20 +15,15 @@
 
 ## Aperçu
 
-<!-- Ajoutez vos captures d'écran dans docs/screenshots/ puis décommentez ou adaptez les lignes ci-dessous -->
-
-![Arborescence et scènes](Docs\Screenshots\arborescence.png)
-![Codex : PNJ](Docs\Screenshots\PNJ.png)
-![codex : lieux](Docs\Screenshots\lieu.png)
-![codex : indices](Docs\Screenshots\indices.png)
-![Calendrier des sessions](Docs\Screenshots\calendrier.png)
-![Tables aléatoires](Docs\Screenshots\tables.png)
-![Notes du MJ](Docs\Screenshots\notes.png)
-![Parametre du compte](Docs\Screenshots\parametres.png)
-![Feuille de personnages](Docs\Screenshots\FeuillesPJ.png)
-
-
-*Captures d'écran à venir.*
+![Arborescence et scènes](Docs/Screenshots/arborescence.png)
+![Codex : PNJ](Docs/Screenshots/PNJ.png)
+![Codex : lieux](Docs/Screenshots/lieu.png)
+![Codex : indices](Docs/Screenshots/indices.png)
+![Calendrier des sessions](Docs/Screenshots/calendrier.png)
+![Tables aléatoires](Docs/Screenshots/tables.png)
+![Notes du MJ](Docs/Screenshots/notes.png)
+![Paramètres du compte](Docs/Screenshots/parametres.png)
+![Feuille de personnages](Docs/Screenshots/FeuillesPJ.png)
 
 ## Guide des fonctionnalités
 
@@ -150,3 +145,4 @@ Ne committez jamais `node_modules`, `dist` ni `release` (déjà exclus par `.git
 ## Licence
 
 Distribué sous licence **MIT**.
+

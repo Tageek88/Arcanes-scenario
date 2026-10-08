@@ -4,6 +4,7 @@ import AppShell from "@/components/AppShell";
 import { RefreshProvider } from "@/lib/RefreshContext";
 import { TabStackProvider } from "@/lib/TabStackContext";
 import { ExpandedCardProvider } from "@/lib/ExpandedCardContext";
+import { PageFilterProvider } from "@/lib/PageFilterContext";
 
 export default function Layout() {
   const outlet = useOutlet();
@@ -11,9 +12,11 @@ export default function Layout() {
   return (
     <RefreshProvider>
       <TabStackProvider>
-        <ExpandedCardProvider>
-          <AppShell>{outlet}</AppShell>
-        </ExpandedCardProvider>
+        <PageFilterProvider>
+          <ExpandedCardProvider>
+            <AppShell>{outlet}</AppShell>
+          </ExpandedCardProvider>
+        </PageFilterProvider>
       </TabStackProvider>
     </RefreshProvider>
   );

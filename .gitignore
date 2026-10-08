@@ -21,6 +21,7 @@ fichiers-non-references.txt
 fichiers-inutilises.mjs
 fichiers-a-envoyer.txt
 recherche-base44.txt
+.continue/
 
 dist-ssr
 *.local

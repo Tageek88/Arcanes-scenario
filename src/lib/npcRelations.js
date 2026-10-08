@@ -1,4 +1,5 @@
 import { api } from "@/api/localClient";
+import { withDataBatch } from "@/lib/dataEvents";
 import { CUSTOM_TYPE, groupIndex, inverseOf, parentEdge, relationLabel } from "@/lib/relationMeta";
 const table = () => api.entities.NPCRelation;
 
@@ -59,28 +60,30 @@ export async function createRelation(
   campaignId,
   { fromId, toId, type, label = "", inverseLabel = "", notes = "", oneSided = false }
 ) {
-  const pair_id = uid();
-  const base = { campaign_id: campaignId, pair_id, notes };
-  const first = await table().create({
-    ...base,
-    from_id: fromId,
-    to_id: toId,
-    type,
-    custom_label: type === CUSTOM_TYPE ? label : "",
-  });
-  if (oneSided) return;
-  try {
-    await table().create({
+  await withDataBatch(async () => {
+    const pair_id = uid();
+    const base = { campaign_id: campaignId, pair_id, notes };
+    const first = await table().create({
       ...base,
-      from_id: toId,
-      to_id: fromId,
-      type: inverseOf(type),
-      custom_label: type === CUSTOM_TYPE ? inverseLabel : "",
+      from_id: fromId,
+      to_id: toId,
+      type,
+      custom_label: type === CUSTOM_TYPE ? label : "",
     });
-  } catch (error) {
-    await table().delete(first.id).catch(() => { });
-    throw error;
-  }
+    if (oneSided) return;
+    try {
+      await table().create({
+        ...base,
+        from_id: toId,
+        to_id: fromId,
+        type: inverseOf(type),
+        custom_label: type === CUSTOM_TYPE ? inverseLabel : "",
+      });
+    } catch (error) {
+      await table().delete(first.id).catch(() => { });
+      throw error;
+    }
+  });
 }
 
 // manual = true : seul ce côté est modifié. Sinon la ligne miroir est mise à jour (ou recréée).
@@ -89,23 +92,25 @@ export async function updateRelation(
   relations,
   { toId, type, label = "", inverseLabel = "", notes = "", manual = false }
 ) {
-  await table().update(row.id, {
-    to_id: toId,
-    type,
-    custom_label: type === CUSTOM_TYPE ? label : "",
-    notes,
+  await withDataBatch(async () => {
+    await table().update(row.id, {
+      to_id: toId,
+      type,
+      custom_label: type === CUSTOM_TYPE ? label : "",
+      notes,
+    });
+    if (manual) return;
+    const mirror = mirrorOf(row, relations);
+    const data = {
+      from_id: toId,
+      to_id: row.from_id,
+      type: inverseOf(type),
+      custom_label: type === CUSTOM_TYPE ? inverseLabel : "",
+      notes,
+    };
+    if (mirror) await table().update(mirror.id, data);
+    else await table().create({ campaign_id: row.campaign_id, pair_id: row.pair_id, ...data });
   });
-  if (manual) return;
-  const mirror = mirrorOf(row, relations);
-  const data = {
-    from_id: toId,
-    to_id: row.from_id,
-    type: inverseOf(type),
-    custom_label: type === CUSTOM_TYPE ? inverseLabel : "",
-    notes,
-  };
-  if (mirror) await table().update(mirror.id, data);
-  else await table().create({ campaign_id: row.campaign_id, pair_id: row.pair_id, ...data });
 }
 
 // Réaligne la ligne miroir sur cette ligne.

@@ -1,6 +1,7 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
+import { useTabStacks } from "@/lib/TabStackContext";
 
 const SECTIONS = {
   "/": "Arcanes & Scénarios",
@@ -14,6 +15,7 @@ const SECTIONS = {
 export default function MobileBackBar() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const { activeTab, openTab } = useTabStacks();
 
   if (pathname === "/") {
     return (
@@ -33,7 +35,7 @@ export default function MobileBackBar() {
       <button
         type="button"
         aria-label="Retour"
-        onClick={() => navigate(-1)}
+        onClick={() => openTab(activeTab)}
         className="grid h-11 w-11 place-items-center rounded-lg text-muted-foreground transition-colors active:bg-secondary"
       >
         <ChevronLeft className="h-5 w-5" />

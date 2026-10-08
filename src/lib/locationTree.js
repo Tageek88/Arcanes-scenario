@@ -1,4 +1,5 @@
 import { api } from "@/api/localClient";
+import { withDataBatch } from "@/lib/dataEvents";
 
 const parentOf = (location) => location.parent_id || "";
 
@@ -99,20 +100,34 @@ async function reassignNpcs(campaignId, removedIds, newLocationId) {
     }
   }
 }
-export async function deleteLocation(location, locations, mode) {
-  let removed = [location.id];
-  if (mode === "cascade") {
-    removed = [location.id, ...descendantIds(locations, location.id)];
-    await api.entities.Location.deleteMany({ id: { $in: removed } });
-  } else {
-    const direct = locations.filter((l) => parentOf(l) === location.id);
-    for (const child of direct) {
-      await api.entities.Location.update(child.id, { parent_id: parentOf(location) });
+
+async function reassignClues(campaignId, removedIds, newLocationId) {
+  const gone = new Set(removedIds);
+  const res = await api.entities.Clue.filter({ campaign_id: campaignId }, { limit: 1000 });
+  for (const clue of res.items) {
+    if (gone.has(clue.location_id)) {
+      await api.entities.Clue.update(clue.id, { location_id: newLocationId });
     }
-    await api.entities.Location.delete(location.id);
   }
-  await removeFromScenes(location.campaign_id, removed);
-  await reassignNpcs(location.campaign_id, removed, mode === "cascade" ? "" : parentOf(location));
+}
+
+export async function deleteLocation(location, locations, mode) {
+  await withDataBatch(async () => {
+    let removed = [location.id];
+    if (mode === "cascade") {
+      removed = [location.id, ...descendantIds(locations, location.id)];
+      await api.entities.Location.deleteMany({ id: { $in: removed } });
+    } else {
+      const direct = locations.filter((l) => parentOf(l) === location.id);
+      for (const child of direct) {
+        await api.entities.Location.update(child.id, { parent_id: parentOf(location) });
+      }
+      await api.entities.Location.delete(location.id);
+    }
+    await removeFromScenes(location.campaign_id, removed);
+    await reassignNpcs(location.campaign_id, removed, mode === "cascade" ? "" : parentOf(location));
+    await reassignClues(location.campaign_id, removed, mode === "cascade" ? "" : parentOf(location));
+  });
 }
 
 // Copie tous les sous-lieux d'un lieu sous un nouveau parent (nouveaux identifiants).
@@ -126,5 +141,5 @@ export async function copyLocationSubtree(locations, sourceId, newParentId) {
       await walk(child.id, copy.id, depth + 1);
     }
   };
-  await walk(sourceId, newParentId, 0);
+  await withDataBatch(() => walk(sourceId, newParentId, 0));
 }
