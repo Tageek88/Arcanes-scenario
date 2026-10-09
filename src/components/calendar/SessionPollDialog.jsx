@@ -116,7 +116,10 @@ export default function SessionPollDialog({
           if (!pollUrl) continue;
           try {
             const updated = await refreshSessionPoll(poll, pollUrl);
-            if (alive) setPolls((current) => current.map((item) => item.id === poll.id ? updated : item));
+            if (alive) {
+              setPolls((current) => current.map((item) => item.id === poll.id ? updated : item));
+              onPollChange?.(updated);
+            }
           } catch (error) {
             console.error(`Actualisation du sondage « ${poll.title} » impossible :`, error);
             if (alive) {

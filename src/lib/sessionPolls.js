@@ -64,16 +64,30 @@ export async function pollRequest(baseUrl, path, options = {}) {
   return body;
 }
 
+const EMPTY_COUNTS = { available: 0, maybe: 0, unavailable: 0 };
+
+export function withSlotAvailabilityCounts(slots = [], votes = []) {
+  return slots.map((slot) => {
+    const counts = { ...EMPTY_COUNTS };
+    for (const vote of votes) {
+      const choice = vote?.choices?.[slot.id];
+      if (choice in counts) counts[choice] += 1;
+    }
+    return { ...slot, ...counts };
+  });
+}
+
 export async function refreshSessionPoll(poll, baseUrl) {
   const results = await pollRequest(baseUrl, `/api/polls/${poll.poll_id}/results`, {
     headers: { Authorization: `Bearer ${poll.owner_token}` },
   });
+  const votes = results.votes || [];
   const updated = {
     title: results.title || poll.title,
     comment: results.comment || "",
     expected_players: results.players,
-    slots: results.slots,
-    votes: results.votes,
+    slots: withSlotAvailabilityCounts(results.slots || [], votes),
+    votes,
     timezone: results.timezone || poll.timezone,
     state: results.state,
     expires_at: results.expiresAt,

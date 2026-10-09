@@ -36,6 +36,15 @@ export async function onRequestGet({ request, params, env }) {
     votes.results.forEach((vote) => {
       if (vote.slot_id) byPlayer.get(vote.id).choices[vote.slot_id] = vote.availability;
     });
+    const playerVotes = [...byPlayer.values()];
+    const slotsWithCounts = (slots.results || []).map((slot) => {
+      const counts = { available: 0, maybe: 0, unavailable: 0 };
+      for (const vote of playerVotes) {
+        const choice = vote.choices[slot.id];
+        if (choice in counts) counts[choice] += 1;
+      }
+      return { ...slot, ...counts };
+    });
     return json({
       id: poll.id,
       title: poll.title,
@@ -44,8 +53,8 @@ export async function onRequestGet({ request, params, env }) {
       timezone: poll.timezone,
       state: poll.state,
       expiresAt: poll.expires_at,
-      slots: slots.results,
-      votes: [...byPlayer.values()],
+      slots: slotsWithCounts,
+      votes: playerVotes,
     });
   } catch (error) {
     return handleApiError(error);
