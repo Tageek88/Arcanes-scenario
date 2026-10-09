@@ -21,6 +21,7 @@ import { KIND_META, defaultEntry, duplicateDraft } from "@/lib/codex";
 import { NPC_ATTITUDE } from "@/lib/sceneMeta";
 import { copyLocationSubtree, descendantIds, parentOptions } from "@/lib/locationTree";
 import { copyNpcRelations, loadRelations } from "@/lib/npcRelations";
+import { dispatchTutorialAction } from "@/utils/tutorialStorage";
 
 function CopyOption({ checked, onChange, title, hint }) {
   return (
@@ -159,6 +160,7 @@ export default function CodexEntryDialog({
         }
       });
       onOpenChange(false);
+      if (created) dispatchTutorialAction(`${kind}-created`);
       await onSaved(created);
     } catch (error) {
       console.error("Échec enregistrement :", error);
@@ -174,7 +176,7 @@ export default function CodexEntryDialog({
 
   const footer = (
     <div className="flex justify-end gap-2">
-      <Button variant="ghost" onClick={() => onOpenChange(false)}>
+      <Button data-tutorial="codex-cancel" variant="ghost" onClick={() => onOpenChange(false)}>
         Annuler
       </Button>
       <Button onClick={save} disabled={saving || !form.name?.trim()}>
@@ -204,7 +206,7 @@ export default function CodexEntryDialog({
       <div className="space-y-4 py-1">
         <div className="space-y-2">
           <Label>{meta.nameLabel}</Label>
-          <Input value={form.name || ""} onChange={(e) => set("name", e.target.value)} />
+          <Input data-tutorial="codex-name" value={form.name || ""} onChange={(e) => set("name", e.target.value)} />
         </div>
 
         <div className="space-y-2">

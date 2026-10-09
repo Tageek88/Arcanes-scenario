@@ -306,7 +306,7 @@ export default function Codex() {
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <span className="tag border border-primary/40 text-primary">Codex du monde</span>
-          <h1 className="mt-3 font-display text-3xl font-bold text-foreground">PNJ, Lieux, Indices &amp; Infos</h1>
+          <h1 data-tutorial="codex-title" className="mt-3 font-display text-3xl font-bold text-foreground">PNJ, Lieux, Indices &amp; Infos</h1>
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">
             Le référentiel de votre campagne. Rattachez chaque élément aux scènes depuis l'arborescence.
           </p>
@@ -318,7 +318,7 @@ export default function Codex() {
             onValueChange={(id) => { setCampaignId(id); setSelectedCampaignId(id); }}
           />
           <PrintButton campaignId={campaignId} preset={tab} />
-          <Button disabled={!campaignId} onClick={openNew}>
+          <Button data-tutorial="codex-new" disabled={!campaignId} onClick={openNew}>
             <Plus className="mr-2 h-4 w-4" /> Nouveau {KIND_META[tab].singular}
           </Button>
         </div>
@@ -330,6 +330,7 @@ export default function Codex() {
             <button
               key={t.key}
               type="button"
+              data-tutorial={`codex-tab-${t.key}`}
               onClick={() => setTab(t.key)}
               className={cn(
                 "rounded-md px-3 py-1.5 font-mono text-xs uppercase tracking-wider transition-colors",

@@ -12,6 +12,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
+import { dispatchTutorialAction } from "@/utils/tutorialStorage";
 import {
   CUSTOM_TYPE,
   RELATION_OPTIONS,
@@ -141,6 +142,7 @@ export default function NpcRelations({ npc, campaignId }) {
       await reload();
       setEditor(null);
       toast({ title: row ? "Relation mise à jour" : "Relation ajoutée" });
+      dispatchTutorialAction("relation-saved");
     } catch (err) {
       console.error("Échec relation :", err);
       toast({ variant: "destructive", title: "Enregistrement impossible", description: "La relation n'a pas été enregistrée." });
@@ -185,7 +187,7 @@ export default function NpcRelations({ npc, campaignId }) {
       : RELATION_TYPES[inverseOf(form.type)]?.label || "";
 
   return (
-    <div className="space-y-3 rounded-lg border border-border p-3">
+    <div data-tutorial="npc-relations" className="space-y-3 rounded-lg border border-border p-3">
       <div className="flex items-center justify-between gap-2">
         <Label>Relations ({mine.length})</Label>
         {!editor && (

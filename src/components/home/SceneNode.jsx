@@ -34,6 +34,7 @@ export default function SceneNode({
   return (
     <div
       {...cardProps}
+      data-tutorial="btn-edit-codex-from-scene"
       role="button"
       onClick={() => onSelect(scene)}
       onDoubleClick={() => onOpen(scene)}

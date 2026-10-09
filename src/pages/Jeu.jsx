@@ -23,6 +23,7 @@ import { useToast } from "@/components/ui/use-toast";
 import CampaignSelect from "@/components/common/CampaignSelect";
 import PrintButton from "@/components/print/PrintButton";
 import { useExpandedCardState } from "@/lib/ExpandedCardContext";
+import { dispatchTutorialAction } from "@/utils/tutorialStorage";
 
 const EMPTY_MODEL = { characteristics: [], skillRollModifier: false };
 const normalize = (value) => String(value || "").trim().toLocaleLowerCase("fr");
@@ -179,6 +180,7 @@ export default function Jeu() {
       }
       setModel({ characteristics: saved.characteristics || [], skillRollModifier: !!saved.skillRollModifier });
       setModelOpen(false);
+      if (!modelId) dispatchTutorialAction("model-created");
       toast(valuesMigrated
         ? { title: "Modèle enregistré" }
         : { variant: "destructive", title: "Modèle enregistré, migration incomplète", description: "Certaines valeurs de caractéristiques des personnages n’ont pas pu être renommées." });
@@ -235,6 +237,7 @@ export default function Jeu() {
       ].sort((a, b) => a.name.localeCompare(b.name, "fr", { numeric: true })));
       setCharacterOpen(false);
       setCharacterDraft(null);
+      if (!draft.id) dispatchTutorialAction("character-created");
 
       try {
         const nextSkills = [...skillCatalog];
@@ -310,7 +313,7 @@ export default function Jeu() {
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <span className="tag border border-primary/40 text-primary">Personnages</span>
-          <h1 className="mt-3 font-display text-3xl font-bold text-foreground">Système de jeu</h1>
+          <h1 data-tutorial="game-title" className="mt-3 font-display text-3xl font-bold text-foreground">Système de jeu</h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
             Définissez un modèle de fiche par campagne, puis créez les fiches des personnages.
             Les valeurs de test sont des seuils saisis manuellement, jamais calculés par l’application.
@@ -324,11 +327,11 @@ export default function Jeu() {
           />
           <PrintButton campaignId={campaignId} preset="characters" />
           {campaignId && (
-            <Button variant="outline" onClick={() => setModelOpen(true)}>
+            <Button data-tutorial="game-model" variant="outline" onClick={() => setModelOpen(true)}>
               <Shield className="h-4 w-4" /> {modelId ? "Modifier le modèle" : "Définir le modèle"}
             </Button>
           )}
-          <Button onClick={openNewCharacter} disabled={!campaignId || !modelId}>
+          <Button data-tutorial="game-new" onClick={openNewCharacter} disabled={!campaignId || !modelId}>
             <Plus className="h-4 w-4" /> Nouveau personnage
           </Button>
         </div>
@@ -363,7 +366,7 @@ export default function Jeu() {
               </div>
             )}
             {!modelId && (
-              <Button className="mt-4" onClick={() => setModelOpen(true)}>
+              <Button data-tutorial="game-model" className="mt-4" onClick={() => setModelOpen(true)}>
                 <Plus className="h-4 w-4" /> Créer le modèle de fiche
               </Button>
             )}

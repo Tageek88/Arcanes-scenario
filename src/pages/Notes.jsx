@@ -19,6 +19,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useDataRefresh } from "@/lib/RefreshContext";
 import PrintButton from "@/components/print/PrintButton";
 import CampaignSelect from "@/components/common/CampaignSelect";
+import { dispatchTutorialAction } from "@/utils/tutorialStorage";
 
 const EMPTY = { title: "", content: "", pinned: false };
 
@@ -149,6 +150,7 @@ export default function Notes() {
         ? await api.entities.Note.update(form.id, payload)
         : await api.entities.Note.create(payload);
       if (saved?.id) applyNote({ ...optimistic, ...saved }, optimistic.id);
+      if (!form.id) dispatchTutorialAction("note-created");
       toast({ title: form.id ? "Note mise à jour" : "Note créée" });
     } catch {
       setPinnedNotes(previous.pinnedNotes);
@@ -209,7 +211,7 @@ export default function Notes() {
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <span className="tag border border-primary/40 text-primary">Bloc-notes</span>
-          <h1 className="mt-3 font-display text-3xl font-bold text-foreground">Notes du MJ</h1>
+          <h1 data-tutorial="notes-title" className="mt-3 font-display text-3xl font-bold text-foreground">Notes du MJ</h1>
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">
             Consignez les idées, les décisions des joueurs et les fils laissés en suspens, pour ne
             rien perdre d'une séance à l'autre.
@@ -222,7 +224,7 @@ export default function Notes() {
             onValueChange={(id) => { setCampaignId(id); setSelectedCampaignId(id); }}
           />
           <PrintButton campaignId={campaignId} preset="notes" />
-          <Button onClick={openNew} disabled={!campaignId}>
+          <Button data-tutorial="notes-new" onClick={openNew} disabled={!campaignId}>
             <Plus className="mr-2 h-4 w-4" /> Nouvelle note
           </Button>
         </div>

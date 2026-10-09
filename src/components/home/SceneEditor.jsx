@@ -54,6 +54,7 @@ export default function SceneEditor({
         <div className="space-y-2">
           <Label>Titre</Label>
           <Input
+            data-tutorial="scene-title"
             value={form.title}
             onChange={(e) => setField("title", e.target.value)}
             placeholder="Ex. La crypte oubliée"

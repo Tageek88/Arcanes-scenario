@@ -16,6 +16,7 @@ import {
   refreshSessionPoll,
   savePollServiceUrl,
 } from "@/lib/sessionPolls";
+import { dispatchTutorialAction } from "@/utils/tutorialStorage";
 
 const newSlot = () => ({ date: "", time: "20:00" });
 const AVAILABILITY_LABELS = {
@@ -304,6 +305,7 @@ export default function SessionPollDialog({
       });
       setPolls((current) => [saved, ...current]);
       onPollChange?.(saved);
+      dispatchTutorialAction("poll-created");
       resetForm();
       onOpenChange(false);
       toast({ title: "Sondage créé", description: "Le lien est prêt à être partagé avec les joueurs." });
@@ -430,7 +432,7 @@ export default function SessionPollDialog({
           {editLoadError && <p className="text-sm text-destructive">{editLoadError}</p>}
           <div className="space-y-2">
             <Label htmlFor="poll-title-input">Nom de la session</Label>
-            <Input id="poll-title-input" value={title} maxLength={120} onChange={(event) => setTitle(event.target.value)} placeholder="Ex. Session 5 — La tour oubliée" />
+            <Input data-tutorial="poll-title" id="poll-title-input" value={title} maxLength={120} onChange={(event) => setTitle(event.target.value)} placeholder="Ex. Session 5 — La tour oubliée" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="poll-comment">Commentaire visible par les participants (facultatif)</Label>

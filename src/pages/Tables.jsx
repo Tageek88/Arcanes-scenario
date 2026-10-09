@@ -21,6 +21,7 @@ import { useDataRefresh } from "@/lib/RefreshContext";
 import PrintButton from "@/components/print/PrintButton";
 import CampaignSelect from "@/components/common/CampaignSelect";
 import { usePageFilter } from "@/lib/PageFilterContext";
+import { dispatchTutorialAction } from "@/utils/tutorialStorage";
 
 const SafeAlertDialogContent = (
   /** @type {React.ComponentProps<typeof AlertDialogContent>} */ props
@@ -142,10 +143,10 @@ export default function Tables() {
     });
   };
 
-  const save = async () => {
+  const save = async (override = {}) => {
     if (!form.name.trim() || !campaignId) return;
     setSaving(true);
-    const entries = (form.entries || [])
+    const entries = (override.entries || form.entries || [])
       .filter((entry) => entry.text?.trim())
       .map((entry) => ({
         text: entry.text.trim(),
@@ -162,6 +163,7 @@ export default function Tables() {
       const saved = form.id
         ? await api.entities.RollTable.update(form.id, payload)
         : await api.entities.RollTable.create(payload);
+      if (!form.id) dispatchTutorialAction("table-created");
       console.log("RollTable enregistrée :", saved);
       if (saved?.id) {
         applyTable(saved, form.id);
@@ -214,7 +216,7 @@ export default function Tables() {
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <span className="tag border border-primary/40 text-primary">Aide de jeu</span>
-          <h1 className="mt-3 font-display text-3xl font-bold text-foreground">Tables aléatoires</h1>
+          <h1 data-tutorial="tables-title" className="mt-3 font-display text-3xl font-bold text-foreground">Tables aléatoires</h1>
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">
             Préparez vos rencontres, noms et événements, puis tirez au hasard quand vos joueurs
             partent hors des sentiers battus.
@@ -229,6 +231,7 @@ export default function Tables() {
           <PrintButton campaignId={campaignId} preset="tables" />
           <button
             type="button"
+            data-tutorial="tables-new"
             onClick={openNew}
             disabled={!campaignId}
             className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 disabled:pointer-events-none disabled:opacity-50"

@@ -22,6 +22,7 @@ import { dateKey, sessionStatusMeta } from "@/lib/sessionMeta";
 import { getSelectedCampaignId, setSelectedCampaignId } from "@/lib/campaignStore";
 import { useToast } from "@/components/ui/use-toast";
 import { useDataRefresh } from "@/lib/RefreshContext";
+import { dispatchTutorialAction } from "@/utils/tutorialStorage";
 import PrintButton from "@/components/print/PrintButton";
 import SessionPollDialog from "@/components/calendar/SessionPollDialog";
 import CampaignSelect from "@/components/common/CampaignSelect";
@@ -347,6 +348,7 @@ export default function Calendrier() {
         ? await api.entities.GameSession.update(form.id, payload)
         : await api.entities.GameSession.create(payload);
       if (saved?.id) applySession(saved, optimistic.id);
+      if (!form.id) dispatchTutorialAction("session-created");
       toast({ title: form.id ? "Session mise à jour" : "Session planifiée" });
     } catch {
       setSessions(previous.sessions);
@@ -387,7 +389,7 @@ export default function Calendrier() {
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <span className="tag border border-primary/40 text-primary">Agenda du MJ</span>
-          <h1 className="mt-3 font-display text-3xl font-bold text-foreground">Sessions de jeu</h1>
+          <h1 data-tutorial="calendar-title" className="mt-3 font-display text-3xl font-bold text-foreground">Sessions de jeu</h1>
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">
             Planifiez vos prochaines parties par date, gardez une trace de celles déjà jouées et
             préparez la scène de chaque séance.
@@ -403,11 +405,11 @@ export default function Calendrier() {
               setSelectedDate("");
             }}
           />
-          <Button variant="outline" onClick={() => setPollDialogOpen(true)} disabled={!campaignId}>
+          <Button data-tutorial="calendar-poll" variant="outline" onClick={() => setPollDialogOpen(true)} disabled={!campaignId}>
             Sondage des joueurs
           </Button>
           <PrintButton campaignId={campaignId} preset="sessions" />
-          <Button onClick={() => openNew()} disabled={!campaignId}>
+          <Button data-tutorial="calendar-new" onClick={() => openNew()} disabled={!campaignId}>
             <Plus className="mr-2 h-4 w-4" /> Nouvelle session
           </Button>
         </div>
@@ -457,7 +459,7 @@ export default function Calendrier() {
                   Aujourd'hui
                 </Button>
               </div>
-              <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
+              <span data-tutorial="calendar-month" className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
                 {loading
                   ? "Chargement…"
                   : `${sessions.length} session${sessions.length > 1 ? "s" : ""} ce mois`}
@@ -475,7 +477,9 @@ export default function Calendrier() {
           </section>
 
           <div className="space-y-6">
-            <UpcomingSessions sessions={upcoming} onOpen={openEdit} onAdd={() => openNew()} />
+            <div data-tutorial="calendar-upcoming">
+              <UpcomingSessions sessions={upcoming} onOpen={openEdit} onAdd={() => openNew()} />
+            </div>
 
             {sessions.length > 0 && (
               <div className="rounded-xl border border-border bg-card/50 p-4">
@@ -508,7 +512,7 @@ export default function Calendrier() {
               </div>
             )}
 
-            <section className="rounded-xl border border-border bg-card/50 p-4">
+            <section data-tutorial="calendar-polls" className="rounded-xl border border-border bg-card/50 p-4">
               <h2 className="font-display text-sm font-semibold text-foreground">Sondages en cours</h2>
               {polls.length === 0 ? (
                 <p className="mt-3 rounded-lg border border-dashed border-border p-4 text-center text-xs text-muted-foreground">

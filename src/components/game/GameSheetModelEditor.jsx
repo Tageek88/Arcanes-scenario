@@ -82,6 +82,7 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, onSave
           {form.characteristics.map((item, index) => (
             <div key={index} className="grid grid-cols-2 items-center gap-2 rounded-lg border border-border p-2 sm:grid-cols-[minmax(10rem,1fr)_repeat(3,5rem)_2.5rem]">
               <Input
+                data-tutorial="game-model-name"
                 className="col-span-2 sm:col-span-1"
                 aria-label={`Nom de la caractéristique ${index + 1}`}
                 value={item.name}
@@ -112,6 +113,7 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, onSave
           {duplicateNames && <p className="text-xs text-destructive">Chaque caractéristique doit avoir un nom distinct.</p>}
           <Button
             type="button"
+            data-tutorial="game-model-name"
             variant="outline"
             size="sm"
             onClick={() => setForm((current) => ({

@@ -56,6 +56,7 @@ export default function SceneBoard({
       )}
       <button
         type="button"
+        data-tutorial="btn-new-act"
         onClick={onAddAct}
         className="flex min-h-[220px] w-[200px] shrink-0 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
       >

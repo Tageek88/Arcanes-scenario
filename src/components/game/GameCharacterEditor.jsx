@@ -185,7 +185,7 @@ export default function GameCharacterEditor({
       <form id="game-character-form" onSubmit={submit} className="space-y-5 py-1">
         <div className="space-y-2">
           <Label htmlFor="game-character-name">Nom du personnage</Label>
-          <Input id="game-character-name" autoFocus value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} />
+          <Input id="game-character-name" data-tutorial="game-character-name" autoFocus value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} />
         </div>
 
         {model.characteristics.length > 0 && (

@@ -25,6 +25,7 @@ export default function CampaignDialog({ open, onOpenChange, form, setField, sav
     <div className="flex items-center justify-between gap-2">
       {editing && onDelete ? (
         <button
+          data-tutorial="campaign-create"
           type="button"
           className="inline-flex items-center justify-center rounded-md px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
           onClick={onDelete}
@@ -73,6 +74,7 @@ export default function CampaignDialog({ open, onOpenChange, form, setField, sav
           </label>
           <TypedInput
             id="campaign-name"
+            data-tutorial="campaign-name"
             value={form.name}
             onChange={(e) => setField("name", e.target.value)}
             placeholder="Ex. Les Ombres de Val-Cendre"

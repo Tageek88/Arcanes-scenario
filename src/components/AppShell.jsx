@@ -22,7 +22,7 @@ export default function AppShell({ children }) {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SideRail />
-      <main className="pb-24 pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] md:pb-0 md:pl-20">
+      <main data-tutorial="main-content" className="pb-24 pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] md:pb-0 md:pl-20">
         <MobileBackBar />
         <PullToRefresh onRefresh={handleRefresh}>
           <Suspense fallback={<PageLoader />}>

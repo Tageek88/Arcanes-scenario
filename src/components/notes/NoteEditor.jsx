@@ -30,6 +30,7 @@ export default function NoteEditor({ open, onOpenChange, form, setForm, saving, 
         <div className="space-y-2">
           <Label htmlFor="note-title">Titre</Label>
           <Input
+            data-tutorial="note-title"
             id="note-title"
             value={form.title}
             onChange={(e) => setForm({ ...form, title: e.target.value })}

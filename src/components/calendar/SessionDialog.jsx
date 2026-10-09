@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import ResponsiveDialog from "@/components/common/ResponsiveDialog";
 import { SESSION_STATUS_ORDER, SESSION_STATUS } from "@/lib/sessionMeta";
+import { dispatchTutorialAction } from "@/utils/tutorialStorage";
 
 export default function SessionDialog({
   open,
@@ -61,6 +62,7 @@ export default function SessionDialog({
         <div className="space-y-2">
           <Label>Titre de la session</Label>
           <Input
+            data-tutorial="session-title"
             value={form.title}
             onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
             placeholder="Ex. Session 4 — La crypte"
@@ -119,9 +121,12 @@ export default function SessionDialog({
           <Label>Scène prévue</Label>
           <Select
             value={form.scene_id || "_none"}
-            onValueChange={(value) => setForm((f) => ({ ...f, scene_id: value === "_none" ? "" : value }))}
+            onValueChange={(value) => {
+              setForm((f) => ({ ...f, scene_id: value === "_none" ? "" : value }));
+              if (value !== "_none") dispatchTutorialAction("session-scene-selected");
+            }}
           >
-            <SelectTrigger>
+            <SelectTrigger data-tutorial="calendar-scenario">
               <SelectValue placeholder="Aucune scène" />
             </SelectTrigger>
             <SelectContent>

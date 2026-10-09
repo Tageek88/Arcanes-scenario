@@ -102,6 +102,7 @@ export default function ActColumn({
           </div>
         ))}
         <Button
+          data-tutorial="btn-new-scene"
           variant="ghost"
           size="sm"
           onClick={() => onAddScene(act?.id || null)}

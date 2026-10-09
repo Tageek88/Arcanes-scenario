@@ -9,6 +9,7 @@ import { AuthProvider } from "@/lib/AuthContext";
 import ScrollToTop from "./components/ScrollToTop";
 import Layout from "@/components/Layout";
 import RestorePrompt from "@/components/RestorePrompt";
+import TutorialProvider from "@/components/Tutorial/TutorialProvider";
 
 const Home = lazy(() => import("@/pages/Home"));
 const Codex = lazy(() => import("@/pages/Codex"));
@@ -25,21 +26,23 @@ function App() {
       <AuthProvider>
         <QueryClientProvider client={queryClientInstance}>
           <Router>
-            <ScrollToTop />
-            <Suspense fallback={null}>
-              <Routes>
-                <Route element={<Layout />}>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/codex" element={<Codex />} />
-                  <Route path="/tables" element={<Tables />} />
-                  <Route path="/calendrier" element={<Calendrier />} />
-                  <Route path="/notes" element={<Notes />} />
-                  <Route path="/jeu" element={<Game />} />
-                  <Route path="/settings" element={<Settings />} />
-                </Route>
-                <Route path="*" element={<PageNotFound />} />
-              </Routes>
-            </Suspense>
+            <TutorialProvider>
+              <ScrollToTop />
+              <Suspense fallback={null}>
+                <Routes>
+                  <Route element={<Layout />}>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/codex" element={<Codex />} />
+                    <Route path="/tables" element={<Tables />} />
+                    <Route path="/calendrier" element={<Calendrier />} />
+                    <Route path="/notes" element={<Notes />} />
+                    <Route path="/jeu" element={<Game />} />
+                    <Route path="/settings" element={<Settings />} />
+                  </Route>
+                  <Route path="*" element={<PageNotFound />} />
+                </Routes>
+              </Suspense>
+            </TutorialProvider>
           </Router>
           <RestorePrompt />
           <Toaster />

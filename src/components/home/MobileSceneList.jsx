@@ -33,7 +33,7 @@ export default function MobileSceneList({
     return (
       <div className="rounded-xl border border-dashed border-border p-8 text-center">
         <p className="text-sm text-muted-foreground">Aucun acte pour cette campagne.</p>
-        <Button variant="outline" className="mt-4" onClick={onAddAct}>
+        <Button data-tutorial="btn-new-act" variant="outline" className="mt-4" onClick={onAddAct}>
           <Plus className="mr-2 h-4 w-4" /> Ajouter un acte
         </Button>
       </div>
@@ -74,6 +74,7 @@ export default function MobileSceneList({
                   />
                 ))}
               <Button
+                data-tutorial="btn-new-scene"
                 variant="ghost"
                 size="sm"
                 onClick={() => onAddScene(group.id === "_none" ? null : group.id)}
@@ -85,7 +86,7 @@ export default function MobileSceneList({
           </AccordionItem>
         ))}
       </Accordion>
-      <Button variant="outline" className="w-full" onClick={onAddAct}>
+      <Button data-tutorial="btn-new-act" variant="outline" className="w-full" onClick={onAddAct}>
         <Plus className="mr-2 h-4 w-4" /> Ajouter un acte
       </Button>
     </div>

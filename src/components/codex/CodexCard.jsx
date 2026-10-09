@@ -104,7 +104,7 @@ export default function CodexCard({
             {linked ? "Lié à la scène" : "Lier à la scène"}
           </button>
         )}
-        <button type="button" aria-label={`Modifier ${entry.name}`} onClick={() => onEdit(kind, entry)} className="tag min-touch border border-border text-muted-foreground transition-colors hover:text-foreground">
+        <button type="button" data-tutorial={kind === "npc" ? "codex-edit" : undefined} aria-label={`Modifier ${entry.name}`} onClick={() => onEdit(kind, entry)} className="tag min-touch border border-border text-muted-foreground transition-colors hover:text-foreground">
           <Pencil className="mr-1.5 h-3 w-3" /> Modifier
         </button>
         {onDuplicate && (

@@ -27,6 +27,7 @@ import PrintButton from "@/components/print/PrintButton";
 import CampaignSelect from "@/components/common/CampaignSelect";
 import { useExpandedCardState } from "@/lib/ExpandedCardContext";
 import { usePageFilter } from "@/lib/PageFilterContext";
+import { dispatchTutorialAction } from "@/utils/tutorialStorage";
 
 const EMPTY_SCENE = {
   title: "",
@@ -285,6 +286,7 @@ export default function Home() {
         if (created?.id) {
           setScenes((prev) => prev.map((s) => (s.id === optimistic.id ? created : s)));
           setActiveSceneId(created.id);
+          dispatchTutorialAction("scene-created");
         }
       }
       toast({ title: editingSceneId ? "Scène mise à jour" : "Scène créée" });
@@ -333,6 +335,7 @@ export default function Home() {
     try {
       const created = await api.entities.Act.create({ campaign_id: campaignId, title, order });
       setActs((prev) => prev.map((a) => (a.id === optimistic.id ? created : a)));
+      dispatchTutorialAction("act-created");
       toast({ title: "Acte ajouté", description: "Cliquez sur son titre pour le renommer." });
     } catch {
       setActs(previous);
@@ -500,6 +503,7 @@ export default function Home() {
       setCampaignId(created.id);
       setSelectedCampaignId(created.id);
       setActiveSceneId(null);
+      dispatchTutorialAction("campaign-created");
       toast({ title: "Campagne créée" });
     } catch {
       setCampaigns(previous);
@@ -583,7 +587,7 @@ export default function Home() {
       {/* HEADER STANDARDISÉ CONFORME AUX RÈGLES */}
       <header className="space-y-3">
         <span className="tag">Campagne</span>
-        <h1 className="font-display text-3xl font-bold text-foreground">
+        <h1 data-tutorial="home-title" className="font-display text-3xl font-bold text-foreground">
           {campaign?.name || "Aucune campagne"}
         </h1>
         <p className="text-sm text-muted-foreground">
@@ -597,7 +601,10 @@ export default function Home() {
             allowCreate
           />
           <PrintButton campaignId={campaignId} preset="scenes" />
-          <Button onClick={() => (campaignId ? openNewScene(null) : openNewCampaign())}>
+          <Button
+            data-tutorial={campaignId ? "home-new" : "btn-new-campaign"}
+            onClick={() => (campaignId ? openNewScene(null) : openNewCampaign())}
+          >
             <Plus className="mr-2 h-4 w-4" />
             {campaignId ? "Nouvelle scène" : "Nouvelle campagne"}
           </Button>
@@ -615,6 +622,7 @@ export default function Home() {
                 Créez votre première campagne pour commencer à dessiner ses actes et ses scènes.
               </p>
               <Button
+                data-tutorial="btn-new-campaign"
                 className="mt-5"
                 onClick={() => {
                   setCampaignForm(EMPTY_CAMPAIGN);

@@ -19,6 +19,7 @@ import { useToast } from "@/components/ui/use-toast";
 import PrintButton from "@/components/print/PrintButton";
 import AutosavePanel from "@/components/AutosavePanel";
 import CampaignSelect from "@/components/common/CampaignSelect";
+import TutorialCenter from "@/components/Tutorial/TutorialCenter";
 
 export default function Settings() {
   const { toast } = useToast();
@@ -74,10 +75,10 @@ export default function Settings() {
           Sauvegardez vos données de jeu ou repartez de zéro. Tout est stocké dans ce navigateur.
         </p>
       </header>
-      <AutosavePanel />
-      <BackupPanel />
+      <div data-tutorial="section-auto-save"><AutosavePanel /></div>
+      <div data-tutorial="section-export-import"><BackupPanel /></div>
 
-      <section className="space-y-3 rounded-xl border border-border bg-card/50 p-4">
+      <section data-tutorial="section-print" className="space-y-3 rounded-xl border border-border bg-card/50 p-4">
         <h2 className="font-display text-base font-semibold text-foreground">Impression</h2>
         <CampaignSelect
           campaigns={campaigns}
@@ -95,7 +96,9 @@ export default function Settings() {
         />
       </section>
 
-      <section className="rounded-xl border border-destructive/40 bg-destructive/[0.06] p-5">
+      <div data-tutorial="section-help"><TutorialCenter /></div>
+
+      <section data-tutorial="section-clear-data" className="rounded-xl border border-destructive/40 bg-destructive/[0.06] p-5">
         <div className="flex items-start gap-3">
           <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
           <div className="space-y-1">

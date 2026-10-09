@@ -30,11 +30,14 @@ export default function TableEditor({ open, onOpenChange, form, setForm, saving,
   const removeEntry = (index) =>
     setForm((f) => ({ ...f, entries: (f.entries || []).filter((_, i) => i !== index) }));
 
-  const addQuickLines = () => {
-    const lines = quick
+  const parseQuick = () =>
+    quick
       .split("\n")
       .map((line) => line.trim())
       .filter(Boolean);
+
+  const addQuickLines = () => {
+    const lines = parseQuick();
     if (lines.length === 0) return;
     setForm((f) => ({
       ...f,
@@ -43,12 +46,20 @@ export default function TableEditor({ open, onOpenChange, form, setForm, saving,
     setQuick("");
   };
 
+  // Les lignes encore présentes dans « Ajout rapide » sont ajoutées à l'enregistrement.
+  const saveWithQuick = () => {
+    const lines = parseQuick();
+    if (lines.length === 0) return onSave();
+    setQuick("");
+    return onSave({ entries: [...entries, ...lines.map((text) => ({ text, weight: 1 }))] });
+  };
+
   const footer = (
     <div className="flex justify-end gap-2">
       <Button variant="ghost" onClick={() => onOpenChange(false)}>
         Annuler
       </Button>
-      <Button onClick={onSave} disabled={saving || !form.name.trim()}>
+      <Button onClick={saveWithQuick} disabled={saving || !form.name.trim()}>
         {saving ? "Enregistrement…" : "Enregistrer"}
       </Button>
     </div>
@@ -66,6 +77,7 @@ export default function TableEditor({ open, onOpenChange, form, setForm, saving,
         <div className="space-y-2">
           <Label>Nom de la table</Label>
           <Input
+            data-tutorial="table-name"
             value={form.name}
             onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
             placeholder="Ex. Rencontres en forêt"
