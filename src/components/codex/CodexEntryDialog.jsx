@@ -22,6 +22,8 @@ import { NPC_ATTITUDE } from "@/lib/sceneMeta";
 import { copyLocationSubtree, descendantIds, parentOptions } from "@/lib/locationTree";
 import { copyNpcRelations, loadRelations } from "@/lib/npcRelations";
 import { dispatchTutorialAction } from "@/utils/tutorialStorage";
+import { Dices } from "lucide-react";
+import { canGenerateNames, generateNames } from "@/lib/nameGenerator";
 
 function CopyOption({ checked, onChange, title, hint }) {
   return (
@@ -59,8 +61,24 @@ export default function CodexEntryDialog({
   const [copyRelations, setCopyRelations] = useState(true);
   const [copyChildren, setCopyChildren] = useState(true);
   const [sourceRelationCount, setSourceRelationCount] = useState(0);
+  const [universeId, setUniverseId] = useState("");
+  const [nameGender, setNameGender] = useState("neutral");
   const allLocations = locations ?? fetchedLocations;
   const meta = KIND_META[kind] || KIND_META.npc;
+
+  useEffect(() => {
+    if (!open || kind !== "npc" || !campaignId) return;
+    let cancelled = false;
+    api.entities.Campaign.get(campaignId)
+      .then((c) => { if (!cancelled) setUniverseId(c?.universe_type || ""); })
+      .catch(() => { if (!cancelled) setUniverseId(""); });
+    return () => { cancelled = true; };
+  }, [open, kind, campaignId]);
+
+  const generateName = () => {
+    const [name] = generateNames({ universeId, gender: nameGender, withFamily: true });
+    if (name) set("name", name);
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -207,7 +225,23 @@ export default function CodexEntryDialog({
         <div className="space-y-2">
           <Label>{meta.nameLabel}</Label>
           <Input data-tutorial="codex-name" value={form.name || ""} onChange={(e) => set("name", e.target.value)} />
-        </div>
+          {kind === "npc" && !entry && canGenerateNames(universeId) && (
+            <div className="flex items-center gap-2">
+              <Select value={nameGender} onValueChange={setNameGender}>
+                <SelectTrigger className="h-8 w-32 text-xs" aria-label="Genre du nom généré">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="neutral">Au hasard</SelectItem>
+                  <SelectItem value="male">Masculin</SelectItem>
+                  <SelectItem value="female">Féminin</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button type="button" variant="outline" size="sm" onClick={generateName}>
+                <Dices className="mr-2 h-4 w-4" /> Génération aléatoire
+              </Button>
+            </div>
+          )}        </div>
 
         <div className="space-y-2">
           <Label>Commentaire (facultatif)</Label>

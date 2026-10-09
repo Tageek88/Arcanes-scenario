@@ -1,8 +1,10 @@
-import React from "react";
+import React from 'react';
 import { Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import ResponsiveDialog from "@/components/common/ResponsiveDialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { UNIVERSE_TYPES, DEFAULT_UNIVERSE } from '@/lib/universeMeta';
 
 const TypedInput = /** @type {React.ComponentType<React.InputHTMLAttributes<HTMLInputElement>>} */ (Input);
 const TypedTextarea = /** @type {React.ComponentType<React.TextareaHTMLAttributes<HTMLTextAreaElement>>} */ (Textarea);
@@ -11,7 +13,7 @@ const TypedTextarea = /** @type {React.ComponentType<React.TextareaHTMLAttribute
  * @typedef {Object} CampaignDialogProps
  * @property {boolean} open
  * @property {(value: boolean) => void} onOpenChange
- * @property {{ name: string, system: string, summary: string }} form
+ * @property {{ name: string, system: string, summary: string, universe_type: string }} form
  * @property {(field: string, value: string) => void} setField
  * @property {boolean} saving
  * @property {() => void} onSave
@@ -21,6 +23,11 @@ const TypedTextarea = /** @type {React.ComponentType<React.TextareaHTMLAttribute
 
 /** @param {CampaignDialogProps} props */
 export default function CampaignDialog({ open, onOpenChange, form, setField, saving, onSave, editing = false, onDelete }) {
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave();
+  };
+
   const footer = (
     <div className="flex items-center justify-between gap-2">
       {editing && onDelete ? (
@@ -46,7 +53,7 @@ export default function CampaignDialog({ open, onOpenChange, form, setField, sav
         <button
           type="button"
           className="inline-flex items-center justify-center rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:pointer-events-none disabled:opacity-50"
-          onClick={onSave}
+          onClick={handleSubmit}
           disabled={saving || !form.name.trim()}
         >
           {saving ? "Enregistrement…" : editing ? "Enregistrer" : "Créer la campagne"}
@@ -67,6 +74,7 @@ export default function CampaignDialog({ open, onOpenChange, form, setField, sav
       }
       footer={footer}
     >
+      <form onSubmit={handleSubmit}>
       <div className="space-y-4 py-1">
         <div className="space-y-2">
           <label htmlFor="campaign-name" className="text-sm font-medium leading-none">
@@ -103,7 +111,28 @@ export default function CampaignDialog({ open, onOpenChange, form, setField, sav
             placeholder="L'intrigue générale de la campagne…"
           />
         </div>
+          <div className="space-y-2">
+            <label htmlFor="universe_type" className="text-sm font-medium leading-none">
+              Type d'univers
+            </label>
+            <Select
+              value={form.universe_type || DEFAULT_UNIVERSE}
+              onValueChange={(value) => setField("universe_type", value)}
+            >
+              <SelectTrigger id="universe_type">
+                <SelectValue placeholder="Choisissez un univers..." />
+              </SelectTrigger>
+              <SelectContent>
+                {UNIVERSE_TYPES.map((type) => (
+                  <SelectItem key={type.id} value={type.id}>
+                    {type.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
       </div>
+        </div>
+      </form>
     </ResponsiveDialog>
   );
 }

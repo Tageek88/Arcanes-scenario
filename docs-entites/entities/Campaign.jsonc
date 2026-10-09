@@ -3,7 +3,13 @@
   "type": "object",
   "properties": {
     "name": {
-      "type": "string"
+      "type": "string",
+      "description": "Nom de la campagne"
+    },
+    "universe_type": {
+      "type": "string",
+      "enum": ["arcanes", "heroic_fantasy", "cosmic_horror", "gothic", "cyberpunk", "space_opera", "dark_fantasy", "custom"],
+      "description": "Type d'univers de la campagne"
     },
     "system": {
       "type": "string"
@@ -26,8 +32,8 @@
   ],
   "rls": {
     "create": {
-      "created_by_id": "{{user.id}}"
-    },
+          "created_by_id": "{{user.id}}"
+        },
     "read": {
       "$or": [
         {
@@ -60,8 +66,8 @@
         {
           "user_condition": {
             "role": "admin"
-          }
-        }
+  }
+}
       ]
     }
   }

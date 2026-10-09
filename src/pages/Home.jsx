@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "@/api/localClient";
-import { Plus } from "lucide-react";
+import { Plus, Pencil } from "lucide-react";
 import SceneBoard from "@/components/home/SceneBoard";
 import MobileSceneList from "@/components/home/MobileSceneList";
 import SceneEditor from "@/components/home/SceneEditor";
@@ -42,7 +42,7 @@ const EMPTY_SCENE = {
   clue_ids: [],
 };
 
-const EMPTY_CAMPAIGN = { name: "", system: "", summary: "" };
+const EMPTY_CAMPAIGN = { name: "", system: "", summary: "", universe_type: "arcanes" };
 
 /**
  * @param {{ status: string }[]} list
@@ -420,6 +420,7 @@ export default function Home() {
       name: campaign.name || "",
       system: campaign.system || "",
       summary: campaign.summary || "",
+      universe_type: campaign.universe_type || "arcanes",
     });
     setCampaignOpen(true);
   };
@@ -601,6 +602,11 @@ export default function Home() {
             allowCreate
           />
           <PrintButton campaignId={campaignId} preset="scenes" />
+          {campaignId && (
+            <Button variant="outline" onClick={openEditCampaign}>
+              <Pencil className="mr-2 h-4 w-4" /> Modifier la campagne
+            </Button>
+          )}
           <Button
             data-tutorial={campaignId ? "home-new" : "btn-new-campaign"}
             onClick={() => (campaignId ? openNewScene(null) : openNewCampaign())}
