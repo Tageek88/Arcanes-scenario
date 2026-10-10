@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { CalendarPlus, Copy, Mail, MessageCircle, Plus, RefreshCw, Trash2 } from "lucide-react";
+import { CalendarPlus, Copy, Mail, MessageCircle, Plus, RefreshCw, Trash2, Edit2 } from "lucide-react";
 import ResponsiveDialog from "@/components/common/ResponsiveDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,6 +52,7 @@ export default function SessionPollDialog({
 }) {
   const { toast } = useToast();
   const [serviceUrl, setServiceUrl] = useState(getPollServiceUrl);
+  const [editingServiceUrl, setEditingServiceUrl] = useState(false);
   const [title, setTitle] = useState("");
   const [comment, setComment] = useState("");
   const [playerNames, setPlayerNames] = useState("");
@@ -403,7 +404,20 @@ export default function SessionPollDialog({
       <div className="max-h-[70vh] space-y-6 overflow-y-auto py-1">
         <section className="space-y-3 rounded-lg border border-border p-3">
           <div className="space-y-2">
-            <Label htmlFor="poll-service-url">Adresse du site Cloudflare Pages</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="poll-service-url">Adresse du site Cloudflare Pages</Label>
+              {!editingServiceUrl && (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setEditingServiceUrl(true)}
+                  aria-label="Modifier l'adresse Cloudflare"
+                >
+                  <Edit2 className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
             <Input
               id="poll-service-url"
               type="url"
@@ -411,15 +425,25 @@ export default function SessionPollDialog({
               value={serviceUrl}
               onChange={(event) => setServiceUrl(event.target.value)}
               onBlur={() => {
-                if (!serviceUrl.trim()) return;
+                const url = serviceUrl.trim();
+                if (!url) {
+                  const defaultUrl = getPollServiceUrl();
+                  setServiceUrl(defaultUrl);
+                  savePollServiceUrl(defaultUrl);
+                  setEditingServiceUrl(false);
+                  return;
+                }
                 try {
-                  const normalized = normalizePollServiceUrl(serviceUrl);
+                  const normalized = normalizePollServiceUrl(url);
                   savePollServiceUrl(normalized);
                   setServiceUrl(normalized);
+                  setEditingServiceUrl(false);
                 } catch {
                   // La validation détaillée est affichée lors de l'enregistrement ou de la création.
                 }
               }}
+              disabled={!editingServiceUrl}
+              className={!editingServiceUrl ? "bg-muted text-muted-foreground" : ""}
             />
             <p className="text-xs text-muted-foreground">
               Cette adresse est mémorisée localement et peut être remplacée par celle de votre déploiement.

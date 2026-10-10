@@ -1,11 +1,28 @@
+// CodexEntryDialog component for managing codex entries in the application.
 import React, { useEffect, useMemo, useState } from "react";
+
+// This component provides a dialog interface for creating, editing, and duplicating codex entries.
 import { api } from "@/api/localClient";
+
+// External and internal dependencies for the CodexEntryDialog component.
 import { withDataBatch } from "@/lib/dataEvents";
+
+// UI components for the CodexEntryDialog.
 import { Button } from "@/components/ui/button";
+
+// Input component for single-line text fields.
 import { Input } from "@/components/ui/input";
+
+// Textarea component for multi-line input fields.
 import { Textarea } from "@/components/ui/textarea";
+
+// Label component for form fields.
 import { Label } from "@/components/ui/label";
+
+// Switch component for toggle inputs.
 import { Switch } from "@/components/ui/switch";
+
+// Select component for dropdown menus.
 import {
   Select,
   SelectTrigger,
@@ -13,18 +30,40 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+// Common and custom components used within the CodexEntryDialog.
 import ResponsiveDialog from "@/components/common/ResponsiveDialog";
-import AttachmentsField from "@/components/codex/AttachmentsField";
-import NpcRelations from "@/components/codex/NpcRelations";
-import { useToast } from "@/components/ui/use-toast";
-import { KIND_META, defaultEntry, duplicateDraft } from "@/lib/codex";
-import { NPC_ATTITUDE } from "@/lib/sceneMeta";
-import { copyLocationSubtree, descendantIds, parentOptions } from "@/lib/locationTree";
-import { copyNpcRelations, loadRelations } from "@/lib/npcRelations";
-import { dispatchTutorialAction } from "@/utils/tutorialStorage";
-import { Dices } from "lucide-react";
-import { canGenerateNames, generateNames } from "@/lib/nameGenerator";
 
+// Import the components we need.
+import AttachmentsField from "@/components/codex/AttachmentsField";
+
+// NPC relations component for managing relationships between NPCs.
+import NpcRelations from "@/components/codex/NpcRelations";
+
+// Toast notification hook for displaying messages to the user.
+import { useToast } from "@/components/ui/use-toast";
+
+// Codex-related utilities and constants.
+import { KIND_META, defaultEntry, duplicateDraft } from "@/lib/codex";
+
+// Location tree utilities for managing hierarchical location data.
+import { NPC_ATTITUDE } from "@/lib/sceneMeta";
+
+// NPC utilities for managing NPC data.
+import { copyLocationSubtree, descendantIds, parentOptions } from "@/lib/locationTree";
+// NPC relations utilities for copying and loading relationships.
+import { copyNpcRelations, loadRelations } from "@/lib/npcRelations";
+
+// Tutorial storage utility for dispatching tutorial actions.
+import { dispatchTutorialAction } from "@/utils/tutorialStorage";
+
+// Icon component for dice, used in name generation UI.
+import { Dices } from "lucide-react";
+
+// Name generation utilities for creating NPC names based on universe and gender.
+import { canGenerateNames, generateNames, generatePlaceNames, generateItemNames } from "@/lib/nameGenerator";
+
+
+// Component for rendering copy options in the dialog.
 function CopyOption({ checked, onChange, title, hint }) {
   return (
     <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-border p-3">
@@ -42,6 +81,7 @@ function CopyOption({ checked, onChange, title, hint }) {
   );
 }
 
+// Main dialog component for creating or editing codex entries.
 export default function CodexEntryDialog({
   open,
   onOpenChange,
@@ -53,33 +93,83 @@ export default function CodexEntryDialog({
   defaultLocationId = "",
   duplicateOf = null,
   locations,
-}) {
+}){
+  
+  // Toast notification hook for displaying messages to the user.
   const { toast } = useToast();
+
+  // Form state for managing the codex entry being edited or created.
   const [form, setForm] = useState(defaultEntry(kind));
+
+  // Saving state for managing the save operation and related UI feedback.
   const [saving, setSaving] = useState(false);
+
+  // State for managing fetched locations and copy options in the dialog.
   const [fetchedLocations, setFetchedLocations] = useState([]);
+
+  // State for managing copy options and related metadata.
   const [copyRelations, setCopyRelations] = useState(true);
+
+  // State for managing copy of child entries in the dialog.
   const [copyChildren, setCopyChildren] = useState(true);
+
+  // State for managing the count of source relations for the current entry.
   const [sourceRelationCount, setSourceRelationCount] = useState(0);
+
+  // State for managing the universe ID and name generation gender for NPCs.
   const [universeId, setUniverseId] = useState("");
+
+  // State for managing the universe ID and name generation gender for NPCs.
   const [nameGender, setNameGender] = useState("neutral");
+
+  // State for managing the list of generated names for NPCs.
+  const [generatedNames, setGeneratedNames] = useState([]);
+
+  // Combined list of all locations, either from props or fetched from the API.
   const allLocations = locations ?? fetchedLocations;
+
+  // Metadata for the current kind of codex entry, used for rendering and behavior.
   const meta = KIND_META[kind] || KIND_META.npc;
 
+  // Effect for fetching the universe ID when the dialog is opened for an NPC entry.
   useEffect(() => {
-    if (!open || kind !== "npc" || !campaignId) return;
+    if (!open || !campaignId) return;
     let cancelled = false;
     api.entities.Campaign.get(campaignId)
       .then((c) => { if (!cancelled) setUniverseId(c?.universe_type || ""); })
       .catch(() => { if (!cancelled) setUniverseId(""); });
     return () => { cancelled = true; };
-  }, [open, kind, campaignId]);
+  }, [open, campaignId]);
 
+  // Function for generating a name for the current NPC entry based on the universe ID and name generation gender.
   const generateName = () => {
     const [name] = generateNames({ universeId, gender: nameGender, withFamily: true });
-    if (name) set("name", name);
+    if (name) setForm((prev) => ({ ...prev, name }));
   };
 
+  // State for managing the list of locations that can be selected for NPCs.
+  const handleGenerateNames = () => {
+    if (!universeId || universeId === "custom") {
+      toast({
+        title: "Universe non défini",
+        description: "Définissez d'abord un type d'univers pour votre campagne.",
+      });
+      return;
+    }
+
+    // Generate a list of names based on the kind of entry and universe ID.
+    let result = [];
+    if (kind === "npc") {
+      result = generateNames({ universeId, gender: "neutral", withFamily: true, count: 3 });
+    } else if (kind === "location") {
+      result = generatePlaceNames({ universeId, placeType: entry?.type || "lieu", count: 3 });
+    } else if (kind === "clue") {
+      result = generateItemNames({ universeId, count: 3 });
+    }
+    setGeneratedNames(result);
+  };
+
+  // Effect for initializing the form when the dialog is opened, handling entry duplication and default values.
   useEffect(() => {
     if (!open) return;
     if (entry) setForm({ ...entry });
@@ -93,6 +183,7 @@ export default function CodexEntryDialog({
     setCopyChildren(true);
   }, [open, kind, entry, defaultParentId, defaultLocationId, duplicateOf]);
 
+  // Effect for fetching locations when the dialog is opened for location, NPC, or clue entries.
   useEffect(() => {
     if (locations || !open || (kind !== "location" && kind !== "npc" && kind !== "clue") || !campaignId) return;
     let alive = true;
@@ -104,6 +195,7 @@ export default function CodexEntryDialog({
     };
   }, [locations, open, kind, campaignId]);
 
+  // Effect for counting the source relations of the duplicate entry when the dialog is opened for an NPC entry.
   useEffect(() => {
     if (!open || !duplicateOf || kind !== "npc" || !campaignId) {
       setSourceRelationCount(0);
@@ -118,18 +210,22 @@ export default function CodexEntryDialog({
     };
   }, [open, duplicateOf, kind, campaignId]);
 
+  // Memoized list of location choices for the parent location dropdown.
   const locationChoices = useMemo(
     () => parentOptions(allLocations, kind === "location" ? entry?.id : null),
     [allLocations, kind, entry?.id]
   );
 
+  // Memoized count of child entries for the duplicate location entry.
   const childCount = useMemo(
     () => (duplicateOf && kind === "location" ? descendantIds(allLocations, duplicateOf.id).length : 0),
     [duplicateOf, kind, allLocations]
   );
 
+  // Helper function for updating the form state.
   const set = (key, value) => setForm((f) => ({ ...f, [key]: value }));
 
+  // Function for saving the current form data, handling creation, updating, and copying of related entries.
   const save = async () => {
     if (!form.name?.trim() || !campaignId) return;
     setSaving(true);
@@ -139,6 +235,7 @@ export default function CodexEntryDialog({
       comment: form.comment?.trim() || "",
       attachments: form.attachments || [],
     };
+    // Add kind-specific fields to the payload based on the type of codex entry.
     if (kind === "npc") {
       payload.role = form.role || "";
       payload.description = form.description || "";
@@ -157,6 +254,7 @@ export default function CodexEntryDialog({
       payload.location_id = form.location_id || "";
     }
     try {
+      // Variable to hold the newly created entry, if any.
       let created = null;
       await withDataBatch(async () => {
         if (entry?.id) await api.entities[meta.entity].update(entry.id, payload);
@@ -177,6 +275,8 @@ export default function CodexEntryDialog({
           }
         }
       });
+
+      // Close the dialog and trigger any necessary callbacks after saving.
       onOpenChange(false);
       if (created) dispatchTutorialAction(`${kind}-created`);
       await onSaved(created);
@@ -187,11 +287,14 @@ export default function CodexEntryDialog({
         title: "Enregistrement impossible",
         description: "L'élément n'a pas été enregistré.",
       });
+
+      // Optionally, additional error handling or user feedback could be added here.
     } finally {
       setSaving(false);
     }
   };
 
+  // Footer component for the dialog, containing action buttons for canceling or saving the entry.
   const footer = (
     <div className="flex justify-end gap-2">
       <Button data-tutorial="codex-cancel" variant="ghost" onClick={() => onOpenChange(false)}>
@@ -203,12 +306,14 @@ export default function CodexEntryDialog({
     </div>
   );
 
+  // Title for the dialog, dynamically set based on whether the entry is being edited, duplicated, or created anew.
   const title = entry?.id
     ? `Modifier — ${meta.singular}`
     : duplicateOf
       ? `Dupliquer — ${meta.singular}`
       : `Nouveau ${meta.singular}`;
 
+  // Render the responsive dialog component with the appropriate title, description, and footer, and include the form fields for the codex entry.
   return (
     <ResponsiveDialog
       open={open}
@@ -241,8 +346,33 @@ export default function CodexEntryDialog({
                 <Dices className="mr-2 h-4 w-4" /> Génération aléatoire
               </Button>
             </div>
-          )}        </div>
+          )}
 
+          {(kind === "location" || kind === "clue") && !entry && canGenerateNames(universeId) && (
+            <Button type="button" variant="outline" size="sm" onClick={handleGenerateNames}>
+              <Dices className="mr-2 h-4 w-4" />
+              {kind === "location" ? "Générer des noms de lieux" : "Générer des noms d'indices/infos"}
+            </Button>
+          )}
+
+          {generatedNames.length > 0 && (kind === "location" || kind === "clue") && (
+            <div className="flex flex-col gap-1">
+              {generatedNames.map((name) => (
+                <Button
+                  key={name}
+                  type="button"
+                  variant="ghost"
+                  className="justify-start text-left h-8"
+                  onClick={() => set("name", name)}
+                >
+                  {name}
+                </Button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Comment field for the codex entry, optional for the user to fill out. */}
         <div className="space-y-2">
           <Label>Commentaire (facultatif)</Label>
           <Input
@@ -252,6 +382,7 @@ export default function CodexEntryDialog({
           />
         </div>
 
+        {/* Copy options for duplicating NPC or location entries, conditionally rendered based on the kind of entry and whether it is a duplicate. */}
         {duplicateOf && kind === "npc" && (
           <CopyOption
             checked={copyRelations}
@@ -260,6 +391,8 @@ export default function CodexEntryDialog({
             hint="Le PNJ dupliqué aura les mêmes relations que l'original avec les autres PNJ. Son lieu d'attribution est conservé."
           />
         )}
+
+        {/* Copy option for duplicating location entries, conditionally rendered based on the kind of entry and whether it is a duplicate. */}
         {duplicateOf && kind === "location" && (
           <CopyOption
             checked={copyChildren}
@@ -269,6 +402,7 @@ export default function CodexEntryDialog({
           />
         )}
 
+        {/* NPC-specific fields, conditionally rendered when the kind of entry is "npc". */}
         {kind === "npc" && (
           <>
             <div className="space-y-2">
@@ -280,6 +414,7 @@ export default function CodexEntryDialog({
               />
             </div>
 
+            {/* Role field for the NPC, allowing the user to specify the character's role or occupation. */}
             <div className="space-y-2">
               <Label>Attitude</Label>
               <Select value={form.attitude || "neutre"} onValueChange={(v) => set("attitude", v)}>
@@ -295,7 +430,7 @@ export default function CodexEntryDialog({
                 </SelectContent>
               </Select>
             </div>
-
+            {/* Attitude field for the NPC, allowing the user to specify the character's general demeanor or disposition. */}
             <div className="space-y-2">
               <Label>Lieu d'attribution</Label>
               <Select
@@ -321,6 +456,7 @@ export default function CodexEntryDialog({
           </>
         )}
 
+        {/* Location-specific fields, conditionally rendered when the kind of entry is "location". */}
         {kind === "location" && (
           <>
             <div className="space-y-2">
@@ -332,6 +468,8 @@ export default function CodexEntryDialog({
               />
             </div>
 
+            {/* Type field for the location, allowing the user to specify the kind of location (e.g., country, city, street, house, dungeon). */}
+            {/* Parent location field for the location, allowing the user to specify the hierarchical parent of the current location (e.g., a city belongs to a country, a street belongs to a city). */}
             <div className="space-y-2">
               <Label>Lieu parent</Label>
               <Select
@@ -359,7 +497,9 @@ export default function CodexEntryDialog({
 
         {kind === "clue" && (
           <>
+            {/* Clue-specific fields, conditionally rendered when the kind of entry is "clue". */}
             <div className="space-y-2">
+              {/* Type field for the clue, allowing the user to specify whether it is an "info" or an "indice". */}
               <Label>Type</Label>
               <Select
                 value={form.clue_type === "info" ? "info" : "indice"}
@@ -374,7 +514,9 @@ export default function CodexEntryDialog({
                 </SelectContent>
               </Select>
             </div>
+
             <div className="space-y-2">
+              {/* Location assignment field for the clue, allowing the user to specify the location where the clue is assigned. */}
               <Label>Lieu d'attribution</Label>
               <Select
                 value={form.location_id || "_none"}
@@ -396,6 +538,8 @@ export default function CodexEntryDialog({
           </>
         )}
 
+        
+        {/* Description field for the codex entry, allowing the user to provide a detailed description of the entry. */}
         <div className="space-y-2">
           <Label>Description</Label>
           <Textarea
@@ -405,8 +549,10 @@ export default function CodexEntryDialog({
           />
         </div>
 
+        {/* Attachments field for the codex entry, allowing the user to upload and manage related files. */}
         <AttachmentsField value={form.attachments || []} onChange={(files) => set("attachments", files)} />
 
+        {/* NPC relations section, conditionally rendered when the kind of entry is "npc" and the entry has been saved. */}
         {kind === "npc" &&
           (entry?.id ? (
             <NpcRelations npc={entry} campaignId={campaignId} />
@@ -416,6 +562,7 @@ export default function CodexEntryDialog({
             </p>
           ))}
 
+        {/* Clue status section, conditionally rendered when the kind of entry is "clue" and the clue type is not "info". */}
         {kind === "clue" && (form.clue_type !== "info" ? (
           <div className="flex items-center justify-between rounded-lg border border-border p-3">
             <div>

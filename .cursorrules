@@ -1,4 +1,54 @@
-# ⚠️ CRITICAL RULES (READ FIRST - NEVER VIOLATE)
+# âš ï¸ CRITICAL RULES (READ FIRST - NEVER VIOLATE)
+
+## AUTONOMY RULES (for complex tasks)
+- When a task requires creating/modifying MORE THAN 3 files, SPLIT it into sub-tasks of 2-3 files max.
+- Execute sub-tasks ONE AT A TIME. After each sub-task, STOP and wait for user confirmation before continuing.
+- Never try to create 5+ files in a single response. If you need to, split into multiple prompts.
+- For data files with similar structure (like nameData/*.js), create them ONE BY ONE, not all at once.
+- If you feel the context is getting too long, STOP and summarize what's been done so far.
+- Prefer incremental progress over ambitious single-shot attempts.
+
+## FILE READING RULES (for large files)
+- NEVER read an entire file larger than 200 lines. Instead:
+  1. First, SEARCH for the specific function, variable, or section you need
+  2. Then read ONLY the relevant portion (50 lines around the match)
+- For `src/api/localClient.js`: search for "TABLES", "db.version", or the entity name you need. Do NOT read the whole file.
+- For `src/pages/*.jsx`: search for the specific section (e.g., "return (", "header", "useEffect") instead of reading everything.
+- If you need to understand a file's structure, search for "export" or "function" to get an overview first.
+- When modifying a large file, show ONLY the changed lines with `// ... existing code ...` above and below.
+
+## CONFIRMATION OBLIGATOIRE (NE JAMAIS CONTOURNER)
+
+Avant TOUTE modification de fichier, tu DOIS :
+
+1. **Présenter un plan clair** :
+   - Liste les fichiers que tu vas modifier
+   - Pour chaque fichier, décris brièvement ce que tu vas changer (ex: "Ajouter un bouton Dices à côté du champ name")
+   - Mentionne les risques potentiels (ex: "Cela modifie la structure du formulaire")
+
+2. **Attendre la validation explicite** :
+   - Ne JAMAIS appliquer les modifications sans que l'utilisateur ait répondu "OK", "Oui", "Vas-y", ou équivalent
+   - Si l'utilisateur demande des ajustements, modifie ton plan avant d'agir
+
+3. **Exceptions (pas besoin de confirmation)** :
+   - Lecture de fichiers (read_file)
+   - Recherche dans le code (search)
+   - Réponses textuelles sans modification de code
+
+4. **Format du plan** :
+
+📋 Plan de modifications :
+Fichier 1 : src/components/codex/CodexEntryDialog.jsx
+Ajouter import de Dices depuis lucide-react
+Ajouter state generatedNames
+Ajouter fonction handleGenerateNames
+Ajouter bouton de génération à côté du champ name
+Fichier 2 : (aucun autre fichier)
+⚠️ Risques : Modifie la structure du formulaire, mais pas la logique de sauvegarde.
+Confirmer pour appliquer ? (oui/non)
+
+
+**NE JAMAIS** appliquer de modifications sans cette étape, même si le prompt dit "implémente directement". La sécurité prime sur la rapidité.
 
 ## This is a LOCAL-FIRST app
 - NO backend server. NO REST API. NO routes. NO models folder. NO controllers.
@@ -14,9 +64,9 @@
 - create auto-adds: id, created_date, updated_date, created_by_id, created_by.
 
 ## ADD A NEW ENTITY (follow EXACTLY this order)
-1. src/api/localClient.js → add name to TABLES array + new db.version(N+1).stores(...)
-2. src/lib/campaignDelete.js → add to LINKED_ENTITIES (children before parents)
-3. If printable → src/lib/printModel.js, src/components/print/PrintSheet.jsx, src/components/print/PrintButton.jsx, src/lib/editablePdf.js
+1. src/api/localClient.js â†’ add name to TABLES array + new db.version(N+1).stores(...)
+2. src/lib/campaignDelete.js â†’ add to LINKED_ENTITIES (children before parents)
+3. If printable â†’ src/lib/printModel.js, src/components/print/PrintSheet.jsx, src/components/print/PrintButton.jsx, src/lib/editablePdf.js
 4. docs-entites/entities/<Name>.jsonc (documentation only)
 
 ## NEVER DO THESE (instant failure)

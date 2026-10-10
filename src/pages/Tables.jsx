@@ -22,6 +22,7 @@ import PrintButton from "@/components/print/PrintButton";
 import CampaignSelect from "@/components/common/CampaignSelect";
 import { usePageFilter } from "@/lib/PageFilterContext";
 import { dispatchTutorialAction } from "@/utils/tutorialStorage";
+import DiceRoller from "@/components/tables/DiceRoller";
 
 const SafeAlertDialogContent = (
   /** @type {React.ComponentProps<typeof AlertDialogContent>} */ props
@@ -240,6 +241,8 @@ export default function Tables() {
           </button>
         </div>
       </header>
+
+      <DiceRoller />
 
       <div className="flex flex-wrap items-center gap-2">
         <button

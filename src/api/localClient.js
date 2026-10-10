@@ -1,17 +1,21 @@
+// === SECTION IMPORTS ===
 import Dexie from "dexie";
 import { notifyDataChanged } from "@/lib/dataEvents";
-
+// === SECTION TABLES ===
 const BASE_TABLES = [
   "Campaign", "Act", "Scene", "NPC", "Location", "Clue", "RollTable", "GameSession", "Note",
 ];
 
+// === SECTION RELATION TABLES ===
 const RELATION_TABLES = [...BASE_TABLES, "NPCRelation"];
 const VERSION_3_TABLES = [...RELATION_TABLES, "GameSheetModel", "GameCharacter", "SkillCatalog", "EquipmentCatalog"];
 const VERSION_4_TABLES = [...VERSION_3_TABLES, "SessionPoll"];
 export const TABLES = [...VERSION_4_TABLES, "Quest"];
 
+// === SECTION TABLE CONSTANTS ===
 export const LOCAL_USER = { id: "local-user", email: "local@arcanes", full_name: "MJ", role: "admin" };
 
+// === SECTION DATABASE INITIALIZATION ===  
 export const db = new Dexie("arcanes_scenario");
 // La version 1 doit rester déclarée : elle permet de mettre à niveau les bases existantes.
 db.version(1).stores(Object.fromEntries(BASE_TABLES.map((t) => [t, "id, campaign_id"])));
@@ -27,10 +31,12 @@ try {
   /* ignoré */
 }
 
+// === SECTION UTILS ===
 const uid = () =>
   globalThis.crypto?.randomUUID?.() ||
   `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 
+  // === SECTION MATCHING ===
 const matchValue = (actual, expected) => {
   if (expected && typeof expected === "object" && !Array.isArray(expected)) {
     return Object.entries(expected).every(([op, v]) => {
@@ -57,8 +63,10 @@ const matchValue = (actual, expected) => {
   return actual === expected;
 };
 
+// === SECTION MATCHING ===
 const matches = (row, query) => Object.entries(query || {}).every(([k, v]) => matchValue(row[k], v));
 
+// === SECTION SORTING ===
 const compare = (a, b) => {
   if (a == null && b == null) return 0;
   if (a == null) return 1;
@@ -67,6 +75,7 @@ const compare = (a, b) => {
   return String(a).localeCompare(String(b), "fr", { numeric: true });
 };
 
+// === SECTION SORTING FUNCTION ===
 const sortRows = (rows, sort) => {
   if (!sort || typeof sort !== "string") return rows;
   const desc = sort.startsWith("-");
@@ -74,8 +83,10 @@ const sortRows = (rows, sort) => {
   return [...rows].sort((x, y) => (desc ? -1 : 1) * compare(x[field], y[field]));
 };
 
+// === SECTION ENTITY FACTORY ===
 const makeEntity = (name) => {
   const table = db.table(name);
+  // === SECTION SELECT FUNCTION ===
 
   const select = async (query = {}) => {
     const rows =
@@ -85,6 +96,7 @@ const makeEntity = (name) => {
     return rows.filter((row) => matches(row, query));
   };
 
+  // === SECTION NOT FOUND FUNCTION ===
   const notFound = (id) =>
     Object.assign(new Error(`Entity ${name} with ID ${id} not found`), { status: 404 });
 
@@ -95,16 +107,22 @@ const makeEntity = (name) => {
       if (opts.limit) items = items.slice(0, opts.limit);
       return { items };
     },
+
+    // === SECTION LIST FUNCTION ===
     async list(sort, limit) {
       let items = sortRows(await table.toArray(), sort);
       if (limit) items = items.slice(0, limit);
       return items;
     },
+
+    // === SECTION GET FUNCTION ===
     async get(id) {
       const row = await table.get(id);
       if (!row) throw notFound(id);
       return row;
     },
+
+    // === SECTION CREATE FUNCTION ===
     async create(data, options = {}) {
       const now = new Date().toISOString();
       const row = {
@@ -115,10 +133,14 @@ const makeEntity = (name) => {
         created_by_id: LOCAL_USER.id,
         created_by: LOCAL_USER.email,
       };
+
+      // === SECTION ADDITIONAL METADATA ===
       await table.add(row);
       if (!options.silent) notifyDataChanged();
       return row;
     },
+
+    // === SECTION UPDATE FUNCTION ===
     async update(id, data, options = {}) {
       const existing = await table.get(id);
       if (!existing) throw notFound(id);
@@ -127,17 +149,23 @@ const makeEntity = (name) => {
       if (!options.silent) notifyDataChanged();
       return row;
     },
+
+    // === SECTION DELETE FUNCTION ===
     async delete(id, options = {}) {
       await table.delete(id);
       if (!options.silent) notifyDataChanged();
       return { success: true };
     },
+
+    // === SECTION DELETE MANY FUNCTION ===
     async deleteMany(query = {}, options = {}) {
       const rows = await select(query);
       await table.bulkDelete(rows.map((r) => r.id));
       if (!options.silent) notifyDataChanged();
       return { deleted: rows.length };
     },
+
+    // === SECTION AGGREGATE FUNCTION ===
     async aggregate({ query = {}, groupBy } = {}) {
       const rows = await select(query);
       const counts = new Map();
@@ -145,8 +173,10 @@ const makeEntity = (name) => {
       return { rows: [...counts].map(([key, count]) => ({ [groupBy]: key, count })) };
     },
   };
+// === END SECTION ENTITY FACTORY ===
 };
 
+// === SECTION FILE READER ===
 const readAsDataUrl = (file) =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -155,6 +185,7 @@ const readAsDataUrl = (file) =>
     reader.readAsDataURL(file);
   });
 
+  // === SECTION API ===
 export const api = {
   entities: Object.fromEntries(TABLES.map((t) => [t, makeEntity(t)])),
   integrations: {
@@ -163,6 +194,8 @@ export const api = {
       UploadFile: async ({ file }) => ({ file_url: await readAsDataUrl(file) }),
     },
   },
+
+  // === SECTION INTEGRATIONS ===
   auth: {
     me: async () => LOCAL_USER,
     isAuthenticated: async () => true,
