@@ -1,5 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
-import { api } from "@/api/localClient";
+import React, { useState } from "react";
 import { Dices, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -14,15 +13,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import TableCard from "@/components/tables/TableCard";
 import TableEditor from "@/components/tables/TableEditor";
-import { TABLE_CATEGORIES } from "@/lib/tableMeta";
-import { getSelectedCampaignId, setSelectedCampaignId } from "@/lib/campaignStore";
-import { useToast } from "@/components/ui/use-toast";
-import { useDataRefresh } from "@/lib/RefreshContext";
+import { TABLE_CATEGORIES } from "@/lib/meta/tableMeta";
 import PrintButton from "@/components/print/PrintButton";
 import CampaignSelect from "@/components/common/CampaignSelect";
-import { usePageFilter } from "@/lib/PageFilterContext";
-import { dispatchTutorialAction } from "@/utils/tutorialStorage";
+import { usePageFilter } from "@/lib/context/PageFilterContext";
 import DiceRoller from "@/components/tables/DiceRoller";
+import { useCampaigns } from "@/hooks/useCampaigns";
+import { useTables } from "@/hooks/useTables";
 
 const SafeAlertDialogContent = (
   /** @type {React.ComponentProps<typeof AlertDialogContent>} */ props
@@ -37,80 +34,15 @@ const EMPTY = /** @type {{ id?: string; name: string; category: string; descript
 });
 
 export default function Tables() {
-  const { toast } = useToast();
-  const { refreshKey: dataRefreshKey } = useDataRefresh();
-  const [campaigns, setCampaigns] = useState(
-    /** @type {Array<{ id: string; name: string }>} */([])
-  );
-  const [campaignId, setCampaignId] = useState(getSelectedCampaignId());
+  const { campaigns, campaignId, selectCampaign } = useCampaigns();
   const [category, setCategory] = usePageFilter("tables.category", "all");
-  const [tables, setTables] = useState(
-    /** @type {Array<{ id: string; name: string; category?: string; description?: string; entries?: Array<{ text?: string; weight?: number }> }>} */([])
-  );
-  const [loading, setLoading] = useState(false);
-  const loadedFor = useRef("");
+  const { tables, loading, saving, saveTable, deleteTable } = useTables(campaignId, category);
 
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(EMPTY);
-  const [saving, setSaving] = useState(false);
   const [pendingDelete, setPendingDelete] = useState(
-    /** @type {{ id: string; name: string; category?: string; description?: string; entries?: Array<{ text?: string; weight?: number }> } | null} */
-    (null)
+    /** @type {import("@/hooks/useTables").RollTable | null} */ (null)
   );
-
-  useEffect(() => {
-    let alive = true;
-    const run = async () => {
-      try {
-        const res = await api.entities.Campaign.filter({}, { sort: "-created_date", limit: 100 });
-        if (!alive) return;
-        const campaignList = /** @type {Array<{ id: string; name: string }>} */ (res.items || []);
-        setCampaigns(campaignList);
-        const stored = getSelectedCampaignId();
-        const valid = campaignList.some((c) => c.id === stored) ? stored : campaignList[0]?.id || "";
-        setCampaignId(valid);
-        setSelectedCampaignId(valid);
-      } catch (error) {
-        console.error("Chargement des campagnes impossible :", error);
-        if (alive) toast({ variant: "destructive", title: "Campagnes indisponibles", description: "Impossible de charger les campagnes locales." });
-      }
-    };
-    run();
-    return () => { alive = false; };
-  }, [dataRefreshKey, toast]);
-
-  useEffect(() => {
-    if (!campaignId) {
-      setTables([]);
-      setLoading(false);
-      return;
-    }
-    let alive = true;
-    const contextKey = `${campaignId}|${category}`;
-    const initial = loadedFor.current !== contextKey;
-    if (initial) setTables([]);
-    const run = async () => {
-      if (initial) setLoading(true);
-      const query = /** @type {Record<string, string>} */ ({ campaign_id: campaignId });
-      if (category !== "all") query.category = category;
-      try {
-        const res = await api.entities.RollTable.filter(query, { sort: "-created_date", limit: 200 });
-        if (!alive) return;
-        const tableList = /** @type {Array<{ id: string; name: string; category?: string; description?: string; entries?: Array<{ text?: string; weight?: number }> }>} */ (res.items || []);
-        setTables(tableList);
-        loadedFor.current = contextKey;
-      } catch (error) {
-        console.error("Chargement des tables impossible :", error);
-        if (alive) toast({ variant: "destructive", title: "Tables indisponibles", description: "Impossible de charger les tables de cette campagne." });
-      } finally {
-        if (alive && initial) setLoading(false);
-      }
-    };
-    run();
-    return () => {
-      alive = false;
-    };
-  }, [campaignId, category, dataRefreshKey, toast]);
 
   const openNew = () => {
     setForm({ ...EMPTY, category: category === "all" ? EMPTY.category : category, entries: [] });
@@ -118,7 +50,7 @@ export default function Tables() {
   };
 
   const openEdit = (
-    /** @type {{ id: string; name: string; category?: string; description?: string; entries?: Array<{ text?: string; weight?: number }> }} */
+    /** @type {import("@/hooks/useTables").RollTable} */
     table
   ) => {
     setForm({
@@ -131,85 +63,19 @@ export default function Tables() {
     setOpen(true);
   };
 
-  const applyTable = (
-    /** @type {{ id: string; name: string; category?: string; description?: string; entries?: Array<{ text?: string; weight?: number }> }} */
-    table,
-    /** @type {string | undefined} */
-    replacedId
-  ) => {
-    setTables((list) => {
-      const rest = list.filter((t) => t.id !== table.id && t.id !== replacedId);
-      const matches = category === "all" || (table.category || "autre") === category;
-      return matches ? [table, ...rest] : rest;
-    });
-  };
-
   const save = async (override = {}) => {
     if (!form.name.trim() || !campaignId) return;
-    setSaving(true);
-    const entries = (override.entries || form.entries || [])
-      .filter((entry) => entry.text?.trim())
-      .map((entry) => ({
-        text: entry.text.trim(),
-        weight: Number(entry.weight) > 0 ? Number(entry.weight) : 1,
-      }));
-    const payload = {
-      campaign_id: campaignId,
-      name: form.name.trim(),
-      category: form.category || "autre",
-      description: form.description || "",
-      entries,
-    };
-    try {
-      const saved = form.id
-        ? await api.entities.RollTable.update(form.id, payload)
-        : await api.entities.RollTable.create(payload);
-      if (!form.id) dispatchTutorialAction("table-created");
-      console.log("RollTable enregistrée :", saved);
-      if (saved?.id) {
-        applyTable(saved, form.id);
-      } else {
-        // réponse sans id : on recharge la liste depuis le serveur
-        const query = /** @type {Record<string, string>} */ ({ campaign_id: campaignId });
-        if (category !== "all") query.category = category;
-        const res = await api.entities.RollTable.filter(query, { sort: "-created_date", limit: 200 });
-        const tableList = /** @type {Array<{ id: string; name: string; category?: string; description?: string; entries?: Array<{ text?: string; weight?: number }> }>} */ (res.items || []);
-        setTables(tableList);
-      }
+    const ok = await saveTable(form, override);
+    if (ok) {
       setOpen(false);
       setForm({ ...EMPTY, entries: [] });
-      toast({ title: form.id ? "Table mise à jour" : "Table créée" });
-    } catch (error) {
-      console.error("Échec enregistrement RollTable :", error);
-      toast({
-        variant: "destructive",
-        title: "Enregistrement impossible",
-        description: "La table n'a pas été enregistrée.",
-      });
-    } finally {
-      setSaving(false);
     }
   };
 
-  const removeTable = async () => {
+  const removeTable = () => {
     const pending = pendingDelete;
     setPendingDelete(null);
-    if (!pending) return;
-
-    const pendingId = pending.id;
-    const previous = tables;
-    setTables((list) => list.filter((t) => t.id !== pendingId));
-    try {
-      await api.entities.RollTable.delete(pendingId);
-      toast({ title: "Table supprimée" });
-    } catch {
-      setTables(previous);
-      toast({
-        variant: "destructive",
-        title: "Suppression impossible",
-        description: "La table a été rétablie.",
-      });
-    }
+    if (pending) deleteTable(pending);
   };
 
   return (
@@ -227,7 +93,7 @@ export default function Tables() {
           <CampaignSelect
             campaigns={campaigns}
             value={campaignId}
-            onValueChange={(id) => { setCampaignId(id); setSelectedCampaignId(id); }}
+            onValueChange={selectCampaign}
           />
           <PrintButton campaignId={campaignId} preset="tables" />
           <button

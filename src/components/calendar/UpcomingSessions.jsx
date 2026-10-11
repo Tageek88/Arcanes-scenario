@@ -4,7 +4,7 @@ import { CalendarPlus } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
-import { dateKey, sessionStatusMeta } from "@/lib/sessionMeta";
+import { dateKey, sessionStatusMeta } from "@/lib/meta/sessionMeta";
 
 export default function UpcomingSessions({ sessions, onOpen, onAdd }) {
   return (

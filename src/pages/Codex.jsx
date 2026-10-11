@@ -1,6 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { api } from "@/api/localClient";
-import { withDataBatch } from "@/lib/dataEvents";
+import React, { useMemo, useState } from "react";
 import { Search, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -27,13 +25,12 @@ import CodexEntryDialog from "@/components/codex/CodexEntryDialog";
 import LocationTree from "@/components/codex/LocationTree";
 import PrintButton from "@/components/print/PrintButton";
 import CampaignSelect from "@/components/common/CampaignSelect";
-import { CODEX_TABS, KIND_META } from "@/lib/codex";
-import { deleteLocation, descendantIds, parentOptions, pathOf } from "@/lib/locationTree";
-import { deleteNpcRelations, loadRelations, relationsByNpc } from "@/lib/npcRelations";
-import { getSelectedCampaignId, setSelectedCampaignId } from "@/lib/campaignStore";
-import { useToast } from "@/components/ui/use-toast";
-import { useDataRefresh } from "@/lib/RefreshContext";
-import { usePageFilter } from "@/lib/PageFilterContext";
+import { CODEX_TABS, KIND_META } from "@/lib/meta/codex";
+import { descendantIds, parentOptions, pathOf } from "@/lib/services/locationTree";
+import { relationsByNpc } from "@/lib/services/npcRelations";
+import { usePageFilter } from "@/lib/context/PageFilterContext";
+import { useCampaigns } from "@/hooks/useCampaigns";
+import { useCodex } from "@/hooks/useCodex";
 
 const normalize = (value) =>
   String(value || "")
@@ -44,16 +41,10 @@ const normalize = (value) =>
 const count = (n, one, many) => `${n} ${n > 1 ? many : one}`;
 
 export default function Codex() {
-  const { toast } = useToast();
-  const { refreshKey: dataRefreshKey } = useDataRefresh();
-  const [campaigns, setCampaigns] = useState([]);
-  const [campaignId, setCampaignId] = useState(getSelectedCampaignId());
+  const { campaigns, campaignId, selectCampaign } = useCampaigns();
   const [tab, setTab] = usePageFilter("codex.tab", "npc");
   const [term, setTerm] = usePageFilter("codex.term", "");
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const loadedFor = useRef("");
-  const [refreshKey, setRefreshKey] = useState(0);
+  const { items, allLocations, relations, loading, refresh, deleteEntry } = useCodex(campaignId, tab);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [entry, setEntry] = useState(null);
@@ -63,107 +54,7 @@ export default function Codex() {
   const [pendingDelete, setPendingDelete] = useState(null);
   const [deleteMode, setDeleteMode] = useState("promote");
   const [collapsed, setCollapsed] = useState(() => new Set());
-  const [allLocations, setAllLocations] = useState([]);
   const [locationFilter, setLocationFilter] = usePageFilter(`codex.location.${campaignId}`, "all");
-  const [relations, setRelations] = useState([]);
-
-  const kind = CODEX_TABS.find((t) => t.key === tab) || CODEX_TABS[0];
-
-  useEffect(() => {
-    let alive = true;
-    const run = async () => {
-      try {
-        const res = await api.entities.Campaign.filter({}, { sort: "-created_date", limit: 100 });
-        if (!alive) return;
-        setCampaigns(res.items);
-        const stored = getSelectedCampaignId();
-        const valid = res.items.some((c) => c.id === stored) ? stored : res.items[0]?.id || "";
-        setCampaignId(valid);
-        setSelectedCampaignId(valid);
-      } catch (error) {
-        console.error("Chargement des campagnes impossible :", error);
-        if (alive) toast({ variant: "destructive", title: "Campagnes indisponibles", description: "Impossible de charger les campagnes locales." });
-      }
-    };
-    run();
-    return () => { alive = false; };
-  }, [dataRefreshKey, toast]);
-
-  useEffect(() => {
-    if (!campaignId) {
-      setItems([]);
-      setLoading(false);
-      return;
-    }
-    let alive = true;
-    const contextKey = `${campaignId}|${kind.entity}`;
-    const initial = loadedFor.current !== contextKey;
-    const run = async () => {
-      if (initial) {
-        setLoading(true);
-        setItems([]);
-      }
-      try {
-        const res = await api.entities[kind.entity].filter(
-          { campaign_id: campaignId },
-          { sort: "name", limit: 1000 }
-        );
-        if (alive) {
-          setItems(res.items);
-          loadedFor.current = contextKey;
-        }
-      } catch (error) {
-        console.error("Chargement du codex impossible :", error);
-        if (alive) toast({ variant: "destructive", title: "Codex indisponible", description: "Impossible de charger les éléments de cette campagne." });
-      } finally {
-        if (alive && initial) setLoading(false);
-      }
-    };
-    run();
-    return () => {
-      alive = false;
-    };
-  }, [campaignId, kind.entity, refreshKey, dataRefreshKey, toast]);
-
-  useEffect(() => {
-    if (!campaignId) {
-      setAllLocations([]);
-      return;
-    }
-    let alive = true;
-    setAllLocations([]);
-    api.entities.Location.filter({ campaign_id: campaignId }, { sort: "name", limit: 1000 })
-      .then((res) => {
-        if (alive) setAllLocations(res.items);
-      })
-      .catch((error) => {
-        console.error("Chargement des lieux impossible :", error);
-        if (alive) toast({ variant: "destructive", title: "Lieux indisponibles", description: "Impossible de charger la hiérarchie des lieux." });
-      });
-    return () => {
-      alive = false;
-    };
-  }, [campaignId, refreshKey, dataRefreshKey, toast]);
-
-  useEffect(() => {
-    if (!campaignId || tab !== "npc") {
-      setRelations([]);
-      return;
-    }
-    let alive = true;
-    setRelations([]);
-    loadRelations(campaignId)
-      .then((rows) => {
-        if (alive) setRelations(rows);
-      })
-      .catch((error) => {
-        console.error("Chargement des relations impossible :", error);
-        if (alive) toast({ variant: "destructive", title: "Relations indisponibles", description: "Les relations entre PNJ n'ont pas pu être chargées." });
-      });
-    return () => {
-      alive = false;
-    };
-  }, [campaignId, tab, refreshKey, dataRefreshKey, toast]);
 
   const q = normalize(term.trim());
 
@@ -260,31 +151,11 @@ export default function Codex() {
     setPendingDelete({ kind: k, entry: e });
   };
 
-  const removeEntry = async () => {
+  const removeEntry = () => {
     const pending = pendingDelete;
     const mode = deleteMode;
     setPendingDelete(null);
-    if (!pending) return;
-    try {
-      await withDataBatch(async () => {
-        if (pending.kind === "location") {
-          await deleteLocation(pending.entry, items, mode);
-        } else {
-          if (pending.kind === "npc") await deleteNpcRelations(pending.entry.campaign_id, pending.entry.id);
-          await api.entities[KIND_META[pending.kind].entity].delete(pending.entry.id);
-        }
-      });
-      setRefreshKey((k) => k + 1);
-      toast({ title: "Élément supprimé" });
-    } catch (error) {
-      console.error("Suppression impossible :", error);
-      setRefreshKey((k) => k + 1);
-      toast({
-        variant: "destructive",
-        title: "Suppression impossible",
-        description: "Une erreur est survenue, la liste a été rechargée.",
-      });
-    }
+    if (pending) deleteEntry(pending, mode);
   };
 
   const hasChildren = (pendingDelete?.totalCount || 0) > 0;
@@ -315,7 +186,7 @@ export default function Codex() {
           <CampaignSelect
             campaigns={campaigns}
             value={campaignId}
-            onValueChange={(id) => { setCampaignId(id); setSelectedCampaignId(id); }}
+            onValueChange={selectCampaign}
           />
           <PrintButton campaignId={campaignId} preset={tab} />
           <Button data-tutorial="codex-new" disabled={!campaignId} onClick={openNew}>
@@ -431,7 +302,7 @@ export default function Codex() {
         open={dialogOpen}
         onOpenChange={(value) => {
           setDialogOpen(value);
-          if (!value) setRefreshKey((k) => k + 1);
+          if (!value) refresh();
         }}
         kind={tab}
         campaignId={campaignId}
@@ -440,7 +311,7 @@ export default function Codex() {
         defaultLocationId={createLocationId}
         duplicateOf={duplicateOf}
         locations={allLocations}
-        onSaved={() => setRefreshKey((k) => k + 1)}
+        onSaved={refresh}
       />
 
       <AlertDialog open={!!pendingDelete} onOpenChange={(open) => !open && setPendingDelete(null)}>

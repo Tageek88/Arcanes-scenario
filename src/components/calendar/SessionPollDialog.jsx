@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/api/localClient";
-import { withDataBatch } from "@/lib/dataEvents";
+import { withDataBatch } from "@/lib/context/dataEvents";
 import { formatPollDateInput, toPollIsoDate } from "@/lib/pollDates";
 import {
   getPollServiceUrl,
@@ -15,7 +15,7 @@ import {
   pollRequest,
   refreshSessionPoll,
   savePollServiceUrl,
-} from "@/lib/sessionPolls";
+} from "@/lib/services/sessionPolls";
 import { dispatchTutorialAction } from "@/utils/tutorialStorage";
 
 const newSlot = () => ({ date: "", time: "20:00" });

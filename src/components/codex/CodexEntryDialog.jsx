@@ -5,7 +5,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { api } from "@/api/localClient";
 
 // External and internal dependencies for the CodexEntryDialog component.
-import { withDataBatch } from "@/lib/dataEvents";
+import { withDataBatch } from "@/lib/context/dataEvents";
 
 // UI components for the CodexEntryDialog.
 import { Button } from "@/components/ui/button";
@@ -43,15 +43,16 @@ import NpcRelations from "@/components/codex/NpcRelations";
 import { useToast } from "@/components/ui/use-toast";
 
 // Codex-related utilities and constants.
-import { KIND_META, defaultEntry, duplicateDraft } from "@/lib/codex";
+import { KIND_META, defaultEntry, duplicateDraft } from "@/lib/meta/codex";
 
 // Location tree utilities for managing hierarchical location data.
-import { NPC_ATTITUDE } from "@/lib/sceneMeta";
+import { NPC_ATTITUDE } from "@/lib/meta/sceneMeta";
 
 // NPC utilities for managing NPC data.
-import { copyLocationSubtree, descendantIds, parentOptions } from "@/lib/locationTree";
+import { copyLocationSubtree, descendantIds, parentOptions } from "@/lib/services/locationTree";
 // NPC relations utilities for copying and loading relationships.
-import { copyNpcRelations, loadRelations } from "@/lib/npcRelations";
+import { copyNpcRelations, loadRelations } from "@/lib/services/npcRelations";
+// NPC relations utilities for copying
 
 // Tutorial storage utility for dispatching tutorial actions.
 import { dispatchTutorialAction } from "@/utils/tutorialStorage";

@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import { cn } from "@/lib/utils";
-import { SCENE_STATUS } from "@/lib/sceneMeta";
+import { SCENE_STATUS } from "@/lib/meta/sceneMeta";
 
 export default function SwipeSceneRow({ scene, active, npcs, locations, clues, onOpen, onSelect, onToggleStatus }) {
   const startX = useRef(null);

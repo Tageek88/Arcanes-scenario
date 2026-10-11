@@ -25,11 +25,11 @@
     "types": []
   },
   "include": [
-    "src/lib/codex.js",
+    "src/lib/meta/codex.js",
     "src/lib/pollDates.js",
-    "src/lib/sceneMeta.js",
-    "src/lib/sessionMeta.js",
-    "src/lib/tableMeta.js"
+    "src/lib/meta/sceneMeta.js",
+    "src/lib/meta/sessionMeta.js",
+    "src/lib/meta/tableMeta.js"
   ],
   "exclude": [
     "node_modules",

@@ -2,8 +2,8 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Folder, FolderOpen, RotateCcw, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { hasAutosave, saveNow, useAutosaveStatus } from "@/lib/autosave";
-import { restoreFromPayload, validateBackupPayload } from "@/lib/backup";
+import { hasAutosave, saveNow, useAutosaveStatus } from "@/lib/save/autosave";
+import { restoreFromPayload, validateBackupPayload } from "@/lib/save/backup";
 
 const KIND_LABEL = { current: "Courante", auto: "Automatique", archive: "Archive", other: "Autre" };
 

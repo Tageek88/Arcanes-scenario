@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import ResponsiveDialog from "@/components/common/ResponsiveDialog";
 import { useToast } from "@/components/ui/use-toast";
 import PrintSheet from "@/components/print/PrintSheet";
-import { loadRelations } from "@/lib/npcRelations";
+import { loadRelations } from "@/lib/services/npcRelations";
 import {
     SECTIONS,
     buildPrintModel,

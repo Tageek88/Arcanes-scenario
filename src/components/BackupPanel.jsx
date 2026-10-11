@@ -2,8 +2,8 @@ import React, { useRef } from "react";
 import { Download, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { exportBackup, importBackup } from "@/lib/backup";
-import { saveNow } from "@/lib/autosave";
+import { exportBackup, importBackup } from "@/lib/save/backup";
+import { saveNow } from "@/lib/save/autosave";
 
 export default function BackupPanel() {
   const { toast } = useToast();

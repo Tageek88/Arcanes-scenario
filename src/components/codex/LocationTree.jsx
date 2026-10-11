@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import { ChevronDown, ChevronRight, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import CodexCard from "@/components/codex/CodexCard";
-import { childrenMap } from "@/lib/locationTree";
+import { childrenMap } from "@/lib/services/locationTree";
 
 export default function LocationTree({ locations, collapsed, onToggle, onEdit, onDelete, onDuplicate, onAddChild }) {
   const map = useMemo(() => childrenMap(locations), [locations]);

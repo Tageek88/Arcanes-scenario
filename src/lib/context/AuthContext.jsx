@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useMemo } from "react";
-import { LOCAL_USER } from "@/api/localClient";
-
+import { LOCAL_USER } from "@/api/localUser";
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {

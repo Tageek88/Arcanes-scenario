@@ -11,7 +11,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import LinkPicker from "@/components/home/LinkPicker";
-import { SCENE_STATUS } from "@/lib/sceneMeta";
+import { SCENE_STATUS } from "@/lib/meta/sceneMeta";
 import ResponsiveDialog from "@/components/common/ResponsiveDialog";
 
 export default function SceneEditor({

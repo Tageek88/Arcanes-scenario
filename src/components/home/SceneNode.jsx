@@ -1,7 +1,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { ArrowRight, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
-import { SCENE_STATUS } from "@/lib/sceneMeta";
+import { SCENE_STATUS } from "@/lib/meta/sceneMeta";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -9,7 +9,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { useExpandedCard } from "@/lib/ExpandedCardContext";
+import { useExpandedCard } from "@/lib/context/ExpandedCardContext";
 
 export default function SceneNode({
   scene,

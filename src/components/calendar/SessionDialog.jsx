@@ -12,7 +12,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import ResponsiveDialog from "@/components/common/ResponsiveDialog";
-import { SESSION_STATUS_ORDER, SESSION_STATUS } from "@/lib/sessionMeta";
+import { SESSION_STATUS_ORDER, SESSION_STATUS } from "@/lib/meta/sessionMeta";
 import { dispatchTutorialAction } from "@/utils/tutorialStorage";
 
 export default function SessionDialog({

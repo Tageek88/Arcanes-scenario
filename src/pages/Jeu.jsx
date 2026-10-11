@@ -1,8 +1,6 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Copy, Pencil, Plus, Printer, Shield, Trash2, UserRound } from "lucide-react";
-import { api } from "@/api/localClient";
-import { withDataBatch } from "@/lib/dataEvents";
 import { Button } from "@/components/ui/button";
 import PrintSheet from "@/components/print/PrintSheet";
 import {
@@ -17,32 +15,29 @@ import {
 } from "@/components/ui/alert-dialog";
 import GameSheetModelEditor from "@/components/game/GameSheetModelEditor";
 import GameCharacterEditor from "@/components/game/GameCharacterEditor";
-import { getSelectedCampaignId, setSelectedCampaignId } from "@/lib/campaignStore";
-import { useDataRefresh } from "@/lib/RefreshContext";
-import { useToast } from "@/components/ui/use-toast";
 import CampaignSelect from "@/components/common/CampaignSelect";
 import PrintButton from "@/components/print/PrintButton";
-import { useExpandedCardState } from "@/lib/ExpandedCardContext";
-import { dispatchTutorialAction } from "@/utils/tutorialStorage";
-
-const EMPTY_MODEL = { characteristics: [], skillRollModifier: false };
-const normalize = (value) => String(value || "").trim().toLocaleLowerCase("fr");
+import { useExpandedCardState } from "@/lib/context/ExpandedCardContext";
+import { useCampaigns } from "@/hooks/useCampaigns";
+import { useGameSheet } from "@/hooks/useGameSheet";
 
 export default function Jeu() {
-  const { toast } = useToast();
-  const { refreshKey } = useDataRefresh();
   const { expandedCardId, setExpandedCardId } = useExpandedCardState();
-  const [campaigns, setCampaigns] = useState([]);
-  const [campaignId, setCampaignId] = useState(getSelectedCampaignId());
-  const [model, setModel] = useState(EMPTY_MODEL);
-  const [modelId, setModelId] = useState("");
-  const [characters, setCharacters] = useState([]);
-  const [skillCatalog, setSkillCatalog] = useState([]);
-  const [equipmentCatalog, setEquipmentCatalog] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const loadedFor = useRef("");
-  const [savingModel, setSavingModel] = useState(false);
-  const [savingCharacter, setSavingCharacter] = useState(false);
+  const { campaigns, campaignId, selectCampaign } = useCampaigns();
+  const {
+    model,
+    modelId,
+    characters,
+    skillCatalog,
+    equipmentCatalog,
+    loading,
+    savingModel,
+    savingCharacter,
+    saveModel,
+    saveCharacter,
+    deleteCharacter: removeCharacter,
+  } = useGameSheet(campaignId);
+
   const [modelOpen, setModelOpen] = useState(false);
   const [characterOpen, setCharacterOpen] = useState(false);
   const [characterDraft, setCharacterDraft] = useState(null);
@@ -65,135 +60,6 @@ export default function Jeu() {
     };
   }, [characterToPrint]);
 
-  const loadCampaigns = useCallback(async () => {
-    try {
-      const result = await api.entities.Campaign.filter({}, { sort: "-created_date", limit: 100 });
-      setCampaigns(result.items);
-      const stored = getSelectedCampaignId();
-      const valid = result.items.some((item) => item.id === stored) ? stored : result.items[0]?.id || "";
-      setCampaignId(valid);
-      setSelectedCampaignId(valid);
-    } catch (error) {
-      console.error("Chargement des campagnes impossible :", error);
-      toast({ variant: "destructive", title: "Campagnes indisponibles", description: "Impossible de charger les campagnes locales." });
-    }
-  }, [toast]);
-
-  useEffect(() => {
-    loadCampaigns();
-  }, [loadCampaigns, refreshKey]);
-
-  useEffect(() => {
-    if (!campaignId) {
-      setModel(EMPTY_MODEL);
-      setModelId("");
-      setCharacters([]);
-      setSkillCatalog([]);
-      setEquipmentCatalog([]);
-      return;
-    }
-    let alive = true;
-    const initial = loadedFor.current !== campaignId;
-    const load = async () => {
-      if (initial) setLoading(true);
-      try {
-        const [models, people, skills, equipment] = await Promise.all([
-          api.entities.GameSheetModel.filter({ campaign_id: campaignId }, { limit: 10 }),
-          api.entities.GameCharacter.filter({ campaign_id: campaignId }, { sort: "name", limit: 1000 }),
-          api.entities.SkillCatalog.filter({ campaign_id: campaignId }, { sort: "name", limit: 1000 }),
-          api.entities.EquipmentCatalog.filter({ campaign_id: campaignId }, { sort: "name", limit: 1000 }),
-        ]);
-        if (!alive) return;
-        const savedModel = models.items[0] || null;
-        setModelId(savedModel?.id || "");
-        setModel({
-          characteristics: savedModel?.characteristics || [],
-          skillRollModifier: !!savedModel?.skillRollModifier,
-        });
-        setCharacters(people.items);
-        setSkillCatalog(skills.items);
-        setEquipmentCatalog(equipment.items);
-        loadedFor.current = campaignId;
-      } catch (error) {
-        console.error("Chargement des fiches de jeu impossible :", error);
-        if (alive) toast({ variant: "destructive", title: "Fiches indisponibles", description: "Impossible de charger les données de jeu de cette campagne." });
-      } finally {
-        if (alive && initial) setLoading(false);
-      }
-    };
-    load();
-    return () => { alive = false; };
-  }, [campaignId, refreshKey, toast]);
-
-  const saveModel = (nextModel) => withDataBatch(() => saveModelUnbatched(nextModel));
-
-  const saveModelUnbatched = async (nextModel) => {
-    if (!campaignId) return;
-    setSavingModel(true);
-    try {
-      let saved;
-      if (modelId) {
-        saved = await api.entities.GameSheetModel.update(modelId, {
-          campaign_id: campaignId,
-          ...nextModel,
-        });
-      } else {
-        saved = await api.entities.GameSheetModel.create({
-          campaign_id: campaignId,
-          ...nextModel,
-        });
-        setModelId(saved.id);
-      }
-
-      let valuesMigrated = true;
-      if (modelId) {
-        const updatedNames = new Map();
-        model.characteristics.forEach((previous, index) => {
-          const current = nextModel.characteristics[index];
-          if (current && previous.name !== current.name) updatedNames.set(previous.name, current.name);
-        });
-        if (updatedNames.size > 0) {
-          try {
-            await Promise.all(characters.map((character) => {
-              const characteristics = { ...(character.characteristics || {}) };
-              updatedNames.forEach((newName, previousName) => {
-                if (characteristics[previousName] && !characteristics[newName]) {
-                  characteristics[newName] = characteristics[previousName];
-                }
-                delete characteristics[previousName];
-              });
-              return api.entities.GameCharacter.update(character.id, { characteristics });
-            }));
-            setCharacters((current) => current.map((character) => {
-              const characteristics = { ...(character.characteristics || {}) };
-              updatedNames.forEach((newName, previousName) => {
-                if (characteristics[previousName] && !characteristics[newName]) characteristics[newName] = characteristics[previousName];
-                delete characteristics[previousName];
-              });
-              return { ...character, characteristics };
-            }));
-          } catch (error) {
-            valuesMigrated = false;
-            console.error("Migration des valeurs de caractéristiques impossible :", error);
-          }
-        }
-      }
-      setModel({ characteristics: saved.characteristics || [], skillRollModifier: !!saved.skillRollModifier });
-      setModelOpen(false);
-      if (!modelId) dispatchTutorialAction("model-created");
-      toast(valuesMigrated
-        ? { title: "Modèle enregistré" }
-        : { variant: "destructive", title: "Modèle enregistré, migration incomplète", description: "Certaines valeurs de caractéristiques des personnages n’ont pas pu être renommées." });
-      return true;
-    } catch (error) {
-      console.error("Enregistrement du modèle impossible :", error);
-      toast({ variant: "destructive", title: "Modèle non enregistré", description: "Le modèle n’a pas été enregistré." });
-      return false;
-    } finally {
-      setSavingModel(false);
-    }
-  };
-
   const openNewCharacter = () => {
     setCharacterDraft(null);
     setCharacterOpen(true);
@@ -208,102 +74,18 @@ export default function Jeu() {
     setCharacterOpen(true);
   };
 
-  const saveCatalogItem = async (entity, existing, payload) => {
-    const matched = existing.find((item) => normalize(item.name) === normalize(payload.name));
-    if (matched) return api.entities[entity].update(matched.id, payload);
-    return api.entities[entity].create({ campaign_id: campaignId, ...payload });
-  };
+  const handleSaveModel = (nextModel) => saveModel(nextModel, () => setModelOpen(false));
 
-  const saveCharacter = (draft) => withDataBatch(() => saveCharacterUnbatched(draft));
-
-  const saveCharacterUnbatched = async (draft) => {
-    if (!campaignId) return false;
-    setSavingCharacter(true);
-    const payload = {
-      campaign_id: campaignId,
-      name: draft.name,
-      notes: draft.notes || "",
-      characteristics: draft.characteristics || {},
-      skills: draft.skills || [],
-      equipment: draft.equipment || [],
-    };
-    try {
-      const saved = draft.id
-        ? await api.entities.GameCharacter.update(draft.id, payload)
-        : await api.entities.GameCharacter.create(payload);
-      setCharacters((current) => [
-        ...current.filter((item) => item.id !== saved.id),
-        saved,
-      ].sort((a, b) => a.name.localeCompare(b.name, "fr", { numeric: true })));
+  const handleSaveCharacter = (draft) =>
+    saveCharacter(draft, () => {
       setCharacterOpen(false);
       setCharacterDraft(null);
-      if (!draft.id) dispatchTutorialAction("character-created");
+    });
 
-      try {
-        const nextSkills = [...skillCatalog];
-        const nextEquipment = [...equipmentCatalog];
-        for (const skill of payload.skills) {
-          if (skill.name) {
-            const catalogItem = await saveCatalogItem("SkillCatalog", nextSkills, {
-              name: skill.name,
-              roll_modifier: skill.roll_modifier || "",
-            });
-            const existingIndex = nextSkills.findIndex((item) => item.id === catalogItem.id);
-            if (existingIndex >= 0) nextSkills[existingIndex] = catalogItem;
-            else nextSkills.push(catalogItem);
-          }
-        }
-        for (const item of payload.equipment) {
-          if (!item.name) continue;
-          const fieldNames = [...new Set([
-            ...nextEquipment
-              .filter((known) => normalize(known.type) === normalize(item.type))
-              .flatMap((known) => known.field_names || (known.fields || []).map((field) => field.name)),
-            ...item.fields.map((field) => field.name),
-          ].filter(Boolean))];
-          const catalogItem = await saveCatalogItem("EquipmentCatalog", nextEquipment, {
-            name: item.name,
-            type: item.type || "",
-            fields: item.fields || [],
-            field_names: fieldNames,
-          });
-          const existingIndex = nextEquipment.findIndex((known) => known.id === catalogItem.id);
-          if (existingIndex >= 0) nextEquipment[existingIndex] = catalogItem;
-          else nextEquipment.push(catalogItem);
-        }
-        setSkillCatalog(nextSkills);
-        setEquipmentCatalog(nextEquipment);
-        toast({ title: draft.id ? "Fiche mise à jour" : "Fiche créée" });
-      } catch (error) {
-        console.error("Mise à jour du catalogue impossible :", error);
-        toast({
-          variant: "destructive",
-          title: "Fiche enregistrée, catalogue incomplet",
-          description: "Le personnage est enregistré, mais certains éléments du catalogue n’ont pas été mis à jour.",
-        });
-      }
-      return true;
-    } catch (error) {
-      console.error("Enregistrement de la fiche personnage impossible :", error);
-      toast({ variant: "destructive", title: "Fiche non enregistrée", description: "La fiche personnage n’a pas été enregistrée." });
-      return false;
-    } finally {
-      setSavingCharacter(false);
-    }
-  };
-
-  const deleteCharacter = async () => {
+  const deleteCharacter = () => {
     const character = pendingDelete;
     setPendingDelete(null);
-    if (!character) return;
-    try {
-      await api.entities.GameCharacter.delete(character.id);
-      setCharacters((current) => current.filter((item) => item.id !== character.id));
-      toast({ title: "Personnage supprimé" });
-    } catch (error) {
-      console.error("Suppression du personnage impossible :", error);
-      toast({ variant: "destructive", title: "Suppression impossible", description: "Le personnage n’a pas été supprimé." });
-    }
+    if (character) removeCharacter(character);
   };
 
   const campaign = campaigns.find((item) => item.id === campaignId);
@@ -323,7 +105,7 @@ export default function Jeu() {
           <CampaignSelect
             campaigns={campaigns}
             value={campaignId}
-            onValueChange={(id) => { setCampaignId(id); setSelectedCampaignId(id); }}
+            onValueChange={selectCampaign}
           />
           <PrintButton campaignId={campaignId} preset="characters" />
           {campaignId && (
@@ -481,7 +263,7 @@ export default function Jeu() {
         open={modelOpen}
         onOpenChange={setModelOpen}
         model={model}
-        onSave={saveModel}
+        onSave={handleSaveModel}
         saving={savingModel}
       />
       <GameCharacterEditor
@@ -493,7 +275,7 @@ export default function Jeu() {
         skillCatalog={skillCatalog}
         equipmentCatalog={equipmentCatalog}
         saving={savingCharacter}
-        onSave={saveCharacter}
+        onSave={handleSaveCharacter}
       />
 
       <AlertDialog open={!!pendingDelete} onOpenChange={(open) => !open && setPendingDelete(null)}>

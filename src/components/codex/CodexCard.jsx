@@ -1,10 +1,10 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { Copy, Link2, Link2Off, MapPin, Paperclip, Pencil, Trash2, Users } from "lucide-react";
-import { NPC_ATTITUDE } from "@/lib/sceneMeta";
+import { NPC_ATTITUDE } from "@/lib/meta/sceneMeta";
 import { isImage } from "@/components/codex/AttachmentsField";
 import { openAttachment } from "@/lib/openAttachment";
-import { useExpandedCard } from "@/lib/ExpandedCardContext";
+import { useExpandedCard } from "@/lib/context/ExpandedCardContext";
 
 export default function CodexCard({
   kind,

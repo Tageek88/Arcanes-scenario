@@ -1,5 +1,5 @@
 import { api } from "@/api/localClient";
-import { withDataBatch } from "@/lib/dataEvents";
+import { withDataBatch } from "@/lib/context/dataEvents";
 
 const parentOf = (location) => location.parent_id || "";
 

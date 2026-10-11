@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from "react";
 import { db, TABLES } from "@/api/localClient";
-import { buildBackupPayload } from "@/lib/backup";
+import { buildBackupPayload } from "@/lib/save/backup";
 
 const DEBOUNCE_MS = 2000;
 const MAX_WAIT_MS = 20000;

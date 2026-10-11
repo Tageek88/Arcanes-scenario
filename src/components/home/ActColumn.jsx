@@ -2,7 +2,7 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import { Plus, MoreHorizontal, Trash2 } from "lucide-react";
 import SceneNode from "@/components/home/SceneNode";
-import { SCENE_STATUS } from "@/lib/sceneMeta";
+import { SCENE_STATUS } from "@/lib/meta/sceneMeta";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,

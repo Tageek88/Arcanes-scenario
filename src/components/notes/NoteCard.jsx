@@ -3,7 +3,7 @@ import { Pencil, Pin, PinOff, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-import { useExpandedCard } from "@/lib/ExpandedCardContext";
+import { useExpandedCard } from "@/lib/context/ExpandedCardContext";
 
 export default function NoteCard({ note, onEdit, onDelete, onTogglePin }) {
   const { expanded, cardProps } = useExpandedCard(`note:${note.id}`);

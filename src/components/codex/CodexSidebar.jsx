@@ -5,11 +5,11 @@ import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { CODEX_TABS } from "@/lib/codex";
-import { NPC_ATTITUDE } from "@/lib/sceneMeta";
+import { CODEX_TABS } from "@/lib/meta/codex";
+import { NPC_ATTITUDE } from "@/lib/meta/sceneMeta";
 import { isImage } from "@/components/codex/AttachmentsField";
 import { openAttachment } from "@/lib/openAttachment";
-import { usePageFilter } from "@/lib/PageFilterContext";
+import { usePageFilter } from "@/lib/context/PageFilterContext";
 
 export default function CodexSidebar({
   campaignId,
