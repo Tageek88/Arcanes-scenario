@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Copy, Pencil, Plus, Printer, Shield, Trash2, UserRound } from "lucide-react";
-import { api } from "@/api/localClient";
 import { withDataBatch } from "@/lib/dataEvents";
 import { Button } from "@/components/ui/button";
 import PrintSheet from "@/components/print/PrintSheet";

@@ -1,0 +1,122 @@
+import { useEffect, useState } from "react";
+import { api } from "@/api/localClient";
+import { useToast } from "@/components/ui/use-toast";
+import { useDataRefresh } from "@/lib/context/RefreshContext";
+import { getPollServiceUrl, pollRequest, refreshSessionPoll } from "@/lib/services/sessionPolls";
+
+/**
+ * Sondages de date ouverts d'une campagne.
+ * - à l'ouverture / au changement de campagne : relecture locale puis actualisation réseau
+ * - à chaque changement de données : relecture locale uniquement (sans réseau)
+ */
+export function useSessionPolls(campaignId) {
+  const { toast } = useToast();
+  const { refreshKey } = useDataRefresh();
+  const [polls, setPolls] = useState([]);
+  const [deletingPollId, setDeletingPollId] = useState("");
+
+  useEffect(() => {
+    if (!campaignId) {
+      setPolls([]);
+      return;
+    }
+    const serviceUrl = getPollServiceUrl();
+    let alive = true;
+    const refreshPolls = async () => {
+      try {
+        const { items } = await api.entities.SessionPoll.filter({ campaign_id: campaignId }, { limit: 100 });
+        if (alive) setPolls(items.filter((poll) => poll.state === "open"));
+        let failed = 0;
+        for (const poll of items) {
+          const pollUrl = poll.service_url || serviceUrl;
+          if (!pollUrl) continue;
+          try {
+            const updated = await refreshSessionPoll(poll, pollUrl);
+            if (alive) {
+              setPolls((current) => updated.state === "open"
+                ? [updated, ...current.filter((item) => item.id !== updated.id)]
+                : current.filter((item) => item.id !== updated.id));
+            }
+          } catch (error) {
+            failed += 1;
+            console.error(`Actualisation du sondage « ${poll.title} » impossible :`, error);
+          }
+        }
+        if (alive && failed > 0) {
+          toast({
+            variant: "destructive",
+            title: "Certains sondages n'ont pas été actualisés",
+            description: "Le calendrier local reste disponible. Vérifiez la connexion et actualisez les sondages plus tard.",
+          });
+        }
+      } catch (error) {
+        console.error("Synchronisation des sondages impossible :", error);
+        if (alive) {
+          toast({
+            variant: "destructive",
+            title: "Synchronisation des sondages impossible",
+            description: "Le calendrier local reste disponible.",
+          });
+        }
+      }
+    };
+    refreshPolls();
+    return () => {
+      alive = false;
+    };
+  }, [campaignId, toast]);
+
+  // Relecture locale (sans appel réseau) à chaque changement de données.
+  useEffect(() => {
+    if (!campaignId) return;
+    let alive = true;
+    api.entities.SessionPoll.filter({ campaign_id: campaignId }, { limit: 100 })
+      .then(({ items }) => {
+        if (alive) setPolls(items.filter((poll) => poll.state === "open"));
+      })
+      .catch((error) => console.error("Rechargement des sondages impossible :", error));
+    return () => {
+      alive = false;
+    };
+  }, [campaignId, refreshKey]);
+
+  const updatePollCard = (poll, removedId) => {
+    if (!poll || poll.state !== "open") {
+      setPolls((current) => current.filter((item) => item.id !== (poll?.id || removedId)));
+      return;
+    }
+    setPolls((current) => [poll, ...current.filter((item) => item.id !== poll.id)]);
+  };
+
+  const deletePoll = async (poll) => {
+    if (!window.confirm(`Supprimer le sondage « ${poll.title} » et toutes ses réponses ?`)) return;
+    setDeletingPollId(poll.id);
+    try {
+      await pollRequest(poll.service_url || getPollServiceUrl(), `/api/polls/${poll.poll_id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${poll.owner_token}` },
+      });
+      await api.entities.SessionPoll.delete(poll.id);
+      setPolls((current) => current.filter((item) => item.id !== poll.id));
+      toast({ title: "Sondage supprimé" });
+    } catch (error) {
+      if (error.status === 404) {
+        try {
+          await api.entities.SessionPoll.delete(poll.id);
+          setPolls((current) => current.filter((item) => item.id !== poll.id));
+          toast({ title: "Référence locale supprimée", description: "Le sondage distant a déjà expiré ou été supprimé." });
+        } catch (localError) {
+          console.error("Suppression de la référence locale au sondage impossible :", localError);
+          toast({ variant: "destructive", title: "Suppression impossible", description: "La référence locale au sondage n'a pas pu être supprimée." });
+        }
+      } else {
+        console.error("Suppression du sondage impossible :", error);
+        toast({ variant: "destructive", title: "Suppression impossible", description: error.message });
+      }
+    } finally {
+      setDeletingPollId("");
+    }
+  };
+
+  return { polls, deletingPollId, updatePollCard, deletePoll };
+}

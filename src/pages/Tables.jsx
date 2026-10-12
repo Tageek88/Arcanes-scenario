@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import { api } from "@/api/localClient";
 import { Dices, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
