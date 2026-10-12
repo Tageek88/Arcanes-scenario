@@ -14,7 +14,7 @@ import {
     buildTrees,
     countableIds,
     selectableIds,
-} from "@/lib/printModel";
+} from "@/lib/print/printModel";
 
 const PRESETS = {
     scenes: "scenes",
@@ -320,7 +320,7 @@ export default function PrintButton({
         if (!job) return;
         let cancelled = false;
         if (job.action === "pdf") {
-            import("@/lib/editablePdf")
+            import("@/lib/print/editablePdf")
                 .then(({ createEditablePdf }) => createEditablePdf(job.model))
                 .then(async ({ bytes, filename }) => {
                     if (window.arcanesPdf?.save) {

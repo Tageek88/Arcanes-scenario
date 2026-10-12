@@ -1,7 +1,7 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
-import { useTabStacks } from "@/lib/TabStackContext";
+import { useTabStacks } from "@/lib/context/TabStackContext";
 
 const SECTIONS = {
   "/": "Arcanes & Scénarios",

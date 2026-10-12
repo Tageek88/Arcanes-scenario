@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import ResponsiveDialog from "@/components/common/ResponsiveDialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { UNIVERSE_TYPES, DEFAULT_UNIVERSE } from '@/lib/universeMeta';
+import { UNIVERSE_TYPES, DEFAULT_UNIVERSE } from '@/lib/meta/universeMeta';
 
 const TypedInput = /** @type {React.ComponentType<React.InputHTMLAttributes<HTMLInputElement>>} */ (Input);
 const TypedTextarea = /** @type {React.ComponentType<React.TextareaHTMLAttributes<HTMLTextAreaElement>>} */ (Textarea);

@@ -1,5 +1,5 @@
 import { childrenMap, flattenTree, pathOf } from "@/lib/locationTree";
-import { groupIndex, relationLabel } from "@/lib/relationMeta";
+import { groupIndex, relationLabel } from "@/lib/meta/relationMeta";
 import { NPC_ATTITUDE, SCENE_STATUS } from "@/lib/sceneMeta";
 import { sessionStatusMeta } from "@/lib/sessionMeta";
 

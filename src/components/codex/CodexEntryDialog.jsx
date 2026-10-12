@@ -60,7 +60,7 @@ import { dispatchTutorialAction } from "@/utils/tutorialStorage";
 import { Dices } from "lucide-react";
 
 // Name generation utilities for creating NPC names based on universe and gender.
-import { canGenerateNames, generateNames, generatePlaceNames, generateItemNames } from "@/lib/nameGenerator";
+import { canGenerateNames, generateNames, generatePlaceNames, generateItemNames } from "@/lib/generators/nameGenerator";
 
 
 // Component for rendering copy options in the dialog.

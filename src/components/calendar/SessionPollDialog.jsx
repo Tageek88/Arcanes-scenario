@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/api/localClient";
 import { withDataBatch } from "@/lib/dataEvents";
-import { formatPollDateInput, toPollIsoDate } from "@/lib/pollDates";
+import { formatPollDateInput, toPollIsoDate } from "@/lib/services/polls/pollDates";
 import {
   getPollServiceUrl,
   normalizePollServiceUrl,

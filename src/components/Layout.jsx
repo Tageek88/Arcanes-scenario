@@ -2,7 +2,7 @@ import React from "react";
 import { useOutlet } from "react-router-dom";
 import AppShell from "@/components/AppShell";
 import { RefreshProvider } from "@/lib/RefreshContext";
-import { TabStackProvider } from "@/lib/TabStackContext";
+import { TabStackProvider } from "@/lib/context/TabStackContext";
 import { ExpandedCardProvider } from "@/lib/ExpandedCardContext";
 import { PageFilterProvider } from "@/lib/PageFilterContext";
 

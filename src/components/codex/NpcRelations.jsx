@@ -21,7 +21,7 @@ import {
   groupLabel,
   inverseOf,
   relationLabel,
-} from "@/lib/relationMeta";
+} from "@/lib/meta/relationMeta";
 import {
   createRelation,
   deleteRelation,

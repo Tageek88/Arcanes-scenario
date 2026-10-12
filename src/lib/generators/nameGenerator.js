@@ -1,6 +1,7 @@
 // === SECTION NAME GENERATOR ===
 import { NAME_DATA } from "./nameData";
-import { DEFAULT_UNIVERSE } from "./universeMeta";
+import { DEFAULT_UNIVERSE } from "@/lib/meta/universeMeta";
+
 
 // === SECTION HELPER FUNCTIONS ===
 const pick = (list) => list[Math.floor(Math.random() * list.length)];

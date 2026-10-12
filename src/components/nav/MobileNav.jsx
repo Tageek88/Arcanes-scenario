@@ -3,7 +3,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { GitBranch, BookMarked, CalendarDays, Dices, StickyNote, Swords, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useTabStacks } from "@/lib/TabStackContext";
+import { useTabStacks } from "@/lib/context/TabStackContext";
 
 const TABS = [
   { to: "/", label: "Scènes", icon: GitBranch, tutorial: "tab-arborescence" },
