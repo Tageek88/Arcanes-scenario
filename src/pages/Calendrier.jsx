@@ -1,5 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { api } from "@/api/localClient";
+import React, { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Pencil, Plus, Trash2 } from "lucide-react";
 import { addMonths, format, parseISO, startOfMonth, subMonths } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -19,15 +18,15 @@ import MonthGrid from "@/components/calendar/MonthGrid";
 import SessionDialog from "@/components/calendar/SessionDialog";
 import UpcomingSessions from "@/components/calendar/UpcomingSessions";
 import { dateKey, sessionStatusMeta } from "@/lib/meta/sessionMeta";
-import { getSelectedCampaignId, setSelectedCampaignId } from "@/lib/context/campaignStore";
-import { useToast } from "@/components/ui/use-toast";
-import { useDataRefresh } from "@/lib/context/RefreshContext";
-import { dispatchTutorialAction } from "@/utils/tutorialStorage";
 import PrintButton from "@/components/print/PrintButton";
 import SessionPollDialog from "@/components/calendar/SessionPollDialog";
 import CampaignSelect from "@/components/common/CampaignSelect";
-import { getPollServiceUrl, pollRequest, refreshSessionPoll, tallyVotes } from "@/lib/services/sessionPolls";
+import { tallyVotes } from "@/lib/services/sessionPolls";
 import { useExpandedCardState } from "@/lib/context/ExpandedCardContext";
+import { useCampaigns } from "@/hooks/useCampaigns";
+import { useScenes } from "@/hooks/useScenes";
+import { useGameSessions } from "@/hooks/useGameSessions";
+import { useSessionPolls } from "@/hooks/useSessionPolls";
 
 
 const emptyForm = (date) => ({
@@ -41,182 +40,24 @@ const emptyForm = (date) => ({
 });
 
 export default function Calendrier() {
-  const { toast } = useToast();
   const { expandedCardId, setExpandedCardId } = useExpandedCardState();
-  const { refreshKey: dataRefreshKey } = useDataRefresh();
-  const [campaigns, setCampaigns] = useState([]);
-  const [campaignId, setCampaignId] = useState(getSelectedCampaignId());
-  const [scenes, setScenes] = useState([]);
+  const { campaigns, campaignId, selectCampaign } = useCampaigns();
   const [month, setMonth] = useState(startOfMonth(new Date()));
-  const [sessions, setSessions] = useState([]);
-  const [upcoming, setUpcoming] = useState([]);
-  const [polls, setPolls] = useState([]);
   const [selectedDate, setSelectedDate] = useState("");
-  const [loading, setLoading] = useState(false);
+
+  const scenes = useScenes(campaignId);
+  const { sessions, upcoming, loading, saving, saveSession, deleteSession } = useGameSessions(campaignId, month);
+  const { polls, deletingPollId, updatePollCard, deletePoll } = useSessionPolls(campaignId);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [pollDialogOpen, setPollDialogOpen] = useState(false);
   const [pollToEdit, setPollToEdit] = useState(null);
   const [form, setForm] = useState(emptyForm());
-  const [saving, setSaving] = useState(false);
   const [pendingDelete, setPendingDelete] = useState(null);
-  const [deletingPollId, setDeletingPollId] = useState("");
-  const loadedFor = useRef("");
-
-  const monthKey = format(month, "yyyy-MM");
 
   useEffect(() => {
-    if (!campaignId) {
-      setPolls([]);
-      return;
-    }
-    const serviceUrl = getPollServiceUrl();
-    let alive = true;
-    const refreshPolls = async () => {
-      try {
-        const { items } = await api.entities.SessionPoll.filter({ campaign_id: campaignId }, { limit: 100 });
-        if (alive) setPolls(items.filter((poll) => poll.state === "open"));
-        let failed = 0;
-        for (const poll of items) {
-          const pollUrl = poll.service_url || serviceUrl;
-          if (!pollUrl) continue;
-          try {
-            const updated = await refreshSessionPoll(poll, pollUrl);
-            if (alive) {
-              setPolls((current) => updated.state === "open"
-                ? [updated, ...current.filter((item) => item.id !== updated.id)]
-                : current.filter((item) => item.id !== updated.id));
-            }
-          } catch (error) {
-            failed += 1;
-            console.error(`Actualisation du sondage « ${poll.title} » impossible :`, error);
-          }
-        }
-        if (alive && failed > 0) {
-          toast({
-            variant: "destructive",
-            title: "Certains sondages n'ont pas été actualisés",
-            description: "Le calendrier local reste disponible. Vérifiez la connexion et actualisez les sondages plus tard.",
-          });
-        }
-      } catch (error) {
-        console.error("Synchronisation des sondages impossible :", error);
-        if (alive) {
-          toast({
-            variant: "destructive",
-            title: "Synchronisation des sondages impossible",
-            description: "Le calendrier local reste disponible.",
-          });
-        }
-      }
-    };
-    refreshPolls();
-    return () => {
-      alive = false;
-    };
-  }, [campaignId, toast]);
-
-  // Relecture locale (sans appel réseau) à chaque changement de données.
-  useEffect(() => {
-    if (!campaignId) return;
-    let alive = true;
-    api.entities.SessionPoll.filter({ campaign_id: campaignId }, { limit: 100 })
-      .then(({ items }) => {
-        if (alive) setPolls(items.filter((poll) => poll.state === "open"));
-      })
-      .catch((error) => console.error("Rechargement des sondages impossible :", error));
-    return () => {
-      alive = false;
-    };
-  }, [campaignId, dataRefreshKey]);
-
-  useEffect(() => {
-    let alive = true;
-    const run = async () => {
-      try {
-        const res = await api.entities.Campaign.filter({}, { sort: "-created_date", limit: 100 });
-        if (!alive) return;
-        setCampaigns(res.items);
-        const stored = getSelectedCampaignId();
-        const valid = res.items.some((c) => c.id === stored) ? stored : res.items[0]?.id || "";
-        setCampaignId(valid);
-        setSelectedCampaignId(valid);
-      } catch (error) {
-        console.error("Chargement des campagnes impossible :", error);
-        if (alive) toast({ variant: "destructive", title: "Campagnes indisponibles", description: "Impossible de charger les campagnes locales." });
-      }
-    };
-    run();
-    return () => { alive = false; };
-  }, [dataRefreshKey, toast]);
-
-  useEffect(() => {
-    if (!campaignId) {
-      setScenes([]);
-      return;
-    }
-    let alive = true;
-    setScenes([]);
-    api.entities.Scene
-      .filter({ campaign_id: campaignId }, { sort: "order", limit: 300 })
-      .then((res) => {
-        if (alive) setScenes(res.items);
-      })
-      .catch((error) => {
-        console.error("Chargement des scènes impossible :", error);
-        if (alive) toast({ variant: "destructive", title: "Scènes indisponibles", description: "Impossible de charger les scènes de cette campagne." });
-      });
-    return () => {
-      alive = false;
-    };
-  }, [campaignId, dataRefreshKey, toast]);
-
-  useEffect(() => {
-    if (!campaignId) {
-      setSessions([]);
-      setUpcoming([]);
-      setSelectedDate("");
-      return;
-    }
-    let alive = true;
-    const contextKey = `${campaignId}|${monthKey}`;
-    const initial = loadedFor.current !== contextKey;
-    if (initial) {
-      setSessions([]);
-      setUpcoming([]);
-    }
-    const run = async () => {
-      if (initial) setLoading(true);
-      try {
-        const start = format(startOfMonth(month), "yyyy-MM-dd");
-        const nextMonth = format(addMonths(startOfMonth(month), 1), "yyyy-MM-dd");
-        const today = format(new Date(), "yyyy-MM-dd");
-        const [monthRes, upcomingRes] = await Promise.all([
-          api.entities.GameSession.filter(
-            { campaign_id: campaignId, date: { $gte: start, $lt: nextMonth } },
-            { sort: "date", limit: 300 }
-          ),
-          api.entities.GameSession.filter(
-            { campaign_id: campaignId, date: { $gte: today } },
-            { sort: "date", limit: 6 }
-          ),
-        ]);
-        if (!alive) return;
-        setSessions(monthRes.items);
-        setUpcoming(upcomingRes.items);
-        loadedFor.current = contextKey;
-      } catch (error) {
-        console.error("Chargement des sessions impossible :", error);
-        if (alive) toast({ variant: "destructive", title: "Sessions indisponibles", description: "Impossible de charger le calendrier de cette campagne." });
-      } finally {
-        if (alive && initial) setLoading(false);
-      }
-    };
-    run();
-    return () => {
-      alive = false;
-    };
-  }, [campaignId, monthKey, month, dataRefreshKey, toast]);
+    if (!campaignId) setSelectedDate("");
+  }, [campaignId]);
 
   const sessionsByDate = useMemo(() => {
     const map = {};
@@ -247,44 +88,6 @@ export default function Calendrier() {
     if (!expandedCardId?.startsWith("calendar-day:")) setSelectedDate("");
   }, [expandedCardId]);
 
-  const updatePollCard = (poll, removedId) => {
-    if (!poll || poll.state !== "open") {
-      setPolls((current) => current.filter((item) => item.id !== (poll?.id || removedId)));
-      return;
-    }
-    setPolls((current) => [poll, ...current.filter((item) => item.id !== poll.id)]);
-  };
-
-  const deletePoll = async (poll) => {
-    if (!window.confirm(`Supprimer le sondage « ${poll.title} » et toutes ses réponses ?`)) return;
-    setDeletingPollId(poll.id);
-    try {
-      await pollRequest(poll.service_url || getPollServiceUrl(), `/api/polls/${poll.poll_id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${poll.owner_token}` },
-      });
-      await api.entities.SessionPoll.delete(poll.id);
-      setPolls((current) => current.filter((item) => item.id !== poll.id));
-      toast({ title: "Sondage supprimé" });
-    } catch (error) {
-      if (error.status === 404) {
-        try {
-          await api.entities.SessionPoll.delete(poll.id);
-          setPolls((current) => current.filter((item) => item.id !== poll.id));
-          toast({ title: "Référence locale supprimée", description: "Le sondage distant a déjà expiré ou été supprimé." });
-        } catch (localError) {
-          console.error("Suppression de la référence locale au sondage impossible :", localError);
-          toast({ variant: "destructive", title: "Suppression impossible", description: "La référence locale au sondage n'a pas pu être supprimée." });
-        }
-      } else {
-        console.error("Suppression du sondage impossible :", error);
-        toast({ variant: "destructive", title: "Suppression impossible", description: error.message });
-      }
-    } finally {
-      setDeletingPollId("");
-    }
-  };
-
   const openEdit = (session) => {
     setForm({
       id: session.id,
@@ -309,79 +112,17 @@ export default function Calendrier() {
     setDialogOpen(true);
   };
 
-  const applySession = (session, replacedId) => {
-    setSessions((list) => {
-      const rest = list.filter((s) => s.id !== session.id && s.id !== replacedId);
-      const inMonth = String(session.date || "").slice(0, 7) === monthKey;
-      return inMonth
-        ? [...rest, session].sort((a, b) => String(a.date).localeCompare(String(b.date)))
-        : rest;
-    });
-    setUpcoming((list) => {
-      const rest = list.filter((s) => s.id !== session.id && s.id !== replacedId);
-      const isUpcoming = String(session.date || "") >= format(new Date(), "yyyy-MM-dd");
-      return isUpcoming
-        ? [...rest, session].sort((a, b) => String(a.date).localeCompare(String(b.date))).slice(0, 6)
-        : rest;
-    });
-  };
-
-  const save = async () => {
+  const save = () => {
     if (!form.title.trim() || !form.date || !campaignId) return;
-    setSaving(true);
-    const payload = {
-      campaign_id: campaignId,
-      title: form.title.trim(),
-      date: form.date,
-      time: form.time || "",
-      location: form.location || "",
-      status: form.status || "planifiee",
-      notes: form.notes || "",
-      scene_id: form.scene_id || "",
-    };
-    const optimistic = { ...payload, id: form.id || `session-${Date.now()}` };
-    const previous = { sessions, upcoming };
-    applySession(optimistic);
+    const values = form;
     setDialogOpen(false);
-    try {
-      const saved = form.id
-        ? await api.entities.GameSession.update(form.id, payload)
-        : await api.entities.GameSession.create(payload);
-      if (saved?.id) applySession(saved, optimistic.id);
-      if (!form.id) dispatchTutorialAction("session-created");
-      toast({ title: form.id ? "Session mise à jour" : "Session planifiée" });
-    } catch {
-      setSessions(previous.sessions);
-      setUpcoming(previous.upcoming);
-      toast({
-        variant: "destructive",
-        title: "Enregistrement impossible",
-        description: "La session n'a pas été enregistrée.",
-      });
-    } finally {
-      setSaving(false);
-    }
+    saveSession(values);
   };
 
-  const removeSession = async () => {
+  const removeSession = () => {
     const pending = pendingDelete;
     setPendingDelete(null);
-    if (!pending) return;
-    const previous = { sessions, upcoming };
-    setSessions((list) => list.filter((s) => s.id !== pending.id));
-    setUpcoming((list) => list.filter((s) => s.id !== pending.id));
-    try {
-      await api.entities.GameSession.delete(pending.id);
-      toast({ title: "Session supprimée" });
-    } catch {
-      setSessions(previous.sessions);
-      setUpcoming(previous.upcoming);
-      toast({
-        variant: "destructive",
-        title: "Suppression impossible",
-        description: "La session a été rétablie.",
-      });
-    }
+    if (pending) deleteSession(pending);
   };
 
   return (
@@ -400,8 +141,7 @@ export default function Calendrier() {
             campaigns={campaigns}
             value={campaignId}
             onValueChange={(id) => {
-              setCampaignId(id);
-              setSelectedCampaignId(id);
+              selectCampaign(id);
               setSelectedDate("");
             }}
           />

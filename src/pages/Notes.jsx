@@ -1,5 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
-import { api } from "@/api/localClient";
+import React, { useState } from "react";
 import { Pin, Plus, StickyNote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,92 +13,20 @@ import {
 } from "@/components/ui/alert-dialog";
 import NoteCard from "@/components/notes/NoteCard";
 import NoteEditor from "@/components/notes/NoteEditor";
-import { getSelectedCampaignId, setSelectedCampaignId } from "@/lib/context/campaignStore";
-import { useToast } from "@/components/ui/use-toast";
-import { useDataRefresh } from "@/lib/context/RefreshContext";
 import PrintButton from "@/components/print/PrintButton";
 import CampaignSelect from "@/components/common/CampaignSelect";
-import { dispatchTutorialAction } from "@/utils/tutorialStorage";
+import { useCampaigns } from "@/hooks/useCampaigns";
+import { useNotes } from "@/hooks/useNotes";
 
 const EMPTY = { title: "", content: "", pinned: false };
 
 export default function Notes() {
-  const { toast } = useToast();
-  const { refreshKey: dataRefreshKey } = useDataRefresh();
-  const [campaigns, setCampaigns] = useState([]);
-  const [campaignId, setCampaignId] = useState(getSelectedCampaignId());
-  const [pinnedNotes, setPinnedNotes] = useState([]);
-  const [notes, setNotes] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const { campaigns, campaignId, selectCampaign } = useCampaigns();
+  const { pinnedNotes, notes, loading, saving, saveNote, togglePin, deleteNote } = useNotes(campaignId);
 
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(EMPTY);
-  const [saving, setSaving] = useState(false);
   const [pendingDelete, setPendingDelete] = useState(null);
-  const loadedFor = useRef("");
-
-  useEffect(() => {
-    let alive = true;
-    const run = async () => {
-      try {
-        const res = await api.entities.Campaign.filter({}, { sort: "-created_date", limit: 100 });
-        if (!alive) return;
-        setCampaigns(res.items);
-        const stored = getSelectedCampaignId();
-        const valid = res.items.some((c) => c.id === stored) ? stored : res.items[0]?.id || "";
-        setCampaignId(valid);
-        setSelectedCampaignId(valid);
-      } catch (error) {
-        console.error("Chargement des campagnes impossible :", error);
-        if (alive) toast({ variant: "destructive", title: "Campagnes indisponibles", description: "Impossible de charger les campagnes locales." });
-      }
-    };
-    run();
-    return () => { alive = false; };
-  }, [dataRefreshKey, toast]);
-
-  useEffect(() => {
-    if (!campaignId) {
-      setPinnedNotes([]);
-      setNotes([]);
-      setLoading(false);
-      return;
-    }
-    let alive = true;
-    const initial = loadedFor.current !== campaignId;
-    if (initial) {
-      setPinnedNotes([]);
-      setNotes([]);
-    }
-    const run = async () => {
-      if (initial) setLoading(true);
-      try {
-        const [pinnedRes, restRes] = await Promise.all([
-          api.entities.Note.filter(
-            { campaign_id: campaignId, pinned: true },
-            { sort: "-updated_date", limit: 50 }
-          ),
-          api.entities.Note.filter(
-            { campaign_id: campaignId, pinned: false },
-            { sort: "-updated_date", limit: 100 }
-          ),
-        ]);
-        if (!alive) return;
-        setPinnedNotes(pinnedRes.items);
-        setNotes(restRes.items);
-        loadedFor.current = campaignId;
-      } catch (error) {
-        console.error("Chargement des notes impossible :", error);
-        if (alive) toast({ variant: "destructive", title: "Notes indisponibles", description: "Impossible de charger les notes de cette campagne." });
-      } finally {
-        if (alive && initial) setLoading(false);
-      }
-    };
-    run();
-    return () => {
-      alive = false;
-    };
-  }, [campaignId, dataRefreshKey, toast]);
 
   const openNew = () => {
     setForm(EMPTY);
@@ -116,92 +43,18 @@ export default function Notes() {
     setOpen(true);
   };
 
-  const applyNote = (note, replacedId) => {
-    setPinnedNotes((list) => {
-      const rest = list.filter((n) => n.id !== note.id && n.id !== replacedId);
-      return note.pinned ? [note, ...rest] : rest;
-    });
-    setNotes((list) => {
-      const rest = list.filter((n) => n.id !== note.id && n.id !== replacedId);
-      return note.pinned ? rest : [note, ...rest];
-    });
-  };
-
-  const save = async () => {
+  const save = () => {
     if (!form.title.trim() || !campaignId) return;
-    const payload = {
-      campaign_id: campaignId,
-      title: form.title.trim(),
-      content: form.content || "",
-      pinned: !!form.pinned,
-    };
-    const optimistic = {
-      ...payload,
-      id: form.id || `note-${Date.now()}`,
-      updated_date: new Date().toISOString(),
-    };
-    const previous = { pinnedNotes, notes };
-    setSaving(true);
-    applyNote(optimistic);
+    const values = form;
     setOpen(false);
     setForm(EMPTY);
-    try {
-      const saved = form.id
-        ? await api.entities.Note.update(form.id, payload)
-        : await api.entities.Note.create(payload);
-      if (saved?.id) applyNote({ ...optimistic, ...saved }, optimistic.id);
-      if (!form.id) dispatchTutorialAction("note-created");
-      toast({ title: form.id ? "Note mise à jour" : "Note créée" });
-    } catch {
-      setPinnedNotes(previous.pinnedNotes);
-      setNotes(previous.notes);
-      toast({
-        variant: "destructive",
-        title: "Enregistrement impossible",
-        description: "La note n'a pas été enregistrée.",
-      });
-    } finally {
-      setSaving(false);
-    }
+    saveNote(values);
   };
 
-  const togglePin = async (note) => {
-    const previous = { pinnedNotes, notes };
-    const pinned = !note.pinned;
-    applyNote({ ...note, pinned });
-    try {
-      await api.entities.Note.update(note.id, { pinned });
-      toast({ title: pinned ? "Note épinglée" : "Note désépinglée" });
-    } catch {
-      setPinnedNotes(previous.pinnedNotes);
-      setNotes(previous.notes);
-      toast({
-        variant: "destructive",
-        title: "Épingle non modifiée",
-        description: "La note a repris sa place précédente.",
-      });
-    }
-  };
-
-  const removeNote = async () => {
+  const removeNote = () => {
     const pending = pendingDelete;
     setPendingDelete(null);
-    if (!pending) return;
-    const previous = { pinnedNotes, notes };
-    setPinnedNotes((list) => list.filter((n) => n.id !== pending.id));
-    setNotes((list) => list.filter((n) => n.id !== pending.id));
-    try {
-      await api.entities.Note.delete(pending.id);
-      toast({ title: "Note supprimée" });
-    } catch {
-      setPinnedNotes(previous.pinnedNotes);
-      setNotes(previous.notes);
-      toast({
-        variant: "destructive",
-        title: "Suppression impossible",
-        description: "La note a été rétablie.",
-      });
-    }
+    if (pending) deleteNote(pending);
   };
 
   const isEmpty = pinnedNotes.length === 0 && notes.length === 0;
@@ -221,7 +74,7 @@ export default function Notes() {
           <CampaignSelect
             campaigns={campaigns}
             value={campaignId}
-            onValueChange={(id) => { setCampaignId(id); setSelectedCampaignId(id); }}
+            onValueChange={selectCampaign}
           />
           <PrintButton campaignId={campaignId} preset="notes" />
           <Button data-tutorial="notes-new" onClick={openNew} disabled={!campaignId}>

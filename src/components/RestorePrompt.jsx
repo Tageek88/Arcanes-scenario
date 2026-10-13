@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { db } from "@/api/localClient";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -12,7 +11,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { hasAutosave, saveNow } from "@/lib/save/autosave";
-import { restoreFromPayload, validateBackupPayload } from "@/lib/save/backup";
+import { hasCampaigns, restoreFromPayload, validateBackupPayload } from "@/lib/save/backup";
 
 export default function RestorePrompt() {
     const { toast } = useToast();
@@ -24,7 +23,7 @@ export default function RestorePrompt() {
         let alive = true;
         (async () => {
             try {
-                if ((await db.table("Campaign").count()) > 0) return;
+                if (await hasCampaigns()) return;
                 const text = await window.arcanesBackup.read("arcanes-courante.json");
                 if (!text) return;
                 const payload = JSON.parse(text);
