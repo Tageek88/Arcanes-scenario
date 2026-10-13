@@ -9,7 +9,7 @@ import {
   startOfMonth,
   startOfWeek,
 } from "date-fns";
-import { sessionStatusMeta } from "@/lib/sessionMeta";
+import { sessionStatusMeta } from "@/lib/meta/sessionMeta";
 import { Button } from "@/components/ui/button";
 
 const WEEK_DAYS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];

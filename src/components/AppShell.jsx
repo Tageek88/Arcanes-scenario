@@ -6,8 +6,8 @@ import MobileBackBar from "@/components/MobileBackBar";
 import PageLoader from "@/components/PageLoader";
 import PullToRefresh from "@/components/PullToRefresh";
 import { queryClientInstance } from "@/lib/query-client";
-import { useDataRefresh } from "@/lib/RefreshContext";
-import { useExpandedCardState } from "@/lib/ExpandedCardContext";
+import { useDataRefresh } from "@/lib/context/RefreshContext";
+import { useExpandedCardState } from "@/lib/context/ExpandedCardContext";
 
 export default function AppShell({ children }) {
   const { pathname } = useLocation();

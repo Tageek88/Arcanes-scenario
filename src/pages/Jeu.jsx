@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "@/api/localClient";
 import { createPortal } from "react-dom";
 import { Copy, Pencil, Plus, Printer, Shield, Trash2, UserRound } from "lucide-react";
-import { withDataBatch } from "@/lib/dataEvents";
+import { withDataBatch } from "@/lib/context/dataEvents";
 import { Button } from "@/components/ui/button";
 import PrintSheet from "@/components/print/PrintSheet";
 import {
@@ -17,12 +17,12 @@ import {
 } from "@/components/ui/alert-dialog";
 import GameSheetModelEditor from "@/components/game/GameSheetModelEditor";
 import GameCharacterEditor from "@/components/game/GameCharacterEditor";
-import { getSelectedCampaignId, setSelectedCampaignId } from "@/lib/campaignStore";
-import { useDataRefresh } from "@/lib/RefreshContext";
+import { getSelectedCampaignId, setSelectedCampaignId } from "@/lib/context/campaignStore";
+import { useDataRefresh } from "@/lib/context/RefreshContext";
 import { useToast } from "@/components/ui/use-toast";
 import CampaignSelect from "@/components/common/CampaignSelect";
 import PrintButton from "@/components/print/PrintButton";
-import { useExpandedCardState } from "@/lib/ExpandedCardContext";
+import { useExpandedCardState } from "@/lib/context/ExpandedCardContext";
 import { dispatchTutorialAction } from "@/utils/tutorialStorage";
 
 const EMPTY_MODEL = { characteristics: [], skillRollModifier: false };

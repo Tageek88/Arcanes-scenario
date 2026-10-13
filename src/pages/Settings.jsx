@@ -13,8 +13,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import BackupPanel from "@/components/BackupPanel";
-import { deleteAccountData } from "@/lib/accountData";
-import { getSelectedCampaignId, setSelectedCampaignId } from "@/lib/campaignStore";
+import { deleteAccountData } from "@/lib/save/accountData";
+import { getSelectedCampaignId, setSelectedCampaignId } from "@/lib/context/campaignStore";
 import { useToast } from "@/components/ui/use-toast";
 import PrintButton from "@/components/print/PrintButton";
 import AutosavePanel from "@/components/AutosavePanel";

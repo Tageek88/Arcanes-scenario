@@ -1,5 +1,5 @@
 import { api } from "@/api/localClient";
-import { withDataBatch } from "@/lib/dataEvents";
+import { withDataBatch } from "@/lib/context/dataEvents";
 import { CUSTOM_TYPE, groupIndex, inverseOf, parentEdge, relationLabel } from "@/lib/meta/relationMeta";
 const table = () => api.entities.NPCRelation;
 

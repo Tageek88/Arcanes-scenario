@@ -19,14 +19,14 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/components/ui/use-toast";
-import { getSelectedCampaignId, setSelectedCampaignId } from "@/lib/campaignStore";
-import { nextStatus } from "@/lib/sceneMeta";
-import { useDataRefresh } from "@/lib/RefreshContext";
-import { countCampaignContent, deleteCampaignCascade } from "@/lib/campaignDelete";
+import { getSelectedCampaignId, setSelectedCampaignId } from "@/lib/context/campaignStore";
+import { nextStatus } from "@/lib/meta/sceneMeta";
+import { useDataRefresh } from "@/lib/context/RefreshContext";
+import { countCampaignContent, deleteCampaignCascade } from "@/lib/services/campaignDelete";
 import PrintButton from "@/components/print/PrintButton";
 import CampaignSelect from "@/components/common/CampaignSelect";
-import { useExpandedCardState } from "@/lib/ExpandedCardContext";
-import { usePageFilter } from "@/lib/PageFilterContext";
+import { useExpandedCardState } from "@/lib/context/ExpandedCardContext";
+import { usePageFilter } from "@/lib/context/PageFilterContext";
 import { dispatchTutorialAction } from "@/utils/tutorialStorage";
 
 const EMPTY_SCENE = {

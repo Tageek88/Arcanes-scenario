@@ -4,8 +4,8 @@ import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Dices, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { categoryMeta, rollTable, validEntries } from "@/lib/tableMeta";
-import { useExpandedCard } from "@/lib/ExpandedCardContext";
+import { categoryMeta, rollTable, validEntries } from "@/lib/meta/tableMeta";
+import { useExpandedCard } from "@/lib/context/ExpandedCardContext";
 
 /**
  * @typedef {Object} TableCardProps

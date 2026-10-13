@@ -1,7 +1,7 @@
-import { childrenMap, flattenTree, pathOf } from "@/lib/locationTree";
+import { childrenMap, flattenTree, pathOf } from "@/lib/services/locationTree";
 import { groupIndex, relationLabel } from "@/lib/meta/relationMeta";
-import { NPC_ATTITUDE, SCENE_STATUS } from "@/lib/sceneMeta";
-import { sessionStatusMeta } from "@/lib/sessionMeta";
+import { NPC_ATTITUDE, SCENE_STATUS } from "@/lib/meta/sceneMeta";
+import { sessionStatusMeta } from "@/lib/meta/sessionMeta";
 
 export const SECTIONS = [
     { key: "scenes", title: "Scènes et actes", hint: "Chaque scène est imprimée avec ses indices liés." },

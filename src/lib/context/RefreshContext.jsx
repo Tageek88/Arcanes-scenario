@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { subscribeDataChanged } from "@/lib/dataEvents";
+import { subscribeDataChanged } from "@/lib/context/dataEvents";
 
 // Durée minimale d'affichage de l'indicateur, le temps que les données reviennent.
 const SETTLE_MS = 600;

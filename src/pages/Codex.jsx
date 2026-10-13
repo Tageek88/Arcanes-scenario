@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "@/api/localClient";
-import { withDataBatch } from "@/lib/dataEvents";
+import { withDataBatch } from "@/lib/context/dataEvents";
 import { Search, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -27,13 +27,13 @@ import CodexEntryDialog from "@/components/codex/CodexEntryDialog";
 import LocationTree from "@/components/codex/LocationTree";
 import PrintButton from "@/components/print/PrintButton";
 import CampaignSelect from "@/components/common/CampaignSelect";
-import { CODEX_TABS, KIND_META } from "@/lib/codex";
-import { deleteLocation, descendantIds, parentOptions, pathOf } from "@/lib/locationTree";
-import { deleteNpcRelations, loadRelations, relationsByNpc } from "@/lib/npcRelations";
-import { getSelectedCampaignId, setSelectedCampaignId } from "@/lib/campaignStore";
+import { CODEX_TABS, KIND_META } from "@/lib/meta/codex";
+import { deleteLocation, descendantIds, parentOptions, pathOf } from "@/lib/services/locationTree";
+import { deleteNpcRelations, loadRelations, relationsByNpc } from "@/lib/services/npcRelations";
+import { getSelectedCampaignId, setSelectedCampaignId } from "@/lib/context/campaignStore";
 import { useToast } from "@/components/ui/use-toast";
-import { useDataRefresh } from "@/lib/RefreshContext";
-import { usePageFilter } from "@/lib/PageFilterContext";
+import { useDataRefresh } from "@/lib/context/RefreshContext";
+import { usePageFilter } from "@/lib/context/PageFilterContext";
 
 const normalize = (value) =>
   String(value || "")

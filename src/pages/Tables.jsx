@@ -14,13 +14,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import TableCard from "@/components/tables/TableCard";
 import TableEditor from "@/components/tables/TableEditor";
-import { TABLE_CATEGORIES } from "@/lib/tableMeta";
-import { getSelectedCampaignId, setSelectedCampaignId } from "@/lib/campaignStore";
+import { TABLE_CATEGORIES } from "@/lib/meta/tableMeta";
+import { getSelectedCampaignId, setSelectedCampaignId } from "@/lib/context/campaignStore";
 import { useToast } from "@/components/ui/use-toast";
-import { useDataRefresh } from "@/lib/RefreshContext";
+import { useDataRefresh } from "@/lib/context/RefreshContext";
 import PrintButton from "@/components/print/PrintButton";
 import CampaignSelect from "@/components/common/CampaignSelect";
-import { usePageFilter } from "@/lib/PageFilterContext";
+import { usePageFilter } from "@/lib/context/PageFilterContext";
 import { dispatchTutorialAction } from "@/utils/tutorialStorage";
 import DiceRoller from "@/components/tables/DiceRoller";
 

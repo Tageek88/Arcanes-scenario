@@ -14,9 +14,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import NoteCard from "@/components/notes/NoteCard";
 import NoteEditor from "@/components/notes/NoteEditor";
-import { getSelectedCampaignId, setSelectedCampaignId } from "@/lib/campaignStore";
+import { getSelectedCampaignId, setSelectedCampaignId } from "@/lib/context/campaignStore";
 import { useToast } from "@/components/ui/use-toast";
-import { useDataRefresh } from "@/lib/RefreshContext";
+import { useDataRefresh } from "@/lib/context/RefreshContext";
 import PrintButton from "@/components/print/PrintButton";
 import CampaignSelect from "@/components/common/CampaignSelect";
 import { dispatchTutorialAction } from "@/utils/tutorialStorage";

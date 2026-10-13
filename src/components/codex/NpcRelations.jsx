@@ -31,7 +31,7 @@ import {
   repairRelation,
   updateRelation,
   validateRelation,
-} from "@/lib/npcRelations";
+} from "@/lib/services/npcRelations";
 
 const EMPTY = {
   type: "parent_de",

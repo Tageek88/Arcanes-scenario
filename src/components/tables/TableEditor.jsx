@@ -12,7 +12,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import ResponsiveDialog from "@/components/common/ResponsiveDialog";
-import { TABLE_CATEGORIES } from "@/lib/tableMeta";
+import { TABLE_CATEGORIES } from "@/lib/meta/tableMeta";
 
 export default function TableEditor({ open, onOpenChange, form, setForm, saving, onSave }) {
   const [quick, setQuick] = useState("");

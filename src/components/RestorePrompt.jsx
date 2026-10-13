@@ -11,8 +11,8 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/components/ui/use-toast";
-import { hasAutosave, saveNow } from "@/lib/autosave";
-import { restoreFromPayload, validateBackupPayload } from "@/lib/backup";
+import { hasAutosave, saveNow } from "@/lib/save/autosave";
+import { restoreFromPayload, validateBackupPayload } from "@/lib/save/backup";
 
 export default function RestorePrompt() {
     const { toast } = useToast();

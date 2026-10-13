@@ -64,3 +64,5 @@ export async function importBackup(file) {
 
   await restoreFromPayload(parsed);
 }
+
+hasCampaigns();

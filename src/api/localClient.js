@@ -1,7 +1,7 @@
 // === SECTION IMPORTS ===
 import Dexie from "dexie";
-import { notifyDataChanged } from "@/lib/dataEvents";
-   import { LOCAL_USER } from "./localUser";
+import { notifyDataChanged } from "@/lib/context/dataEvents";
+import { LOCAL_USER } from "./localUser";
 // === SECTION TABLES ===
 const BASE_TABLES = [
   "Campaign", "Act", "Scene", "NPC", "Location", "Clue", "RollTable", "GameSession", "Note",

@@ -18,16 +18,16 @@ import {
 import MonthGrid from "@/components/calendar/MonthGrid";
 import SessionDialog from "@/components/calendar/SessionDialog";
 import UpcomingSessions from "@/components/calendar/UpcomingSessions";
-import { dateKey, sessionStatusMeta } from "@/lib/sessionMeta";
-import { getSelectedCampaignId, setSelectedCampaignId } from "@/lib/campaignStore";
+import { dateKey, sessionStatusMeta } from "@/lib/meta/sessionMeta";
+import { getSelectedCampaignId, setSelectedCampaignId } from "@/lib/context/campaignStore";
 import { useToast } from "@/components/ui/use-toast";
-import { useDataRefresh } from "@/lib/RefreshContext";
+import { useDataRefresh } from "@/lib/context/RefreshContext";
 import { dispatchTutorialAction } from "@/utils/tutorialStorage";
 import PrintButton from "@/components/print/PrintButton";
 import SessionPollDialog from "@/components/calendar/SessionPollDialog";
 import CampaignSelect from "@/components/common/CampaignSelect";
-import { getPollServiceUrl, pollRequest, refreshSessionPoll, tallyVotes } from "@/lib/sessionPolls";
-import { useExpandedCardState } from "@/lib/ExpandedCardContext";
+import { getPollServiceUrl, pollRequest, refreshSessionPoll, tallyVotes } from "@/lib/services/sessionPolls";
+import { useExpandedCardState } from "@/lib/context/ExpandedCardContext";
 
 
 const emptyForm = (date) => ({

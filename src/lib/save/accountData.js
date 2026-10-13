@@ -1,5 +1,5 @@
 import { db, TABLES } from "@/api/localClient";
-import { saveNow } from "@/lib/autosave";
+import { saveNow } from "@/lib/save/autosave";
 
 export const deleteAccountData = async () => {
   await saveNow({ force: true });

@@ -1,5 +1,5 @@
 import { api } from "@/api/localClient";
-import { withDataBatch } from "@/lib/dataEvents";
+import { withDataBatch } from "@/lib/context/dataEvents";
 
 // Enfants d'abord, la campagne en dernier.
 export const LINKED_ENTITIES = [
