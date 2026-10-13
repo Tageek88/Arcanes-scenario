@@ -1,0 +1,1 @@
+   export const LOCAL_USER = { id: "local-user", email: "local@arcanes", full_name: "MJ", role: "admin" };

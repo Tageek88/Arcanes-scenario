@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { api } from "@/api/localClient";
 import { withDataBatch } from "@/lib/dataEvents";
 import { Search, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";

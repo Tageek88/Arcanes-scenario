@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { api } from "@/api/localClient";
 import { Pin, Plus, StickyNote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {

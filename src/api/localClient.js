@@ -1,6 +1,7 @@
 // === SECTION IMPORTS ===
 import Dexie from "dexie";
 import { notifyDataChanged } from "@/lib/dataEvents";
+   import { LOCAL_USER } from "./localUser";
 // === SECTION TABLES ===
 const BASE_TABLES = [
   "Campaign", "Act", "Scene", "NPC", "Location", "Clue", "RollTable", "GameSession", "Note",
@@ -11,9 +12,6 @@ const RELATION_TABLES = [...BASE_TABLES, "NPCRelation"];
 const VERSION_3_TABLES = [...RELATION_TABLES, "GameSheetModel", "GameCharacter", "SkillCatalog", "EquipmentCatalog"];
 const VERSION_4_TABLES = [...VERSION_3_TABLES, "SessionPoll"];
 export const TABLES = [...VERSION_4_TABLES, "Quest"];
-
-// === SECTION TABLE CONSTANTS ===
-export const LOCAL_USER = { id: "local-user", email: "local@arcanes", full_name: "MJ", role: "admin" };
 
 // === SECTION DATABASE INITIALIZATION ===  
 export const db = new Dexie("arcanes_scenario");
