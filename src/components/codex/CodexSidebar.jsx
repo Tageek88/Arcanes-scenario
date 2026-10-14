@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import { Search, Plus, Link2, Link2Off, Pencil, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { CODEX_TABS } from "@/lib/meta/codex";
 import { NPC_ATTITUDE } from "@/lib/meta/sceneMeta";
 import { isImage } from "@/components/codex/AttachmentsField";
-import { openAttachment } from "@/lib/openAttachment";
+import { openAttachment } from "@/lib/services/openAttachment";
 import { usePageFilter } from "@/lib/context/PageFilterContext";
 import { useCodexList } from "@/hooks/useCodexList";
 
