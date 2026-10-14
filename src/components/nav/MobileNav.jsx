@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { GitBranch, BookMarked, CalendarDays, Dices, StickyNote, Swords, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTabStacks } from "@/lib/context/TabStackContext";
@@ -14,12 +14,13 @@ const TABS = [
 ];
 
 export default function MobileNav() {
+  const { pathname } = useLocation();
   const { activeTab, openTab, tabTarget } = useTabStacks();
 
   return (
     <nav 
       data-tutorial="sidebar" 
-      className="glass-panel fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around py-2 pb-[env(safe-area-inset-bottom)] md:hidden"
+      className="glass-panel fixed bottom-0 left-0 right-0 z-40 flex w-full items-center justify-between px-2 py-2 pb-[calc(0.5rem_+_env(safe-area-inset-bottom))] md:hidden"
     >
       {TABS.map((tab) => {
         const Icon = tab.icon;
@@ -38,11 +39,11 @@ export default function MobileNav() {
               openTab(tab.to);
             }}
             className={cn(
-              "flex items-center justify-center p-2",
-              active ? "text-primary" : "text-muted-foreground"
+              "flex flex-1 min-w-0 items-center justify-center rounded-lg py-2 transition-colors",
+              active ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground"
             )}
           >
-            <Icon className="h-5 w-5" />
+            <Icon className="h-5 w-5 shrink-0" />
           </Link>
         );
       })}
@@ -50,9 +51,13 @@ export default function MobileNav() {
         to="/settings"
         data-tutorial="tab-params"
         aria-label="Paramètres"
-        className="flex items-center justify-center p-2 text-muted-foreground"
+        aria-current={pathname === "/settings" ? "page" : undefined}
+        className={cn(
+          "flex flex-1 min-w-0 items-center justify-center rounded-lg py-2 transition-colors",
+          pathname === "/settings" || pathname.startsWith("/settings/") ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground"
+        )}
       >
-        <Settings className="h-5 w-5" />
+        <Settings className="h-5 w-5 shrink-0" />
       </Link>
     </nav>
   );
