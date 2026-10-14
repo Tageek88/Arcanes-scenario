@@ -1,6 +1,5 @@
-import React from "react";
-
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { GitBranch, BookMarked, CalendarDays, Dices, StickyNote, Swords, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTabStacks } from "@/lib/context/TabStackContext";
@@ -16,9 +15,44 @@ const TABS = [
 
 export default function MobileNav() {
   const { activeTab, openTab, tabTarget } = useTabStacks();
+  const location = useLocation();
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      // Cacher si on scroll vers le bas (et qu'on est assez bas)
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setIsVisible(false);
+      } 
+      // Montrer si on scroll vers le haut
+      else if (currentScrollY < lastScrollY) {
+        setIsVisible(true);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY]);
+
+  // Réinitialiser la visibilité quand on change de page
+  useEffect(() => {
+    setIsVisible(true);
+    setLastScrollY(0);
+  }, [location.pathname]);
 
   return (
-    <nav data-tutorial="sidebar" className="glass-panel fixed bottom-0 left-0 right-0 z-40 flex items-stretch justify-around rounded-t-2xl pb-[env(safe-area-inset-bottom)] md:hidden">
+    <nav 
+      data-tutorial="sidebar" 
+      className={cn(
+        "glass-panel fixed bottom-0 left-0 right-0 z-40 flex items-stretch justify-around rounded-t-2xl pb-[env(safe-area-inset-bottom)] md:hidden transition-transform duration-300 ease-in-out",
+        isVisible ? "translate-y-0" : "translate-y-full"
+      )}
+    >
       {TABS.map((tab) => {
         const Icon = tab.icon;
         const active = activeTab === tab.to;
