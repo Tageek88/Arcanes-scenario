@@ -27,7 +27,7 @@ export default function CodexCard({
           <h3 className="font-display text-base font-semibold text-foreground break-words">{entry.name}</h3>
           {entry.comment && <p className="text-xs italic text-muted-foreground break-words">{entry.comment}</p>}
         </div>
-        {kind === "npc" && <span className={cn("tag border shrink-0", attitude.badge)}>{attitude.label}</span>}
+        {kind === "npc" && <span className={cn("tag border", attitude.badge)}>{attitude.label}</span>}
         {kind === "clue" && (
           <span className={cn(
             "tag border shrink-0",
