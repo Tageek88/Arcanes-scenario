@@ -6,9 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { api } from "@/api/localClient";
 import { withDataBatch } from "@/lib/context/dataEvents";
 import { formatPollDateInput, toPollIsoDate } from "@/lib/services/polls/pollDates";
+import { createLocalPoll, deleteLocalPoll, listCampaignPolls, updateLocalPoll } from "@/lib/services/polls/store";
 import {
   getPollServiceUrl,
   normalizePollServiceUrl,
@@ -107,12 +107,12 @@ export default function SessionPollDialog({
   useEffect(() => {
     if (!open || !campaignId) return;
     let alive = true;
-    api.entities.SessionPoll.filter({ campaign_id: campaignId }, { sort: "-created_date" })
-      .then(async (result) => {
+    listCampaignPolls(campaignId)
+      .then(async (items) => {
         if (!alive) return;
-        setPolls(result.items);
+        setPolls(items);
         const baseUrl = getPollServiceUrl();
-        for (const poll of result.items) {
+        for (const poll of items) {
           const pollUrl = poll.service_url || baseUrl;
           if (!pollUrl) continue;
           try {
@@ -249,7 +249,7 @@ export default function SessionPollDialog({
             body: JSON.stringify(payload),
           });
           remoteSaved = true;
-          const saved = await api.entities.SessionPoll.update(editingPoll.id, {
+          const saved = await updateLocalPoll(editingPoll.id, {
             title: payload.title,
             comment: payload.comment,
             timezone: payload.timezone,
@@ -292,7 +292,7 @@ export default function SessionPollDialog({
         method: "POST",
         body: JSON.stringify(payload),
       });
-      const saved = await api.entities.SessionPoll.create({
+      const saved = await createLocalPoll({
         campaign_id: campaignId,
         poll_id: created.id,
         title: created.title,
@@ -363,14 +363,14 @@ export default function SessionPollDialog({
         method: "DELETE",
         headers: { Authorization: `Bearer ${poll.owner_token}` },
       });
-      await api.entities.SessionPoll.delete(poll.id);
+      await deleteLocalPoll(poll.id);
       setPolls((current) => current.filter((item) => item.id !== poll.id));
       onPollChange?.(null, poll.id);
       toast({ title: "Sondage supprimé" });
     } catch (error) {
       if (error.status === 404) {
         try {
-          await api.entities.SessionPoll.delete(poll.id);
+          await deleteLocalPoll(poll.id);
           setPolls((current) => current.filter((item) => item.id !== poll.id));
           onPollChange?.(null, poll.id);
           toast({ title: "Référence locale supprimée", description: "Le sondage distant n'existe plus ou a expiré." });
