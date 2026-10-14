@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+﻿import React, { useRef } from "react";
 import { cn } from "@/lib/utils";
 import { SCENE_STATUS } from "@/lib/meta/sceneMeta";
 
@@ -31,10 +31,10 @@ export default function SwipeSceneRow({ scene, active, npcs, locations, clues, o
         active ? "border-primary/60 bg-primary/[0.06]" : "border-border bg-background/70"
       )}
     >
-      <button type="button" className="min-w-0 flex-1 text-left" onClick={() => onSelect(scene)} onDoubleClick={() => onOpen(scene)}>
+      <button type="button" className="min-w-0 flex-1 text-left break-words" onClick={() => onSelect(scene)} onDoubleClick={() => onOpen(scene)}>
         <div className="flex items-center gap-2">
           <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", meta.dot)} />
-          <span className="truncate font-display text-sm font-semibold text-foreground">{scene.title}</span>
+          <span className="truncate break-words font-display text-sm font-semibold text-foreground">{scene.title}</span>
         </div>
         {scene.summary && (
           <p className={cn("mt-1 text-xs text-muted-foreground", active ? "whitespace-pre-wrap" : "line-clamp-1")}>

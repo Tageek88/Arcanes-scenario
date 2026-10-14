@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+﻿import { cn } from "@/lib/utils";
 import {
   eachDayOfInterval,
   endOfMonth,
@@ -27,7 +27,7 @@ export default function MonthGrid({
   const days = eachDayOfInterval({ start, end });
 
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-card/50">
+    <div className="w-full max-w-full overflow-hidden rounded-xl border border-border bg-card/50">
       <div className="grid grid-cols-7 border-b border-border">
         {WEEK_DAYS.map((day) => (
           <div

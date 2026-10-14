@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -46,7 +46,7 @@ export default function Settings() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-6 px-4 py-6 md:px-8 md:py-8">
+    <div className="mx-auto w-full max-w-3xl space-y-6 px-4 py-6 md:px-8 md:py-8 overflow-x-hidden">
       <header>
         <span className="tag border border-primary/40 text-primary">Configuration</span>
         <h1 className="mt-3 font-display text-3xl font-bold text-foreground">Paramètres</h1>
