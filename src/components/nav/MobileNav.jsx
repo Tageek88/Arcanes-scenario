@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { GitBranch, BookMarked, CalendarDays, Dices, StickyNote, Swords, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -17,40 +17,53 @@ export default function MobileNav() {
   const { activeTab, openTab, tabTarget } = useTabStacks();
   const location = useLocation();
   const [isVisible, setIsVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
+  const lastScrollY = useRef(0);
+  const scrollThreshold = 150; // Seulement après 150px de scroll
 
   useEffect(() => {
+    let ticking = false;
+
     const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      
-      // Cacher si on scroll vers le bas (et qu'on est assez bas)
-      if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        setIsVisible(false);
-      } 
-      // Montrer si on scroll vers le haut
-      else if (currentScrollY < lastScrollY) {
-        setIsVisible(true);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
+          const scrollDiff = currentScrollY - lastScrollY.current;
+          
+          // Cacher seulement si on descend significativement et qu'on est assez bas
+          if (scrollDiff > 5 && currentScrollY > scrollThreshold) {
+            setIsVisible(false);
+          } 
+          // Montrer si on monte ou si on est en haut
+          else if (scrollDiff < -5 || currentScrollY < scrollThreshold) {
+            setIsVisible(true);
+          }
+          
+          lastScrollY.current = currentScrollY;
+          ticking = false;
+        });
+        ticking = true;
       }
-      
-      setLastScrollY(currentScrollY);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [lastScrollY]);
+  }, []);
 
   // Réinitialiser la visibilité quand on change de page
   useEffect(() => {
     setIsVisible(true);
-    setLastScrollY(0);
+    lastScrollY.current = 0;
   }, [location.pathname]);
 
   return (
     <nav 
       data-tutorial="sidebar" 
       className={cn(
-        "glass-panel fixed bottom-0 left-0 right-0 z-40 flex items-stretch justify-around rounded-t-2xl pb-[env(safe-area-inset-bottom)] md:hidden transition-transform duration-300 ease-in-out",
-        isVisible ? "translate-y-0" : "translate-y-full"
+        "glass-panel fixed bottom-0 left-0 right-0 z-40 flex items-stretch justify-around rounded-t-2xl pb-[env(safe-area-inset-bottom)] md:hidden",
+        "transition-all duration-300 ease-in-out will-change-transform",
+        isVisible 
+          ? "translate-y-0 opacity-100" 
+          : "translate-y-[calc(100%+env(safe-area-inset-bottom))] opacity-0"
       )}
     >
       {TABS.map((tab) => {
