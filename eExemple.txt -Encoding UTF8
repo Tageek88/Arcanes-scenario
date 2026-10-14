@@ -1,0 +1,40 @@
+f894b07 fix(mobile): champ role en bloc avec break-all pour forcer le retour à la ligne
+2739886 fix(mobile): champ role en bloc avec break-all pour éviter le débordement
+f2a47cd fix(mobile): badge d'attitude des PNJ peut se réduire
+ade99f9 fix(mobile): break-words et overflow-hidden sur tous les champs de texte des cartes Codex
+be79b73 fix(mobile): overflow-hidden sur tous les textes de scène
+f20d70f fix(mobile): boutons de scène en taille normale
+652ac4b fix(mobile): layout vertical des scènes avec boutons en dessous
+571e750 fix(mobile): layout vertical des scènes avec boutons en dessous
+2318cd9 fix(mobile): layout vertical des scènes sur mobile et scroll horizontal du calendrier
+e18194e fix(mobile): correction du débordement des scènes, calendrier et paramètres
+e6baf82 fix(mobile): ajout de w-full, max-w-full et overflow-hidden aux grilles de cartes
+f5e87a8 fix(mobile): correction du débordement des cartes avec w-full, max-w-full et break-words
+44fa187 fix(mobile): correction du débordement horizontal de la barre de navigation et du layout
+d4d5160 chore: ajout de @capacitor/assets et génération des icônes Android
+d921266 feat: favicon officiel de l'application
+dc0500d fix(mobile): MobileNav avec icônes seules, suppression totale du texte
+98665b6 fix: correction du favicon dans index.html
+bc23f5e fix(mobile): amélioration de la transition de la MobileNav avec seuil et animation fluide
+b844752 feat: ajout d'un favicon SVG thématique pour l'application
+f5d933b feat(mobile): MobileNav se cache au scroll vers le bas, réapparaît au scroll vers le haut
+56ebcca refactor: déplacement de openAttachment.js vers lib/services
+c632c29 refactor: découpage de localClient.js en dbConfig et entityFactory
+04bae96 chore: lint étendu à tout src, corrections associées
+59d6e66 docs: architecture.md et AGENTS.md à jour, check étendu aux composants
+35d1a64 refactor: SessionPollDialog via services/polls/store
+f390417 refactor: CodexEntryDialog via useCodexEntryData et codexEntries
+26b2135 refactor: PrintButton charge ses données via lib/print/laodPrintData
+f9f8ff8 refactor: AttachmentsField, NpcRelations et CodexSidebar via hooks
+7e7dc65 docs: liens corrigés après déplacement des fichiers
+35f8771 chore: tri des fichiers de doc, .gradle ignoré
+1b2d7d3 refactor: retire progress de useCampaignContent
+2c6d03f refactor: hooks: Notes, Tables, Jeu, Settings, Calendrier, Codex, Home.
+1bc375f refactor: lib rangé en sous dossiers
+e8664a3 Base saine : imports api, local user
+8d92a49 Supprime les composants inutilisés
+8262e9a Refactor hooks, decoupage de print, generators
+4b0fa5c Refactor hooks, découpage de lib/, servvices/polls
+247c37b ajout de la table de lancé de dé aléatoire
+68bd685 Univers de campagne, génération aléatoire de noms de PNJ et bouton Modifier la campagne
+06e6b21 Version 1.5.0 : passage de version et fichier de release vide

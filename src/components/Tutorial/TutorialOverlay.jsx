@@ -244,7 +244,7 @@ export default function TutorialOverlay({
               onClick={onClose}
               className="rounded-lg px-2 py-1.5 text-sm text-gray-400 transition-colors hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             >
-              Passer cette étape
+              Ignorer ce tuto
             </button>
             <button
               type="button"
