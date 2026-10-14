@@ -2,7 +2,7 @@
 //  1. imports qui ne pointent vers aucun fichier (y compris dans les fichiers que le build ignore
 //     parce qu'ils ne sont importés par personne), avec contrôle de la casse du nom
 //  2. fichiers qui utilisent `api` sans l'importer (page blanche à l'exécution)
-//  3. informatif : pages qui appellent encore `api` directement (reste à migrer vers un hook)
+//  3. pages ou composants qui appellent `api` directement (interdit : passer par un hook ou un service)
 //
 // Usage (à la racine du projet) : node scripts/check-refactor.mjs
 import { readdirSync, readFileSync, existsSync, statSync } from "node:fs";
@@ -54,7 +54,7 @@ const API_IMPORT = /import\s*\{[^}]*\bapi\b[^}]*\}\s*from/;
 const files = walk(SRC);
 const unresolved = [];
 const missingApiImport = [];
-const pagesUsingApi = [];
+const uiUsingApi = [];
 
 for (const file of files) {
   const rel = relative(process.cwd(), file);
@@ -68,7 +68,8 @@ for (const file of files) {
   const isClient = rel.split(sep).join("/").endsWith("src/api/localClient.js");
   if (!isClient && API_USE.test(text)) {
     if (!API_IMPORT.test(text)) missingApiImport.push(rel);
-    if (rel.split(sep).join("/").startsWith("src/pages/")) pagesUsingApi.push(rel);
+    const posix = rel.split(sep).join("/");
+    if (posix.startsWith("src/pages/") || posix.startsWith("src/components/")) uiUsingApi.push(rel);
   }
 }
 
@@ -79,7 +80,7 @@ const show = (title, items) => {
 
 show("1. Imports qui ne pointent vers aucun fichier", unresolved);
 show("2. Fichiers qui utilisent `api` sans l'importer", missingApiImport);
-show("3. (info) Pages qui appellent encore `api` directement", pagesUsingApi);
+show("3. Pages ou composants qui appellent `api` directement", uiUsingApi);
 
 console.log(`\n${files.length} fichiers analysés.`);
-process.exit(unresolved.length || missingApiImport.length ? 1 : 0);
+process.exit(unresolved.length || missingApiImport.length || uiUsingApi.length ? 1 : 0);
