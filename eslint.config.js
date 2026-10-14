@@ -9,16 +9,14 @@ export default [
     ignores: ["dist/**", "release/**", "node_modules/**", "android/**", "ios/**"],
   },
   {
-    files: [
-      "src/components/**/*.{js,mjs,cjs,jsx}",
-      "src/pages/**/*.{js,mjs,cjs,jsx}",
-      "src/Layout.jsx",
-    ],
-    ignores: ["src/lib/**/*", "src/components/ui/**/*", "android/**", "ios/**"],
-    ...pluginJs.configs.recommended,
-    ...pluginReact.configs.flat.recommended,
+    // Tout le code de l'application, sauf les primitives shadcn/ui générées.
+    files: ["src/**/*.{js,mjs,cjs,jsx}"],
+    ignores: ["src/components/ui/**/*"],
     languageOptions: {
-      globals: globals.browser,
+      globals: {
+        ...globals.browser,
+        __APP_VERSION__: "readonly", // injecté par Vite (vite.config.js)
+      },
       parserOptions: {
         ecmaVersion: 2022,
         sourceType: "module",
@@ -38,26 +36,33 @@ export default [
       "unused-imports": pluginUnusedImports,
     },
     rules: {
+      // Règles recommandées (dont no-undef : détecte un `api` utilisé sans import).
+      ...pluginJs.configs.recommended.rules,
+      ...pluginReact.configs.flat.recommended.rules,
+
       "no-unused-vars": "off",
       "react/jsx-uses-vars": "error",
       "react/jsx-uses-react": "error",
       "unused-imports/no-unused-imports": "error",
       "unused-imports/no-unused-vars": [
-        "warn",
-        {
-          vars: "all",
-          varsIgnorePattern: "^_",
-          args: "after-used",
-          argsIgnorePattern: "^_",
-        },
-      ],
+  "warn",
+  {
+    vars: "all",
+    varsIgnorePattern: "^_",
+    args: "after-used",
+    argsIgnorePattern: "^_",
+    ignoreRestSiblings: true,
+  },
+],
       "react/prop-types": "off",
       "react/react-in-jsx-scope": "off",
+      "react/no-unescaped-entities": "off", // apostrophes françaises dans le texte JSX
       "react/no-unknown-property": [
         "error",
         { ignore: ["cmdk-input-wrapper", "toast-close"] },
       ],
       "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn",
     },
   },
 ];

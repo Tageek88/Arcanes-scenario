@@ -6,6 +6,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { withDataBatch } from "@/lib/context/dataEvents";
 import { formatPollDateInput, toPollIsoDate } from "@/lib/services/polls/pollDates";
 import { createLocalPoll, deleteLocalPoll, listCampaignPolls, updateLocalPoll } from "@/lib/services/polls/store";
@@ -66,6 +76,7 @@ export default function SessionPollDialog({
   const [editingPoll, setEditingPoll] = useState(null);
   const [editLoading, setEditLoading] = useState(false);
   const [editLoadError, setEditLoadError] = useState("");
+  const [pendingPollRemoval, setPendingPollRemoval] = useState(null);
 
   const parsedPlayers = useMemo(
     () => playerNames.split(/\r?\n/).map((name) => name.normalize("NFKC").trim().replace(/\s+/g, " ")).filter(Boolean),
@@ -138,6 +149,8 @@ export default function SessionPollDialog({
     return () => {
       alive = false;
     };
+  // onPollChange n'est pas stable : l'actualisation ne doit se relancer qu'à l'ouverture ou au changement de campagne.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, campaignId, toast]);
 
   useEffect(() => {
@@ -356,7 +369,6 @@ export default function SessionPollDialog({
   };
 
   const removePoll = async (poll) => {
-    if (!window.confirm(`Supprimer le sondage « ${poll.title} » et ses réponses en ligne ?`)) return;
     setBusyPoll(poll.id);
     try {
       await pollRequest(poll.service_url, `/api/polls/${poll.poll_id}`, {
@@ -393,7 +405,14 @@ export default function SessionPollDialog({
     </div>
   );
 
+  const confirmPollRemoval = () => {
+    const poll = pendingPollRemoval;
+    setPendingPollRemoval(null);
+    if (poll) removePoll(poll);
+  };
+
   return (
+    <>
     <ResponsiveDialog
       open={open}
       onOpenChange={onOpenChange}
@@ -586,7 +605,7 @@ export default function SessionPollDialog({
                           Clôturer
                         </Button>
                       )}
-                      <Button type="button" size="sm" variant="ghost" className="text-destructive" onClick={() => removePoll(poll)} disabled={busyPoll === poll.id} aria-label="Supprimer le sondage">
+                      <Button type="button" size="sm" variant="ghost" className="text-destructive" onClick={() => setPendingPollRemoval(poll)} disabled={busyPoll === poll.id} aria-label="Supprimer le sondage">
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -633,5 +652,26 @@ export default function SessionPollDialog({
         )}
       </div>
     </ResponsiveDialog>
+
+    <AlertDialog open={!!pendingPollRemoval} onOpenChange={(next) => !next && setPendingPollRemoval(null)}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Supprimer le sondage ?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Le sondage « {pendingPollRemoval?.title} » et ses réponses en ligne seront définitivement supprimés.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Annuler</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={confirmPollRemoval}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            Supprimer
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 }

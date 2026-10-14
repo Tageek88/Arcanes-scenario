@@ -17,9 +17,11 @@ const safeFieldText = (value) =>
         .replace(/[—–]/g, "-")
         .replace(/…/g, "...")
         .replace(/[•·]/g, "-")
+        // eslint-disable-next-line no-control-regex
         .replace(/[^\u0000-\u00FF]/g, "?");
 
 const fileSafe = (value) =>
+    // eslint-disable-next-line no-control-regex
     String(value || "Campagne").replace(/[<>:"/\\|?*\x00-\x1F]/g, "_").slice(0, 100);
 
 const fieldSafe = (value) =>

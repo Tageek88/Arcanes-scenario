@@ -1,5 +1,5 @@
 import React from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 import { useTabStacks } from "@/lib/context/TabStackContext";
 
@@ -14,7 +14,6 @@ const SECTIONS = {
 
 export default function MobileBackBar() {
   const { pathname } = useLocation();
-  const navigate = useNavigate();
   const { activeTab, openTab } = useTabStacks();
 
   if (pathname === "/") {
