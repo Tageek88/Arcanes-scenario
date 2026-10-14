@@ -27,7 +27,7 @@
 
 ## Guide des fonctionnalités
 
-Retrouvez le descriptif complet de l'application, onglet par onglet, dans le fichier **[Fonctionnalites.txt](./Fonctionnalites.txt)** à la racine du projet.
+Retrouvez le descriptif complet de l'application, onglet par onglet, dans le fichier **[Docs/Fonctionnalites.md](./Docs/Fonctionnalites.md)**.
 
 ## Fonctionnalités
 
@@ -40,7 +40,7 @@ Retrouvez le descriptif complet de l'application, onglet par onglet, dans le fic
 - **Cartes, campagnes et impression** : développez les cartes de contenu au clic, choisissez la campagne depuis chaque onglet et imprimez le contenu associé, y compris les tables, sessions et fiches de personnages.
 - **Notes du MJ** : bloc-notes avec épinglage.
 - **Sauvegarde** : export et import JSON depuis les Paramètres.
-- **Données de campagne locales** : aucun compte n'est nécessaire et les campagnes restent sur votre machine. Les sondages partagés sont hébergés sur Cloudflare uniquement si vous configurez ce service (voir [CLOUDFLARE.md](./CLOUDFLARE.md)).
+- **Données de campagne locales** : aucun compte n'est nécessaire et les campagnes restent sur votre machine. Les sondages partagés sont hébergés sur Cloudflare uniquement si vous configurez ce service (voir [cloudflare/README.md](./cloudflare/README.md)).
 
 ## Prérequis
 
@@ -104,7 +104,7 @@ Exportez régulièrement depuis **Paramètres > Exporter**, et restaurez avec **
 
 Aucune variable d'environnement n'est nécessaire.
 
-Le service gratuit de sondage Cloudflare Pages/D1 et sa configuration sont décrits dans [CLOUDFLARE.md](./CLOUDFLARE.md).
+Le service gratuit de sondage Cloudflare Pages/D1 et sa configuration sont décrits dans [cloudflare/README.md](./cloudflare/README.md).
 
 | Fichier | Contenu |
 |---|---|

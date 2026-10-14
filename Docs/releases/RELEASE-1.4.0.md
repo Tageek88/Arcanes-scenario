@@ -34,7 +34,7 @@ Cette version ajoute l'export des éléments de préparation en PDF éditable, d
 
 Dans **Paramètres**, ouvrez **Choisir les éléments**, sélectionnez le contenu souhaité, puis cliquez sur **Créer un PDF avec champs éditables**. Choisissez où enregistrer le fichier. Ouvrez-le dans un lecteur PDF compatible avec les formulaires AcroForm pour modifier les champs.
 
-Dans **Calendrier > Sondage des joueurs**, configurez le service Cloudflare, renseignez le titre, les participants, les dates proposées et la date d'expiration. Le lien peut ensuite être partagé par courriel, WhatsApp ou Discord. Les joueurs peuvent répondre et consulter le récapitulatif sur la page du sondage. Le service et sa configuration sont détaillés dans [CLOUDFLARE.md](./CLOUDFLARE.md).
+Dans **Calendrier > Sondage des joueurs**, configurez le service Cloudflare, renseignez le titre, les participants, les dates proposées et la date d'expiration. Le lien peut ensuite être partagé par courriel, WhatsApp ou Discord. Les joueurs peuvent répondre et consulter le récapitulatif sur la page du sondage. Le service et sa configuration sont détaillés dans [cloudflare/README.md](../../cloudflare/README.md).
 
 ### Installation
 
