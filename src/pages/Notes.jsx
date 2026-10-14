@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { Pin, Plus, StickyNote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -70,7 +70,7 @@ export default function Notes() {
             rien perdre d'une séance à l'autre.
           </p>
         </div>
-        <div className="flex w-full items-center gap-2 sm:w-auto">
+        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
           <CampaignSelect
             campaigns={campaigns}
             value={campaignId}
@@ -106,7 +106,7 @@ export default function Notes() {
               <h2 className="flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-primary">
                 <Pin className="h-3.5 w-3.5" /> Épinglées
               </h2>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="w-full max-w-full overflow-hidden grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {pinnedNotes.map((note) => (
                   <NoteCard
                     key={note.id}
@@ -125,7 +125,7 @@ export default function Notes() {
               <h2 className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
                 {pinnedNotes.length > 0 ? "Autres notes" : "Toutes les notes"}
               </h2>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="w-full max-w-full overflow-hidden grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {notes.map((note) => (
                   <NoteCard
                     key={note.id}

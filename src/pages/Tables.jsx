@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { Dices, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -89,7 +89,7 @@ export default function Tables() {
             partent hors des sentiers battus.
           </p>
         </div>
-        <div className="flex w-full items-center gap-2 sm:w-auto">
+        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
           <CampaignSelect
             campaigns={campaigns}
             value={campaignId}
@@ -161,7 +161,7 @@ export default function Tables() {
           </button>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="w-full max-w-full overflow-hidden grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {tables.map((table) => (
             <TableCard
               key={table.id}

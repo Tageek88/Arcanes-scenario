@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+﻿import React, { useMemo, useState } from "react";
 import { Search, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -269,7 +269,7 @@ export default function Codex() {
           onAddChild={openChild}
         />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="w-full max-w-full overflow-hidden grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {visible.map((item) => {
             const path =
               tab === "location"
