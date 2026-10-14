@@ -1,8 +1,9 @@
 // CodexEntryDialog component for managing codex entries in the application.
 import React, { useEffect, useMemo, useState } from "react";
 
-// This component provides a dialog interface for creating, editing, and duplicating codex entries.
-import { api } from "@/api/localClient";
+// Data hooks and services used by the dialog (no direct API access in this component).
+import { useCodexEntryData } from "@/hooks/useCodexEntryData";
+import { saveCodexEntry } from "@/lib/services/codexEntries";
 
 // External and internal dependencies for the CodexEntryDialog component.
 import { withDataBatch } from "@/lib/context/dataEvents";
@@ -104,9 +105,6 @@ export default function CodexEntryDialog({
   // Saving state for managing the save operation and related UI feedback.
   const [saving, setSaving] = useState(false);
 
-  // State for managing fetched locations and copy options in the dialog.
-  const [fetchedLocations, setFetchedLocations] = useState([]);
-
   // State for managing copy options and related metadata.
   const [copyRelations, setCopyRelations] = useState(true);
 
@@ -117,29 +115,16 @@ export default function CodexEntryDialog({
   const [sourceRelationCount, setSourceRelationCount] = useState(0);
 
   // State for managing the universe ID and name generation gender for NPCs.
-  const [universeId, setUniverseId] = useState("");
-
-  // State for managing the universe ID and name generation gender for NPCs.
   const [nameGender, setNameGender] = useState("neutral");
 
   // State for managing the list of generated names for NPCs.
   const [generatedNames, setGeneratedNames] = useState([]);
 
-  // Combined list of all locations, either from props or fetched from the API.
-  const allLocations = locations ?? fetchedLocations;
+  // Universe of the campaign and the list of locations (from props, or loaded by the hook).
+  const { universeId, allLocations } = useCodexEntryData({ open, kind, campaignId, locations });
 
   // Metadata for the current kind of codex entry, used for rendering and behavior.
   const meta = KIND_META[kind] || KIND_META.npc;
-
-  // Effect for fetching the universe ID when the dialog is opened for an NPC entry.
-  useEffect(() => {
-    if (!open || !campaignId) return;
-    let cancelled = false;
-    api.entities.Campaign.get(campaignId)
-      .then((c) => { if (!cancelled) setUniverseId(c?.universe_type || ""); })
-      .catch(() => { if (!cancelled) setUniverseId(""); });
-    return () => { cancelled = true; };
-  }, [open, campaignId]);
 
   // Function for generating a name for the current NPC entry based on the universe ID and name generation gender.
   const generateName = () => {
@@ -182,18 +167,6 @@ export default function CodexEntryDialog({
     setCopyRelations(true);
     setCopyChildren(true);
   }, [open, kind, entry, defaultParentId, defaultLocationId, duplicateOf]);
-
-  // Effect for fetching locations when the dialog is opened for location, NPC, or clue entries.
-  useEffect(() => {
-    if (locations || !open || (kind !== "location" && kind !== "npc" && kind !== "clue") || !campaignId) return;
-    let alive = true;
-    api.entities.Location.filter({ campaign_id: campaignId }, { sort: "name", limit: 1000 }).then((res) => {
-      if (alive) setFetchedLocations(res.items);
-    });
-    return () => {
-      alive = false;
-    };
-  }, [locations, open, kind, campaignId]);
 
   // Effect for counting the source relations of the duplicate entry when the dialog is opened for an NPC entry.
   useEffect(() => {
@@ -257,8 +230,7 @@ export default function CodexEntryDialog({
       // Variable to hold the newly created entry, if any.
       let created = null;
       await withDataBatch(async () => {
-        if (entry?.id) await api.entities[meta.entity].update(entry.id, payload);
-        else created = await api.entities[meta.entity].create(payload);
+        created = await saveCodexEntry(meta.entity, entry?.id, payload);
 
         if (created && duplicateOf) {
           try {
