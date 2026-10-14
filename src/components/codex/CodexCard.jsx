@@ -21,9 +21,9 @@ export default function CodexCard({
   const { expanded, cardProps } = useExpandedCard(`codex:${entry.id}`);
 
   return (
-    <div {...cardProps} className={cn("w-full max-w-full flex cursor-pointer flex-col rounded-xl border bg-card/50 p-4 transition-colors", linked ? "corner-accent border-primary/50" : "border-border", expanded && "ring-2 ring-primary/50")}>
+    <div {...cardProps} className={cn("w-full max-w-full flex cursor-pointer flex-col rounded-xl border bg-card/50 p-4 transition-colors overflow-hidden", linked ? "corner-accent border-primary/50" : "border-border", expanded && "ring-2 ring-primary/50")}>
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 overflow-hidden">
           <h3 className="font-display text-base font-semibold text-foreground break-words">{entry.name}</h3>
           {entry.comment && <p className="text-xs italic text-muted-foreground break-words">{entry.comment}</p>}
         </div>
@@ -43,16 +43,16 @@ export default function CodexCard({
       </div>
 
       {(entry.role || entry.type) && (
-        <span className="mt-1 font-mono text-xs uppercase tracking-widest text-muted-foreground break-words">
+        <span className="mt-1 font-mono text-xs uppercase tracking-widest text-muted-foreground break-words overflow-hidden">
           {entry.role || entry.type}
         </span>
       )}
-      {entry.description && <p className={cn("mt-2 text-sm text-muted-foreground break-words", !expanded && "line-clamp-3")}>{entry.description}</p>}
+      {entry.description && <p className={cn("mt-2 text-sm text-muted-foreground break-words overflow-hidden", !expanded && "line-clamp-3")}>{entry.description}</p>}
 
       {locationLabel && (
-        <p className="mt-2 flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-muted-foreground">
+        <p className="mt-2 flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-muted-foreground overflow-hidden">
           <MapPin className="h-3 w-3 shrink-0" />
-          <span className="truncate">{locationLabel}</span>
+          <span className="truncate break-words">{locationLabel}</span>
         </p>
       )}
 
@@ -61,7 +61,7 @@ export default function CodexCard({
           {(expanded ? relations : relations.slice(0, 3)).map((r) => (
             <li key={r.id} className="flex items-start gap-1.5 text-xs text-muted-foreground">
               <Users className="mt-0.5 h-3 w-3 shrink-0" />
-              <span className="truncate break-words">{r.text}</span>
+              <span className="truncate break-words overflow-hidden">{r.text}</span>
             </li>
           ))}
           {relations.length > 3 && (
