@@ -1,13 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Printer } from "lucide-react";
-import { api } from "@/api/localClient";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import ResponsiveDialog from "@/components/common/ResponsiveDialog";
 import { useToast } from "@/components/ui/use-toast";
 import PrintSheet from "@/components/print/PrintSheet";
-import { loadRelations } from "@/lib/services/npcRelations";
+import { loadPrintData } from "@/lib/print/loadPrintData";
 import {
     SECTIONS,
     buildPrintModel,
@@ -26,7 +25,6 @@ const PRESETS = {
     sessions: "sessions",
     characters: "characters",
 };
-const LIMIT = 5000;
 
 // ---------- Arbre à cases à cocher ----------
 
@@ -100,37 +98,9 @@ function PrintDialog({ open, onOpenChange, campaignId, preset, onPrint, allowPdf
         if (!open || !campaignId) return;
         let alive = true;
         setLoading(true);
-        const list = (entity) => api.entities[entity].filter({ campaign_id: campaignId }, { limit: LIMIT });
-        Promise.all([
-            api.entities.Campaign.get(campaignId).catch(() => null),
-            list("Act"),
-            list("Scene"),
-            list("NPC"),
-            list("Location"),
-            list("Clue"),
-            list("Note"),
-            list("RollTable"),
-            list("GameSession"),
-            list("GameCharacter"),
-            api.entities.GameSheetModel.filter({ campaign_id: campaignId }, { limit: 1 }),
-            loadRelations(campaignId),
-        ])
-            .then(([campaign, acts, scenes, npcs, locations, clues, notes, tables, sessions, characters, models, relations]) => {
+        loadPrintData(campaignId)
+            .then((loaded) => {
                 if (!alive) return;
-                const loaded = {
-                    campaign,
-                    acts: acts.items,
-                    scenes: scenes.items,
-                    npcs: npcs.items,
-                    locations: locations.items,
-                    clues: clues.items,
-                    notes: notes.items,
-                    tables: tables.items,
-                    sessions: sessions.items,
-                    characters: characters.items,
-                    gameSheetModel: models.items[0] || null,
-                    relations,
-                };
                 const trees = buildTrees(loaded);
                 setData(loaded);
                 setSelected(Object.fromEntries(SECTIONS.map((s) => [s.key, new Set(selectableIds(trees[s.key]))])));
