@@ -88,8 +88,8 @@ export function useSessionPolls(campaignId) {
     setPolls((current) => [poll, ...current.filter((item) => item.id !== poll.id)]);
   };
 
+  /** Supprime le sondage (service distant puis référence locale). La confirmation est demandée par la page. */
   const deletePoll = async (poll) => {
-    if (!window.confirm(`Supprimer le sondage « ${poll.title} » et toutes ses réponses ?`)) return;
     setDeletingPollId(poll.id);
     try {
       await pollRequest(poll.service_url || getPollServiceUrl(), `/api/polls/${poll.poll_id}`, {

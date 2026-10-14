@@ -1,10 +1,10 @@
 import React, { useRef, useState } from "react";
 import { ExternalLink, FileText, Loader2, Paperclip, Trash2 } from "lucide-react";
-import { api } from "@/api/localClient";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { openAttachment } from "@/lib/openAttachment";
+import { uploadAttachment } from "@/lib/services/attachments";
 
 const MAX_MB = 10;
 
@@ -33,8 +33,7 @@ export default function AttachmentsField({ value = [], onChange }) {
         continue;
       }
       try {
-        const res = await api.integrations.Core.UploadFile({ file });
-        added.push({ name: file.name, url: res.file_url, type: file.type });
+        added.push(await uploadAttachment(file));
       } catch (error) {
         console.error("Échec du téléversement :", error);
         toast({ variant: "destructive", title: "Téléversement impossible", description: file.name });

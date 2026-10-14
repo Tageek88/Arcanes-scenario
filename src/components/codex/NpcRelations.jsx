@@ -1,6 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, Pencil, Plus, Trash2, Wrench } from "lucide-react";
-import { api } from "@/api/localClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +11,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
+import { useNpcRelations } from "@/hooks/useNpcRelations";
 import { dispatchTutorialAction } from "@/utils/tutorialStorage";
 import {
   CUSTOM_TYPE,
@@ -25,7 +25,6 @@ import {
 import {
   createRelation,
   deleteRelation,
-  loadRelations,
   mirrorOf,
   pairStatus,
   repairRelation,
@@ -45,26 +44,12 @@ const EMPTY = {
 
 export default function NpcRelations({ npc, campaignId }) {
   const { toast } = useToast();
-  const [npcs, setNpcs] = useState([]);
-  const [relations, setRelations] = useState([]);
+  const { npcs, relations, reload } = useNpcRelations(campaignId);
   const [editor, setEditor] = useState(null); // null | { row: null | relation }
   const [form, setForm] = useState(EMPTY);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [confirmId, setConfirmId] = useState("");
-
-  const reload = useCallback(async () => {
-    const [n, r] = await Promise.all([
-      api.entities.NPC.filter({ campaign_id: campaignId }, { sort: "name", limit: 1000 }),
-      loadRelations(campaignId),
-    ]);
-    setNpcs(n.items);
-    setRelations(r);
-  }, [campaignId]);
-
-  useEffect(() => {
-    reload();
-  }, [reload]);
 
   useEffect(() => {
     setEditor(null);

@@ -54,6 +54,7 @@ export default function Calendrier() {
   const [pollToEdit, setPollToEdit] = useState(null);
   const [form, setForm] = useState(emptyForm());
   const [pendingDelete, setPendingDelete] = useState(null);
+  const [pendingPollDelete, setPendingPollDelete] = useState(null);
 
   useEffect(() => {
     if (!campaignId) setSelectedDate("");
@@ -123,6 +124,12 @@ export default function Calendrier() {
     const pending = pendingDelete;
     setPendingDelete(null);
     if (pending) deleteSession(pending);
+  };
+
+  const confirmPollDelete = () => {
+    const poll = pendingPollDelete;
+    setPendingPollDelete(null);
+    if (poll) deletePoll(poll);
   };
 
   return (
@@ -292,7 +299,7 @@ export default function Calendrier() {
                             className="h-8 w-8 text-destructive hover:text-destructive"
                             aria-label={`Supprimer le sondage ${poll.title}`}
                             disabled={deletingPollId === poll.id}
-                            onClick={() => deletePoll(poll)}
+                            onClick={() => setPendingPollDelete(poll)}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -372,6 +379,26 @@ export default function Calendrier() {
             <AlertDialogCancel>Annuler</AlertDialogCancel>
             <AlertDialogAction
               onClick={removeSession}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!pendingPollDelete} onOpenChange={(open) => !open && setPendingPollDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer le sondage ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Le sondage « {pendingPollDelete?.title} » et toutes ses réponses seront définitivement supprimés.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmPollDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Supprimer

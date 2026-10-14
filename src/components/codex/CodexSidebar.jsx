@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { api } from "@/api/localClient";
 import { Search, Plus, Link2, Link2Off, Pencil, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -10,6 +9,7 @@ import { NPC_ATTITUDE } from "@/lib/meta/sceneMeta";
 import { isImage } from "@/components/codex/AttachmentsField";
 import { openAttachment } from "@/lib/openAttachment";
 import { usePageFilter } from "@/lib/context/PageFilterContext";
+import { useCodexList } from "@/hooks/useCodexList";
 
 export default function CodexSidebar({
   campaignId,
@@ -23,13 +23,11 @@ export default function CodexSidebar({
   const [tab, setTab] = usePageFilter("home.codex.tab", "npc");
   const [term, setTerm] = usePageFilter("home.codex.term", "");
   const [linkedOnly, setLinkedOnly] = usePageFilter("home.codex.linkedOnly", false);
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [expandedId, setExpandedId] = useState(null);
 
   const kind = CODEX_TABS.find((t) => t.key === tab) || CODEX_TABS[0];
   const linkedIds = activeScene ? activeScene[kind.linkKey] || [] : [];
-  const linkedKey = linkedIds.join(",");
+  const { items, setItems, loading } = useCodexList(campaignId, kind.entity, { term, linkedOnly, linkedIds, refreshKey });
 
   useEffect(() => {
     setExpandedId(null);
@@ -43,40 +41,6 @@ export default function CodexSidebar({
       setItems((current) => current.map((entry) => entry.id === item.id ? item : entry));
     }
   };
-
-  useEffect(() => {
-    if (!campaignId) {
-      setItems([]);
-      return;
-    }
-    let alive = true;
-    const ids = activeScene ? activeScene[kind.linkKey] || [] : [];
-    const run = async () => {
-      setLoading(true);
-      const query = { campaign_id: campaignId };
-      const q = term.trim();
-      if (q) query.name = { $regex: q, $options: "i" };
-      if (linkedOnly) {
-        if (ids.length === 0) {
-          if (alive) {
-            setItems([]);
-            setLoading(false);
-          }
-          return;
-        }
-        query.id = { $in: ids };
-      }
-      const res = await api.entities[kind.entity].filter(query, { sort: "name", limit: 100 });
-      if (!alive) return;
-      setItems(res.items);
-      setLoading(false);
-    };
-    const timer = setTimeout(run, term.trim() ? 250 : 0);
-    return () => {
-      alive = false;
-      clearTimeout(timer);
-    };
-  }, [campaignId, tab, term, linkedOnly, refreshKey, linkedKey, kind.entity, kind.linkKey, activeScene]);
 
   return (
     <aside

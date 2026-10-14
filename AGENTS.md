@@ -105,6 +105,14 @@ Be concise: no long introductions, no repeating the question, no apologies.
 - Automatic backups live in `Documents\Arcanes Scenario\Sauvegardes` (`arcanes-courante.json`, `arcanes-auto-*.json`, `arcanes-archive-*.json`).
 - Printing uses `window.print()` with `.print-root` styles from `PrintSheet.jsx`; the editable PDF uses `createEditablePdf` and the `arcanesPdf.save` bridge.
 
+## ANDROID (Capacitor)
+- `android/` is a Capacitor project (`capacitor.config.ts`, appId `com.arcanes.scenario`, `webDir: "dist"`). The React code in `src/` is shared by Electron and Android; there is no separate Android UI code.
+- Build flow: `npm run build` (produces `dist/`), then `npx cap sync android` (copies `dist/` into the Android project), then build the APK with Gradle from Android Studio. The user tests on a phone with Wi-Fi debugging.
+- Never edit generated files: `android/app/src/main/assets/public/`, `android/app/build/`, `android/build/`.
+- Never commit `.gradle/`, `local.properties`, `build/` folders or `.apk` files.
+- Electron-only bridges (`window.arcanesPdf`, native backups in `Documents\Arcanes Scenario`) do not exist on Android: always handle the undefined case.
+- Only touch `android/` when asked.
+
 ## HOW TO FIND INFORMATION (do this instead of guessing)
 - Looking for a feature: search for a distinctive French UI label or a function name across `src/`, then open the matching file.
 - Looking for who uses X: search for the exact symbol name; list every file that imports it BEFORE changing its signature.
