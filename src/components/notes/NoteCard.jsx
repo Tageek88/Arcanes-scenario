@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { Pencil, Pin, PinOff, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -15,13 +15,13 @@ export default function NoteCard({ note, onEdit, onDelete, onTogglePin }) {
     <article
       {...cardProps}
       className={cn(
-        "glass-panel corner-accent flex cursor-pointer flex-col rounded-xl p-4",
+        "w-full max-w-full glass-panel corner-accent flex cursor-pointer flex-col rounded-xl p-4",
         note.pinned && "ring-1 ring-primary/40",
         expanded && "ring-2 ring-primary/50"
       )}
     >
       <header className="flex items-start justify-between gap-3">
-        <h3 className="font-display text-base leading-snug text-foreground">{note.title}</h3>
+        <h3 className="font-display text-base leading-snug text-foreground break-words min-w-0 flex-1">{note.title}</h3>
         <button
           type="button"
           title={note.pinned ? "Désépingler la note" : "Épingler la note"}
@@ -39,7 +39,7 @@ export default function NoteCard({ note, onEdit, onDelete, onTogglePin }) {
       </header>
 
       {note.content ? (
-        <p className={cn("mt-2 whitespace-pre-wrap text-sm text-muted-foreground", !expanded && "line-clamp-5")}>
+        <p className={cn("mt-2 whitespace-pre-wrap break-words text-sm text-muted-foreground", !expanded && "line-clamp-5")}>
           {note.content}
         </p>
       ) : (
@@ -47,10 +47,10 @@ export default function NoteCard({ note, onEdit, onDelete, onTogglePin }) {
       )}
 
       <footer className="mt-4 flex items-center justify-between gap-2 border-t border-border pt-3">
-        <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+        <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground break-words">
           {updated}
         </span>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 shrink-0">
           <button
             type="button"
             title="Modifier la note"
