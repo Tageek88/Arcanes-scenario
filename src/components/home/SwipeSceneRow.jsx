@@ -71,15 +71,15 @@ export default function SwipeSceneRow({ scene, active, npcs, locations, clues, o
           </div>
         )}
       </button>
-      <div className="flex gap-2">
-        <button type="button" onClick={() => onToggleStatus(scene)} className={cn("tag flex-1 border text-center", meta.badge)}>
+      <div className="flex gap-2 justify-end">
+        <button type="button" onClick={() => onToggleStatus(scene)} className={cn("tag border", meta.badge)}>
           {meta.label}
         </button>
         <button
           type="button"
           aria-label={`Ouvrir ${scene.title}`}
           onClick={() => onOpen(scene)}
-          className="tag flex-1 min-touch border border-primary/40 text-primary text-center transition-colors active:bg-primary/10"
+          className="tag min-touch border border-primary/40 text-primary transition-colors active:bg-primary/10"
         >
           Ouvrir
         </button>
