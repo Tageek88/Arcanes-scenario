@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { GitBranch, BookMarked, CalendarDays, Dices, StickyNote, Swords, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -20,7 +20,7 @@ export default function MobileNav() {
   return (
     <nav 
       data-tutorial="sidebar" 
-      className="glass-panel fixed bottom-0 left-0 right-0 z-40 flex w-full items-center justify-between px-2 py-2 pb-[calc(0.5rem_+_env(safe-area-inset-bottom))] md:hidden"
+      className="glass-panel fixed bottom-0 left-0 right-0 z-40 flex w-full items-center justify-between px-1 py-1.5 pb-[calc(0.4rem_+_env(safe-area-inset-bottom))] md:hidden"
     >
       {TABS.map((tab) => {
         const Icon = tab.icon;
@@ -38,12 +38,16 @@ export default function MobileNav() {
               event.preventDefault();
               openTab(tab.to);
             }}
-            className={cn(
-              "flex flex-1 min-w-0 items-center justify-center rounded-lg py-2 transition-colors",
-              active ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground"
-            )}
+            className="flex flex-1 min-w-0 items-center justify-center py-1"
           >
-            <Icon className="h-5 w-5 shrink-0" />
+            <div
+              className={cn(
+                "grid h-8 w-8 place-items-center rounded-lg transition-colors",
+                active ? "bg-primary/15 text-primary" : "text-muted-foreground"
+              )}
+            >
+              <Icon className="h-5 w-5 shrink-0" />
+            </div>
           </Link>
         );
       })}
@@ -52,12 +56,18 @@ export default function MobileNav() {
         data-tutorial="tab-params"
         aria-label="Paramètres"
         aria-current={pathname === "/settings" ? "page" : undefined}
-        className={cn(
-          "flex flex-1 min-w-0 items-center justify-center rounded-lg py-2 transition-colors",
-          pathname === "/settings" || pathname.startsWith("/settings/") ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground"
-        )}
+        className="flex flex-1 min-w-0 items-center justify-center py-1"
       >
-        <Settings className="h-5 w-5 shrink-0" />
+        <div
+          className={cn(
+            "grid h-8 w-8 place-items-center rounded-lg transition-colors",
+            pathname === "/settings" || pathname.startsWith("/settings/")
+              ? "bg-primary/15 text-primary"
+              : "text-muted-foreground"
+          )}
+        >
+          <Settings className="h-5 w-5 shrink-0" />
+        </div>
       </Link>
     </nav>
   );

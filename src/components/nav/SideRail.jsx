@@ -26,7 +26,7 @@ export default function SideRail() {
       </Link>
       {ITEMS.map((item) => {
         const Icon = item.icon;
-        const active = pathname === item.to;
+        const active = item.to === "/" ? pathname === "/" : pathname === item.to || pathname.startsWith(item.to + "/");
         return (
           <Link
             key={item.label}
@@ -34,7 +34,7 @@ export default function SideRail() {
             title={item.label}
             data-tutorial={item.tutorial}
             className={cn(
-              "grid h-11 w-11 place-items-center rounded-lg transition-colors",
+              "grid h-10 w-10 place-items-center rounded-lg transition-colors",
               active
                 ? "bg-primary/15 text-primary ring-1 ring-primary/40"
                 : "text-muted-foreground hover:bg-secondary hover:text-foreground"
@@ -50,8 +50,8 @@ export default function SideRail() {
           title="Paramètres"
           data-tutorial="tab-params"
           className={cn(
-            "grid h-11 w-11 place-items-center rounded-lg transition-colors",
-            pathname === "/settings"
+            "grid h-10 w-10 place-items-center rounded-lg transition-colors",
+            pathname === "/settings" || pathname.startsWith("/settings/")
               ? "bg-primary/15 text-primary ring-1 ring-primary/40"
               : "text-muted-foreground hover:bg-secondary hover:text-foreground"
           )}

@@ -20,13 +20,13 @@ export default function AppShell({ children }) {
   }, [refresh]);
 
   return (
-    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground">
       <SideRail />
-      <main data-tutorial="main-content" className="min-h-screen w-full max-w-full pb-24 pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] md:pb-0 md:pl-20">
+      <main data-tutorial="main-content" className="pb-24 pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] md:pb-0 md:pl-20">
         <MobileBackBar />
         <PullToRefresh onRefresh={handleRefresh}>
           <Suspense fallback={<PageLoader />}>
-            <div key={pathname} className="page-transition w-full max-w-full">
+            <div key={pathname} className="page-transition">
               <div
                 onClick={(event) => {
                   if (!event.target.closest("[data-expandable-card], [data-keep-expanded], [role='dialog'], [role='alertdialog'], [role='menu'], [role='listbox']")) setExpandedCardId(null);

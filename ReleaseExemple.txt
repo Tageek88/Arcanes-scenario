@@ -1,0 +1,37 @@
+## Arcanes & Scénario 1.5.0 — Génération aléatoire : bases et noms
+### Nouveautés
+
+- **Univers de jeu** : choisissez un type d'univers lors de la création d'un système de jeu (par exemple futuriste, français ou nain) pour adapter les propositions générées.
+- **Noms de PNJ** : générez aléatoirement des noms cohérents avec l'univers choisi depuis les fiches de PNJ.
+- **Table de lancer de dé aléatoire** : ajoutez une nouvelle fonctionnalité qui permet de générer des tables de lancer de dé aléatoires.
+- **Bouton Modifier la campagne** : un nouveau bouton a été ajouté pour permettre aux utilisateurs de modifier plus facilement leurs campagnes.
+
+### Corrections
+
+- **Corrections de lint** : des erreurs de linting ont été corrigées pour améliorer la qualité du code.
+- **Corrections d'imports** : des imports ont été corrigés pour éviter les erreurs lors de l'exécution.
+- **Corrections de liens** : des liens brisés ont été corrigés pour une meilleure navigation.
+
+### Améliorations
+
+- **Refactor des hooks** : les hooks ont été refactorés pour améliorer leur lisibilité et leur efficacité.
+- **Découpage de lib/** : le dossier lib/ a été découpé en plusieurs sous-dossiers pour une meilleure organisation.
+- **Découpage de localClient.js** : le fichier localClient.js a été découpé en plusieurs fichiers pour une meilleure lisibilité.
+- **Découpage de print** : le dossier print a été découpé en plusieurs sous-dossiers pour une meilleure organisation.
+- **Améliorations de l'architecture** : l'architecture de l'application a été améliorée pour une meilleure maintenabilité.
+- **Documentation** : la documentation a été mise à jour pour refléter les nouvelles fonctionnalités et les changements apportés.
+
+### Améliorations supplémentaires
+
+- **26b2135 refactor: PrintButton charge ses données via lib/print/loadPrintData** : le bouton de print a été refactoré pour charger ses données via un fichier spécifique.
+- **f390417 refactor: CodexEntryDialog via useCodexEntryData et codexEntries** : la boîte de dialogue CodexEntryDialog a été refactorée pour utiliser les hooks useCodexEntryData et codexEntries.
+- **35d1a64 refactor: SessionPollDialog via services/polls/store** : la boîte de dialogue SessionPollDialog a été refactorée pour utiliser le store de services/polls.
+
+### Documentation
+
+- **59d6e66 docs: architecture.md et AGENTS.md à jour** : les fichiers architecture.md et AGENTS.md ont été mis à jour pour refléter les changements apportés.
+
+### Chore
+
+- **35f8771 chore: tri des fichiers de doc, .gradle ignoré** : les fichiers de documentation ont été triés et le dossier .gradle a été ignoré.
+- **04bae96 chore: lint étendu à tout src, corrections associées** : le linting a été étendu à tous les fichiers src et les corrections associées ont été apportées.

@@ -9,6 +9,7 @@ const SECTIONS = {
   "/calendrier": "Agenda",
   "/tables": "Tables",
   "/notes": "Notes",
+  "/jeu": "Jeu",
   "/settings": "Paramètres",
 };
 
