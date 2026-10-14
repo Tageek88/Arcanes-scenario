@@ -27,14 +27,14 @@ export default function SwipeSceneRow({ scene, active, npcs, locations, clues, o
         if (dx > 60) onToggleStatus(scene);
       }}
       className={cn(
-        "w-full max-w-full flex flex-col gap-2 rounded-lg border p-3 transition-colors overflow-hidden",
+        "flex flex-col gap-2 rounded-lg border p-3 transition-colors",
         active ? "border-primary/60 bg-primary/[0.06]" : "border-border bg-background/70"
       )}
     >
-      <button type="button" className="w-full min-w-0 text-left break-words" onClick={() => onSelect(scene)} onDoubleClick={() => onOpen(scene)}>
+      <button type="button" className="w-full min-w-0 text-left" onClick={() => onSelect(scene)} onDoubleClick={() => onOpen(scene)}>
         <div className="flex items-center gap-2">
           <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", meta.dot)} />
-          <span className="truncate break-words font-display text-sm font-semibold text-foreground">{scene.title}</span>
+          <span className="truncate font-display text-sm font-semibold text-foreground">{scene.title}</span>
         </div>
         {scene.summary && (
           <p className={cn("mt-1 text-xs text-muted-foreground break-words", active ? "whitespace-pre-wrap" : "line-clamp-1")}>
