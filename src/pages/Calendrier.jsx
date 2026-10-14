@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+﻿import React, { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Pencil, Plus, Trash2 } from "lucide-react";
 import { addMonths, format, parseISO, startOfMonth, subMonths } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -133,7 +133,7 @@ export default function Calendrier() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-[1400px] space-y-6 px-4 py-6 md:px-8 md:py-8">
+    <div className="mx-auto w-full max-w-[1400px] space-y-6 px-4 py-6 md:px-8 md:py-8 overflow-x-hidden">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <span className="tag border border-primary/40 text-primary">Agenda du MJ</span>
@@ -143,7 +143,7 @@ export default function Calendrier() {
             préparez la scène de chaque séance.
           </p>
         </div>
-        <div className="flex w-full items-center gap-2 sm:w-auto">
+        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
           <CampaignSelect
             campaigns={campaigns}
             value={campaignId}

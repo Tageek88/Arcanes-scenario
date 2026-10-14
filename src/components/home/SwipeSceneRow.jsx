@@ -71,14 +71,14 @@ export default function SwipeSceneRow({ scene, active, npcs, locations, clues, o
           </div>
         )}
       </button>
-      <button type="button" onClick={() => onToggleStatus(scene)} className={cn("tag shrink-0 border", meta.badge)}>
+      <button type="button" onClick={() => onToggleStatus(scene)} className={cn("tag w-full sm:w-auto shrink-0 border", meta.badge)}>
         {meta.label}
       </button>
       <button
         type="button"
         aria-label={`Ouvrir ${scene.title}`}
         onClick={() => onOpen(scene)}
-        className="tag min-touch shrink-0 border border-primary/40 text-primary transition-colors active:bg-primary/10"
+        className="tag min-touch w-full sm:w-auto shrink-0 border border-primary/40 text-primary transition-colors active:bg-primary/10"
       >
         Ouvrir
       </button>
