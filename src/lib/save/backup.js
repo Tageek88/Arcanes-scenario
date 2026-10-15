@@ -65,8 +65,6 @@ export async function importBackup(file) {
   await restoreFromPayload(parsed);
 }
 
-hasCampaigns();
-
 export async function hasCampaigns() {
   return (await db.table("Campaign").count()) > 0;
 }

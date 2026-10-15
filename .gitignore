@@ -35,4 +35,8 @@ dist-ssr
 .vite
 
 .gradle/
-.apk
+*.apk
+
+audit/
+audit.zip
+audit-src.zip
