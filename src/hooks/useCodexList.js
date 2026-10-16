@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { api } from "@/api/localClient";
 import { useToast } from "@/components/ui/use-toast";
 
+// La recherche est un texte libre : on neutralise les caractères spéciaux d'expression régulière.
+const escapeRegex = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 /**
  * Éléments du codex affichés dans la barre latérale (PNJ, lieux ou indices),
  * filtrés par recherche et, si demandé, limités à ceux liés à la scène.
@@ -27,7 +30,7 @@ export function useCodexList(campaignId, entity, { term, linkedOnly, linkedIds, 
       setLoading(true);
       const query = { campaign_id: campaignId };
       const q = term.trim();
-      if (q) query.name = { $regex: q, $options: "i" };
+      if (q) query.name = { $regex: escapeRegex(q), $options: "i" };
       if (linkedOnly) {
         if (ids.length === 0) {
           if (alive) {
