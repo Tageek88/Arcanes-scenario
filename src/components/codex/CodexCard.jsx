@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { cn } from "@/lib/utils";
 import { Copy, Link2, Link2Off, MapPin, Paperclip, Pencil, Trash2, Users } from "lucide-react";
 import { NPC_ATTITUDE } from "@/lib/meta/sceneMeta";

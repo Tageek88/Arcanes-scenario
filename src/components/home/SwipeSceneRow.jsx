@@ -1,4 +1,4 @@
-﻿import React, { useRef } from "react";
+import React, { useRef } from "react";
 import { cn } from "@/lib/utils";
 import { SCENE_STATUS } from "@/lib/meta/sceneMeta";
 

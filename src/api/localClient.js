@@ -1,4 +1,4 @@
-﻿// === SECTION IMPORTS ===
+// === SECTION IMPORTS ===
 import { db, TABLES } from "./dbConfig";
 import { makeEntity } from "./entityFactory";
 

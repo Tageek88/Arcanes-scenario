@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { Pencil, Pin, PinOff, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";

@@ -1,4 +1,4 @@
-﻿// === SECTION IMPORTS ===
+// === SECTION IMPORTS ===
 import Dexie from "dexie";
 
 // === SECTION TABLES ===

@@ -1,4 +1,4 @@
-﻿// === SECTION IMPORTS ===
+// === SECTION IMPORTS ===
 import { db } from "./dbConfig";
 import { notifyDataChanged } from "@/lib/context/dataEvents";
 import { LOCAL_USER } from "./localUser";

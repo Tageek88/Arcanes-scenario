@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import { Pin, Plus, StickyNote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
