@@ -25,14 +25,15 @@ export function usePageFilter(key, initialValue) {
   const context = useContext(PageFilterContext);
   if (!context) throw new Error("usePageFilter doit être utilisé dans PageFilterProvider.");
 
+  const { filters, setFilter } = context;
   const setValue = useCallback(
-    (valueOrUpdater) => context.setFilter(
+    (valueOrUpdater) => setFilter(
       key,
       typeof valueOrUpdater === "function"
         ? (currentValue) => valueOrUpdater(currentValue ?? initialValue)
         : valueOrUpdater
     ),
-    [context.setFilter, initialValue, key]
+    [setFilter, initialValue, key]
   );
-  return [context.filters[key] ?? initialValue, setValue];
+  return [filters[key] ?? initialValue, setValue];
 }

@@ -122,13 +122,15 @@ export default function TutorialOverlay({
     };
   }, [measure]);
 
+  // Mesure l'infobulle à chaque rendu ; setSize ne change l'état que si la taille a vraiment changé (pas de boucle).
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useLayoutEffect(() => {
     const node = tooltipRef.current;
     if (!node) return;
     const { width, height } = node.getBoundingClientRect();
     setSize((current) => (current.width === width && current.height === height ? current : { width, height }));
   });
-
+  
   useEffect(() => {
     const frame = requestAnimationFrame(() => setVisible(true));
     return () => cancelAnimationFrame(frame);
