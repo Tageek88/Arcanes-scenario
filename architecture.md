@@ -50,17 +50,19 @@ flowchart LR
     direction TB
     META["meta/<br/>codex, sceneMeta, sessionMeta,<br/>tableMeta, relationMeta, universeMeta"]
     CTX["context/<br/>campaignStore, RefreshContext,<br/>PageFilterContext, ExpandedCardContext,<br/>TabStackContext, dataEvents, AuthContext"]
-    SERV["services/<br/>campaignDelete, locationTree,<br/>npcRelations, attachments,<br/>codexEntries"]
+    SERV["services/<br/>campaignDelete, locationTree,<br/>npcRelations, attachments,<br/>codexEntries, openAttachment"]
     POLLS["services/polls<br/>config, client (fetch), votes,<br/>sync, pollDates, store<br/>(façade : sessionPolls.js)"]
     PRINT["print/<br/>printModel, editablePdf,<br/>loadPrintData"]
     GEN["generators/<br/>nameGenerator, nameData"]
     SAVE["save/<br/>backup, autosave, accountData"]
-    MISC["à la racine, non classés :<br/>utils, openAttachment, query-client"]
+    MISC["à la racine, non classés :<br/>utils, query-client"]
   end
 
   subgraph DATA["api/"]
     direction TB
-    API["localClient.js<br/>api (CRUD), db (Dexie brut),<br/>TABLES"]
+    API["localClient.js<br/>api (entities), réexporte db et TABLES"]
+    EF["entityFactory.js<br/>makeEntity : CRUD"]
+    DBC["dbConfig.js<br/>db (Dexie), TABLES, versions v1 à v5"]
     LU["localUser.js<br/>LOCAL_USER"]
     TAB[("IndexedDB<br/>schéma v1 à v5")]
   end
@@ -117,8 +119,11 @@ flowchart LR
   F_SET --> SAVE
   SAVE --> API
   RESTORE --> SAVE
-  API --> TAB
-  API --- LU
+  API --> EF
+  API --> DBC
+  EF --> DBC
+  EF --> LU
+  DBC --> TAB
 
   %% Réseau
   POLLS ==>|fetch| POLL
@@ -128,6 +133,10 @@ flowchart LR
 
 - Les 7 pages et les composants n'importent plus `api` : seuls `hooks/`, `lib/` et `api/` y accèdent. Le script `scripts/check-refactor.mjs` (`npm run check`) échoue si une page ou un composant le fait.
 - `lib/` est découpé en `meta`, `context`, `services` (avec `services/polls`), `save`, `print` et `generators`.
+- `src/api/` est découpé en `dbConfig.js` (Dexie, `TABLES`, versions), `entityFactory.js` (`makeEntity`), `localClient.js` (`api`) et `localUser.js` (`LOCAL_USER`).
+- `openAttachment` est dans `lib/services/` : types MIME autorisés (pdf, png, jpeg, gif, webp, avif), URL distantes en https uniquement.
+- ESLint (`eslint.config.js`) couvre tout `src/` sauf `components/ui/`.
+- `Layout` est dans `components/` et `PageNotFound` dans `pages/`.
 - `RestorePrompt` passe par `lib/save/backup.js` (`hasCampaigns`) et n'accède plus à `db`.
 - `sessionPolls.js` est une façade qui réexporte les fichiers de `services/polls/`.
 - La confirmation de suppression d'un sondage depuis la page Calendrier passe par une `AlertDialog` (plus de `window.confirm` dans `useSessionPolls`).
@@ -142,13 +151,17 @@ flowchart LR
 ## Ce qui reste à traiter
 
 - `SessionPollDialog` garde beaucoup de logique réseau et de formulaire ; seule sa persistance locale est dans `services/polls/store.js`. Un hook dédié serait une amélioration possible.
-- `SessionPollDialog` utilise encore `window.confirm` pour la suppression d'un sondage depuis la boîte de dialogue.
-- `utils.js`, `openAttachment.js` et `query-client.js` sont à la racine de `lib/`, non classés.
-- `localClient.js` regroupe encore le schéma Dexie, le CRUD (`api`) et `db` ; `LOCAL_USER` est déjà dans `localUser.js`.
-- ESLint ignore `src/lib/**` et `src/components/ui/**` pour la plupart des règles : la logique de `lib/` n'est donc pas vérifiée par le lint.
+- 4 `window.confirm` restent : `BackupPanel`, `AutosavePanel` (restauration), `GameCharacterEditor` (×2). Prévu : un hook `useConfirm()` basé sur `AlertDialog`.
+- `deleteCampaignCascade` (`lib/services/campaignDelete.js`) n'est pas dans une transaction Dexie : une erreur en cours de route laisse une suppression partielle.
+- Sur Android, aucun export de sécurité n'est fait avant une restauration (l'autosave est propre à Electron).
+- `utils.js` et `query-client.js` sont à la racine de `lib/`, non classés.
+- L'entité `Quest` est déclarée dans `dbConfig.js` mais n'est utilisée nulle part.
+- Avertissements lint restants : `PageFilterContext.jsx` (destructuration de `setFilter`) et `TutorialOverlay.jsx` (eslint-disable).
+- Fins de ligne mixtes (CRLF/LF) : ajouter `.gitattributes` et `.editorconfig` dans un commit séparé.
 
 ## Points non vérifiés
 
 - Les flèches de `META` et `CTX` depuis les pages sont déduites des imports lus, pas d'une analyse complète.
 - Le pont `window.arcanesBackup` (Electron) n'apparaît pas : il est utilisé par `RestorePrompt` et probablement `autosave`, mais le dossier `electron/` n'a pas été relu.
-- Le lien `API --- LU` signifie seulement que `localClient.js` utilise `LOCAL_USER` ; à confirmer dans le code.
+- Le lien `EF --> LU` (l'usine d'entités utilise `LOCAL_USER` pour `created_by`) est déduit de l'ancien `localClient.js` ; à confirmer dans `entityFactory.js`.
+- `tsc` n'a jamais été lancé ; `openAttachment` (option `noopener`) n'a pas été testé sous Electron ni Android.

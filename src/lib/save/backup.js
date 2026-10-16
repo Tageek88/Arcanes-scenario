@@ -1,4 +1,5 @@
 import { db, TABLES } from "@/api/localClient";
+import { isNativeApp, shareTextFile } from "@/lib/save/nativeShare";
 
 const APP_ID = "arcanes-scenario";
 const BACKUP_VERSION = 1;
@@ -35,17 +36,30 @@ export async function restoreFromPayload(parsed) {
   });
 }
 
+// Renvoie true quand le fichier a été remis à l'utilisateur, false s'il a fermé la feuille de partage (Android).
 export async function exportBackup() {
   const payload = await buildBackupPayload();
+  const fileName = `arcanes-sauvegarde-${new Date().toISOString().slice(0, 10)}.json`;
+
+  if (isNativeApp()) {
+    try {
+      return await shareTextFile(JSON.stringify(payload), fileName, "Sauvegarde Arcanes & Scénario");
+    } catch (error) {
+      console.warn("Échec du partage natif Android, tentative via téléchargement blob :", error);
+    }
+  }
+
   const json = JSON.stringify(payload, null, 2);
-  const url = URL.createObjectURL(new Blob([json], { type: "application/json" }));
+  const blob = new Blob([json], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `arcanes-sauvegarde-${new Date().toISOString().slice(0, 10)}.json`;
+  a.download = fileName;
   document.body.appendChild(a);
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+  return true;
 }
 
 export async function importBackup(file) {
