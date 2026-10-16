@@ -35,6 +35,7 @@ Be concise: no long introductions, no repeating the question, no apologies.
 - Routing: react-router-dom with `HashRouter` (required by Electron). Never use `BrowserRouter`.
 - Data: Dexie (IndexedDB), database name "arcanes_scenario". Configured in `src/api/dbConfig.js`, wrapped by `src/api/localClient.js` (exported as `api`).
 - Desktop: Electron (`electron/main.cjs`, `electron/preload.cjs`, CommonJS), packaged with electron-builder (NSIS, Windows).
+- Android: Capacitor 8 (`@capacitor/core`, `android`, `cli`, plus `@capacitor/filesystem` and `@capacitor/share` for the manual backup export).
 - PDF: pdf-lib (`src/lib/print/editablePdf.js`). Dates: date-fns (French locale). Toasts: `useToast`.
 - Optional online service for session polls: `cloudflare/` (Pages Functions + D1). Separate from the app; do not touch it unless asked.
 - Language: JavaScript (.jsx/.js). No TypeScript except `src/utils/index.ts`. STRICTLY use the alias `@/` for `src/` in every import. Missing slashes (like `@lib/`) will cause build failures. NEVER create backend routes, models, or authentication - this is a 100% local-first app.
@@ -44,7 +45,7 @@ Be concise: no long introductions, no repeating the question, no apologies.
 - `src/pages/`: PageNotFound and Home (tree of acts/scenes), Codex (NPC, locations, clues & infos), Tables (random tables), Calendrier (sessions and polls), Notes, Jeu (game system and player characters), Settings.
 - `src/components/`: `ui/` (shadcn primitives), `common/` (ResponsiveDialog, CampaignSelect), `home/`, `codex/`, `calendar/`, `notes/`, `tables/`, `game/`, `print/`, `nav/`, plus Layout, AppShell, BackupPanel, AutosavePanel, RestorePrompt.
 - `src/lib/`: business logic and helpers, split by role (see ARCHITECTURE RULES below).
-- `src/hooks/`: data hooks (one per page or feature) + `use-mobile`. See ARCHITECTURE RULES.
+- `src/hooks/`: data hooks (one per page or feature) + `use-mobile` + `useConfirm` (UI helper, no data). See ARCHITECTURE RULES.
 - `src/api/`: `dbConfig.js` (Dexie `db`, `TABLES`, `db.version` 1 to 5), `entityFactory.js` (`makeEntity`: CRUD), `localClient.js` (`api`, re-exports `db` and `TABLES`), `localUser.js` (`LOCAL_USER`).
 - `docs-entites/entities/*.jsonc`: documentation of entity fields only (not read by the app).
 - Docs: `README.md`, `AGENTS.md` and `architecture.md` at the root; `Docs/Fonctionnalites.md`; `Docs/releases/RELEASE-X.Y.Z.md`; `cloudflare/README.md`.
@@ -52,9 +53,9 @@ Be concise: no long introductions, no repeating the question, no apologies.
 ## ARCHITECTURE RULES (keep them true)
 - Layers: pages/components (UI) -> hooks (`src/hooks/`) -> `src/lib/services` and `src/api/` (`localClient.js`) -> Dexie/IndexedDB.
 - Pages and components NEVER call `api.*` or Dexie directly (`import { api }` is only allowed in `src/hooks/`, `src/lib/` and `src/api/`). All data loading and writing goes through a hook in `src/hooks/` or a function in `src/lib/services/`. Hooks own loading state, optimistic updates with rollback, and the toasts. Pages only keep UI state (dialogs, forms) and may close a dialog through an `onSaved` callback passed to the hook.
-- Existing hooks: `useCampaigns` (list + selected campaign), `useCampaignContent` (acts, scenes, NPC, locations, clues), `useCampaignActions` (create/edit/delete campaign), `useCodex`, `useCodexList` (codex sidebar), `useCodexEntryData` (universe + locations for the entry dialog), `useNpcRelations`, `useGameSheet`, `useGameSessions`, `useSessionPolls`, `useScenes`, `useNotes`, `useTables`.
+- Existing hooks: `useCampaigns` (list + selected campaign), `useCampaignContent` (acts, scenes, NPC, locations, clues), `useCampaignActions` (create/edit/delete campaign), `useCodex`, `useCodexList` (codex sidebar), `useCodexEntryData` (universe + locations for the entry dialog), `useNpcRelations`, `useGameSheet`, `useGameSessions`, `useSessionPolls`, `useScenes`, `useNotes`, `useTables`. UI helper (no data access): `useConfirm`.
 - `SessionPollDialog` still holds a lot of network and form logic (only its local persistence moved to `src/lib/services/polls/store.js`). Extracting it into a hook is optional future work.
-- `src/lib/` subfolders: `context/` (React contexts and shared state: Auth, campaignStore, dataEvents, ExpandedCard, PageFilter, Refresh, TabStack), `meta/` (constants and labels: codex, sceneMeta, sessionMeta, tableMeta, relationMeta, universeMeta), `save/` (accountData, autosave, backup), `services/` (campaignDelete, locationTree, npcRelations, attachments, codexEntries, openAttachment, sessionPolls + `polls/` config, client, votes, sync, pollDates, store), `print/` (printModel, editablePdf, loadPrintData), `generators/` (nameGenerator, nameData). Loose files (`utils.js`, `query-client.js`) stay at the root of `lib/` for now.
+- `src/lib/` subfolders: `context/` (React contexts and shared state: Auth, campaignStore, dataEvents, ExpandedCard, PageFilter, Refresh, TabStack), `meta/` (constants and labels: codex, sceneMeta, sessionMeta, tableMeta, relationMeta, universeMeta), `save/` (accountData, autosave, backup, nativeShare), `services/` (campaignDelete, locationTree, npcRelations, attachments, codexEntries, openAttachment, sessionPolls + `polls/` config, client, votes, sync, pollDates, store), `print/` (printModel, editablePdf, loadPrintData), `generators/` (nameGenerator, nameData). Loose files (`utils.js`, `query-client.js`) stay at the root of `lib/` for now.
 - Never create a folder in `src/lib/` with the same name as a file there (it breaks the build on Windows).
 - After ANY change to imports, hooks or pages run `npm run check`: it must report 0 unresolved imports, 0 files using `api` without importing it, and 0 pages or components calling `api` directly (it exits with an error otherwise). `npm run build` and `npm run lint` do not catch these cases.
 - Keep `architecture.md` up to date when a folder, hook or layer changes.
@@ -71,10 +72,11 @@ Be concise: no long introductions, no repeating the question, no apologies.
 - Location tree: use `src/lib/services/locationTree.js` (childrenMap, flattenTree, descendantIds, pathOf, parentOptions, deleteLocation, copyLocationSubtree). Never allow a location to become its own ancestor.
 - Selected campaign: `getSelectedCampaignId()` / `setSelectedCampaignId()` from `@/lib/context/campaignStore` (use `useCampaigns` in pages).
 - Backup and autosave iterate over the exported `TABLES` array automatically.
+- Writes or deletes that must be all-or-nothing across several tables use `db.transaction("rw", [...tableNames], async () => { ... })` (see `deleteCampaignCascade` in `campaignDelete.js` and `restoreFromPayload` in `backup.js`). Inside a transaction, only await Dexie operations (never `fetch`, timers or other promises), and throw to roll back.
 
 ## ADD A NEW ENTITY (follow ALL steps)
 1. In `dbConfig.js`: add the name to `TABLES` (keep the existing version declarations untouched), then add a NEW `db.version(N+1).stores(...)` with the same schema string `"id, campaign_id"` for all tables. NEVER edit or delete an older `db.version(...)` block.
-2. If it belongs to a campaign: add it to `LINKED_ENTITIES` in `src/lib/services/campaignDelete.js` (children before parents).
+2. If it belongs to a campaign: add it to `LINKED_ENTITIES` in `src/lib/services/campaignDelete.js` (children before parents). The cascade runs in one Dexie transaction over `LINKED_ENTITIES` + `Campaign`: keep it that way.
 3. If it must be printable: update `src/lib/print/printModel.js` (SECTIONS, buildTrees, buildPrintModel), `src/components/print/PrintSheet.jsx`, `src/components/print/PrintButton.jsx` (PRESETS and data loading) and `src/lib/print/editablePdf.js` (it throws on an unknown block kind).
 4. Add `docs-entites/entities/<Name>.jsonc` (documentation).
 5. Backup, restore and autosave need no change.
@@ -84,7 +86,7 @@ Be concise: no long introductions, no repeating the question, no apologies.
 - Forms and popups: `ResponsiveDialog` from `@/components/common/ResponsiveDialog` (props: open, onOpenChange, title, description, footer, children). Destructive confirmations: `AlertDialog`.
 - Campaign picker: `CampaignSelect` from `@/components/common/CampaignSelect`. Print button: `PrintButton` from `@/components/print/PrintButton` with a `preset` (scenes, clue, location, npc, notes, tables, sessions, characters, all).
 - Expandable cards: `useExpandedCard("<kind>:<id>")` from `@/lib/context/ExpandedCardContext`; spread `cardProps` on the card root. Only one card is expanded at a time. Elements that must not collapse the card on click need `data-keep-expanded` or a `[data-expandable-card]` ancestor.
-- Confirmations: NEVER add `window.confirm`; use `AlertDialog`. Four old `window.confirm` remain (BackupPanel, AutosavePanel restore, GameCharacterEditor x2) and are to be replaced by a `useConfirm()` hook.
+- Confirmations: NEVER use `window.confirm`. For a simple yes/no, use `useConfirm()` from `@/hooks/useConfirm`: `const { confirm, confirmDialog } = useConfirm();`, then `if (!(await confirm({ title, description, confirmLabel, cancelLabel }))) return;` and render `{confirmDialog}` in the JSX (`dismiss()` cancels a pending confirmation, e.g. when a dialog closes). Page-level deletions that need extra state keep their own `AlertDialog`.
 - Notifications: `const { toast } = useToast()` from `@/components/ui/use-toast`; `toast({ title, description })`, add `variant: "destructive"` for errors. NEVER fail silently: every `catch` must `console.error(...)` and show a French toast.
 - Styling: Tailwind utility classes with theme tokens (`bg-background`, `bg-card/50`, `text-foreground`, `text-muted-foreground`, `border-border`, `text-primary`, `bg-primary`, `text-destructive`). Fonts: `font-display` (titles), `font-mono` (labels), default sans. Helper classes: `tag`, `glass-panel`, `corner-accent`, `min-touch`. Use `cn()` from `@/lib/utils` to merge classes. Never hard-code colors.
 - Pages follow this pattern: `const { campaigns, campaignId, selectCampaign } = useCampaigns()`, then a page hook for the data (e.g. `useNotes(campaignId)`), show a loading state and an empty state ("Créez une campagne ..."). Data reloads on `refreshKey` from `useDataRefresh()` inside the hooks, with async effects protected by an `alive` flag.
@@ -114,6 +116,7 @@ Be concise: no long introductions, no repeating the question, no apologies.
 - Never edit generated files: `android/app/src/main/assets/public/`, `android/app/build/`, `android/build/`.
 - Never commit `.gradle/`, `local.properties`, `build/` folders or `.apk` files.
 - Electron-only bridges (`window.arcanesPdf`, native backups in `Documents\Arcanes Scenario`) do not exist on Android: always handle the undefined case.
+- Manual backup export on Android goes through `src/lib/save/nativeShare.js` (`@capacitor/filesystem` writes to the cache in chunks, `@capacitor/share` opens the share sheet; both are loaded with dynamic `import()` and only used when `Capacitor.isNativePlatform()`). Without autosave (Android, browser), `BackupPanel` exports the current data before any import. After adding or updating a Capacitor plugin, run `npm run build` then `npx cap sync android`.
 - Only touch `android/` when asked.
 
 ## HOW TO FIND INFORMATION (do this instead of guessing)
@@ -136,7 +139,7 @@ Be concise: no long introductions, no repeating the question, no apologies.
 
 ## LINT
 - `eslint.config.js` (flat config) covers `src/**` except `src/components/ui/`. Never override `rules` with an object literal that drops the recommended rules (it once hid `no-undef`). `__APP_VERSION__` is a declared global.
-- Run `npm run lint` after any change: it must stay at 0 errors.
+- Run `npm run lint` after any change: it must stay at 0 errors. The script uses `--quiet` and hides warnings: run `npx eslint src` to see them. The only accepted exception is the `eslint-disable-next-line react-hooks/exhaustive-deps` above the dependency-less `useLayoutEffect` in `TutorialOverlay.jsx` (it measures on every render; `setSize` only changes state when the size changed).
 
 ## CODE STYLE
 - Functional components with hooks, default export per file, 2-space indentation, double quotes, semicolons.
@@ -145,10 +148,12 @@ Be concise: no long introductions, no repeating the question, no apologies.
 - Keep functions small; reuse helpers from `src/lib/` rather than duplicating logic.
 - Do not leave `console.log` debug lines (keep `console.error` in catch blocks).
 - Comments only where intent is not obvious.
+- Files are UTF-8 without BOM, with LF line endings (`.gitattributes`, `.editorconfig`).
 
 ## WINDOWS / TERMINAL
 - The user works on Windows with PowerShell. Give PowerShell-compatible commands (no `&&` chains, no `rm -rf`, no `grep`; use `Select-String`, `Get-ChildItem`, `Remove-Item`).
 - Run project commands from the folder containing package.json (never from a parent folder).
+- In Windows PowerShell 5, `Set-Content -Encoding UTF8` adds a BOM: write files with `[IO.File]::WriteAllText($path, $text, (New-Object System.Text.UTF8Encoding $false))`.
 
 ## VERSIONING AND RELEASES (only when asked)
 - Bump version with `npm version X.Y.Z --no-git-tag-version`, then update the version badge in `README.md`. The app shows the version from package.json (`__APP_VERSION__`).

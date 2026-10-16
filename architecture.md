@@ -44,6 +44,7 @@ flowchart LR
     H_GAME["useGameSheet"]
     H_NOTES["useNotes"]
     H_TABLES["useTables"]
+    H_UI["useConfirm<br/>(confirmations, sans données)"]
   end
 
   subgraph LIB["lib/"]
@@ -54,7 +55,7 @@ flowchart LR
     POLLS["services/polls<br/>config, client (fetch), votes,<br/>sync, pollDates, store<br/>(façade : sessionPolls.js)"]
     PRINT["print/<br/>printModel, editablePdf,<br/>loadPrintData"]
     GEN["generators/<br/>nameGenerator, nameData"]
-    SAVE["save/<br/>backup, autosave, accountData"]
+    SAVE["save/<br/>backup, autosave, accountData,<br/>nativeShare"]
     MISC["à la racine, non classés :<br/>utils, query-client"]
   end
 
@@ -68,6 +69,7 @@ flowchart LR
   end
 
   POLL(["Service de sondage externe<br/>arcanes-planification.pages.dev<br/>(HTTPS, URL configurable)"])
+  NATIVE(["Plugins Capacitor<br/>filesystem, share (Android)"])
   RESTORE["RestorePrompt"]
 
   %% Pages -> composants
@@ -117,6 +119,8 @@ flowchart LR
   PRINT --> API
   PRINT --> SERV
   F_SET --> SAVE
+  F_SET & F_GAME --> H_UI
+  SAVE -.->|export Android| NATIVE
   SAVE --> API
   RESTORE --> SAVE
   API --> EF
@@ -140,28 +144,31 @@ flowchart LR
 - `RestorePrompt` passe par `lib/save/backup.js` (`hasCampaigns`) et n'accède plus à `db`.
 - `sessionPolls.js` est une façade qui réexporte les fichiers de `services/polls/`.
 - La confirmation de suppression d'un sondage depuis la page Calendrier passe par une `AlertDialog` (plus de `window.confirm` dans `useSessionPolls`).
+- `useConfirm()` (`hooks/useConfirm.jsx`) remplace tous les `window.confirm` : `BackupPanel`, `AutosavePanel` (restauration) et `GameCharacterEditor` (×2). Il renvoie une promesse et fournit `confirmDialog` à afficher dans le JSX.
+- `deleteCampaignCascade` (`lib/services/campaignDelete.js`) s'exécute dans une seule transaction Dexie : en cas d'erreur, y compris la vérification finale, rien n'est supprimé.
+- Android : `lib/save/nativeShare.js` exporte la sauvegarde par la feuille de partage (plugins `@capacitor/filesystem` et `@capacitor/share`, chargés à la demande). Sans sauvegarde automatique (Android, navigateur), `BackupPanel` exporte l'état actuel avant tout import.
+- Plus d'avertissement de lint : `usePageFilter` destructure `setFilter` ; `TutorialOverlay` garde un `eslint-disable-next-line` justifié (mesure à chaque rendu, sans boucle).
+- Fins de ligne LF et UTF-8 sans BOM : `.gitattributes` et `.editorconfig` à la racine.
 - `progress` (statuts des scènes) n'est plus calculé : aucune page ne l'utilisait.
 
 ## Plateformes
 
 - **Electron (Windows)** : `electron/main.cjs` et `preload.cjs` (`window.arcanesPdf`, sauvegardes dans `Documents\Arcanes Scenario`). Installateur via `npm run dist`.
-- **Android (Capacitor)** : `android/`, config dans `capacitor.config.ts` (`webDir: "dist"`). Flux : `npm run build`, `npx cap sync android`, puis APK avec Gradle depuis Android Studio. Les ponts Electron n'existent pas sur Android.
+- **Android (Capacitor)** : `android/`, config dans `capacitor.config.ts` (`webDir: "dist"`). Flux : `npm run build`, `npx cap sync android`, puis APK avec Gradle depuis Android Studio. Les ponts Electron n'existent pas sur Android ; l'export manuel passe par `@capacitor/filesystem` et `@capacitor/share`.
 - Le même code React (`src/`) sert aux deux.
 
 ## Ce qui reste à traiter
 
 - `SessionPollDialog` garde beaucoup de logique réseau et de formulaire ; seule sa persistance locale est dans `services/polls/store.js`. Un hook dédié serait une amélioration possible.
-- 4 `window.confirm` restent : `BackupPanel`, `AutosavePanel` (restauration), `GameCharacterEditor` (×2). Prévu : un hook `useConfirm()` basé sur `AlertDialog`.
-- `deleteCampaignCascade` (`lib/services/campaignDelete.js`) n'est pas dans une transaction Dexie : une erreur en cours de route laisse une suppression partielle.
-- Sur Android, aucun export de sécurité n'est fait avant une restauration (l'autosave est propre à Electron).
+- `useCodexList` : le terme de recherche est traité comme une expression régulière ; il faut l'échapper.
 - `utils.js` et `query-client.js` sont à la racine de `lib/`, non classés.
 - L'entité `Quest` est déclarée dans `dbConfig.js` mais n'est utilisée nulle part.
-- Avertissements lint restants : `PageFilterContext.jsx` (destructuration de `setFilter`) et `TutorialOverlay.jsx` (eslint-disable).
-- Fins de ligne mixtes (CRLF/LF) : ajouter `.gitattributes` et `.editorconfig` dans un commit séparé.
+- `npm audit` signale 12 alertes, surtout dans la chaîne de build (tailwind, braces) et `uuid` via `@capacitor/cli`. Ne pas lancer `npm audit fix --force` (montées de version majeures).
 
 ## Points non vérifiés
 
 - Les flèches de `META` et `CTX` depuis les pages sont déduites des imports lus, pas d'une analyse complète.
-- Le pont `window.arcanesBackup` (Electron) n'apparaît pas : il est utilisé par `RestorePrompt` et probablement `autosave`, mais le dossier `electron/` n'a pas été relu.
-- Le lien `EF --> LU` (l'usine d'entités utilise `LOCAL_USER` pour `created_by`) est déduit de l'ancien `localClient.js` ; à confirmer dans `entityFactory.js`.
+- Le pont `window.arcanesBackup` (Electron) est utilisé par `lib/save/autosave.js` et `AutosavePanel` ; le dossier `electron/` n'a pas été relu.
 - `tsc` n'a jamais été lancé ; `openAttachment` (option `noopener`) n'a pas été testé sous Electron ni Android.
+- L'export Android (`nativeShare.js`, écriture par morceaux dans le cache puis feuille de partage) n'a pas été testé sur téléphone, ni avec une grosse base contenant des images.
+- Le `useConfirm` affiché au-dessus de `ResponsiveDialog` (fiche personnage) n'a pas été testé sur mobile.
