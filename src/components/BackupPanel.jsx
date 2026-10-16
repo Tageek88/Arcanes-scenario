@@ -4,16 +4,23 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { exportBackup, importBackup } from "@/lib/save/backup";
 import { saveNow } from "@/lib/save/autosave";
+import useConfirm from "@/hooks/useConfirm";
 
 export default function BackupPanel() {
   const { toast } = useToast();
   const inputRef = useRef(null);
+  const { confirm, confirmDialog } = useConfirm();
 
   const handleImport = async (event) => {
     const file = event.target.files?.[0];
     event.target.value = "";
     if (!file) return;
-    if (!window.confirm("Remplacer toutes les données actuelles par cette sauvegarde ?")) return;
+    const accepted = await confirm({
+      title: "Importer une sauvegarde",
+      description: "Remplacer toutes les données actuelles par cette sauvegarde ?",
+      confirmLabel: "Remplacer",
+    });
+    if (!accepted) return;
     try {
       await saveNow({ force: true });
       await importBackup(file);
@@ -28,6 +35,7 @@ export default function BackupPanel() {
   };
 
   return (
+    <>
     <div className="space-y-3 rounded-xl border border-border bg-card/50 p-4">
       <h2 className="font-display text-base font-semibold text-foreground">Export et import manuels</h2>
       <p className="text-sm text-muted-foreground">
@@ -43,5 +51,7 @@ export default function BackupPanel() {
         <input ref={inputRef} type="file" accept="application/json,.json" className="hidden" onChange={handleImport} />
       </div>
     </div>
+    {confirmDialog}
+    </>
   );
 }

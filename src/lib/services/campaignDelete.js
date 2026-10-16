@@ -1,4 +1,4 @@
-import { api } from "@/api/localClient";
+import { api, db } from "@/api/localClient";
 import { withDataBatch } from "@/lib/context/dataEvents";
 
 // Enfants d'abord, la campagne en dernier.
@@ -41,15 +41,20 @@ export async function countCampaignContent(campaignId) {
 }
 
 // Supprime tout le contenu, vérifie qu'il ne reste rien, puis supprime la campagne.
+// Le tout dans une seule transaction Dexie : si une étape échoue (y compris la vérification),
+// rien n'est supprimé.
 export async function deleteCampaignCascade(campaignId) {
-  await withDataBatch(async () => {
-    for (const { entity } of LINKED_ENTITIES) {
-      await api.entities[entity].deleteMany({ campaign_id: campaignId });
-      const left = await api.entities[entity].filter({ campaign_id: campaignId }, { limit: 1 });
-      if (left.items.length > 0) {
-        throw new Error(`Il reste des éléments de type ${entity} : la campagne n'a pas été supprimée.`);
+  const tableNames = [...LINKED_ENTITIES.map(({ entity }) => entity), "Campaign"];
+  await withDataBatch(() =>
+    db.transaction("rw", tableNames, async () => {
+      for (const { entity } of LINKED_ENTITIES) {
+        await api.entities[entity].deleteMany({ campaign_id: campaignId });
+        const left = await api.entities[entity].filter({ campaign_id: campaignId }, { limit: 1 });
+        if (left.items.length > 0) {
+          throw new Error(`Il reste des éléments de type ${entity} : la campagne n'a pas été supprimée.`);
+        }
       }
-    }
-    await api.entities.Campaign.delete(campaignId);
-  });
+      await api.entities.Campaign.delete(campaignId);
+    })
+  );
 }

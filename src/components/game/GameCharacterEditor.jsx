@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import ResponsiveDialog from "@/components/common/ResponsiveDialog";
+import useConfirm from "@/hooks/useConfirm";
 
 const EMPTY = { name: "", notes: "", characteristics: {}, skills: [], equipment: [] };
 const normalize = (value) => String(value || "").trim().toLocaleLowerCase("fr");
@@ -23,9 +24,13 @@ export default function GameCharacterEditor({
 }) {
   const [form, setForm] = useState(EMPTY);
   const [saveError, setSaveError] = useState("");
+  const { confirm, confirmDialog, dismiss } = useConfirm();
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      dismiss();
+      return;
+    }
     setSaveError("");
     setForm(character ? {
       ...EMPTY,
@@ -34,7 +39,7 @@ export default function GameCharacterEditor({
       skills: structuredClone(character.skills || []),
       equipment: structuredClone(character.equipment || []),
     } : EMPTY);
-  }, [open, character]);
+  }, [open, character, dismiss]);
 
   const skillNames = useMemo(
     () => [...new Set(skillCatalog.map((item) => item.name).filter(Boolean))],
@@ -68,11 +73,18 @@ export default function GameCharacterEditor({
   const findKnownSkill = (name) => skillCatalog.find((item) => normalize(item.name) === normalize(name));
   const findKnownEquipment = (name) => equipmentCatalog.find((item) => normalize(item.name) === normalize(name));
 
-  const fillKnownSkill = (index) => {
+  const fillKnownSkill = async (index) => {
     const skill = form.skills[index];
     const known = findKnownSkill(skill?.name);
     if (known && String(skill.roll_modifier || "") === String(known.roll_modifier || "")) return;
-    if (!known || !window.confirm(`La compétence « ${known.name} » existe déjà dans le catalogue. Reprendre ses champs ?`)) return;
+    if (!known) return;
+    const accepted = await confirm({
+      title: "Compétence déjà connue",
+      description: `La compétence « ${known.name} » existe déjà dans le catalogue. Reprendre ses champs ?`,
+      confirmLabel: "Reprendre",
+      cancelLabel: "Garder ma saisie",
+    });
+    if (!accepted) return;
     setSkill(index, "roll_modifier", known.roll_modifier || "");
   };
 
@@ -91,7 +103,7 @@ export default function GameCharacterEditor({
       ),
     }));
 
-  const fillKnownEquipment = (index) => {
+  const fillKnownEquipment = async (index) => {
     const item = form.equipment[index];
     const known = findKnownEquipment(item?.name);
     if (
@@ -99,7 +111,14 @@ export default function GameCharacterEditor({
       normalize(item.type) === normalize(known.type) &&
       JSON.stringify(item.fields || []) === JSON.stringify(known.fields || [])
     ) return;
-    if (!known || !window.confirm(`L’équipement « ${known.name} » existe déjà dans le catalogue. Reprendre ses champs ?`)) return;
+    if (!known) return;
+    const accepted = await confirm({
+      title: "Équipement déjà connu",
+      description: `L’équipement « ${known.name} » existe déjà dans le catalogue. Reprendre ses champs ?`,
+      confirmLabel: "Reprendre",
+      cancelLabel: "Garder ma saisie",
+    });
+    if (!accepted) return;
     setEquipment(index, {
       type: known.type || "",
       fields: structuredClone(known.fields || []),
@@ -175,6 +194,7 @@ export default function GameCharacterEditor({
   );
 
   return (
+    <>
     <ResponsiveDialog
       open={open}
       onOpenChange={onOpenChange}
@@ -346,5 +366,7 @@ export default function GameCharacterEditor({
         {saveError && <p role="alert" className="text-sm text-destructive">{saveError}</p>}
       </form>
     </ResponsiveDialog>
+    {confirmDialog}
+    </>
   );
 }

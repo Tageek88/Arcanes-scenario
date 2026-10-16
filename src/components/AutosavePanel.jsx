@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { hasAutosave, saveNow, useAutosaveStatus } from "@/lib/save/autosave";
 import { restoreFromPayload, validateBackupPayload } from "@/lib/save/backup";
+import useConfirm from "@/hooks/useConfirm";
 
 const KIND_LABEL = { current: "Courante", auto: "Automatique", archive: "Archive", other: "Autre" };
 
@@ -15,6 +16,7 @@ export default function AutosavePanel() {
     const status = useAutosaveStatus();
     const [info, setInfo] = useState(null);
     const [busy, setBusy] = useState(false);
+    const { confirm, confirmDialog } = useConfirm();
 
     const refresh = useCallback(async () => {
         if (!hasAutosave()) return;
@@ -61,12 +63,12 @@ export default function AutosavePanel() {
     };
 
     const restore = async (file) => {
-        if (
-            !window.confirm(
-                `Remplacer toutes les données actuelles par la sauvegarde du ${when(file.mtime)} ?\nL'état actuel sera d'abord conservé dans une sauvegarde.`
-            )
-        )
-            return;
+        const accepted = await confirm({
+            title: "Restaurer une sauvegarde",
+            description: `Remplacer toutes les données actuelles par la sauvegarde du ${when(file.mtime)} ?\nL'état actuel sera d'abord conservé dans une sauvegarde.`,
+            confirmLabel: "Restaurer",
+        });
+        if (!accepted) return;
         setBusy(true);
         try {
             // Lecture d'abord : l'instantané ci-dessous peut supprimer la plus ancienne version.
@@ -98,6 +100,7 @@ export default function AutosavePanel() {
 
     return (
         <section className="space-y-3 rounded-xl border border-border bg-card/50 p-4">
+            {confirmDialog}
             <h2 className="font-display text-base font-semibold text-foreground">Sauvegarde automatique</h2>
             <p className="text-sm text-muted-foreground">
                 Vos données sont enregistrées dans un fichier après chaque modification, avec des versions datées.
