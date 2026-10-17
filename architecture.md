@@ -149,18 +149,19 @@ flowchart LR
 - Android : `lib/save/nativeShare.js` exporte la sauvegarde par la feuille de partage (plugins `@capacitor/filesystem` et `@capacitor/share`, chargés à la demande). Sans sauvegarde automatique (Android, navigateur), `BackupPanel` exporte l'état actuel avant tout import.
 - Plus d'avertissement de lint : `usePageFilter` destructure `setFilter` ; `TutorialOverlay` garde un `eslint-disable-next-line` justifié (mesure à chaque rendu, sans boucle).
 - Fins de ligne LF et UTF-8 sans BOM : `.gitattributes` et `.editorconfig` à la racine.
+- `useCodexList` échappe le terme de recherche avant de le passer à `$regex` (une recherche comme `a.c` ou `(` est traitée comme du texte).
+- Testés à la main par l'utilisateur le 17/10/2026, tout passe : export Android (feuille de partage), import avec export préalable, les confirmations `useConfirm` (dont celle de la fiche personnage sur mobile) et la suppression de campagne.
 - `progress` (statuts des scènes) n'est plus calculé : aucune page ne l'utilisait.
 
 ## Plateformes
 
 - **Electron (Windows)** : `electron/main.cjs` et `preload.cjs` (`window.arcanesPdf`, sauvegardes dans `Documents\Arcanes Scenario`). Installateur via `npm run dist`.
-- **Android (Capacitor)** : `android/`, config dans `capacitor.config.ts` (`webDir: "dist"`). Flux : `npm run build`, `npx cap sync android`, puis APK avec Gradle depuis Android Studio. Les ponts Electron n'existent pas sur Android ; l'export manuel passe par `@capacitor/filesystem` et `@capacitor/share`.
+- **Android (Capacitor)** : `android/`, config dans `capacitor.config.ts` (`webDir: "dist"`). Flux : `npm run build`, `npx cap sync android`, puis APK avec Gradle depuis Android Studio. Les ponts Electron n'existent pas sur Android ; l'export manuel passe par `@capacitor/filesystem` et `@capacitor/share`. La version Android (`versionName`, `versionCode` dans `android/app/build.gradle`) est indépendante de `package.json` : à mettre à jour à chaque release.
 - Le même code React (`src/`) sert aux deux.
 
 ## Ce qui reste à traiter
 
 - `SessionPollDialog` garde beaucoup de logique réseau et de formulaire ; seule sa persistance locale est dans `services/polls/store.js`. Un hook dédié serait une amélioration possible.
-- `useCodexList` : le terme de recherche est traité comme une expression régulière ; il faut l'échapper.
 - `utils.js` et `query-client.js` sont à la racine de `lib/`, non classés.
 - L'entité `Quest` est déclarée dans `dbConfig.js` mais n'est utilisée nulle part.
 - `npm audit` signale 12 alertes, surtout dans la chaîne de build (tailwind, braces) et `uuid` via `@capacitor/cli`. Ne pas lancer `npm audit fix --force` (montées de version majeures).
@@ -170,5 +171,4 @@ flowchart LR
 - Les flèches de `META` et `CTX` depuis les pages sont déduites des imports lus, pas d'une analyse complète.
 - Le pont `window.arcanesBackup` (Electron) est utilisé par `lib/save/autosave.js` et `AutosavePanel` ; le dossier `electron/` n'a pas été relu.
 - `tsc` n'a jamais été lancé ; `openAttachment` (option `noopener`) n'a pas été testé sous Electron ni Android.
-- L'export Android (`nativeShare.js`, écriture par morceaux dans le cache puis feuille de partage) n'a pas été testé sur téléphone, ni avec une grosse base contenant des images.
-- Le `useConfirm` affiché au-dessus de `ResponsiveDialog` (fiche personnage) n'a pas été testé sur mobile.
+- Le cas d'une très grosse base avec beaucoup d'images n'a pas été précisé lors des tests de l'export Android.
