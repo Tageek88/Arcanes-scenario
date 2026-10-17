@@ -40,3 +40,5 @@ dist-ssr
 audit/
 audit.zip
 audit-src.zip
+
+.claude/agents/
