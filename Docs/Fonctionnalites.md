@@ -56,8 +56,8 @@ Le système de jeu permet de définir un modèle de fiche pour chaque campagne, 
 PARAMÈTRES
 
 Les Paramètres donnent accès à la sauvegarde et à la gestion des données :
-- exporter les données locales au format JSON ;
-- importer une sauvegarde JSON ;
+- exporter les données locales au format JSON (sur Android, l'export ouvre la feuille de partage : Drive, Fichiers...) ;
+- importer une sauvegarde JSON (sans sauvegarde automatique, l'application propose d'abord d'exporter les données actuelles) ;
 - effacer les données locales, avec une confirmation avant la suppression ;
 - consulter la version de l'application.
 
