@@ -17,7 +17,18 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { withDataBatch } from "@/lib/context/dataEvents";
-import { formatPollDateInput, toPollIsoDate } from "@/lib/services/polls/pollDates";
+import { formatPollDateInput } from "@/lib/services/polls/pollDates";
+import {
+  AVAILABILITY_LABELS,
+  buildPollPayload,
+  defaultExpiryInput,
+  displaySlot,
+  newSlot,
+  normalizePlayer,
+  parsePlayerNames,
+  pollDateInput,
+  validatePollForm,
+} from "@/lib/services/polls/pollForm";
 import { createLocalPoll, deleteLocalPoll, listCampaignPolls, updateLocalPoll } from "@/lib/services/polls/store";
 import {
   getPollServiceUrl,
@@ -27,30 +38,6 @@ import {
   savePollServiceUrl,
 } from "@/lib/services/sessionPolls";
 import { dispatchTutorialAction } from "@/utils/tutorialStorage";
-
-const newSlot = () => ({ date: "", time: "20:00" });
-const AVAILABILITY_LABELS = {
-  available: "Disponible",
-  maybe: "Peut-être",
-  unavailable: "Indisponible",
-};
-
-const displaySlot = (slot, timezone) => {
-  const wallTime = new Date(`${slot.date}T${slot.time}:00Z`);
-  return new Intl.DateTimeFormat("fr-FR", {
-    dateStyle: "medium",
-    timeStyle: "short",
-    timeZone: "UTC",
-  }).format(wallTime) + (timezone ? ` (${timezone})` : "");
-};
-
-const normalizePlayer = (name) =>
-  String(name || "").normalize("NFKC").trim().replace(/\s+/g, " ").toLocaleLowerCase("fr-FR");
-
-const pollDateInput = (value) => {
-  const [year, month, day] = value.split("-");
-  return formatPollDateInput(`${day}/${month}/${year}`);
-};
 
 export default function SessionPollDialog({
   open,
@@ -78,10 +65,7 @@ export default function SessionPollDialog({
   const [editLoadError, setEditLoadError] = useState("");
   const [pendingPollRemoval, setPendingPollRemoval] = useState(null);
 
-  const parsedPlayers = useMemo(
-    () => playerNames.split(/\r?\n/).map((name) => name.normalize("NFKC").trim().replace(/\s+/g, " ")).filter(Boolean),
-    [playerNames]
-  );
+  const parsedPlayers = useMemo(() => parsePlayerNames(playerNames), [playerNames]);
 
   const saveServiceUrl = () => {
     const normalized = normalizePollServiceUrl(serviceUrl);
@@ -210,49 +194,22 @@ export default function SessionPollDialog({
 
   useEffect(() => {
     if (pollToEdit || editingPoll || expiryManuallySet) return;
-    const latestSlotDate = slots.reduce((latest, slot) => {
-      const date = toPollIsoDate(slot.date);
-      return date > latest ? date : latest;
-    }, "");
-    setExpiresOn(latestSlotDate ? pollDateInput(latestSlotDate) : "");
+    setExpiresOn(defaultExpiryInput(slots));
   }, [editingPoll, expiryManuallySet, pollToEdit, slots]);
 
   const savePoll = () => withDataBatch(savePollUnbatched);
 
   const savePollUnbatched = async () => {
     if (!campaignId) return;
-    const normalizedPlayers = parsedPlayers.map(normalizePlayer);
-    if (!title.trim() || title.trim().length > 120) {
-      toast({ variant: "destructive", title: "Titre invalide", description: "Le titre doit contenir de 1 à 120 caractères." });
-      return;
-    }
-    if (parsedPlayers.length === 0 || parsedPlayers.length > 40 ||
-        new Set(normalizedPlayers).size !== normalizedPlayers.length) {
-      toast({ variant: "destructive", title: "Liste de joueurs invalide", description: "Indiquez de 1 à 40 noms uniques, un par ligne." });
-      return;
-    }
-    if (slots.length < 2 || slots.some((slot) => !toPollIsoDate(slot.date) || !slot.time)) {
-      toast({ variant: "destructive", title: "Dates incomplètes ou invalides", description: "Renseignez au moins deux dates au format jj/mm/aaaa et leurs heures." });
-      return;
-    }
-    if (!toPollIsoDate(expiresOn)) {
-      toast({ variant: "destructive", title: "Date d'expiration invalide", description: "Choisissez une date valide au format jj/mm/aaaa jusqu'à laquelle le sondage et ses résultats resteront accessibles." });
+    const problem = validatePollForm({ title, players: parsedPlayers, slots, expiresOn });
+    if (problem) {
+      toast({ variant: "destructive", ...problem });
       return;
     }
     setCreating(true);
     try {
       const baseUrl = saveServiceUrl();
-      const normalizedSlots = slots.map((slot) => ({ ...slot, date: toPollIsoDate(slot.date) }));
-      const uniqueSlots = new Set(normalizedSlots.map((slot) => `${slot.date}T${slot.time}`));
-      if (uniqueSlots.size !== slots.length) throw new Error("Les propositions de date doivent être uniques.");
-      const payload = {
-        title: title.trim(),
-        comment: comment.trim(),
-        players: parsedPlayers,
-        slots: normalizedSlots,
-        timezone,
-        expiresOn: toPollIsoDate(expiresOn),
-      };
+      const payload = buildPollPayload({ title, comment, players: parsedPlayers, slots, timezone, expiresOn });
       if (editingPoll) {
         let remoteSaved = false;
         try {
