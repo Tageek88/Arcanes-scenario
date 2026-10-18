@@ -29,11 +29,18 @@ import {
   pollDateInput,
   validatePollForm,
 } from "@/lib/services/polls/pollForm";
-import { createLocalPoll, deleteLocalPoll, listCampaignPolls, updateLocalPoll } from "@/lib/services/polls/store";
+import { createLocalPoll, listCampaignPolls, updateLocalPoll } from "@/lib/services/polls/store";
+import {
+  closeRemotePoll,
+  createRemotePoll,
+  fetchPollDetails,
+  pollServiceUrlOf,
+  removeSessionPoll,
+  updateRemotePoll,
+} from "@/lib/services/polls/remote";
 import {
   getPollServiceUrl,
   normalizePollServiceUrl,
-  pollRequest,
   refreshSessionPoll,
   savePollServiceUrl,
 } from "@/lib/services/sessionPolls";
@@ -151,10 +158,8 @@ export default function SessionPollDialog({
     setEditingPoll(pollToEdit);
     setEditLoading(true);
     setEditLoadError("");
-    const baseUrl = pollToEdit.service_url || getPollServiceUrl();
-    pollRequest(baseUrl, `/api/polls/${pollToEdit.poll_id}/results`, {
-      headers: { Authorization: `Bearer ${pollToEdit.owner_token}` },
-    })
+    const baseUrl = pollServiceUrlOf(pollToEdit);
+    fetchPollDetails(pollToEdit, baseUrl)
       .then((details) => {
         if (!alive) return;
         const expiryParts = Object.fromEntries(
@@ -213,11 +218,7 @@ export default function SessionPollDialog({
       if (editingPoll) {
         let remoteSaved = false;
         try {
-          const response = await pollRequest(baseUrl, `/api/polls/${editingPoll.poll_id}`, {
-            method: "PUT",
-            headers: { Authorization: `Bearer ${editingPoll.owner_token}` },
-            body: JSON.stringify(payload),
-          });
+          const response = await updateRemotePoll(baseUrl, editingPoll, payload);
           remoteSaved = true;
           const saved = await updateLocalPoll(editingPoll.id, {
             title: payload.title,
@@ -258,10 +259,7 @@ export default function SessionPollDialog({
         }
         return;
       }
-      const created = await pollRequest(baseUrl, "/api/polls", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      });
+      const created = await createRemotePoll(baseUrl, payload);
       const saved = await createLocalPoll({
         campaign_id: campaignId,
         poll_id: created.id,
@@ -308,12 +306,8 @@ export default function SessionPollDialog({
   const closePoll = async (poll) => {
     setBusyPoll(poll.id);
     try {
-      await pollRequest(poll.service_url, `/api/polls/${poll.poll_id}/close`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${poll.owner_token}` },
-        body: "{}",
-      });
-      const updated = await refreshSessionPoll({ ...poll, state: "closed" }, poll.service_url);
+      await closeRemotePoll(poll);
+      const updated = await refreshSessionPoll({ ...poll, state: "closed" }, pollServiceUrlOf(poll));
       setPolls((current) => current.map((item) => item.id === poll.id ? updated : item));
       onPollChange?.(updated);
       toast({ title: "Sondage clôturé", description: "Les joueurs ne peuvent plus modifier leur réponse." });
@@ -328,27 +322,13 @@ export default function SessionPollDialog({
   const removePoll = async (poll) => {
     setBusyPoll(poll.id);
     try {
-      await pollRequest(poll.service_url, `/api/polls/${poll.poll_id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${poll.owner_token}` },
-      });
-      await deleteLocalPoll(poll.id);
+      const { remoteMissing } = await removeSessionPoll(poll);
       setPolls((current) => current.filter((item) => item.id !== poll.id));
       onPollChange?.(null, poll.id);
-      toast({ title: "Sondage supprimé" });
+      toast(remoteMissing
+        ? { title: "Référence locale supprimée", description: "Le sondage distant n'existe plus ou a expiré." }
+        : { title: "Sondage supprimé" });
     } catch (error) {
-      if (error.status === 404) {
-        try {
-          await deleteLocalPoll(poll.id);
-          setPolls((current) => current.filter((item) => item.id !== poll.id));
-          onPollChange?.(null, poll.id);
-          toast({ title: "Référence locale supprimée", description: "Le sondage distant n'existe plus ou a expiré." });
-        } catch (localError) {
-          console.error("Suppression de la référence locale impossible :", localError);
-          toast({ variant: "destructive", title: "Suppression impossible", description: "La référence locale au sondage n'a pas pu être supprimée." });
-        }
-        return;
-      }
       console.error("Suppression du sondage impossible :", error);
       toast({ variant: "destructive", title: "Suppression impossible", description: error.message });
     } finally {

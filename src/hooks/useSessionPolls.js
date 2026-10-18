@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { api } from "@/api/localClient";
 import { useToast } from "@/components/ui/use-toast";
 import { useDataRefresh } from "@/lib/context/RefreshContext";
-import { getPollServiceUrl, pollRequest, refreshSessionPoll } from "@/lib/services/sessionPolls";
+import { getPollServiceUrl, refreshSessionPoll } from "@/lib/services/sessionPolls";
+import { removeSessionPoll } from "@/lib/services/polls/remote";
 
 /**
  * Sondages de date ouverts d'une campagne.
@@ -92,27 +93,14 @@ export function useSessionPolls(campaignId) {
   const deletePoll = async (poll) => {
     setDeletingPollId(poll.id);
     try {
-      await pollRequest(poll.service_url || getPollServiceUrl(), `/api/polls/${poll.poll_id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${poll.owner_token}` },
-      });
-      await api.entities.SessionPoll.delete(poll.id);
+      const { remoteMissing } = await removeSessionPoll(poll);
       setPolls((current) => current.filter((item) => item.id !== poll.id));
-      toast({ title: "Sondage supprimé" });
+      toast(remoteMissing
+        ? { title: "Référence locale supprimée", description: "Le sondage distant a déjà expiré ou été supprimé." }
+        : { title: "Sondage supprimé" });
     } catch (error) {
-      if (error.status === 404) {
-        try {
-          await api.entities.SessionPoll.delete(poll.id);
-          setPolls((current) => current.filter((item) => item.id !== poll.id));
-          toast({ title: "Référence locale supprimée", description: "Le sondage distant a déjà expiré ou été supprimé." });
-        } catch (localError) {
-          console.error("Suppression de la référence locale au sondage impossible :", localError);
-          toast({ variant: "destructive", title: "Suppression impossible", description: "La référence locale au sondage n'a pas pu être supprimée." });
-        }
-      } else {
-        console.error("Suppression du sondage impossible :", error);
-        toast({ variant: "destructive", title: "Suppression impossible", description: error.message });
-      }
+      console.error("Suppression du sondage impossible :", error);
+      toast({ variant: "destructive", title: "Suppression impossible", description: error.message });
     } finally {
       setDeletingPollId("");
     }
