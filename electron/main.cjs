@@ -1,6 +1,7 @@
 const { app, BrowserWindow, Menu, shell, dialog, ipcMain } = require("electron");
 const path = require("path");
 const fs = require("fs");
+const { windowOpenPolicy, navigationPolicy } = require("./navigationPolicy.cjs");
 
 const CURRENT = "arcanes-courante.json";
 const SNAP_PREFIX = "arcanes-auto-";
@@ -67,9 +68,31 @@ function atomicWrite(file, content) {
   fs.renameSync(tmp, file);
 }
 
+// ---------- Liens externes ----------
+
+function openExternal(url) {
+  shell.openExternal(url).catch((error) => {
+    console.error("Ouverture du lien impossible :", error);
+  });
+}
+
 // ---------- Échanges avec l'interface ----------
 
-ipcMain.handle("backup:info", () => {
+// Seule la page principale de la fenêtre de l'appli peut appeler ces canaux
+// (ni une fenêtre fille, ni une iframe).
+function isTrustedSender(event) {
+  const contents = mainWindow?.webContents;
+  return !!contents && event.sender === contents && !!event.senderFrame && event.senderFrame === contents.mainFrame;
+}
+
+// `denied` est la valeur renvoyée à un appelant non autorisé.
+function handle(channel, denied, handler) {
+  ipcMain.handle(channel, (event, ...args) => (isTrustedSender(event) ? handler(event, ...args) : denied));
+}
+
+const REFUSED = { ok: false, error: "Appel refusé." };
+
+handle("backup:info", REFUSED, () => {
   try {
     const folder = backupFolder();
     return { ok: true, folder, files: listBackups(folder) };
@@ -78,7 +101,7 @@ ipcMain.handle("backup:info", () => {
   }
 });
 
-ipcMain.handle("backup:write", (_event, json, options = {}) => {
+handle("backup:write", REFUSED, (_event, json, options = {}) => {
   try {
     if (typeof json !== "string" || json.length < 2) throw new Error("Contenu invalide.");
     const folder = backupFolder();
@@ -100,7 +123,7 @@ ipcMain.handle("backup:write", (_event, json, options = {}) => {
   }
 });
 
-ipcMain.handle("backup:read", (_event, name) => {
+handle("backup:read", null, (_event, name) => {
   if (!isBackupName(name)) return null;
   try {
     return fs.readFileSync(path.join(backupFolder(), name), "utf8");
@@ -109,7 +132,7 @@ ipcMain.handle("backup:read", (_event, name) => {
   }
 });
 
-ipcMain.handle("backup:archive-current", () => {
+handle("backup:archive-current", REFUSED, () => {
   try {
     const folder = backupFolder();
     const current = path.join(folder, CURRENT);
@@ -121,7 +144,7 @@ ipcMain.handle("backup:archive-current", () => {
   }
 });
 
-ipcMain.handle("backup:choose-folder", async () => {
+handle("backup:choose-folder", null, async () => {
   const result = await dialog.showOpenDialog(mainWindow, {
     title: "Dossier des sauvegardes automatiques",
     properties: ["openDirectory", "createDirectory"],
@@ -131,11 +154,11 @@ ipcMain.handle("backup:choose-folder", async () => {
   return result.filePaths[0];
 });
 
-ipcMain.handle("backup:open-folder", async () => {
+handle("backup:open-folder", undefined, async () => {
   await shell.openPath(backupFolder());
 });
 
-ipcMain.handle("pdf:save", async (_event, bytes, filename) => {
+handle("pdf:save", REFUSED, async (_event, bytes, filename) => {
   if (!(bytes instanceof Uint8Array) || bytes.length < 5 || Buffer.from(bytes.subarray(0, 5)).toString("ascii") !== "%PDF-") {
     return { ok: false, error: "Le document PDF est invalide." };
   }
@@ -169,6 +192,7 @@ function createWindow() {
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
+      sandbox: true,
       spellcheck: true,
       preload: path.join(__dirname, "preload.cjs"),
     },
@@ -221,13 +245,19 @@ function createWindow() {
 
   mainWindow.loadFile(path.join(__dirname, "..", "dist", "index.html"));
 
-  // Liens externes dans le navigateur ; PDF et images (blob:) dans une fenêtre de l'appli.
+  // Liens et courriels dans l'application externe ; PDF et images (blob:) dans une fenêtre de l'appli ; le reste est refusé.
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    if (url.startsWith("http")) {
-      shell.openExternal(url);
-      return { action: "deny" };
-    }
-    return { action: "allow" };
+    const policy = windowOpenPolicy(url);
+    if (policy === "external") openExternal(url);
+    return { action: policy === "allow" ? "allow" : "deny" };
+  });
+
+  // La fenêtre principale ne quitte jamais l'appli : un lien sans cible s'ouvre à l'extérieur.
+  mainWindow.webContents.on("will-navigate", (event, url) => {
+    const policy = navigationPolicy(url);
+    if (policy === "allow") return;
+    event.preventDefault();
+    if (policy === "external") openExternal(url);
   });
 
   mainWindow.on("closed", () => {
