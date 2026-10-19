@@ -27,7 +27,7 @@ flowchart LR
   subgraph FEAT["components/ par page"]
     direction TB
     F_HOME["home : SceneBoard, SceneEditor,<br/>MobileSceneList, CampaignDialog"]
-    F_CAL["calendar : MonthGrid, SessionDialog,<br/>UpcomingSessions, SessionPollDialog"]
+    F_CAL["calendar : MonthGrid, SessionDialog,<br/>UpcomingSessions, SessionPollDialog<br/>poll/ : PollForm, PollCard,<br/>PollResultsTable, PollServiceUrlField,<br/>PollRemovalDialog"]
     F_CODEX["codex : CodexCard, CodexEntryDialog,<br/>LocationTree, CodexSidebar,<br/>NpcRelations, AttachmentsField"]
     F_GAME["game : GameSheetModelEditor,<br/>GameCharacterEditor<br/>print : PrintSheet"]
     F_NOTES["notes : NoteCard, NoteEditor"]
@@ -39,7 +39,7 @@ flowchart LR
     direction TB
     H_CAMP["useCampaigns"]
     H_HOME["useCampaignContent<br/>useCampaignActions"]
-    H_CAL["useScenes, useGameSessions,<br/>useSessionPolls"]
+    H_CAL["useScenes, useGameSessions,<br/>useSessionPolls,<br/>useSessionPollManager"]
     H_CODEX["useCodex, useCodexList,<br/>useCodexEntryData,<br/>useNpcRelations"]
     H_GAME["useGameSheet"]
     H_NOTES["useNotes"]
@@ -52,7 +52,7 @@ flowchart LR
     META["meta/<br/>codex, sceneMeta, sessionMeta,<br/>tableMeta, relationMeta, universeMeta"]
     CTX["context/<br/>campaignStore, RefreshContext,<br/>PageFilterContext, ExpandedCardContext,<br/>TabStackContext, dataEvents, AuthContext"]
     SERV["services/<br/>campaignDelete, locationTree,<br/>npcRelations, attachments,<br/>codexEntries, openAttachment"]
-    POLLS["services/polls<br/>config, client (fetch), votes,<br/>sync, pollDates, store<br/>(façade : sessionPolls.js)"]
+    POLLS["services/polls<br/>config, client (fetch), remote,<br/>votes, sync, pollDates, pollForm,<br/>store (façade : sessionPolls.js)"]
     PRINT["print/<br/>printModel, editablePdf,<br/>loadPrintData"]
     GEN["generators/<br/>nameGenerator, nameData"]
     SAVE["save/<br/>backup, autosave, accountData,<br/>nativeShare"]
@@ -95,7 +95,8 @@ flowchart LR
   F_CODEX --> H_CODEX
   F_CODEX -->|AttachmentsField, CodexEntryDialog| SERV
   F_CODEX -->|noms aléatoires| GEN
-  F_CAL -->|SessionPollDialog| POLLS
+  F_CAL -->|SessionPollDialog| H_CAL
+  F_CAL -->|formulaire, libellés| POLLS
   COMMON -->|PrintButton| PRINT
 
   %% Pages -> lib (constantes, contextes d'interface, aides)
@@ -144,6 +145,7 @@ flowchart LR
 - `RestorePrompt` passe par `lib/save/backup.js` (`hasCampaigns`) et n'accède plus à `db`.
 - `sessionPolls.js` est une façade qui réexporte les fichiers de `services/polls/`.
 - La confirmation de suppression d'un sondage depuis la page Calendrier passe par une `AlertDialog` (plus de `window.confirm` dans `useSessionPolls`).
+- `SessionPollDialog` est découpé en quatre couches : `lib/services/polls/pollForm.js` (validation, charge utile, aides de dates : fonctions pures), `lib/services/polls/remote.js` (appels au service distant avec le `owner_token` ; `removeSessionPoll` est l'unique chemin de suppression, partagé avec `useSessionPolls`, un 404 du service n'est pas une erreur), `hooks/useSessionPollManager.js` (état du formulaire, liste des sondages, actualisation, clôture, suppression) et `components/calendar/poll/` (`PollServiceUrlField`, `PollForm`, `PollCard`, `PollResultsTable`, `PollRemovalDialog`). La fenêtre elle-même ne fait plus qu'assembler l'affichage.
 - `useConfirm()` (`hooks/useConfirm.jsx`) remplace tous les `window.confirm` : `BackupPanel`, `AutosavePanel` (restauration) et `GameCharacterEditor` (×2). Il renvoie une promesse et fournit `confirmDialog` à afficher dans le JSX.
 - `deleteCampaignCascade` (`lib/services/campaignDelete.js`) s'exécute dans une seule transaction Dexie : en cas d'erreur, y compris la vérification finale, rien n'est supprimé.
 - Android : `lib/save/nativeShare.js` exporte la sauvegarde par la feuille de partage (plugins `@capacitor/filesystem` et `@capacitor/share`, chargés à la demande). Sans sauvegarde automatique (Android, navigateur), `BackupPanel` exporte l'état actuel avant tout import.
@@ -161,10 +163,9 @@ flowchart LR
 
 ## Ce qui reste à traiter
 
-- `SessionPollDialog` garde beaucoup de logique réseau et de formulaire ; seule sa persistance locale est dans `services/polls/store.js`. Un hook dédié serait une amélioration possible.
 - `utils.js` et `query-client.js` sont à la racine de `lib/`, non classés.
 - L'entité `Quest` est déclarée dans `dbConfig.js` mais n'est utilisée nulle part.
-- `npm audit` signale 12 alertes, surtout dans la chaîne de build (tailwind, braces) et `uuid` via `@capacitor/cli`. Ne pas lancer `npm audit fix --force` (montées de version majeures).
+- `npm audit` signalait 26 alertes (dont 1 critique) au 17/10 ; à traiter en dernier, en commençant par `npm audit --omit=dev`. Ne pas lancer `npm audit fix --force` (montées de version majeures).
 
 ## Points non vérifiés
 
