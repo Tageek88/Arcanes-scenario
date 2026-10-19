@@ -4,7 +4,7 @@ Règle d'or : ni les pages ni les composants n'appellent `api` ou Dexie. Tout pa
 
 ```mermaid
 flowchart LR
-  ELECTRON["Electron (Windows)<br/>electron/main.cjs"] --> PAGES
+  ELECTRON["Electron 44 (Windows)<br/>electron/main.cjs<br/>navigationPolicy.cjs"] --> PAGES
   ANDROID["Android (Capacitor)<br/>android/ - cap sync + Gradle"] --> PAGES
 
   subgraph PAGES["pages/"]
@@ -157,19 +157,21 @@ flowchart LR
 
 ## Plateformes
 
-- **Electron (Windows)** : `electron/main.cjs` et `preload.cjs` (`window.arcanesPdf`, sauvegardes dans `Documents\Arcanes Scenario`). Installateur via `npm run dist`.
+- **Electron 44.9.0 (Windows)** : `electron/main.cjs`, `preload.cjs` et `navigationPolicy.cjs` (`window.arcanesPdf`, `window.arcanesBackup`, sauvegardes dans `Documents\Arcanes Scenario`). La fenêtre est en `sandbox`, avec isolation de contexte ; les canaux IPC (`handle()`) n'acceptent que la page principale ; `window.open` n'autorise que `blob:` (liens `https:`/`http:`/`mailto:` envoyés au système, reste refusé) ; la fenêtre principale ne navigue que vers `file:`. Installateur via `npm run dist`.
 - **Android (Capacitor)** : `android/`, config dans `capacitor.config.ts` (`webDir: "dist"`). Flux : `npm run build`, `npx cap sync android`, puis APK avec Gradle depuis Android Studio. Les ponts Electron n'existent pas sur Android ; l'export manuel passe par `@capacitor/filesystem` et `@capacitor/share`. La version Android (`versionName`, `versionCode` dans `android/app/build.gradle`) est indépendante de `package.json` : à mettre à jour à chaque release.
 - Le même code React (`src/`) sert aux deux.
+
+- Sécurité du 19/10/2026 : `@capacitor/assets` retiré (inutilisé, il tirait `tar` 6 et `sharp`), Electron 31.7.7 -> 44.9.0, react-router-dom 6.30.6 -> 7.18.4, tous les paquets en `devDependencies` (l'installateur n'embarque plus de `node_modules` d'exécution : l'interface est déjà regroupée par Vite). `electron/main.cjs` durci (voir Plateformes). `npm audit` : 26 alertes dont 1 critique -> 20 (15 modérées, 5 hautes), voir ci-dessous.
 
 ## Ce qui reste à traiter
 
 - `utils.js` et `query-client.js` sont à la racine de `lib/`, non classés.
 - L'entité `Quest` est déclarée dans `dbConfig.js` mais n'est utilisée nulle part.
-- `npm audit` signalait 26 alertes (dont 1 critique) au 17/10 ; à traiter en dernier, en commençant par `npm audit --omit=dev`. Ne pas lancer `npm audit fix --force` (montées de version majeures).
+- `npm audit` : 20 alertes acceptées au 19/10/2026 (0 critique, 5 hautes, 15 modérées) : `tailwindcss` 3 et sa chaîne de build (seule correction : tailwindcss 4, migration lourde ; s'exécute à la build sur nos propres fichiers), `@capacitor/cli` via `xcode`/`uuid` (la correction proposée est un retour en arrière) et la chaîne d'emballage `electron-builder`. Ne pas lancer `npm audit fix --force`. `npm audit --omit=dev` renvoie 0 parce que tout est en `devDependencies` : ce n'est pas une preuve que l'interface est sans alerte.
 
 ## Points non vérifiés
 
 - Les flèches de `META` et `CTX` depuis les pages sont déduites des imports lus, pas d'une analyse complète.
-- Le pont `window.arcanesBackup` (Electron) est utilisé par `lib/save/autosave.js` et `AutosavePanel` ; le dossier `electron/` n'a pas été relu.
-- `tsc` n'a jamais été lancé ; `openAttachment` (option `noopener`) n'a pas été testé sous Electron ni Android.
+- Le pont `window.arcanesBackup` (Electron) est utilisé par `lib/save/autosave.js` et `AutosavePanel`. `electron/` a été relu le 19/10 et testé à la main par l'utilisateur sous Electron 44.9.0 (sauvegarde automatique, PDF éditable, impression, pièce jointe, liens et courriel des sondages, correcteur, menu contextuel, `release\win-unpacked`).
+- `tsc` n'a jamais été lancé ; `openAttachment` (option `noopener`) n'a pas été testé sous Android (WebView). Les changements des versions Electron 32 à 43 n'ont pas été relus un par un : seule la page des changements de la 44 l'a été, la validation repose sur les tests manuels.
 - Le cas d'une très grosse base avec beaucoup d'images n'a pas été précisé lors des tests de l'export Android.
