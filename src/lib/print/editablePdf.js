@@ -396,19 +396,19 @@ export async function createEditablePdf(model) {
                     drawCharacteristics(
                         characteristics.map((definition) => {
                             const values = character.characteristics?.[definition.name] || {};
-                            const rows = [["Valeur", values.value]];
-                            if (definition.modifier) rows.push(["Modificateur", values.modifier]);
-                            if (definition.test) rows.push(["Test (seuil)", values.test]);
-                            if (definition.max) rows.push(["Maximum", values.max]);
-                            return { name: definition.name, rows };
+                            return { name: definition.name, rows: [["Valeur", values.value]] };
                         })
                     );
                     drawHeading("Compétences", 3);
                     for (const skill of character.skills || []) {
-                        const modifier = skillRollModifier && skill.roll_modifier !== null && skill.roll_modifier !== undefined
-                            ? ` - Modificateur de lancer : ${skill.roll_modifier}`
+                        const modifier = skillRollModifier && skill.roll_modifier !== null && skill.roll_modifier !== undefined && skill.roll_modifier !== ""
+                            ? ` - Modificateur : ${skill.roll_modifier}`
                             : "";
-                        drawText(`${skill.name}${modifier}`);
+                        const extraFields = (skill.fields || [])
+                            .filter((f) => f.name || f.value)
+                            .map((f) => `${f.name}${f.value ? ` : ${f.value}` : ""}`)
+                            .join(" · ");
+                        drawText(`${skill.name}${modifier}${extraFields ? ` (${extraFields})` : ""}`);
                     }
 
                     drawHeading("Équipement", 3);

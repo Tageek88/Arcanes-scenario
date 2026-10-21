@@ -70,6 +70,42 @@ export default function GameCharacterEditor({
       skills: current.skills.map((skill, i) => i === index ? { ...skill, [field]: value } : skill),
     }));
 
+  const setSkillField = (skillIndex, fieldIndex, key, value) => {
+    setForm((current) => ({
+      ...current,
+      skills: current.skills.map((skill, i) =>
+        i === skillIndex
+          ? {
+              ...skill,
+              fields: (skill.fields || []).map((f, fi) => (fi === fieldIndex ? { ...f, [key]: value } : f)),
+            }
+          : skill
+      ),
+    }));
+  };
+
+  const addSkillField = (skillIndex) => {
+    setForm((current) => ({
+      ...current,
+      skills: current.skills.map((skill, i) =>
+        i === skillIndex
+          ? { ...skill, fields: [...(skill.fields || []), { name: "", value: "" }] }
+          : skill
+      ),
+    }));
+  };
+
+  const removeSkillField = (skillIndex, fieldIndex) => {
+    setForm((current) => ({
+      ...current,
+      skills: current.skills.map((skill, i) =>
+        i === skillIndex
+          ? { ...skill, fields: (skill.fields || []).filter((_, fi) => fi !== fieldIndex) }
+          : skill
+      ),
+    }));
+  };
+
   const findKnownSkill = (name) => skillCatalog.find((item) => normalize(item.name) === normalize(name));
   const findKnownEquipment = (name) => equipmentCatalog.find((item) => normalize(item.name) === normalize(name));
 
@@ -166,6 +202,10 @@ export default function GameCharacterEditor({
           ...skill,
           name: skill.name.trim(),
           roll_modifier: String(skill.roll_modifier ?? ""),
+          fields: (skill.fields || []).filter((field) => field.name?.trim()).map((field) => ({
+            name: field.name.trim(),
+            value: String(field.value ?? ""),
+          })),
         })),
         equipment: form.equipment.filter((item) => item.name?.trim()).map((item) => ({
           ...item,
@@ -211,36 +251,18 @@ export default function GameCharacterEditor({
         {model.characteristics.length > 0 && (
           <section className="space-y-3">
             <h3 className="font-display font-semibold">Caractéristiques</h3>
-            <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {model.characteristics.map((item) => {
                 const values = form.characteristics[item.name] || blankCharacteristic();
                 return (
-                  <div key={item.name} className="rounded-lg border border-border p-3">
-                    <h4 className="mb-2 font-medium">{item.name}</h4>
-                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                      <label className="space-y-1 text-xs text-muted-foreground">
-                        Valeur
-                        <Input aria-label={`${item.name} valeur`} value={values.value || ""} onChange={(event) => setCharacteristic(item.name, "value", event.target.value)} />
-                      </label>
-                      {item.modifier && (
-                        <label className="space-y-1 text-xs text-muted-foreground">
-                          Modificateur
-                          <Input aria-label={`${item.name} modificateur`} value={values.modifier || ""} onChange={(event) => setCharacteristic(item.name, "modifier", event.target.value)} />
-                        </label>
-                      )}
-                      {item.test && (
-                        <label className="space-y-1 text-xs text-muted-foreground">
-                          Test (seuil)
-                          <Input aria-label={`${item.name} seuil de test`} value={values.test || ""} onChange={(event) => setCharacteristic(item.name, "test", event.target.value)} />
-                        </label>
-                      )}
-                      {item.max && (
-                        <label className="space-y-1 text-xs text-muted-foreground">
-                          Maximum
-                          <Input aria-label={`${item.name} maximum`} value={values.max || ""} onChange={(event) => setCharacteristic(item.name, "max", event.target.value)} />
-                        </label>
-                      )}
-                    </div>
+                  <div key={item.name} className="space-y-1 rounded-lg border border-border p-3">
+                    <Label className="text-xs font-medium">{item.name}</Label>
+                    <Input
+                      aria-label={`${item.name} valeur`}
+                      value={values.value || ""}
+                      onChange={(event) => setCharacteristic(item.name, "value", event.target.value)}
+                      placeholder="Valeur"
+                    />
                   </div>
                 );
               })}
@@ -254,36 +276,53 @@ export default function GameCharacterEditor({
               <h3 className="font-display font-semibold">Compétences</h3>
               <p className="text-xs text-muted-foreground">Les noms saisis sont retenus dans le catalogue de la campagne.</p>
             </div>
-            <Button type="button" variant="outline" size="sm" onClick={() => setForm((current) => ({ ...current, skills: [...current.skills, { name: "", roll_modifier: "" }] }))}>
+            <Button type="button" variant="outline" size="sm" onClick={() => setForm((current) => ({ ...current, skills: [...current.skills, { name: "", roll_modifier: "", fields: [] }] }))}>
               <Plus className="h-4 w-4" /> Ajouter
             </Button>
           </div>
           {form.skills.map((skill, index) => (
-            <div key={index} className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-2 rounded-lg border border-border p-3">
-              <div className={model.skillRollModifier ? "grid gap-2 sm:grid-cols-2" : ""}>
-                <label className="space-y-1 text-xs text-muted-foreground">
-                  Compétence
-                  <Input
-                    list={`skill-catalog-${index}`}
-                    value={skill.name || ""}
-                    onChange={(event) => setSkill(index, "name", event.target.value)}
-                    onBlur={() => fillKnownSkill(index)}
-                    placeholder="Ex. Discrétion"
-                  />
-                  <datalist id={`skill-catalog-${index}`}>
-                    {skillNames.map((name) => <option key={name} value={name} />)}
-                  </datalist>
-                </label>
-                {model.skillRollModifier && (
+            <div key={index} className="space-y-3 rounded-lg border border-border p-3">
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-2">
+                <div className={model.skillRollModifier ? "grid gap-2 sm:grid-cols-2" : ""}>
                   <label className="space-y-1 text-xs text-muted-foreground">
-                    Modificateur de lancer
-                    <Input value={skill.roll_modifier || ""} onChange={(event) => setSkill(index, "roll_modifier", event.target.value)} />
+                    Compétence
+                    <Input
+                      list={`skill-catalog-${index}`}
+                      value={skill.name || ""}
+                      onChange={(event) => setSkill(index, "name", event.target.value)}
+                      onBlur={() => fillKnownSkill(index)}
+                      placeholder="Ex. Discrétion"
+                    />
+                    <datalist id={`skill-catalog-${index}`}>
+                      {skillNames.map((name) => <option key={name} value={name} />)}
+                    </datalist>
                   </label>
-                )}
+                  {model.skillRollModifier && (
+                    <label className="space-y-1 text-xs text-muted-foreground">
+                      Modificateur de lancer
+                      <Input value={skill.roll_modifier || ""} onChange={(event) => setSkill(index, "roll_modifier", event.target.value)} />
+                    </label>
+                  )}
+                </div>
+                <Button type="button" variant="ghost" size="icon" aria-label={`Supprimer la compétence ${skill.name || index + 1}`} onClick={() => setForm((current) => ({ ...current, skills: current.skills.filter((_, i) => i !== index) }))}>
+                  <Trash2 className="h-4 w-4 text-muted-foreground" />
+                </Button>
               </div>
-              <Button type="button" variant="ghost" size="icon" aria-label={`Supprimer la compétence ${skill.name || index + 1}`} onClick={() => setForm((current) => ({ ...current, skills: current.skills.filter((_, i) => i !== index) }))}>
-                <Trash2 className="h-4 w-4 text-muted-foreground" />
-              </Button>
+
+              <div className="space-y-2">
+                {(skill.fields || []).map((field, fieldIndex) => (
+                  <div key={fieldIndex} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_2.5rem] items-center gap-2">
+                    <Input aria-label="Nom du champ de compétence" value={field.name} onChange={(event) => setSkillField(index, fieldIndex, "name", event.target.value)} placeholder="Champ facultatif (ex. Spécialisation)" />
+                    <Input aria-label={`${field.name || "Valeur"} de la compétence`} value={field.value || ""} onChange={(event) => setSkillField(index, fieldIndex, "value", event.target.value)} placeholder="Valeur" />
+                    <Button type="button" variant="ghost" size="icon" aria-label={`Supprimer le champ ${field.name || fieldIndex + 1}`} onClick={() => removeSkillField(index, fieldIndex)}>
+                      <Trash2 className="h-4 w-4 text-muted-foreground" />
+                    </Button>
+                  </div>
+                ))}
+                <Button type="button" variant="ghost" size="sm" onClick={() => addSkillField(index)}>
+                  <Plus className="h-4 w-4" /> Champ facultatif
+                </Button>
+              </div>
             </div>
           ))}
         </section>

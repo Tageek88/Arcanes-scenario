@@ -175,37 +175,18 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
         <div className="space-y-3">
           <div>
             <h3 className="font-display font-semibold">Caractéristiques</h3>
-            <p className="text-xs text-muted-foreground">Cochez les colonnes à afficher sur chaque fiche.</p>
-          </div>
-          <div className="hidden grid-cols-[minmax(10rem,1fr)_repeat(3,5rem)_2.5rem] gap-2 px-2 font-mono text-[10px] uppercase text-muted-foreground sm:grid">
-            <span>Nom</span><span className="text-center">Modif.</span><span className="text-center">Test</span><span className="text-center">Max</span><span />
+            <p className="text-xs text-muted-foreground">Définissez les caractéristiques de la fiche de personnage.</p>
           </div>
           {form.characteristics.map((item, index) => (
-            <div key={index} className="grid grid-cols-2 items-center gap-2 rounded-lg border border-border p-2 sm:grid-cols-[minmax(10rem,1fr)_repeat(3,5rem)_2.5rem]">
+            <div key={item._key || index} className="flex items-center gap-2">
               <Input
                 data-tutorial="game-model-name"
-                className="col-span-2 sm:col-span-1"
+                className="flex-1"
                 aria-label={`Nom de la caractéristique ${index + 1}`}
                 value={item.name}
                 onChange={(event) => updateCharacteristic(index, "name", event.target.value)}
                 placeholder="Ex. Force"
               />
-              {[
-                ["modifier", "Modificateur"],
-                ["test", "Test"],
-                ["max", "Maximum"],
-              ].map(([field, label]) => (
-                <label key={field} className="flex min-h-11 items-center justify-between gap-2 text-xs text-muted-foreground sm:justify-center">
-                  <span className="sm:hidden">{label}</span>
-                  <input
-                    type="checkbox"
-                    aria-label={`${label} pour ${item.name || `la caractéristique ${index + 1}`}`}
-                    checked={!!item[field]}
-                    onChange={(event) => updateCharacteristic(index, field, event.target.checked)}
-                    className="h-4 w-4 accent-[hsl(var(--primary))]"
-                  />
-                </label>
-              ))}
               <Button variant="ghost" size="icon" aria-label={`Supprimer la caractéristique ${index + 1}`} onClick={() => removeCharacteristic(index)}>
                 <Trash2 className="h-4 w-4 text-muted-foreground" />
               </Button>
@@ -219,7 +200,7 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
             size="sm"
             onClick={() => setForm((current) => ({
               ...current,
-              characteristics: [...current.characteristics, { _key: nextKey(), name: "", modifier: false, test: false, max: false }],
+              characteristics: [...current.characteristics, { _key: nextKey(), name: "" }],
             }))}
           >
             <Plus className="h-4 w-4" /> Ajouter une caractéristique

@@ -254,12 +254,7 @@ export default function Jeu() {
                         return (
                           <div key={item.name} className="rounded-md bg-secondary/50 px-3 py-2">
                             <dt className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{item.name}</dt>
-                            <dd className="mt-1 text-sm">
-                              {values.value || "—"}
-                              {item.modifier && values.modifier && <span className="text-muted-foreground"> ({values.modifier})</span>}
-                            </dd>
-                            {item.test && values.test && <dd className="text-xs text-muted-foreground">Test : {values.test}</dd>}
-                            {item.max && values.max && <dd className="text-xs text-muted-foreground">Maximum : {values.max}</dd>}
+                            <dd className="mt-1 text-sm font-semibold">{values.value || "—"}</dd>
                           </div>
                         );
                       })}
@@ -271,7 +266,9 @@ export default function Jeu() {
                       <ul className="mt-1 flex flex-wrap gap-2 text-xs">
                         {character.skills.map((skill, index) => (
                           <li key={`${skill.name}-${index}`} className="rounded-md bg-secondary/50 px-2 py-1">
-                            {skill.name}{model.skillRollModifier && skill.roll_modifier ? ` · ${skill.roll_modifier}` : ""}
+                            <span className="font-medium text-foreground">{skill.name}</span>
+                            {model.skillRollModifier && skill.roll_modifier ? ` · ${skill.roll_modifier}` : ""}
+                            {(skill.fields || []).filter((field) => field.value).map((field) => ` · ${field.name} : ${field.value}`).join("")}
                           </li>
                         ))}
                       </ul>

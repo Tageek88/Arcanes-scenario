@@ -228,13 +228,7 @@ function Block({ block }) {
 function CharacterContent({ character, characteristics, skillRollModifier }) {
     const stats = characteristics.map((definition) => {
         const values = character.characteristics?.[definition.name] || {};
-        const entries = [
-            ["Valeur", values.value],
-            ...(definition.modifier ? [["Modificateur", values.modifier]] : []),
-            ...(definition.test ? [["Test (seuil)", values.test]] : []),
-            ...(definition.max ? [["Maximum", values.max]] : []),
-        ];
-        return { name: definition.name, entries };
+        return { name: definition.name, value: values.value };
     });
 
     return (
@@ -246,12 +240,10 @@ function CharacterContent({ character, characteristics, skillRollModifier }) {
                         {stats.map((stat) => (
                             <article className="prt-character-stat" key={stat.name}>
                                 <h3>{stat.name}</h3>
-                                {stat.entries.map(([label, value]) => (
-                                    <p key={label}>
-                                        <strong>{label} :</strong>{" "}
-                                        {hasValue(value) ? value : <span className="prt-blank" />}
-                                    </p>
-                                ))}
+                                <p>
+                                    <strong>Valeur :</strong>{" "}
+                                    {hasValue(stat.value) ? stat.value : <span className="prt-blank" />}
+                                </p>
                             </article>
                         ))}
                     </div>
@@ -264,6 +256,9 @@ function CharacterContent({ character, characteristics, skillRollModifier }) {
                         <div className="prt-character-item" key={`${skill.name}-${index}`}>
                             <span className="prt-title">{skill.name}</span>
                             {skillRollModifier && hasValue(skill.roll_modifier) && <span> · Modificateur de lancer : {skill.roll_modifier}</span>}
+                            {(skill.fields || []).filter((field) => field.name || field.value).map((field, fieldIndex) => (
+                                <p key={`${field.name}-${fieldIndex}`}><strong>{field.name}</strong>{hasValue(field.value) && ` : ${field.value}`}</p>
+                            ))}
                         </div>
                     ))}
                 </section>
