@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { AlertCircle, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -54,14 +54,29 @@ export default function TableEditor({ open, onOpenChange, form, setForm, saving,
     return onSave({ entries: [...entries, ...lines.map((text) => ({ text, weight: 1 }))] });
   };
 
+  const missingReason = !form.name?.trim() ? "Le nom de la table est obligatoire." : null;
+
   const footer = (
-    <div className="flex justify-end gap-2">
-      <Button variant="ghost" onClick={() => onOpenChange(false)}>
-        Annuler
-      </Button>
-      <Button onClick={saveWithQuick} disabled={saving || !form.name.trim()}>
-        {saving ? "Enregistrement…" : "Enregistrer"}
-      </Button>
+    <div className="flex flex-col items-end gap-1.5 w-full">
+      {missingReason && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="relative mb-1 flex items-center gap-1.5 rounded-lg border border-amber-500/50 bg-amber-500/15 px-3 py-1.5 text-xs text-amber-300 shadow-md animate-in fade-in slide-in-from-bottom-1"
+        >
+          <AlertCircle className="h-3.5 w-3.5 shrink-0 text-amber-400" />
+          <span>{missingReason}</span>
+          <div className="absolute -bottom-1 right-8 h-2 w-2 rotate-45 border-b border-r border-amber-500/50 bg-amber-950" />
+        </div>
+      )}
+      <div className="flex justify-end gap-2 w-full">
+        <Button variant="ghost" onClick={() => onOpenChange(false)}>
+          Annuler
+        </Button>
+        <Button onClick={saveWithQuick} disabled={saving || !!missingReason}>
+          {saving ? "Enregistrement…" : "Enregistrer"}
+        </Button>
+      </div>
     </div>
   );
 

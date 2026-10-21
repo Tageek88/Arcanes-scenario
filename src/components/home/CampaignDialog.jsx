@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trash2 } from "lucide-react";
+import { AlertCircle, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import ResponsiveDialog from "@/components/common/ResponsiveDialog";
@@ -25,39 +25,55 @@ const TypedTextarea = /** @type {React.ComponentType<React.TextareaHTMLAttribute
 export default function CampaignDialog({ open, onOpenChange, form, setField, saving, onSave, editing = false, onDelete }) {
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!form.name?.trim()) return;
     onSave();
   };
 
+  const missingReason = !form.name?.trim() ? "Le nom de la campagne est obligatoire." : null;
+
   const footer = (
-    <div className="flex items-center justify-between gap-2">
-      {editing && onDelete ? (
-        <button
-          data-tutorial="campaign-create"
-          type="button"
-          className="inline-flex items-center justify-center rounded-md px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
-          onClick={onDelete}
+    <div className="flex flex-col items-end gap-1.5 w-full">
+      {missingReason && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="relative mb-1 flex items-center gap-1.5 rounded-lg border border-amber-500/50 bg-amber-500/15 px-3 py-1.5 text-xs text-amber-300 shadow-md animate-in fade-in slide-in-from-bottom-1"
         >
-          <Trash2 className="mr-2 h-4 w-4" /> Supprimer la campagne
-        </button>
-      ) : (
-        <span />
+          <AlertCircle className="h-3.5 w-3.5 shrink-0 text-amber-400" />
+          <span>{missingReason}</span>
+          <div className="absolute -bottom-1 right-8 h-2 w-2 rotate-45 border-b border-r border-amber-500/50 bg-amber-950" />
+        </div>
       )}
-      <div className="flex gap-2">
-        <button
-          type="button"
-          className="inline-flex items-center justify-center rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-          onClick={() => onOpenChange(false)}
-        >
-          Annuler
-        </button>
-        <button
-          type="button"
-          className="inline-flex items-center justify-center rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:pointer-events-none disabled:opacity-50"
-          onClick={handleSubmit}
-          disabled={saving || !form.name.trim()}
-        >
-          {saving ? "Enregistrement…" : editing ? "Enregistrer" : "Créer la campagne"}
-        </button>
+      <div className="flex items-center justify-between gap-2 w-full">
+        {editing && onDelete ? (
+          <button
+            data-tutorial="campaign-create"
+            type="button"
+            className="inline-flex items-center justify-center rounded-md px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
+            onClick={onDelete}
+          >
+            <Trash2 className="mr-2 h-4 w-4" /> Supprimer la campagne
+          </button>
+        ) : (
+          <span />
+        )}
+        <div className="flex gap-2">
+          <button
+            type="button"
+            className="inline-flex items-center justify-center rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+            onClick={() => onOpenChange(false)}
+          >
+            Annuler
+          </button>
+          <button
+            type="button"
+            className="inline-flex items-center justify-center rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:pointer-events-none disabled:opacity-50"
+            onClick={handleSubmit}
+            disabled={saving || !!missingReason}
+          >
+            {saving ? "Enregistrement…" : editing ? "Enregistrer" : "Créer la campagne"}
+          </button>
+        </div>
       </div>
     </div>
   );

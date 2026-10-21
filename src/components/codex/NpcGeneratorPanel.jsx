@@ -109,13 +109,18 @@ export default function NpcGeneratorPanel({ generator, generation }) {
           </p>
 
           {missingLists.length > 0 && (
-            <p className="text-xs text-muted-foreground">
-              Listes vides, donc non générées : {missingLists.map((key) => LIST_LABELS[key]).join(", ")}.
+            <p className="text-xs font-medium text-amber-500">
+              Listes vides dans le générateur : {missingLists.map((key) => LIST_LABELS[key]).join(", ")}.
             </p>
           )}
           {!generator.hasSheetModel && (
-            <p className="text-xs text-muted-foreground">
-              Cette campagne n'a pas de modèle de fiche : les caractéristiques ne sont pas générées (à créer dans la page Jeu).
+            <p className="text-xs font-medium text-amber-500">
+              Modèle de fiche manquant : les caractéristiques ne seront pas générées (définissez un modèle dans la page Jeu).
+            </p>
+          )}
+          {!generator.hasScale && (
+            <p className="text-xs font-medium text-amber-500">
+              Barème manquant : les compétences et niveaux ne seront pas générés (définissez un barème dans les paramètres).
             </p>
           )}
         </>

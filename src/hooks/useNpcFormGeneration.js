@@ -21,6 +21,8 @@ const WARNING_TEXT = {
   traits: "aucun trait disponible",
   motivations: "aucune motivation disponible",
   appearances: "aucun signe distinctif disponible",
+  sheetModel: "modèle de fiche absent (caractéristiques non générées)",
+  scale: "barème de PNJ non défini",
 };
 
 const hasContent = (value) => {
@@ -98,10 +100,15 @@ export function useNpcFormGeneration({ open, generator, form, setForm }) {
       gender: npc.gender,
       description: previous.description?.trim() ? previous.description : composeDescription(npc),
     }));
-    if (result.warnings.length) {
+
+    const warnings = [...(result.warnings || [])];
+    if (!generator.hasSheetModel) warnings.push("sheetModel");
+    if (!generator.hasScale) warnings.push("scale");
+
+    if (warnings.length > 0) {
       toast({
         title: "Génération incomplète",
-        description: result.warnings.map((code) => WARNING_TEXT[code] || code).join(" ; "),
+        description: warnings.map((code) => WARNING_TEXT[code] || code).join(" ; "),
       });
     }
   };

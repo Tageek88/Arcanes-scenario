@@ -61,7 +61,7 @@ import { copyNpcRelations, loadRelations } from "@/lib/services/npcRelations";
 import { dispatchTutorialAction } from "@/utils/tutorialStorage";
 
 // Icon component for dice, used in name generation UI.
-import { Dices } from "lucide-react";
+import { AlertCircle, Dices } from "lucide-react";
 
 // Name generation utilities for creating NPC names based on universe and gender.
 import { canGenerateNames, generateNames, generatePlaceNames, generateItemNames } from "@/lib/generators/nameGenerator";
@@ -98,7 +98,7 @@ export default function CodexEntryDialog({
   duplicateOf = null,
   locations,
 }){
-  
+
   // Toast notification hook for displaying messages to the user.
   const { toast } = useToast();
 
@@ -137,15 +137,23 @@ export default function CodexEntryDialog({
   // Function for generating a name for the current NPC entry based on the universe ID and name generation gender.
   const generateName = () => {
     const [name] = generateNames({ universeId, gender: nameGender, withFamily: true, generatorData });
-    if (name) setForm((prev) => ({ ...prev, name }));
+    if (name) {
+      setForm((prev) => ({ ...prev, name }));
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Nom non généré",
+        description: "Aucun prénom ou nom disponible dans cet univers. Complétez les tables du générateur.",
+      });
+    }
   };
 
   // State for managing the list of locations that can be selected for NPCs.
   const handleGenerateNames = () => {
     if (!universeId || universeId === "custom") {
       toast({
-        title: "Universe non défini",
-        description: "Définissez d'abord un type d'univers pour votre campagne.",
+        title: "Univers non défini",
+        description: "Définissez d'abord un type d'univers pour votre campagne dans les paramètres.",
       });
       return;
     }
@@ -153,13 +161,22 @@ export default function CodexEntryDialog({
     // Generate a list of names based on the kind of entry and universe ID.
     let result = [];
     if (kind === "npc") {
-      result = generateNames({ universeId, gender: "neutral", withFamily: true, count: 3 });
+      result = generateNames({ universeId, gender: "neutral", withFamily: true, count: 3, generatorData });
     } else if (kind === "location") {
-      result = generatePlaceNames({ universeId, placeType: entry?.type || "lieu", count: 3 });
+      result = generatePlaceNames({ universeId, placeType: form?.type || "lieu", count: 3 });
     } else if (kind === "clue") {
       result = generateItemNames({ universeId, count: 3 });
     }
-    setGeneratedNames(result);
+
+    if (!result || result.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "Génération impossible",
+        description: `Aucun modèle de nom disponible pour les ${kind === "location" ? "lieux" : "indices/infos"} dans l'univers "${universeId}".`,
+      });
+    } else {
+      setGeneratedNames(result);
+    }
   };
 
   // Effect for initializing the form when the dialog is opened, handling entry duplication and default values.
@@ -275,15 +292,41 @@ export default function CodexEntryDialog({
     }
   };
 
+  const getMissingReason = () => {
+    if (!campaignId) return "Sélectionnez d'abord une campagne pour pouvoir enregistrer.";
+    if (!form.name?.trim()) {
+      if (kind === "npc") return "Le nom du PNJ est obligatoire.";
+      if (kind === "location") return "Le nom du lieu est obligatoire.";
+      if (kind === "clue") return "L'intitulé est obligatoire.";
+      return "Le nom est obligatoire.";
+    }
+    return null;
+  };
+
+  const missingReason = getMissingReason();
+
   // Footer component for the dialog, containing action buttons for canceling or saving the entry.
   const footer = (
-    <div className="flex justify-end gap-2">
-      <Button data-tutorial="codex-cancel" variant="ghost" onClick={() => onOpenChange(false)}>
-        Annuler
-      </Button>
-      <Button onClick={save} disabled={saving || !form.name?.trim()}>
-        {saving ? "Enregistrement…" : duplicateOf ? "Créer la copie" : "Enregistrer"}
-      </Button>
+    <div className="flex flex-col items-end gap-1.5 w-full">
+      {missingReason && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="relative mb-1 flex items-center gap-1.5 rounded-lg border border-amber-500/50 bg-amber-500/15 px-3 py-1.5 text-xs text-amber-300 shadow-md animate-in fade-in slide-in-from-bottom-1"
+        >
+          <AlertCircle className="h-3.5 w-3.5 shrink-0 text-amber-400" />
+          <span>{missingReason}</span>
+          <div className="absolute -bottom-1 right-8 h-2 w-2 rotate-45 border-b border-r border-amber-500/50 bg-amber-950" />
+        </div>
+      )}
+      <div className="flex justify-end gap-2 w-full">
+        <Button data-tutorial="codex-cancel" variant="ghost" onClick={() => onOpenChange(false)}>
+          Annuler
+        </Button>
+        <Button onClick={save} disabled={saving || !!missingReason}>
+          {saving ? "Enregistrement…" : duplicateOf ? "Créer la copie" : "Enregistrer"}
+        </Button>
+      </div>
     </div>
   );
 
@@ -529,8 +572,8 @@ export default function CodexEntryDialog({
           </>
         )}
 
-        
-        
+
+
 
         {/* Attachments field for the codex entry, allowing the user to upload and manage related files. */}
         <AttachmentsField value={form.attachments || []} onChange={(files) => set("attachments", files)} />
