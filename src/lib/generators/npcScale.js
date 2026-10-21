@@ -149,6 +149,35 @@ export function deriveScale(characters, characteristicNames, names = DEFAULT_LEV
   };
 }
 
+// === SECTION MODEL LINK ===
+/** Noms des caractéristiques d'un modèle de fiche (dans l'ordre, sans entrée vide). */
+export const characteristicNamesOf = (characteristics) =>
+  (Array.isArray(characteristics) ? characteristics : [])
+    .map((characteristic) => characteristic?.name)
+    .filter(hasText);
+
+/**
+ * Barème avec des caractéristiques renommées : `renames` associe l'ancien nom au nouveau.
+ * Si le nouveau nom est celui d'une autre caractéristique qui garde le sien, sa plage est conservée ; deux noms échangés sont échangés.
+ * @param {{ levels: object[] }} scale
+ * @param {Map<string, string>} renames
+ */
+export function renameScaleCharacteristics(scale, renames) {
+  if (!renames || renames.size === 0) return sanitizeScale(scale);
+  const source = sanitizeScale(scale);
+  return {
+    levels: source.levels.map((level) => {
+      const ranges = {};
+      for (const [name, range] of Object.entries(level.ranges)) {
+        const target = renames.get(name) ?? name;
+        if (target === "__proto__" || (target !== name && level.ranges[target] && !renames.has(target))) continue;
+        if (!(target in ranges)) ranges[target] = range;
+      }
+      return { ...level, ranges };
+    }),
+  };
+}
+
 // === SECTION SCALE USE ===
 /** Plages d'un niveau au format attendu par `generateNpc` ({ name, min, max }), dans l'ordre des caractéristiques. */
 export function rangesForLevel(scale, levelName, characteristicNames) {
@@ -208,7 +237,8 @@ export function checkNpc(npc, scale, characteristicNames) {
     const raw = characteristics[field]?.value;
     const empty = raw === undefined || raw === null || String(raw).trim() === "";
     if (empty) {
-      issues.push(makeIssue("missing_value", "warning", { field }));
+      // Sans plage pour ce niveau, le générateur ne peut pas la remplir : simple remarque.
+      issues.push(makeIssue("missing_value", level && !level.ranges[field] ? "info" : "warning", { field }));
       continue;
     }
     const value = parseValue(raw);

@@ -4,8 +4,19 @@ import { withDataBatch } from "@/lib/context/dataEvents";
 import { useToast } from "@/components/ui/use-toast";
 import { useDataRefresh } from "@/lib/context/RefreshContext";
 import { dispatchTutorialAction } from "@/utils/tutorialStorage";
+import { characteristicNamesOf, renameScaleCharacteristics, sanitizeScale } from "@/lib/generators/npcScale";
 
-const EMPTY_MODEL = { characteristics: [], skillRollModifier: false };
+const EMPTY_MODEL = { characteristics: [], skillRollModifier: false, scale: { levels: [] } };
+
+// Modèle tel que l'interface l'utilise, à partir de la ligne enregistrée (le barème est optionnel).
+const readModel = (row) => {
+  const characteristics = row?.characteristics || [];
+  return {
+    characteristics,
+    skillRollModifier: !!row?.skillRollModifier,
+    scale: sanitizeScale(row?.scale, characteristicNamesOf(characteristics)),
+  };
+};
 const normalize = (value) => String(value || "").trim().toLocaleLowerCase("fr");
 
 /**
@@ -49,10 +60,7 @@ export function useGameSheet(campaignId) {
         if (!alive) return;
         const savedModel = models.items[0] || null;
         setModelId(savedModel?.id || "");
-        setModel({
-          characteristics: savedModel?.characteristics || [],
-          skillRollModifier: !!savedModel?.skillRollModifier,
-        });
+        setModel(readModel(savedModel));
         setCharacters(people.items);
         setSkillCatalog(skills.items);
         setEquipmentCatalog(equipment.items);
@@ -72,27 +80,29 @@ export function useGameSheet(campaignId) {
     if (!campaignId) return;
     setSavingModel(true);
     try {
+      const updatedNames = new Map();
+      if (modelId) {
+        model.characteristics.forEach((previous, index) => {
+          const current = nextModel.characteristics[index];
+          if (current && previous.name !== current.name) updatedNames.set(previous.name, current.name);
+        });
+      }
+      // Le barème suit les caractéristiques : celui fourni par l'éditeur, sinon l'actuel, avec les renommages appliqués.
+      const scale = sanitizeScale(
+        renameScaleCharacteristics(nextModel.scale ?? model.scale, updatedNames),
+        characteristicNamesOf(nextModel.characteristics)
+      );
+      const payload = { campaign_id: campaignId, ...nextModel, scale };
       let saved;
       if (modelId) {
-        saved = await api.entities.GameSheetModel.update(modelId, {
-          campaign_id: campaignId,
-          ...nextModel,
-        });
+        saved = await api.entities.GameSheetModel.update(modelId, payload);
       } else {
-        saved = await api.entities.GameSheetModel.create({
-          campaign_id: campaignId,
-          ...nextModel,
-        });
+        saved = await api.entities.GameSheetModel.create(payload);
         setModelId(saved.id);
       }
 
       let valuesMigrated = true;
       if (modelId) {
-        const updatedNames = new Map();
-        model.characteristics.forEach((previous, index) => {
-          const current = nextModel.characteristics[index];
-          if (current && previous.name !== current.name) updatedNames.set(previous.name, current.name);
-        });
         if (updatedNames.size > 0) {
           try {
             await Promise.all(characters.map((character) => {
@@ -119,7 +129,7 @@ export function useGameSheet(campaignId) {
           }
         }
       }
-      setModel({ characteristics: saved.characteristics || [], skillRollModifier: !!saved.skillRollModifier });
+      setModel(readModel(saved));
       onSaved?.();
       if (!modelId) dispatchTutorialAction("model-created");
       toast(valuesMigrated
@@ -136,6 +146,30 @@ export function useGameSheet(campaignId) {
   };
 
   const saveModel = (nextModel, onSaved) => withDataBatch(() => saveModelUnbatched(nextModel, onSaved));
+
+  // Enregistre uniquement le barème d'équilibrage des PNJ (le modèle de fiche doit déjà exister).
+  const saveScale = async (nextScale, onSaved) => {
+    if (!campaignId) return false;
+    if (!modelId) {
+      toast({ variant: "destructive", title: "Barème non enregistré", description: "Créez d’abord le modèle de fiche : le barème s’appuie sur ses caractéristiques." });
+      return false;
+    }
+    setSavingModel(true);
+    try {
+      const scale = sanitizeScale(nextScale, characteristicNamesOf(model.characteristics));
+      const saved = await api.entities.GameSheetModel.update(modelId, { scale });
+      setModel(readModel(saved));
+      onSaved?.();
+      toast({ title: "Barème enregistré" });
+      return true;
+    } catch (error) {
+      console.error("Enregistrement du barème impossible :", error);
+      toast({ variant: "destructive", title: "Barème non enregistré", description: "Le barème n’a pas été enregistré." });
+      return false;
+    } finally {
+      setSavingModel(false);
+    }
+  };
 
   const saveCatalogItem = async (entity, existing, payload) => {
     const matched = existing.find((item) => normalize(item.name) === normalize(payload.name));
@@ -241,6 +275,7 @@ export function useGameSheet(campaignId) {
     savingModel,
     savingCharacter,
     saveModel,
+    saveScale,
     saveCharacter,
     deleteCharacter,
   };
