@@ -3,6 +3,8 @@ import React, { useEffect, useMemo, useState } from "react";
 
 // Data hooks and services used by the dialog (no direct API access in this component).
 import { useCodexEntryData } from "@/hooks/useCodexEntryData";
+import { useNpcGenerator } from "@/hooks/useNpcGenerator";
+import { useNpcFormGeneration } from "@/hooks/useNpcFormGeneration";
 import { saveCodexEntry } from "@/lib/services/codexEntries";
 
 // External and internal dependencies for the CodexEntryDialog component.
@@ -40,11 +42,15 @@ import AttachmentsField from "@/components/codex/AttachmentsField";
 // NPC relations component for managing relationships between NPCs.
 import NpcRelations from "@/components/codex/NpcRelations";
 
+// Génération et rubriques détaillées de la fiche de PNJ.
+import NpcGeneratorPanel, { FieldLabel } from "@/components/codex/NpcGeneratorPanel";
+import NpcSheetFields from "@/components/codex/NpcSheetFields";
+
 // Toast notification hook for displaying messages to the user.
 import { useToast } from "@/components/ui/use-toast";
 
 // Codex-related utilities and constants.
-import { KIND_META, defaultEntry, duplicateDraft } from "@/lib/meta/codex";
+import { KIND_META, defaultEntry, duplicateDraft, npcSheetPayload } from "@/lib/meta/codex";
 
 // Location tree utilities for managing hierarchical location data.
 import { NPC_ATTITUDE } from "@/lib/meta/sceneMeta";
@@ -115,7 +121,7 @@ export default function CodexEntryDialog({
   const [sourceRelationCount, setSourceRelationCount] = useState(0);
 
   // State for managing the universe ID and name generation gender for NPCs.
-  const [nameGender, setNameGender] = useState("neutral");
+  const [nameGender, setNameGender] = useState("random");
 
   // State for managing the list of generated names for NPCs.
   const [generatedNames, setGeneratedNames] = useState([]);
@@ -123,12 +129,17 @@ export default function CodexEntryDialog({
   // Universe of the campaign and the list of locations (from props, or loaded by the hook).
   const { universeId, allLocations } = useCodexEntryData({ open, kind, campaignId, locations });
 
+  // Générateur de PNJ (univers, tables du MJ, barème) et génération de la fiche dans le formulaire.
+  const generator = useNpcGenerator({ campaignId, enabled: open && kind === "npc" });
+  const generation = useNpcFormGeneration({ open, generator, form, setForm });
+  const generatorData = generator.context?.generatorData;
+
   // Metadata for the current kind of codex entry, used for rendering and behavior.
   const meta = KIND_META[kind] || KIND_META.npc;
 
   // Function for generating a name for the current NPC entry based on the universe ID and name generation gender.
   const generateName = () => {
-    const [name] = generateNames({ universeId, gender: nameGender, withFamily: true });
+    const [name] = generateNames({ universeId, gender: nameGender, withFamily: true, generatorData });
     if (name) setForm((prev) => ({ ...prev, name }));
   };
 
@@ -214,6 +225,7 @@ export default function CodexEntryDialog({
       payload.description = form.description || "";
       payload.attitude = form.attitude || "neutre";
       payload.location_id = form.location_id || "";
+      Object.assign(payload, npcSheetPayload(form));
     } else if (kind === "location") {
       payload.type = form.type || "";
       payload.description = form.description || "";
@@ -300,18 +312,23 @@ export default function CodexEntryDialog({
     >
       <div className="space-y-4 py-1">
         <div className="space-y-2">
-          <Label>{meta.nameLabel}</Label>
+          <FieldLabel
+            label={meta.nameLabel}
+            locked={!!generation.locks.name}
+            onToggle={kind === "npc" ? () => generation.toggleLock("name") : undefined}
+          />
           <Input data-tutorial="codex-name" value={form.name || ""} onChange={(e) => set("name", e.target.value)} />
-          {kind === "npc" && !entry && canGenerateNames(universeId) && (
+          {kind === "npc" && !entry && canGenerateNames(universeId, generatorData) && (
             <div className="flex items-center gap-2">
               <Select value={nameGender} onValueChange={setNameGender}>
                 <SelectTrigger className="h-8 w-32 text-xs" aria-label="Genre du nom généré">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="neutral">Au hasard</SelectItem>
+                  <SelectItem value="random">Au hasard</SelectItem>
                   <SelectItem value="male">Masculin</SelectItem>
                   <SelectItem value="female">Féminin</SelectItem>
+                  {generator.tables?.neutral.length > 0 && <SelectItem value="neutral">Neutre</SelectItem>}
                 </SelectContent>
               </Select>
               <Button type="button" variant="outline" size="sm" onClick={generateName}>
@@ -343,6 +360,8 @@ export default function CodexEntryDialog({
             </div>
           )}
         </div>
+
+        {kind === "npc" && <NpcGeneratorPanel generator={generator} generation={generation} />}
 
         {/* Comment field for the codex entry, optional for the user to fill out. */}
         <div className="space-y-2">
@@ -378,8 +397,9 @@ export default function CodexEntryDialog({
         {kind === "npc" && (
           <>
             <div className="space-y-2">
-              <Label>Rôle</Label>
+              <FieldLabel label="Rôle" locked={!!generation.locks.role} onToggle={() => generation.toggleLock("role")} htmlFor="npc-role" />
               <Input
+                id="npc-role"
                 value={form.role || ""}
                 onChange={(e) => set("role", e.target.value)}
                 placeholder="Ex. Aubergiste, espion, garde du corps…"
@@ -388,7 +408,7 @@ export default function CodexEntryDialog({
 
             {/* Role field for the NPC, allowing the user to specify the character's role or occupation. */}
             <div className="space-y-2">
-              <Label>Attitude</Label>
+              <FieldLabel label="Attitude" locked={!!generation.locks.attitude} onToggle={() => generation.toggleLock("attitude")} />
               <Select value={form.attitude || "neutre"} onValueChange={(v) => set("attitude", v)}>
                 <SelectTrigger>
                   <SelectValue />
@@ -425,6 +445,8 @@ export default function CodexEntryDialog({
                 Où trouve-t-on ce personnage ? Choisissez un lieu de l'arborescence.
               </p>
             </div>
+
+            <NpcSheetFields form={form} set={set} generator={generator} generation={generation} />
           </>
         )}
 
