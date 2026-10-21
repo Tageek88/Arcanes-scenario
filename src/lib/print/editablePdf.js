@@ -343,6 +343,11 @@ export async function createEditablePdf(model) {
                     for (const npc of group.npcs) {
                         drawHeading(npc.name, 3);
                         if (npc.role) drawText(npc.role, { size: 8, color: MUTED_COLOR });
+                        for (const line of npc.sheet?.lines || []) drawText(line, { size: 8, color: MUTED_COLOR });
+                        if (npc.sheet?.stats.length) {
+                            drawText(npc.sheet.stats.map((stat) => `${stat.name} ${stat.value}`).join(", "));
+                        }
+                        if (npc.sheet?.skills.length) drawText(`Compétences : ${npc.sheet.skills.join(", ")}`);
                         drawField("Attitude", npc.attitude);
                         if (npc.description) drawText(npc.description);
                         drawField("Relations avec les autres PNJ", npc.relations.join("\n"), {

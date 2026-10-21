@@ -263,6 +263,7 @@ export default function Jeu() {
         open={modelOpen}
         onOpenChange={setModelOpen}
         model={model}
+        characters={characters}
         onSave={handleSaveModel}
         saving={savingModel}
       />

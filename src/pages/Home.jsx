@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Plus, Pencil } from "lucide-react";
+import { Plus, Pencil, Dices } from "lucide-react";
 import SceneBoard from "@/components/home/SceneBoard";
 import MobileSceneList from "@/components/home/MobileSceneList";
 import SceneEditor from "@/components/home/SceneEditor";
 import CampaignDialog from "@/components/home/CampaignDialog";
+import GeneratorTablesDialog from "@/components/home/GeneratorTablesDialog";
 import CodexSidebar from "@/components/codex/CodexSidebar";
 import CodexEntryDialog from "@/components/codex/CodexEntryDialog";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,7 @@ import { usePageFilter } from "@/lib/context/PageFilterContext";
 import { useCampaigns } from "@/hooks/useCampaigns";
 import { useCampaignContent } from "@/hooks/useCampaignContent";
 import { useCampaignActions } from "@/hooks/useCampaignActions";
+import { useNpcGenerator } from "@/hooks/useNpcGenerator";
 
 const EMPTY_SCENE = {
   title: "",
@@ -104,6 +106,9 @@ export default function Home() {
   const [campaignOpen, setCampaignOpen] = useState(false);
   const [campaignForm, setCampaignForm] = useState(EMPTY_CAMPAIGN);
   const [editingCampaignId, setEditingCampaignId] = useState(null);
+
+  const [tablesOpen, setTablesOpen] = useState(false);
+  const npcGenerator = useNpcGenerator({ campaignId, enabled: tablesOpen });
 
   const [codexOpen, setCodexOpen] = useState(false);
   const [codexKind, setCodexKind] = useState("npc");
@@ -243,6 +248,11 @@ export default function Home() {
               <Pencil className="mr-2 h-4 w-4" /> Modifier la campagne
             </Button>
           )}
+          {campaignId && (
+            <Button variant="outline" onClick={() => setTablesOpen(true)}>
+              <Dices className="mr-2 h-4 w-4" /> Tables du générateur
+            </Button>
+          )}
           <Button
             data-tutorial={campaignId ? "home-new" : "btn-new-campaign"}
             onClick={() => (campaignId ? openNewScene(null) : openNewCampaign())}
@@ -357,6 +367,18 @@ export default function Home() {
         onSave={saveCampaign}
         editing={!!editingCampaignId}
         onDelete={requestDeleteCampaign}
+      />
+
+      <GeneratorTablesDialog
+        open={tablesOpen}
+        onOpenChange={setTablesOpen}
+        universeId={campaign?.universe_type || ""}
+        data={npcGenerator.context?.generatorData}
+        ready={!!npcGenerator.context}
+        saving={npcGenerator.savingTables}
+        onSave={async (data) => {
+          if (await npcGenerator.saveTables(data)) setTablesOpen(false);
+        }}
       />
 
       <CodexEntryDialog

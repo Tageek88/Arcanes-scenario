@@ -2,6 +2,7 @@ import { childrenMap, flattenTree, pathOf } from "@/lib/services/locationTree";
 import { groupIndex, relationLabel } from "@/lib/meta/relationMeta";
 import { NPC_ATTITUDE, SCENE_STATUS } from "@/lib/meta/sceneMeta";
 import { sessionStatusMeta } from "@/lib/meta/sessionMeta";
+import { NPC_GENDER_OPTIONS } from "@/lib/meta/codex";
 
 export const SECTIONS = [
     { key: "scenes", title: "Scènes et actes", hint: "Chaque scène est imprimée avec ses indices liés." },
@@ -19,6 +20,30 @@ const byName = (a, b) => txt(a.name).localeCompare(txt(b.name), "fr", { numeric:
 const byOrder = (a, b) =>
     (Number(a.order) || 0) - (Number(b.order) || 0) ||
     txt(a.title).localeCompare(txt(b.title), "fr", { numeric: true });
+
+const hasText = (value) => typeof value === "string" && value.trim() !== "";
+
+// Fiche détaillée d'un PNJ (lignes de présentation, valeurs des caractéristiques du modèle, compétences).
+// Les PNJ créés avant ces champs n'ont rien de tout cela : la fiche est alors vide.
+export function npcSheet(npc, gameSheetModel) {
+    const lines = [];
+    const gender = NPC_GENDER_OPTIONS.find((option) => option.id === npc.gender);
+    if (gender) lines.push(`Genre : ${gender.label}`);
+    if (hasText(npc.level)) lines.push(`Niveau : ${npc.level}`);
+    const traits = (Array.isArray(npc.traits) ? npc.traits : []).filter(hasText);
+    if (traits.length) lines.push(`Caractère : ${traits.join(", ")}`);
+    if (hasText(npc.motivation)) lines.push(`Motivation : ${npc.motivation}`);
+    if (hasText(npc.appearance)) lines.push(`Signe distinctif : ${npc.appearance}`);
+    const stats = (gameSheetModel?.characteristics || [])
+        .map((definition) => ({ name: definition.name, value: txt(npc.characteristics?.[definition.name]?.value).trim() }))
+        .filter((stat) => stat.value !== "");
+    const skills = (Array.isArray(npc.skills) ? npc.skills : [])
+        .filter((skill) => hasText(skill?.name))
+        .map((skill) =>
+            gameSheetModel?.skillRollModifier && hasText(skill.roll_modifier) ? `${skill.name} (${skill.roll_modifier})` : skill.name
+        );
+    return { lines, stats, skills };
+}
 
 // Actes dans l'ordre, chacun avec ses scènes ; les scènes sans acte forment un dernier groupe.
 export function orderScenes(acts, scenes) {
@@ -230,6 +255,7 @@ export function buildPrintModel(data, sel, opts) {
                     role: p.role || "",
                     attitude: NPC_ATTITUDE[p.attitude]?.label || "",
                     description: p.description || "",
+                    sheet: npcSheet(p, gameSheetModel),
                     images: images(p),
                     relations: relations
                         .filter((r) => r.from_id === p.id && npcById.has(r.to_id))

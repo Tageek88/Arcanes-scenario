@@ -155,6 +155,15 @@ function Block({ block }) {
                                 <div key={i} className="prt-npc">
                                     <div className="prt-title">{p.name}</div>
                                     <div className="prt-meta">{[p.role, p.attitude].filter(Boolean).join(" · ")}</div>
+                                    {p.sheet?.lines.map((line) => (
+                                        <div key={line} className="prt-meta">{line}</div>
+                                    ))}
+                                    {p.sheet?.stats.length > 0 && (
+                                        <p className="prt-text">{p.sheet.stats.map((stat) => `${stat.name} ${stat.value}`).join(" · ")}</p>
+                                    )}
+                                    {p.sheet?.skills.length > 0 && (
+                                        <p className="prt-text">Compétences : {p.sheet.skills.join(", ")}</p>
+                                    )}
                                     {p.description && <p className="prt-text">{p.description}</p>}
                                     <Lines label="Relations" items={p.relations} />
                                     <Images images={p.images} />
