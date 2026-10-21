@@ -16,9 +16,6 @@ import { Button } from "@/components/ui/button";
 // Input component for single-line text fields.
 import { Input } from "@/components/ui/input";
 
-// Textarea component for multi-line input fields.
-import { Textarea } from "@/components/ui/textarea";
-
 // Label component for form fields.
 import { Label } from "@/components/ui/label";
 
@@ -533,15 +530,7 @@ export default function CodexEntryDialog({
         )}
 
         
-        {/* Description field for the codex entry, allowing the user to provide a detailed description of the entry. */}
-        <div className="space-y-2">
-          <Label>Description</Label>
-          <Textarea
-            rows={4}
-            value={form.description || ""}
-            onChange={(e) => set("description", e.target.value)}
-          />
-        </div>
+        
 
         {/* Attachments field for the codex entry, allowing the user to upload and manage related files. */}
         <AttachmentsField value={form.attachments || []} onChange={(files) => set("attachments", files)} />
