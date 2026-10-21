@@ -143,6 +143,14 @@ export default function TutorialProvider({ children }) {
   // « Suivant » exécute l'action proposée ; l'étape avance une fois l'action réellement détectée.
   const advanceToNextStep = useCallback(() => {
     if (!active) return;
+    const isLast = active.stepIndex === active.tutorial.steps.length - 1;
+
+    // Le bouton "Terminer" sur la dernière étape complète et ferme toujours le tutoriel
+    if (isLast) {
+      goToStep(1, true);
+      return;
+    }
+
     const step = active.tutorial.steps[active.stepIndex];
     const action = step.action;
 
@@ -169,7 +177,10 @@ export default function TutorialProvider({ children }) {
     }
 
     const target = findVisibleTarget(step.element);
-    if (!target) return;
+    if (!target) {
+      goToStep(1, true);
+      return;
+    }
     if (action.type === "click") {
       target.click();
       return;
@@ -179,7 +190,7 @@ export default function TutorialProvider({ children }) {
     const openDialog = findUserDialog();
     const scope = action.name === "relation-saved" ? target : openDialog || target.closest("form");
     if (!scope) {
-      target.click();
+      goToStep(1, true);
       return;
     }
     const submit = findSubmitButton(scope, action.name === "relation-saved");

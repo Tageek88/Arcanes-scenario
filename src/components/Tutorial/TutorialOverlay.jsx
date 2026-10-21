@@ -130,7 +130,7 @@ export default function TutorialOverlay({
     const { width, height } = node.getBoundingClientRect();
     setSize((current) => (current.width === width && current.height === height ? current : { width, height }));
   });
-  
+
   useEffect(() => {
     const frame = requestAnimationFrame(() => setVisible(true));
     return () => cancelAnimationFrame(frame);
@@ -261,7 +261,7 @@ export default function TutorialOverlay({
               <button
                 type="button"
                 onClick={onPrevious}
-                className="rounded-lg bg-gray-700 px-3 py-1.5 text-sm text-white transition-colors hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                className="min-touch rounded-lg bg-gray-700 px-3.5 py-2 text-sm text-white transition-colors hover:bg-gray-600 active:bg-gray-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               >
                 Précédent
               </button>
@@ -270,7 +270,7 @@ export default function TutorialOverlay({
               ref={nextRef}
               type="button"
               onClick={onNext}
-              className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-300"
+              className="min-touch rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-300"
             >
               {isLast ? "Terminer" : "Suivant"}
             </button>

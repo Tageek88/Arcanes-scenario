@@ -130,3 +130,4 @@ export function useNotes(campaignId) {
 
   return { pinnedNotes, notes, loading, saving, saveNote, togglePin, deleteNote };
 }
+
