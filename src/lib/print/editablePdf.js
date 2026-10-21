@@ -396,7 +396,11 @@ export async function createEditablePdf(model) {
                     drawCharacteristics(
                         characteristics.map((definition) => {
                             const values = character.characteristics?.[definition.name] || {};
-                            return { name: definition.name, rows: [["Valeur", values.value]] };
+                            const rows = [["Valeur", values.value]];
+                            (values.fields || []).forEach((field) => {
+                                if (field.name || field.value) rows.push([field.name, field.value]);
+                            });
+                            return { name: definition.name, rows };
                         })
                     );
                     drawHeading("Compétences", 3);

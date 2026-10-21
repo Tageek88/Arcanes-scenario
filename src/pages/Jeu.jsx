@@ -251,10 +251,16 @@ export default function Jeu() {
                     <dl className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
                       {model.characteristics.map((item) => {
                         const values = character.characteristics?.[item.name] || {};
+                        const fields = (values.fields || []).filter((field) => field.name || field.value);
                         return (
                           <div key={item.name} className="rounded-md bg-secondary/50 px-3 py-2">
                             <dt className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{item.name}</dt>
                             <dd className="mt-1 text-sm font-semibold">{values.value || "—"}</dd>
+                            {fields.map((field, fieldIndex) => (
+                              <dd key={fieldIndex} className="mt-0.5 text-xs text-muted-foreground">
+                                <span>{field.name}</span>{field.value && <span> : {field.value}</span>}
+                              </dd>
+                            ))}
                           </div>
                         );
                       })}

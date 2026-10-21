@@ -64,6 +64,50 @@ export default function GameCharacterEditor({
     }));
   };
 
+  const setCharacteristicField = (charName, fieldIndex, key, value) => {
+    setForm((current) => {
+      const charData = current.characteristics[charName] || blankCharacteristic();
+      const fields = (charData.fields || []).map((f, fi) =>
+        fi === fieldIndex ? { ...f, [key]: value } : f
+      );
+      return {
+        ...current,
+        characteristics: {
+          ...current.characteristics,
+          [charName]: { ...charData, fields },
+        },
+      };
+    });
+  };
+
+  const addCharacteristicField = (charName) => {
+    setForm((current) => {
+      const charData = current.characteristics[charName] || blankCharacteristic();
+      const fields = [...(charData.fields || []), { name: "", value: "" }];
+      return {
+        ...current,
+        characteristics: {
+          ...current.characteristics,
+          [charName]: { ...charData, fields },
+        },
+      };
+    });
+  };
+
+  const removeCharacteristicField = (charName, fieldIndex) => {
+    setForm((current) => {
+      const charData = current.characteristics[charName] || blankCharacteristic();
+      const fields = (charData.fields || []).filter((_, fi) => fi !== fieldIndex);
+      return {
+        ...current,
+        characteristics: {
+          ...current.characteristics,
+          [charName]: { ...charData, fields },
+        },
+      };
+    });
+  };
+
   const setSkill = (index, field, value) =>
     setForm((current) => ({
       ...current,
@@ -195,7 +239,15 @@ export default function GameCharacterEditor({
         characteristics: Object.fromEntries(
           Object.entries(form.characteristics || {}).map(([name, values]) => [
             name,
-            Object.fromEntries(Object.entries(values).map(([key, value]) => [key, String(value ?? "")])),
+            {
+              value: String(values?.value ?? ""),
+              fields: (values?.fields || [])
+                .filter((field) => field.name?.trim())
+                .map((field) => ({
+                  name: field.name.trim(),
+                  value: String(field.value ?? ""),
+                })),
+            },
           ])
         ),
         skills: form.skills.filter((skill) => skill.name?.trim()).map((skill) => ({
@@ -251,18 +303,67 @@ export default function GameCharacterEditor({
         {model.characteristics.length > 0 && (
           <section className="space-y-3">
             <h3 className="font-display font-semibold">Caractéristiques</h3>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <div className="space-y-3">
               {model.characteristics.map((item) => {
-                const values = form.characteristics[item.name] || blankCharacteristic();
+                const existing = form.characteristics[item.name];
+                const fields =
+                  existing?.fields && existing.fields.length > 0
+                    ? existing.fields
+                    : (item.field_names || []).map((name) => ({
+                        name,
+                        value: existing?.fields?.find((f) => f.name === name)?.value || "",
+                      }));
+                const values = existing || { value: "", fields };
                 return (
-                  <div key={item.name} className="space-y-1 rounded-lg border border-border p-3">
-                    <Label className="text-xs font-medium">{item.name}</Label>
-                    <Input
-                      aria-label={`${item.name} valeur`}
-                      value={values.value || ""}
-                      onChange={(event) => setCharacteristic(item.name, "value", event.target.value)}
-                      placeholder="Valeur"
-                    />
+                  <div key={item.name} className="space-y-2 rounded-lg border border-border p-3">
+                    <Label className="font-medium text-foreground">{item.name}</Label>
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                      <label className="space-y-1 text-xs text-muted-foreground">
+                        Valeur
+                        <Input
+                          aria-label={`${item.name} valeur`}
+                          value={values.value || ""}
+                          onChange={(event) => setCharacteristic(item.name, "value", event.target.value)}
+                          placeholder="Valeur principale"
+                        />
+                      </label>
+                    </div>
+
+                    <div className="space-y-2 pt-1">
+                      {fields.map((field, fieldIndex) => (
+                        <div key={fieldIndex} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_2.5rem] items-center gap-2">
+                          <Input
+                            aria-label={`Nom du champ de ${item.name}`}
+                            value={field.name}
+                            onChange={(event) => setCharacteristicField(item.name, fieldIndex, "name", event.target.value)}
+                            placeholder="Champ facultatif (ex. Modificateur, Test, Max)"
+                          />
+                          <Input
+                            aria-label={`${field.name || "Valeur"} de ${item.name}`}
+                            value={field.value || ""}
+                            onChange={(event) => setCharacteristicField(item.name, fieldIndex, "value", event.target.value)}
+                            placeholder="Valeur"
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            aria-label={`Supprimer le champ ${field.name || fieldIndex + 1}`}
+                            onClick={() => removeCharacteristicField(item.name, fieldIndex)}
+                          >
+                            <Trash2 className="h-4 w-4 text-muted-foreground" />
+                          </Button>
+                        </div>
+                      ))}
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => addCharacteristicField(item.name)}
+                      >
+                        <Plus className="h-4 w-4" /> Champ facultatif
+                      </Button>
+                    </div>
                   </div>
                 );
               })}

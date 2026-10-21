@@ -59,6 +59,47 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
     }));
   };
 
+  const addCharacteristicFieldName = (charIndex) => {
+    setForm((current) => ({
+      ...current,
+      characteristics: current.characteristics.map((item, i) =>
+        i === charIndex
+          ? { ...item, field_names: [...(item.field_names || []), ""] }
+          : item
+      ),
+    }));
+  };
+
+  const updateCharacteristicFieldName = (charIndex, fieldNameIndex, value) => {
+    setForm((current) => ({
+      ...current,
+      characteristics: current.characteristics.map((item, i) =>
+        i === charIndex
+          ? {
+              ...item,
+              field_names: (item.field_names || []).map((fn, fni) =>
+                fni === fieldNameIndex ? value : fn
+              ),
+            }
+          : item
+      ),
+    }));
+  };
+
+  const removeCharacteristicFieldName = (charIndex, fieldNameIndex) => {
+    setForm((current) => ({
+      ...current,
+      characteristics: current.characteristics.map((item, i) =>
+        i === charIndex
+          ? {
+              ...item,
+              field_names: (item.field_names || []).filter((_, fni) => fni !== fieldNameIndex),
+            }
+          : item
+      ),
+    }));
+  };
+
   const removeCharacteristic = (index) => {
     setForm((current) => ({
       ...current,
@@ -80,7 +121,11 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
     if (new Set(names.map((name) => name.toLocaleLowerCase("fr"))).size !== names.length) return;
     if (levelProblems.duplicates) return;
     const characteristics = form.characteristics
-      .map(({ _key, ...item }) => ({ ...item, name: item.name.trim() }))
+      .map(({ _key, ...item }) => ({
+        ...item,
+        name: item.name.trim(),
+        field_names: (item.field_names || []).map((fn) => String(fn || "").trim()).filter(Boolean),
+      }))
       .filter((item) => item.name);
     onSave({
       characteristics,
@@ -175,21 +220,56 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
         <div className="space-y-3">
           <div>
             <h3 className="font-display font-semibold">Caractéristiques</h3>
-            <p className="text-xs text-muted-foreground">Définissez les caractéristiques de la fiche de personnage.</p>
+            <p className="text-xs text-muted-foreground">Définissez les caractéristiques et leurs champs facultatifs proposés sur les fiches.</p>
           </div>
           {form.characteristics.map((item, index) => (
-            <div key={item._key || index} className="flex items-center gap-2">
-              <Input
-                data-tutorial="game-model-name"
-                className="flex-1"
-                aria-label={`Nom de la caractéristique ${index + 1}`}
-                value={item.name}
-                onChange={(event) => updateCharacteristic(index, "name", event.target.value)}
-                placeholder="Ex. Force"
-              />
-              <Button variant="ghost" size="icon" aria-label={`Supprimer la caractéristique ${index + 1}`} onClick={() => removeCharacteristic(index)}>
-                <Trash2 className="h-4 w-4 text-muted-foreground" />
-              </Button>
+            <div key={item._key || index} className="space-y-2 rounded-lg border border-border p-3">
+              <div className="flex items-center gap-2">
+                <Input
+                  data-tutorial="game-model-name"
+                  className="flex-1 font-medium"
+                  aria-label={`Nom de la caractéristique ${index + 1}`}
+                  value={item.name}
+                  onChange={(event) => updateCharacteristic(index, "name", event.target.value)}
+                  placeholder="Ex. Force"
+                />
+                <Button variant="ghost" size="icon" aria-label={`Supprimer la caractéristique ${index + 1}`} onClick={() => removeCharacteristic(index)}>
+                  <Trash2 className="h-4 w-4 text-muted-foreground" />
+                </Button>
+              </div>
+
+              <div className="space-y-1.5 pl-2 border-l-2 border-border/60">
+                <p className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">Champs facultatifs proposés :</p>
+                {(item.field_names || []).map((fieldName, fieldIndex) => (
+                  <div key={fieldIndex} className="flex items-center gap-2">
+                    <Input
+                      className="flex-1 text-xs"
+                      aria-label={`Nom du champ facultatif ${fieldIndex + 1} pour ${item.name || index + 1}`}
+                      value={fieldName}
+                      onChange={(event) => updateCharacteristicFieldName(index, fieldIndex, event.target.value)}
+                      placeholder="Ex. Modificateur, Test, Maximum"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                      onClick={() => removeCharacteristicFieldName(index, fieldIndex)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                ))}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 text-xs text-muted-foreground hover:text-primary"
+                  onClick={() => addCharacteristicFieldName(index)}
+                >
+                  <Plus className="mr-1 h-3.5 w-3.5" /> Champ facultatif proposé
+                </Button>
+              </div>
             </div>
           ))}
           {duplicateNames && <p className="text-xs text-destructive">Chaque caractéristique doit avoir un nom distinct.</p>}

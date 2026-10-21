@@ -228,7 +228,8 @@ function Block({ block }) {
 function CharacterContent({ character, characteristics, skillRollModifier }) {
     const stats = characteristics.map((definition) => {
         const values = character.characteristics?.[definition.name] || {};
-        return { name: definition.name, value: values.value };
+        const fields = (values.fields || []).filter((f) => f.name || f.value);
+        return { name: definition.name, value: values.value, fields };
     });
 
     return (
@@ -244,6 +245,12 @@ function CharacterContent({ character, characteristics, skillRollModifier }) {
                                     <strong>Valeur :</strong>{" "}
                                     {hasValue(stat.value) ? stat.value : <span className="prt-blank" />}
                                 </p>
+                                {stat.fields.map((field, fieldIndex) => (
+                                    <p key={`${field.name}-${fieldIndex}`}>
+                                        <strong>{field.name} :</strong>{" "}
+                                        {hasValue(field.value) ? field.value : <span className="prt-blank" />}
+                                    </p>
+                                ))}
                             </article>
                         ))}
                     </div>
