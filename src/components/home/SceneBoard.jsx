@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Plus } from "lucide-react";
 import ActColumn from "@/components/home/ActColumn";
 
@@ -18,12 +18,30 @@ export default function SceneBoard({
   onAddScene,
   onDeleteScene,
 }) {
+  const containerRef = useRef(null);
   const sorted = [...acts].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   const orphans = scenes.filter((s) => !s.act_id || !acts.some((a) => a.id === s.act_id));
   const sceneTitles = scenes.reduce((acc, s) => ({ ...acc, [s.id]: s.title }), {});
   const npcById = Object.fromEntries(npcs.map((npc) => [npc.id, npc]));
   const locationById = Object.fromEntries(locations.map((location) => [location.id, location]));
   const clueById = Object.fromEntries(clues.map((clue) => [clue.id, clue]));
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const handleWheel = (e) => {
+      if (el.scrollWidth > el.clientWidth) {
+        if (e.deltaX === 0) {
+          e.preventDefault();
+          el.scrollLeft += e.deltaY;
+        }
+      }
+    };
+
+    el.addEventListener("wheel", handleWheel, { passive: false });
+    return () => el.removeEventListener("wheel", handleWheel);
+  }, []);
 
   const common = {
     sceneTitles,
@@ -41,7 +59,7 @@ export default function SceneBoard({
   };
 
   return (
-    <div className="flex gap-4 overflow-x-auto pb-4">
+    <div ref={containerRef} className="flex gap-4 overflow-x-auto pb-4">
       {sorted.map((act) => (
         <ActColumn
           key={act.id}
