@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { Copy, Pencil, Plus, Printer, Shield, Trash2, UserRound } from "lucide-react";
+import { Copy, Pencil, Plus, Printer, Search, Shield, Trash2, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import PrintSheet from "@/components/print/PrintSheet";
 import {
   AlertDialog,
@@ -18,12 +19,20 @@ import GameCharacterEditor from "@/components/game/GameCharacterEditor";
 import CampaignSelect from "@/components/common/CampaignSelect";
 import PrintButton from "@/components/print/PrintButton";
 import { useExpandedCardState } from "@/lib/context/ExpandedCardContext";
+import { usePageFilter } from "@/lib/context/PageFilterContext";
 import { useCampaigns } from "@/hooks/useCampaigns";
 import { useGameSheet } from "@/hooks/useGameSheet";
+
+const normalize = (value) =>
+  String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
 
 export default function Jeu() {
   const { expandedCardId, setExpandedCardId } = useExpandedCardState();
   const { campaigns, campaignId, selectCampaign } = useCampaigns();
+  const [term, setTerm] = usePageFilter("game.term", "");
   const {
     model,
     modelId,
@@ -90,6 +99,23 @@ export default function Jeu() {
 
   const campaign = campaigns.find((item) => item.id === campaignId);
 
+  const q = normalize(term.trim());
+
+  const visible = useMemo(
+    () =>
+      characters.filter((character) => {
+        if (!q) return true;
+        const nameMatch = normalize(character.name).includes(q);
+        const notesMatch = normalize(character.notes).includes(q);
+        const skillMatch = (character.skills || []).some((s) => normalize(s.name).includes(q));
+        const eqMatch = (character.equipment || []).some(
+          (e) => normalize(e.name).includes(q) || normalize(e.type).includes(q)
+        );
+        return nameMatch || notesMatch || skillMatch || eqMatch;
+      }),
+    [characters, q]
+  );
+
   return (
     <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-6 md:px-8 md:py-8">
       <header className="flex flex-wrap items-end justify-between gap-4">
@@ -154,20 +180,34 @@ export default function Jeu() {
             )}
           </section>
 
+          {modelId && (
+            <div className="relative w-full">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={term}
+                onChange={(e) => setTerm(e.target.value)}
+                placeholder="Rechercher un personnage, compétence, équipement…"
+                className="pl-9"
+              />
+            </div>
+          )}
+
           {loading ? (
             <p className="py-10 text-center font-mono text-xs uppercase tracking-widest text-muted-foreground">Chargement…</p>
           ) : !modelId ? (
             <div className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
               Définissez d’abord le modèle de la campagne pour créer des personnages.
             </div>
-          ) : characters.length === 0 ? (
+          ) : visible.length === 0 ? (
             <div className="rounded-xl border border-dashed border-border p-10 text-center">
               <UserRound className="mx-auto h-8 w-8 text-muted-foreground" />
-              <p className="mt-3 text-sm text-muted-foreground">Aucun personnage pour cette campagne.</p>
+              <p className="mt-3 text-sm text-muted-foreground">
+                {q ? "Aucun personnage ne correspond à la recherche." : "Aucun personnage pour cette campagne."}
+              </p>
             </div>
           ) : (
             <div className="grid gap-4 md:grid-cols-2">
-              {characters.map((character) => (
+              {visible.map((character) => (
                 <article
                   key={character.id}
                   data-expandable-card={`character:${character.id}`}
