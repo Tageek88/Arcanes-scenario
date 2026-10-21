@@ -161,11 +161,118 @@ export default function CodexSidebar({
                 </div>
 
                 {expandedId === item.id && (
-                  <div className="mt-3 space-y-3 border-t border-border pt-3">
-                    {item.comment && <p className="text-xs italic text-muted-foreground">{item.comment}</p>}
+                  <div className="mt-3 space-y-3 border-t border-border pt-3 text-xs">
+                    {item.comment && <p className="italic text-muted-foreground">{item.comment}</p>}
+
+                    {tab === "npc" && (
+                      <div className="space-y-2">
+                        {(item.level || item.gender) && (
+                          <div className="flex flex-wrap gap-1.5 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+                            {item.level && <span className="tag border border-border">{item.level}</span>}
+                            {item.gender && (
+                              <span className="tag border border-border">
+                                {item.gender === "male" ? "Masculin" : item.gender === "female" ? "Féminin" : "Neutre"}
+                              </span>
+                            )}
+                          </div>
+                        )}
+
+                        {item.traits?.length > 0 && (
+                          <p className="text-muted-foreground">
+                            <span className="font-medium text-foreground">Caractère : </span>
+                            {item.traits.join(" · ")}
+                          </p>
+                        )}
+
+                        {item.motivation && (
+                          <p className="text-muted-foreground">
+                            <span className="font-medium text-foreground">Motivation : </span>
+                            {item.motivation}
+                          </p>
+                        )}
+
+                        {item.appearance && (
+                          <p className="text-muted-foreground">
+                            <span className="font-medium text-foreground">Signe distinctif : </span>
+                            {item.appearance}
+                          </p>
+                        )}
+
+                        {item.characteristics && Object.keys(item.characteristics).length > 0 && (
+                          <div>
+                            <p className="mb-1 font-medium text-foreground">Caractéristiques :</p>
+                            <div className="grid grid-cols-2 gap-1 font-mono text-[11px]">
+                              {Object.entries(item.characteristics).map(([key, val]) => (
+                                <div key={key} className="rounded bg-secondary/50 px-1.5 py-1">
+                                  <span className="uppercase text-muted-foreground">{key} : </span>
+                                  <span className="font-semibold text-foreground">{val?.value || "—"}</span>
+                                  {val?.modifier && <span className="text-muted-foreground"> ({val.modifier})</span>}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {item.skills?.length > 0 && (
+                          <div>
+                            <p className="mb-1 font-medium text-foreground">Compétences :</p>
+                            <div className="flex flex-wrap gap-1 text-[11px]">
+                              {item.skills.map((s, idx) => (
+                                <span key={idx} className="rounded bg-secondary/50 px-1.5 py-0.5">
+                                  {s.name}{s.roll_modifier ? ` (${s.roll_modifier})` : ""}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {tab === "character" && (
+                      <div className="space-y-2">
+                        {item.characteristics && Object.keys(item.characteristics).length > 0 && (
+                          <div>
+                            <p className="mb-1 font-medium text-foreground">Caractéristiques :</p>
+                            <div className="grid grid-cols-2 gap-1 font-mono text-[11px]">
+                              {Object.entries(item.characteristics).map(([key, val]) => (
+                                <div key={key} className="rounded bg-secondary/50 px-1.5 py-1">
+                                  <span className="uppercase text-muted-foreground">{key} : </span>
+                                  <span className="font-semibold text-foreground">{val?.value || "—"}</span>
+                                  {val?.modifier && <span className="text-muted-foreground"> ({val.modifier})</span>}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {item.skills?.length > 0 && (
+                          <div>
+                            <p className="mb-1 font-medium text-foreground">Compétences :</p>
+                            <div className="flex flex-wrap gap-1 text-[11px]">
+                              {item.skills.map((s, idx) => (
+                                <span key={idx} className="rounded bg-secondary/50 px-1.5 py-0.5">
+                                  {s.name}{s.roll_modifier ? ` (${s.roll_modifier})` : ""}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {item.equipment?.length > 0 && (
+                          <div>
+                            <p className="mb-1 font-medium text-foreground">Équipement :</p>
+                            <p className="text-muted-foreground">{item.equipment.map((e) => e.name).filter(Boolean).join(" · ")}</p>
+                          </div>
+                        )}
+
+                        {item.notes && <p className="whitespace-pre-wrap text-sm text-muted-foreground">{item.notes}</p>}
+                      </div>
+                    )}
+
                     {item.description && <p className="whitespace-pre-wrap text-sm text-muted-foreground">{item.description}</p>}
+
                     {(item.attachments || []).length > 0 && (
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-2 pt-1">
                         {item.attachments.map((file, index) => (
                           <button
                             type="button"
