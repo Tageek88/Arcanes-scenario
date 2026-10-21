@@ -4,7 +4,7 @@ import { Copy, Link2, Link2Off, MapPin, Paperclip, Pencil, Trash2, Users } from 
 import { NPC_ATTITUDE } from "@/lib/meta/sceneMeta";
 import { isImage } from "@/components/codex/AttachmentsField";
 import { openAttachment } from "@/lib/services/openAttachment";
-import { useExpandedCard } from "@/lib/context/ExpandedCardContext";
+import { useExpandedCard, useExpandedCardState } from "@/lib/context/ExpandedCardContext";
 
 export default function CodexCard({
   kind,
@@ -19,6 +19,7 @@ export default function CodexCard({
 }) {
   const attitude = NPC_ATTITUDE[entry.attitude] || NPC_ATTITUDE.neutre;
   const { expanded, cardProps } = useExpandedCard(`codex:${entry.id}`);
+  const { setExpandedCardId } = useExpandedCardState();
 
   return (
     <div {...cardProps} className={cn("w-full max-w-full flex cursor-pointer flex-col rounded-xl border bg-card/50 p-4 transition-colors overflow-hidden", linked ? "corner-accent border-primary/50" : "border-border", expanded && "ring-2 ring-primary/50")}>
@@ -61,7 +62,29 @@ export default function CodexCard({
           {(expanded ? relations : relations.slice(0, 3)).map((r) => (
             <li key={r.id} className="flex items-start gap-1.5 text-xs text-muted-foreground">
               <Users className="mt-0.5 h-3 w-3 shrink-0" />
-              <span className="truncate break-words overflow-hidden">{r.text}</span>
+              <span className="truncate break-words overflow-hidden">
+                <span>{r.label} </span>
+                {r.targetId ? (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setExpandedCardId(`codex:${r.targetId}`);
+                      setTimeout(() => {
+                        const targetEl = document.querySelector(`[data-expandable-card="codex:${r.targetId}"]`);
+                        if (targetEl) {
+                          targetEl.scrollIntoView({ behavior: "smooth", block: "center" });
+                        }
+                      }, 50);
+                    }}
+                    className="font-medium text-primary underline decoration-primary/40 underline-offset-2 hover:decoration-primary"
+                  >
+                    {r.targetName || "PNJ"}
+                  </button>
+                ) : (
+                  <span>{r.targetName || "PNJ"}</span>
+                )}
+              </span>
             </li>
           ))}
           {relations.length > 3 && (

@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Search, Plus, Link2, Link2Off, Pencil, ChevronDown, ChevronUp } from "lucide-react";
+import React, { useEffect, useMemo, useState } from "react";
+import { Search, Plus, Link2, Link2Off, Pencil, ChevronDown, ChevronUp, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,8 @@ import { isImage } from "@/components/codex/AttachmentsField";
 import { openAttachment } from "@/lib/services/openAttachment";
 import { usePageFilter } from "@/lib/context/PageFilterContext";
 import { useCodexList } from "@/hooks/useCodexList";
+import { useNpcRelations } from "@/hooks/useNpcRelations";
+import { relationsByNpc } from "@/lib/services/npcRelations";
 
 export default function CodexSidebar({
   campaignId,
@@ -28,6 +30,11 @@ export default function CodexSidebar({
   const kind = CODEX_TABS.find((t) => t.key === tab) || CODEX_TABS[0];
   const linkedIds = activeScene ? activeScene[kind.linkKey] || [] : [];
   const { items, setItems, loading } = useCodexList(campaignId, kind.entity, { term, linkedOnly, linkedIds, refreshKey });
+  const { relations: npcRelationsList } = useNpcRelations(campaignId);
+  const npcRelationMap = useMemo(
+    () => (tab === "npc" ? relationsByNpc(npcRelationsList, items) : new Map()),
+    [tab, npcRelationsList, items]
+  );
 
   useEffect(() => {
     setExpandedId(null);
@@ -223,6 +230,30 @@ export default function CodexSidebar({
                                 </span>
                               ))}
                             </div>
+                          </div>
+                        )}
+
+                        {npcRelationMap.get(item.id)?.length > 0 && (
+                          <div>
+                            <p className="mb-1 font-medium text-foreground">Relations :</p>
+                            <ul className="space-y-1">
+                              {npcRelationMap.get(item.id).map((r) => (
+                                <li key={r.id} className="flex items-center gap-1.5 text-muted-foreground text-xs">
+                                  <Users className="h-3 w-3 shrink-0" />
+                                  <span>{r.label} </span>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setExpandedId(r.targetId);
+                                    }}
+                                    className="font-medium text-primary underline decoration-primary/40 underline-offset-2 hover:decoration-primary"
+                                  >
+                                    {r.targetName}
+                                  </button>
+                                </li>
+                              ))}
+                            </ul>
                           </div>
                         )}
                       </div>

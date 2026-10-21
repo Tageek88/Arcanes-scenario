@@ -151,6 +151,9 @@ export function relationsByNpc(relations, npcs) {
     if (!map.has(r.from_id)) map.set(r.from_id, []);
     map.get(r.from_id).push({
       id: r.id,
+      targetId: r.to_id,
+      targetName: names.get(r.to_id),
+      label: relationLabel(r),
       order: groupIndex(r.type),
       text: `${relationLabel(r)} ${names.get(r.to_id)}`,
     });
