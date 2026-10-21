@@ -27,6 +27,8 @@ import { useCampaigns } from "@/hooks/useCampaigns";
 import { useCampaignContent } from "@/hooks/useCampaignContent";
 import { useCampaignActions } from "@/hooks/useCampaignActions";
 import { useNpcGenerator } from "@/hooks/useNpcGenerator";
+import GameCharacterEditor from "@/components/game/GameCharacterEditor";
+import { useGameSheet } from "@/hooks/useGameSheet";
 
 const EMPTY_SCENE = {
   title: "",
@@ -109,6 +111,16 @@ export default function Home() {
 
   const [tablesOpen, setTablesOpen] = useState(false);
   const npcGenerator = useNpcGenerator({ campaignId, enabled: tablesOpen });
+
+  const {
+    model: sheetModel,
+    skillCatalog,
+    equipmentCatalog,
+    savingCharacter,
+    saveCharacter,
+  } = useGameSheet(campaignId);
+  const [characterOpen, setCharacterOpen] = useState(false);
+  const [characterDraft, setCharacterDraft] = useState(null);
 
   const [codexOpen, setCodexOpen] = useState(false);
   const [codexKind, setCodexKind] = useState("npc");
@@ -330,11 +342,21 @@ export default function Home() {
           onToggleLink={toggleSceneLink}
           onToggleClueFlag={toggleClueFlag}
           onAdd={(kind) => {
+            if (kind === "character") {
+              setCharacterDraft(null);
+              setCharacterOpen(true);
+              return;
+            }
             setCodexKind(kind);
             setCodexEntry(null);
             setCodexOpen(true);
           }}
           onEdit={(kind, entry) => {
+            if (kind === "character") {
+              setCharacterDraft(entry);
+              setCharacterOpen(true);
+              return;
+            }
             setCodexKind(kind);
             setCodexEntry(entry);
             setCodexOpen(true);
@@ -379,6 +401,24 @@ export default function Home() {
         onSave={async (data) => {
           if (await npcGenerator.saveTables(data)) setTablesOpen(false);
         }}
+      />
+
+      <GameCharacterEditor
+        key={characterDraft?.id || (characterDraft ? "duplicate" : "new")}
+        open={characterOpen}
+        onOpenChange={setCharacterOpen}
+        model={sheetModel}
+        character={characterDraft}
+        skillCatalog={skillCatalog}
+        equipmentCatalog={equipmentCatalog}
+        saving={savingCharacter}
+        onSave={(draft) =>
+          saveCharacter(draft, async () => {
+            setCharacterOpen(false);
+            setCharacterDraft(null);
+            await reloadCodex();
+          })
+        }
       />
 
       <CodexEntryDialog

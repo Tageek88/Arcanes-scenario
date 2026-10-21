@@ -64,14 +64,14 @@ export default function CodexSidebar({
           {activeScene ? `Scène : ${activeScene.title}` : "Aucune scène sélectionnée"}
         </p>
 
-        <div className="mt-3 flex gap-1 rounded-lg border border-border p-1">
+        <div className="mt-3 flex flex-wrap gap-1 rounded-lg border border-border p-1">
           {CODEX_TABS.map((t) => (
             <button
               key={t.key}
               type="button"
               onClick={() => setTab(t.key)}
               className={cn(
-                "flex-1 rounded-md px-2 py-1.5 font-mono text-xs uppercase tracking-wider transition-colors",
+                "flex-1 min-w-[60px] rounded-md px-1.5 py-1.5 font-mono text-[11px] uppercase tracking-wider transition-colors text-center truncate",
                 tab === t.key ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground"
               )}
             >
@@ -154,6 +154,7 @@ export default function CodexSidebar({
                       {tab === "npc" && (item.role || "PNJ")}
                       {tab === "location" && (item.type || "Lieu")}
                       {tab === "clue" && (item.clue_type === "info" ? "Info" : "Indice")}
+                      {tab === "character" && "Personnage"}
                     </div>
                   </button>
                   {tab === "npc" && <span className={cn("tag shrink-0 border", attitude.badge)}>{attitude.label}</span>}

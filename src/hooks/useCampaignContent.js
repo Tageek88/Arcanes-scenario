@@ -293,7 +293,8 @@ export function useCampaignContent(campaignId, { activeSceneId, setActiveSceneId
       });
       return;
     }
-    const key = { npc: "npc_ids", location: "location_ids", clue: "clue_ids" }[kind];
+    const key = { npc: "npc_ids", location: "location_ids", clue: "clue_ids", character: "character_ids" }[kind];
+    if (!key) return;
     const list = activeScene[key] || [];
     const next = list.includes(entryId) ? list.filter((x) => x !== entryId) : [...list, entryId];
     const previous = scenes;

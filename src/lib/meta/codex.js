@@ -2,6 +2,7 @@ export const KIND_META = {
   npc: { entity: "NPC", title: "PNJ", singular: "PNJ", nameLabel: "Nom du PNJ" },
   location: { entity: "Location", title: "Lieux", singular: "Lieu", nameLabel: "Nom du lieu" },
   clue: { entity: "Clue", title: "Indices & infos", singular: "indice ou info", nameLabel: "Intitulé" },
+  character: { entity: "GameCharacter", title: "Personnages", singular: "Personnage", nameLabel: "Nom du personnage" },
 };
 
 /** Genres proposés pour un PNJ (les identifiants sont ceux des générateurs). */
@@ -15,6 +16,7 @@ export const CODEX_TABS = [
   { key: "npc", label: "PNJ", entity: "NPC", linkKey: "npc_ids" },
   { key: "location", label: "Lieux", entity: "Location", linkKey: "location_ids" },
   { key: "clue", label: "Indices & infos", entity: "Clue", linkKey: "clue_ids" },
+  { key: "character", label: "Personnages", entity: "GameCharacter", linkKey: "character_ids" },
 ];
 
 /** @param {"npc" | "location" | "clue"} kind */
