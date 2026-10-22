@@ -2,11 +2,9 @@ import React, { useEffect, useState } from "react";
 import { Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FieldLabel } from "@/components/codex/NpcGeneratorPanel";
 import { rangesForLevel } from "@/lib/generators/npcScale";
-import { NPC_GENDER_OPTIONS } from "@/lib/meta/codex";
 
 const parseList = (text) => text.split(",").map((item) => item.trim()).filter(Boolean);
 
@@ -30,7 +28,7 @@ function ListInput({ value, onChange, placeholder, id }) {
 }
 
 /**
- * Rubriques détaillées d'un PNJ : genre, niveau, traits, motivation, signe distinctif, caractéristiques, compétences,
+ * Rubriques détaillées d'un PNJ : niveau, traits, motivation, signe distinctif, caractéristiques, compétences,
  * et contrôle d'équilibrage avec le barème de la campagne.
  * @param {{ form: Record<string, any>, set: (key: string, value: unknown) => void, generator: any, generation: any }} props
  */
@@ -59,43 +57,24 @@ export default function NpcSheetFields({ form, set, generator, generation }) {
 
   return (
     <>
-      <div className="grid gap-4 sm:grid-cols-2">
+      {(levelOptions.length > 0 || form.level) && (
         <div className="space-y-2">
-          <Label>Genre</Label>
-          <Select value={form.gender || "_none"} onValueChange={(value) => set("gender", value === "_none" ? "" : value)}>
+          <FieldLabel label="Niveau" locked={!!locks.level} onToggle={() => toggleLock("level")} />
+          <Select value={form.level || "_none"} onValueChange={(value) => set("level", value === "_none" ? "" : value)}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="_none">Non précisé</SelectItem>
-              {NPC_GENDER_OPTIONS.map((option) => (
-                <SelectItem key={option.id} value={option.id}>
-                  {option.label}
+              <SelectItem value="_none">Aucun niveau</SelectItem>
+              {levelOptions.map((name) => (
+                <SelectItem key={name} value={name}>
+                  {name}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
-
-        {(levelOptions.length > 0 || form.level) && (
-          <div className="space-y-2">
-            <FieldLabel label="Niveau" locked={!!locks.level} onToggle={() => toggleLock("level")} />
-            <Select value={form.level || "_none"} onValueChange={(value) => set("level", value === "_none" ? "" : value)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="_none">Aucun niveau</SelectItem>
-                {levelOptions.map((name) => (
-                  <SelectItem key={name} value={name}>
-                    {name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
-      </div>
+      )}
 
       <div className="space-y-2">
         <FieldLabel label="Traits de caractère" locked={!!locks.traits} onToggle={() => toggleLock("traits")} htmlFor="npc-traits" />

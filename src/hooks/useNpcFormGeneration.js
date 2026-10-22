@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
-import { composeDescription } from "@/lib/generators/npcGenerator";
 
 /** Rubriques de la fiche PNJ que le MJ peut verrouiller pour les garder lors d'un nouveau tirage. */
 export const LOCKABLE_FIELDS = [
   "name",
+  "gender",
   "role",
   "attitude",
   "level",
@@ -21,8 +21,6 @@ const WARNING_TEXT = {
   traits: "aucun trait disponible",
   motivations: "aucune motivation disponible",
   appearances: "aucun signe distinctif disponible",
-  sheetModel: "modèle de fiche absent (caractéristiques non générées)",
-  scale: "barème de PNJ non défini",
 };
 
 const hasContent = (value) => {
@@ -35,14 +33,18 @@ const hasContent = (value) => {
 };
 
 /**
- * Génération d'une fiche de PNJ dans le formulaire du Codex : choix du genre et du niveau, verrous par rubrique,
- * confirmation avant d'écraser une saisie du MJ. La génération remplit le formulaire sans l'enregistrer.
+ * Génération d'une fiche de PNJ dans le formulaire du Codex : le genre du formulaire sert de paramètre au tirage,
+ * choix du niveau, verrous par rubrique, confirmation avant d'écraser une saisie du MJ.
+ * La génération remplit le formulaire sans l'enregistrer.
+ *
+ * Genre : un genre choisi par le MJ est respecté à chaque tirage ; un genre laissé « au hasard » est tiré, rempli dans
+ * le formulaire (`genderAuto`) et retiré au hasard au tirage suivant, sauf s'il est verrouillé.
  * @param {{ open: boolean, generator: ReturnType<typeof import("./useNpcGenerator").useNpcGenerator>,
  *   form: Record<string, any>, setForm: (update: (previous: any) => any) => void }} options
  */
 export function useNpcFormGeneration({ open, generator, form, setForm }) {
   const { toast } = useToast();
-  const [genderChoice, setGenderChoice] = useState("random");
+  const [genderAuto, setGenderAuto] = useState(false);
   const [levelChoice, setLevelChoice] = useState("random");
   const [locks, setLocks] = useState(/** @type {Record<string, boolean>} */ ({}));
   const [seed, setSeed] = useState(/** @type {number | string | null} */ (null));
@@ -51,7 +53,7 @@ export function useNpcFormGeneration({ open, generator, form, setForm }) {
 
   useEffect(() => {
     if (!open) return;
-    setGenderChoice("random");
+    setGenderAuto(false);
     setLevelChoice("random");
     setLocks({});
     setSeed(null);
@@ -61,10 +63,19 @@ export function useNpcFormGeneration({ open, generator, form, setForm }) {
 
   const toggleLock = (key) => setLocks((current) => ({ ...current, [key]: !current[key] }));
 
+  // Genre demandé au générateur : celui choisi par le MJ, sinon « au hasard ».
+  const requestedGender = form.gender && !genderAuto ? form.gender : "random";
+
+  // Changement de genre par le MJ : il devient un choix explicite (ou « au hasard » s'il est vidé).
+  const setGender = (value) => {
+    setGenderAuto(false);
+    setForm((previous) => ({ ...previous, gender: value }));
+  };
+
   // Une rubrique non verrouillée, remplie et modifiée depuis le dernier tirage serait perdue par un nouveau tirage.
   const wouldOverwrite = () =>
     LOCKABLE_FIELDS.some((key) => {
-      if (locks[key] || key === "attitude" || !hasContent(form[key])) return false;
+      if (locks[key] || key === "attitude" || key === "gender" || !hasContent(form[key])) return false;
       const generated = lastGenerated.current?.[key];
       return JSON.stringify(form[key]) !== JSON.stringify(generated);
     });
@@ -74,7 +85,7 @@ export function useNpcFormGeneration({ open, generator, form, setForm }) {
     const keep = {};
     for (const key of LOCKABLE_FIELDS) if (locks[key]) keep[key] = form[key];
     const result = generator.generate({
-      gender: genderChoice,
+      gender: requestedGender,
       level: levelChoice === "random" ? undefined : levelChoice,
       keep,
     });
@@ -93,22 +104,12 @@ export function useNpcFormGeneration({ open, generator, form, setForm }) {
     };
     lastGenerated.current = fields;
     setSeed(result.seed);
-    // La description du MJ n'est jamais remplacée : elle n'est composée que si elle est vide.
-    setForm((previous) => ({
-      ...previous,
-      ...fields,
-      gender: npc.gender,
-      description: previous.description?.trim() ? previous.description : composeDescription(npc),
-    }));
-
-    const warnings = [...(result.warnings || [])];
-    if (!generator.hasSheetModel) warnings.push("sheetModel");
-    if (!generator.hasScale) warnings.push("scale");
-
-    if (warnings.length > 0) {
+    if (!locks.gender) setGenderAuto(requestedGender === "random");
+    setForm((previous) => ({ ...previous, ...fields, gender: npc.gender }));
+    if (result.warnings.length) {
       toast({
         title: "Génération incomplète",
-        description: warnings.map((code) => WARNING_TEXT[code] || code).join(" ; "),
+        description: result.warnings.map((code) => WARNING_TEXT[code] || code).join(" ; "),
       });
     }
   };
@@ -119,8 +120,9 @@ export function useNpcFormGeneration({ open, generator, form, setForm }) {
   };
 
   return {
-    genderChoice,
-    setGenderChoice,
+    genderAuto,
+    requestedGender,
+    setGender,
     levelChoice,
     setLevelChoice,
     locks,

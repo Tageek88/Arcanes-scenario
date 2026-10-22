@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { LIST_DEFS } from "@/lib/generators/generatorTables";
+import { NPC_GENDER_OPTIONS } from "@/lib/meta/codex";
 
 const LIST_LABELS = Object.fromEntries(LIST_DEFS.map((def) => [def.key, def.label.toLowerCase()]));
 
@@ -30,13 +31,45 @@ export function FieldLabel({ label, locked = false, onToggle, htmlFor }) {
 }
 
 /**
- * Commandes de génération d'une fiche de PNJ (genre, niveau, tirage, confirmation).
+ * Genre du PNJ, placé sous le nom : il sert de paramètre à la génération des noms et de la fiche.
+ * @param {{ form: Record<string, any>, generation: any, tables?: Record<string, string[]> | null }} props
+ */
+export function NpcGenderField({ form, generation, tables }) {
+  const { locks, toggleLock, genderAuto, setGender } = generation;
+  const options = NPC_GENDER_OPTIONS.filter((option) => option.id !== "neutral" || tables?.neutral.length > 0 || form.gender === "neutral");
+  const hint = !form.gender
+    ? "Au hasard : le tirage choisira un genre."
+    : genderAuto
+      ? "Genre tiré au hasard : un nouveau tirage peut le changer (cadenas pour le garder)."
+      : "Ce genre est utilisé pour les noms générés et pour les prochains tirages.";
+  return (
+    <div className="space-y-2">
+      <FieldLabel label="Genre" locked={!!locks.gender} onToggle={() => toggleLock("gender")} htmlFor="npc-gender" />
+      <Select value={form.gender || "_auto"} onValueChange={(value) => setGender(value === "_auto" ? "" : value)}>
+        <SelectTrigger id="npc-gender" aria-label="Genre du PNJ">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="_auto">Au hasard</SelectItem>
+          {options.map((option) => (
+            <SelectItem key={option.id} value={option.id}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <p className="text-xs text-muted-foreground">{hint}</p>
+    </div>
+  );
+}
+
+/**
+ * Commandes de génération d'une fiche de PNJ (niveau, tirage, confirmation). Le genre est celui du champ « Genre ».
  * @param {{ generator: any, generation: any }} props
  */
 export default function NpcGeneratorPanel({ generator, generation }) {
-  const { genderChoice, setGenderChoice, levelChoice, setLevelChoice, seed, confirming } = generation;
+  const { levelChoice, setLevelChoice, seed, confirming } = generation;
   const missingLists = generator.emptyLists.filter((key) => key !== "neutral");
-  const showNeutral = Boolean(generator.tables?.neutral.length);
 
   return (
     <div className="space-y-3 rounded-lg border border-border p-3" data-tutorial="npc-generator">
@@ -54,18 +87,6 @@ export default function NpcGeneratorPanel({ generator, generation }) {
       ) : (
         <>
           <div className="flex flex-wrap items-center gap-2">
-            <Select value={genderChoice} onValueChange={setGenderChoice}>
-              <SelectTrigger className="h-8 w-36 text-xs" aria-label="Genre du PNJ généré">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="random">Genre au hasard</SelectItem>
-                <SelectItem value="male">Masculin</SelectItem>
-                <SelectItem value="female">Féminin</SelectItem>
-                {showNeutral && <SelectItem value="neutral">Neutre</SelectItem>}
-              </SelectContent>
-            </Select>
-
             {generator.levelNames.length > 0 && (
               <Select value={levelChoice} onValueChange={setLevelChoice}>
                 <SelectTrigger className="h-8 w-36 text-xs" aria-label="Niveau du PNJ généré">
@@ -104,23 +125,18 @@ export default function NpcGeneratorPanel({ generator, generation }) {
           )}
 
           <p className="text-xs text-muted-foreground">
-            Les cadenas gardent un champ lors d'un nouveau tirage. La description n'est remplie que si elle est vide.
+            Les cadenas gardent un champ lors d'un nouveau tirage.
             {seed !== null && <> Graine du dernier tirage : {seed}.</>}
           </p>
 
           {missingLists.length > 0 && (
-            <p className="text-xs font-medium text-amber-500">
-              Listes vides dans le générateur : {missingLists.map((key) => LIST_LABELS[key]).join(", ")}.
+            <p className="text-xs text-muted-foreground">
+              Listes vides, donc non générées : {missingLists.map((key) => LIST_LABELS[key]).join(", ")}.
             </p>
           )}
           {!generator.hasSheetModel && (
-            <p className="text-xs font-medium text-amber-500">
-              Modèle de fiche manquant : les caractéristiques ne seront pas générées (définissez un modèle dans la page Jeu).
-            </p>
-          )}
-          {!generator.hasScale && (
-            <p className="text-xs font-medium text-amber-500">
-              Barème manquant : les compétences et niveaux ne seront pas générés (définissez un barème dans les paramètres).
+            <p className="text-xs text-muted-foreground">
+              Cette campagne n'a pas de modèle de fiche : les caractéristiques ne sont pas générées (à créer dans la page Jeu).
             </p>
           )}
         </>

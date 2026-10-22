@@ -40,7 +40,7 @@ import AttachmentsField from "@/components/codex/AttachmentsField";
 import NpcRelations from "@/components/codex/NpcRelations";
 
 // Génération et rubriques détaillées de la fiche de PNJ.
-import NpcGeneratorPanel, { FieldLabel } from "@/components/codex/NpcGeneratorPanel";
+import NpcGeneratorPanel, { FieldLabel, NpcGenderField } from "@/components/codex/NpcGeneratorPanel";
 import NpcSheetFields from "@/components/codex/NpcSheetFields";
 
 // Toast notification hook for displaying messages to the user.
@@ -117,9 +117,6 @@ export default function CodexEntryDialog({
   // State for managing the count of source relations for the current entry.
   const [sourceRelationCount, setSourceRelationCount] = useState(0);
 
-  // State for managing the universe ID and name generation gender for NPCs.
-  const [nameGender, setNameGender] = useState("random");
-
   // State for managing the list of generated names for NPCs.
   const [generatedNames, setGeneratedNames] = useState([]);
 
@@ -136,7 +133,7 @@ export default function CodexEntryDialog({
 
   // Function for generating a name for the current NPC entry based on the universe ID and name generation gender.
   const generateName = () => {
-    const [name] = generateNames({ universeId, gender: nameGender, withFamily: true, generatorData });
+    const [name] = generateNames({ universeId, gender: generation.requestedGender, withFamily: true, generatorData });
     if (name) {
       setForm((prev) => ({ ...prev, name }));
     } else {
@@ -360,17 +357,6 @@ export default function CodexEntryDialog({
           <Input data-tutorial="codex-name" value={form.name || ""} onChange={(e) => set("name", e.target.value)} />
           {kind === "npc" && !entry && canGenerateNames(universeId, generatorData) && (
             <div className="flex items-center gap-2">
-              <Select value={nameGender} onValueChange={setNameGender}>
-                <SelectTrigger className="h-8 w-32 text-xs" aria-label="Genre du nom généré">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="random">Au hasard</SelectItem>
-                  <SelectItem value="male">Masculin</SelectItem>
-                  <SelectItem value="female">Féminin</SelectItem>
-                  {generator.tables?.neutral.length > 0 && <SelectItem value="neutral">Neutre</SelectItem>}
-                </SelectContent>
-              </Select>
               <Button type="button" variant="outline" size="sm" onClick={generateName}>
                 <Dices className="mr-2 h-4 w-4" /> Génération aléatoire
               </Button>
@@ -401,7 +387,12 @@ export default function CodexEntryDialog({
           )}
         </div>
 
-        {kind === "npc" && <NpcGeneratorPanel generator={generator} generation={generation} />}
+        {kind === "npc" && (
+          <>
+            <NpcGenderField form={form} generation={generation} tables={generator.tables} />
+            <NpcGeneratorPanel generator={generator} generation={generation} />
+          </>
+        )}
 
         {/* Comment field for the codex entry, optional for the user to fill out. */}
         <div className="space-y-2">

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Dices, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
   AlertDialog,
@@ -20,6 +21,8 @@ import { usePageFilter } from "@/lib/context/PageFilterContext";
 import DiceRoller from "@/components/tables/DiceRoller";
 import { useCampaigns } from "@/hooks/useCampaigns";
 import { useTables } from "@/hooks/useTables";
+import { useNpcGenerator } from "@/hooks/useNpcGenerator";
+import GeneratorTablesDialog from "@/components/home/GeneratorTablesDialog";
 
 const SafeAlertDialogContent = (
   /** @type {React.ComponentProps<typeof AlertDialogContent>} */ props
@@ -37,6 +40,9 @@ export default function Tables() {
   const { campaigns, campaignId, selectCampaign } = useCampaigns();
   const [category, setCategory] = usePageFilter("tables.category", "all");
   const { tables, loading, saving, saveTable, deleteTable } = useTables(campaignId, category);
+  const [generatorOpen, setGeneratorOpen] = useState(false);
+  const npcGenerator = useNpcGenerator({ campaignId, enabled: generatorOpen });
+  const campaign = campaigns.find((item) => item.id === campaignId);
 
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(EMPTY);
@@ -96,6 +102,9 @@ export default function Tables() {
             onValueChange={selectCampaign}
           />
           <PrintButton campaignId={campaignId} preset="tables" />
+          <Button variant="outline" onClick={() => setGeneratorOpen(true)} disabled={!campaignId}>
+            <Dices className="mr-2 h-4 w-4" /> Tables du générateur
+          </Button>
           <button
             type="button"
             data-tutorial="tables-new"
@@ -180,6 +189,18 @@ export default function Tables() {
         setForm={setForm}
         saving={saving}
         onSave={save}
+      />
+
+      <GeneratorTablesDialog
+        open={generatorOpen}
+        onOpenChange={setGeneratorOpen}
+        universeId={campaign?.universe_type || ""}
+        data={npcGenerator.context?.generatorData}
+        ready={!!npcGenerator.context}
+        saving={npcGenerator.savingTables}
+        onSave={async (data) => {
+          if (await npcGenerator.saveTables(data)) setGeneratorOpen(false);
+        }}
       />
 
       <AlertDialog open={!!pendingDelete} onOpenChange={(isOpen) => !isOpen && setPendingDelete(null)}>
