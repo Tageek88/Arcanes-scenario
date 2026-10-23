@@ -47,6 +47,11 @@ export default function UpcomingSessions({ sessions, onOpen, onAdd }) {
                       {session.time ? ` · ${session.time}` : ""}
                       {session.location ? ` · ${session.location}` : ""}
                     </span>
+                    {session.campaign_name && (
+                      <span className="mt-0.5 block truncate font-mono text-[10px] uppercase tracking-wider text-primary">
+                        {session.campaign_name}
+                      </span>
+                    )}
                   </span>
                 </button>
               </li>

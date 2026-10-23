@@ -4,6 +4,7 @@ import { addMonths, format, parseISO, startOfMonth, subMonths } from "date-fns";
 import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,6 +24,7 @@ import SessionPollDialog from "@/components/calendar/SessionPollDialog";
 import CampaignSelect from "@/components/common/CampaignSelect";
 import { tallyVotes } from "@/lib/services/sessionPolls";
 import { useExpandedCardState } from "@/lib/context/ExpandedCardContext";
+import { usePageFilter } from "@/lib/context/PageFilterContext";
 import { useCampaigns } from "@/hooks/useCampaigns";
 import { useScenes } from "@/hooks/useScenes";
 import { useGameSessions } from "@/hooks/useGameSessions";
@@ -39,15 +41,19 @@ const emptyForm = (date) => ({
   scene_id: "",
 });
 
+// Dans la vue « Toutes les campagnes », chaque session porte le nom de sa campagne (affichage seulement, non enregistré).
+const withCampaignName = (list, showAll, names) =>
+  showAll ? list.map((session) => ({ ...session, campaign_name: names.get(session.campaign_id) || "" })) : list;
+
 export default function Calendrier() {
   const { expandedCardId, setExpandedCardId } = useExpandedCardState();
   const { campaigns, campaignId, selectCampaign } = useCampaigns();
   const [month, setMonth] = useState(startOfMonth(new Date()));
   const [selectedDate, setSelectedDate] = useState("");
 
-  const scenes = useScenes(campaignId);
-  const { sessions, upcoming, loading, saving, saveSession, deleteSession } = useGameSessions(campaignId, month);
-  const { polls, deletingPollId, updatePollCard, deletePoll } = useSessionPolls(campaignId);
+  // Vue « Toutes les campagnes » : les sessions de chaque campagne s'affichent ensemble, avec le nom de leur campagne.
+  const [showAllStored, setShowAll] = usePageFilter("calendar.allCampaigns", false);
+  const showAll = showAllStored === true && campaigns.length > 1;
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [pollDialogOpen, setPollDialogOpen] = useState(false);
@@ -55,6 +61,17 @@ export default function Calendrier() {
   const [form, setForm] = useState(emptyForm());
   const [pendingDelete, setPendingDelete] = useState(null);
   const [pendingPollDelete, setPendingPollDelete] = useState(null);
+
+  // Les scènes proposées sont celles de la campagne de la session ouverte (la campagne sélectionnée pour une nouvelle session).
+  const scenes = useScenes(form.campaign_id || campaignId);
+  const rawData = useGameSessions(campaignId, month, { allCampaigns: showAll });
+  const { loading, saving, saveSession, deleteSession } = rawData;
+  const { polls, deletingPollId, updatePollCard, deletePoll } = useSessionPolls(campaignId);
+
+  const campaignNames = useMemo(() => new Map(campaigns.map((item) => [item.id, item.name])), [campaigns]);
+  const sessions = useMemo(() => withCampaignName(rawData.sessions, showAll, campaignNames), [rawData.sessions, showAll, campaignNames]);
+  const upcoming = useMemo(() => withCampaignName(rawData.upcoming, showAll, campaignNames), [rawData.upcoming, showAll, campaignNames]);
+  const selectedCampaignName = campaignNames.get(campaignId) || "";
 
   useEffect(() => {
     if (!campaignId) setSelectedDate("");
@@ -92,6 +109,7 @@ export default function Calendrier() {
   const openEdit = (session) => {
     setForm({
       id: session.id,
+      campaign_id: session.campaign_id || campaignId,
       title: session.title || "",
       date: dateKey(session.date),
       time: session.time || "",
@@ -114,7 +132,7 @@ export default function Calendrier() {
   };
 
   const save = () => {
-    if (!form.title.trim() || !form.date || !campaignId) return;
+    if (!form.title.trim() || !form.date || !(form.campaign_id || campaignId)) return;
     const values = form;
     setDialogOpen(false);
     saveSession(values);
@@ -152,6 +170,12 @@ export default function Calendrier() {
               setSelectedDate("");
             }}
           />
+          {campaigns.length > 1 && (
+            <label className="flex min-h-10 cursor-pointer items-center gap-2 rounded-md border border-border px-3 text-sm text-foreground">
+              <Switch checked={showAll} onCheckedChange={(value) => { setShowAll(value); setSelectedDate(""); }} aria-label="Afficher toutes les campagnes" />
+              Toutes les campagnes
+            </label>
+          )}
           <Button data-tutorial="calendar-poll" variant="outline" onClick={() => setPollDialogOpen(true)} disabled={!campaignId}>
             Sondage des joueurs
           </Button>
@@ -209,9 +233,15 @@ export default function Calendrier() {
               <span data-tutorial="calendar-month" className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
                 {loading
                   ? "Chargement…"
-                  : `${sessions.length} session${sessions.length > 1 ? "s" : ""} ce mois`}
+                  : `${sessions.length} session${sessions.length > 1 ? "s" : ""} ce mois${showAll ? " (toutes campagnes)" : ""}`}
               </span>
             </div>
+
+            {showAll && selectedCampaignName && (
+              <p className="text-xs text-muted-foreground">
+                Les nouvelles sessions sont créées dans la campagne « {selectedCampaignName} ». Une session existante reste dans sa campagne.
+              </p>
+            )}
 
             <MonthGrid
               month={month}
@@ -249,6 +279,9 @@ export default function Calendrier() {
                           </span>
                           <span className="min-w-0 flex-1 truncate font-display text-sm text-foreground">
                             {session.title}
+                            {session.campaign_name && (
+                              <span className="ml-2 font-mono text-[10px] uppercase tracking-wider text-primary">{session.campaign_name}</span>
+                            )}
                           </span>
                           <span className={cn("tag shrink-0 border", meta.badge)}>{meta.label}</span>
                         </button>
@@ -346,6 +379,7 @@ export default function Calendrier() {
         form={form}
         setForm={setForm}
         scenes={scenes}
+        campaignName={campaigns.length > 1 ? campaignNames.get(form.campaign_id || campaignId) || "" : ""}
         saving={saving}
         onSave={save}
         isEditing={!!form.id}

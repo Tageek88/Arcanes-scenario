@@ -10,15 +10,37 @@ La page d'accueil rassemble les campagnes, les actes et les scènes sous forme d
 - suivre l'avancement des scènes, par exemple leur état de préparation ou si elles ont été jouées ;
 - détailler les scènes avec leur contenu, leurs notes et leurs suites possibles ;
 - agrandir les cartes pour consulter leur contenu, puis les réduire en sélectionnant une autre carte ;
-- retrouver les éléments du codex associés à la scène sélectionnée.
+- faire défiler la liste des actes à la molette de la souris ;
+- retrouver, dans le panneau Codex, les éléments associés à la scène sélectionnée : PNJ, lieux, indices et informations, et personnages joueurs.
 
 CODEX
 
 Le codex regroupe les éléments du monde de la campagne : PNJ, lieux, indices et informations. Les entrées peuvent être recherchées et associées aux scènes.
 
+La recherche du codex parcourt toute la fiche : nom, rôle, genre, niveau, traits, motivation, signe distinctif, caractéristiques, compétences, équipement, lieu, relations, commentaire et description. Plusieurs mots se combinent (tous doivent correspondre) et des guillemets permettent de chercher une expression. Un bouton efface la recherche.
+
+Les valeurs partagées par plusieurs éléments (rôle, niveau, genre, attitude, trait de caractère, compétence, équipement, type) sont cliquables : le clic ajoute un filtre dans la barre de recherche, un second clic le retire. Le lieu d'attribution d'un PNJ ou d'un indice et les relations d'un PNJ sont aussi cliquables : le clic ouvre directement la fiche correspondante, même dans un autre onglet. Depuis un lieu, un lien affiche les PNJ ou les indices qui lui sont rattachés.
+
+La page Codex présente les PNJ, les lieux et les indices. Les personnages joueurs se consultent dans le panneau Codex de la page d'accueil.
+
 PNJ
 
-Les fiches de PNJ servent à conserver leur nom, leur rôle, leur description et les autres renseignements utiles. Il est aussi possible de gérer les relations entre PNJ.
+Les fiches de PNJ servent à conserver leur nom, leur genre, leur rôle, leur attitude, leur lieu d'attribution, leur niveau, leurs traits de caractère, leur motivation, leur signe distinctif, leurs caractéristiques, leurs compétences et leur équipement. Les caractéristiques, les compétences et l'équipement suivent la même forme que les fiches de personnage : une valeur principale et des champs facultatifs nommés. Il est aussi possible de gérer les relations entre PNJ. Toute la fiche s'affiche dans le codex, sans rien masquer.
+
+GÉNÉRATION ALÉATOIRE DE PNJ
+
+Le bouton « Générer la fiche » remplit une fiche de PNJ à partir de l'univers de la campagne : prénom et nom, rôle, attitude, traits, motivation, signe distinctif, caractéristiques et compétences.
+- Le champ Genre, placé sous le nom, sert de paramètre : un genre choisi est respecté à chaque tirage, « Au hasard » en tire un et le renseigne. Le bouton de génération du nom en tient compte aussi.
+- Chaque rubrique a un cadenas : une rubrique verrouillée n'est pas modifiée par un nouveau tirage. Si le tirage écrase des rubriques déjà saisies, l'application demande confirmation.
+- Le niveau du PNJ (faible, standard, élite ou les niveaux du MJ) guide les valeurs tirées.
+- Tables du générateur : prénoms, noms de famille, rôles, traits, motivations et signes distinctifs peuvent être complétés ou remplacés par ceux du MJ, depuis le bouton « Tables du générateur » de la page Tables aléatoires. Elles sont propres à chaque campagne.
+
+BARÈME D'ÉQUILIBRAGE DES PNJ
+
+Le modèle de fiche d'une campagne peut contenir un barème : pour chaque niveau de PNJ (huit au maximum), la plage de valeurs de chaque caractéristique et le nombre de compétences attendu.
+- Le barème peut être calculé à partir des fiches de personnages existantes, puis ajusté, exporté ou importé au format JSON.
+- Il sert au tirage des valeurs et au contrôle d'équilibrage d'une fiche de PNJ. Les écarts sont signalés par des remarques, rien n'est jamais bloqué.
+- Renommer une caractéristique du modèle met le barème à jour.
 
 LIEUX
 
@@ -34,11 +56,11 @@ Les images et les PDF peuvent être joints aux fiches concernées.
 
 CALENDRIER
 
-Le calendrier sert à organiser les sessions de jeu et à les relier, lorsque c'est utile, à une scène de la campagne. Il permet de retrouver les rendez-vous et les informations associées aux séances.
+Le calendrier sert à organiser les sessions de jeu et à les relier, lorsque c'est utile, à une scène de la campagne. Il permet de retrouver les rendez-vous et les informations associées aux séances. L'interrupteur « Toutes les campagnes » affiche dans un même calendrier les sessions de toutes les campagnes, avec le nom de la campagne sur chacune ; chaque session reste rattachée à sa campagne.
 
 TABLES ALÉATOIRES
 
-Les tables permettent de préparer des listes de résultats pour improviser pendant la partie : rencontres, noms, événements, objets ou autres idées. Les entrées peuvent être pondérées afin que certains résultats apparaissent plus souvent lors d'un tirage.
+Les tables permettent de préparer des listes de résultats pour improviser pendant la partie : rencontres, noms, événements, objets ou autres idées. Les entrées peuvent être pondérées afin que certains résultats apparaissent plus souvent lors d'un tirage. Le bouton « Tables du générateur » ouvre les listes qui alimentent la génération des noms et des PNJ.
 
 NOTES
 
@@ -47,11 +69,11 @@ La page Notes fait office de bloc-notes pour les rappels et les idées de prépa
 SYSTÈME DE JEU
 
 Le système de jeu permet de définir un modèle de fiche pour chaque campagne, puis de créer des fiches de personnages à partir de ce modèle.
-- Le modèle précise les caractéristiques et les champs à afficher : valeur, modificateur, seuil de test et maximum.
-- Les seuils de test sont saisis manuellement : l'application ne les calcule pas.
-- Les fiches peuvent contenir les compétences, l'équipement et des notes.
+- Le modèle précise les caractéristiques de la campagne. Pour chacune, il peut proposer des champs facultatifs (par exemple Modificateur, Test ou Maximum), préremplis sur les nouvelles fiches. Chaque fiche peut aussi ajouter ses propres champs.
+- Les compétences peuvent elles aussi avoir des champs facultatifs.
 - Les compétences et les équipements sont retenus dans des catalogues propres à la campagne. Les champs connus peuvent être repris après confirmation ; les champs facultatifs d'un type d'équipement peuvent être proposés pour un nouvel objet de ce type.
-- Une fiche peut être modifiée, dupliquée, supprimée ou imprimée. La duplication conserve les valeurs saisies, dont les seuils de test.
+- Une fiche peut être modifiée, dupliquée, supprimée ou imprimée. La duplication conserve les valeurs saisies.
+- Une barre de recherche retrouve un personnage par son nom, ses notes, ses compétences ou son équipement.
 
 PARAMÈTRES
 
@@ -65,4 +87,4 @@ Les données de la version navigateur et de l'application installée sont distin
 
 IMPRESSION
 
-Plusieurs pages proposent l'impression de leur contenu. Pour une fiche de personnage, le document présente les caractéristiques, les compétences, l'équipement et les notes dans une mise en page adaptée à l'impression. La boîte de dialogue du système permet de l'imprimer sur papier ou de l'enregistrer en PDF.
+Plusieurs pages proposent l'impression de leur contenu. Pour une fiche de personnage, le document présente les caractéristiques, les compétences, l'équipement et les notes dans une mise en page adaptée à l'impression. Pour un PNJ, l'impression reprend sa fiche complète : genre, niveau, traits, motivation, signe distinctif, caractéristiques, compétences, équipement et relations. La boîte de dialogue du système permet d'imprimer sur papier ou d'enregistrer en PDF.

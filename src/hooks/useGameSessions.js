@@ -7,10 +7,12 @@ import { dispatchTutorialAction } from "@/utils/tutorialStorage";
 
 /**
  * Sessions de jeu d'une campagne : celles du mois affiché et les 6 prochaines.
- * @param {string} campaignId
+ * Avec `allCampaigns`, celles de toutes les campagnes (chaque session garde son `campaign_id`).
+ * @param {string} campaignId campagne sélectionnée (celle des nouvelles sessions)
  * @param {Date} month premier jour du mois affiché
+ * @param {{ allCampaigns?: boolean }} [options]
  */
-export function useGameSessions(campaignId, month) {
+export function useGameSessions(campaignId, month, { allCampaigns = false } = {}) {
   const { toast } = useToast();
   const { refreshKey } = useDataRefresh();
   const [sessions, setSessions] = useState([]);
@@ -28,7 +30,8 @@ export function useGameSessions(campaignId, month) {
       return;
     }
     let alive = true;
-    const contextKey = `${campaignId}|${monthKey}`;
+    const contextKey = `${allCampaigns ? "*" : campaignId}|${monthKey}`;
+    const scope = allCampaigns ? {} : { campaign_id: campaignId };
     const initial = loadedFor.current !== contextKey;
     if (initial) {
       setSessions([]);
@@ -42,11 +45,11 @@ export function useGameSessions(campaignId, month) {
         const today = format(new Date(), "yyyy-MM-dd");
         const [monthRes, upcomingRes] = await Promise.all([
           api.entities.GameSession.filter(
-            { campaign_id: campaignId, date: { $gte: start, $lt: nextMonth } },
+            { ...scope, date: { $gte: start, $lt: nextMonth } },
             { sort: "date", limit: 300 }
           ),
           api.entities.GameSession.filter(
-            { campaign_id: campaignId, date: { $gte: today } },
+            { ...scope, date: { $gte: today } },
             { sort: "date", limit: 6 }
           ),
         ]);
@@ -56,7 +59,7 @@ export function useGameSessions(campaignId, month) {
         loadedFor.current = contextKey;
       } catch (error) {
         console.error("Chargement des sessions impossible :", error);
-        if (alive) toast({ variant: "destructive", title: "Sessions indisponibles", description: "Impossible de charger le calendrier de cette campagne." });
+        if (alive) toast({ variant: "destructive", title: "Sessions indisponibles", description: "Impossible de charger le calendrier." });
       } finally {
         if (alive && initial) setLoading(false);
       }
@@ -65,7 +68,7 @@ export function useGameSessions(campaignId, month) {
     return () => {
       alive = false;
     };
-  }, [campaignId, monthKey, month, refreshKey, toast]);
+  }, [campaignId, allCampaigns, monthKey, month, refreshKey, toast]);
 
   const applySession = (session, replacedId) => {
     setSessions((list) => {
@@ -88,7 +91,8 @@ export function useGameSessions(campaignId, month) {
   const saveSession = async (form) => {
     setSaving(true);
     const payload = {
-      campaign_id: campaignId,
+      // Une session existante reste dans sa campagne, même quand on la modifie depuis une autre.
+      campaign_id: form.campaign_id || campaignId,
       title: form.title.trim(),
       date: form.date,
       time: form.time || "",
