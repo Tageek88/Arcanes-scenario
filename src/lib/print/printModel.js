@@ -23,6 +23,13 @@ const byOrder = (a, b) =>
 
 const hasText = (value) => typeof value === "string" && value.trim() !== "";
 
+// Champs facultatifs renseignés (« Nom : valeur ») d'une caractéristique, d'une compétence ou d'un équipement.
+const optionalFields = (fields) =>
+    (Array.isArray(fields) ? fields : [])
+        .map((field) => ({ name: txt(field?.name).trim(), value: txt(field?.value).trim() }))
+        .filter((field) => field.value)
+        .map((field) => (field.name ? `${field.name} : ${field.value}` : field.value));
+
 // Fiche détaillée d'un PNJ (lignes de présentation, valeurs des caractéristiques du modèle, compétences).
 // Les PNJ créés avant ces champs n'ont rien de tout cela : la fiche est alors vide.
 export function npcSheet(npc, gameSheetModel) {
@@ -35,14 +42,27 @@ export function npcSheet(npc, gameSheetModel) {
     if (hasText(npc.motivation)) lines.push(`Motivation : ${npc.motivation}`);
     if (hasText(npc.appearance)) lines.push(`Signe distinctif : ${npc.appearance}`);
     const stats = (gameSheetModel?.characteristics || [])
-        .map((definition) => ({ name: definition.name, value: txt(npc.characteristics?.[definition.name]?.value).trim() }))
+        .map((definition) => {
+            const entry = npc.characteristics?.[definition.name];
+            const main = txt(entry?.value).trim();
+            const extra = optionalFields(entry?.fields);
+            return { name: definition.name, value: extra.length ? `${main}${main ? " " : ""}(${extra.join(" · ")})` : main };
+        })
         .filter((stat) => stat.value !== "");
     const skills = (Array.isArray(npc.skills) ? npc.skills : [])
         .filter((skill) => hasText(skill?.name))
-        .map((skill) =>
-            gameSheetModel?.skillRollModifier && hasText(skill.roll_modifier) ? `${skill.name} (${skill.roll_modifier})` : skill.name
-        );
-    return { lines, stats, skills };
+        .map((skill) => {
+            const modifier = gameSheetModel?.skillRollModifier && hasText(skill.roll_modifier) ? [skill.roll_modifier.trim()] : [];
+            const detail = [...modifier, ...optionalFields(skill.fields)].join(" · ");
+            return detail ? `${skill.name} (${detail})` : skill.name;
+        });
+    const equipment = (Array.isArray(npc.equipment) ? npc.equipment : [])
+        .filter((item) => hasText(item?.name))
+        .map((item) => {
+            const detail = [txt(item.type).trim(), ...optionalFields(item.fields)].filter(Boolean).join(" · ");
+            return detail ? `${item.name} (${detail})` : item.name;
+        });
+    return { lines, stats, skills, equipment };
 }
 
 // Actes dans l'ordre, chacun avec ses scènes ; les scènes sans acte forment un dernier groupe.
