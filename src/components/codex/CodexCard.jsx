@@ -1,10 +1,11 @@
 import React from "react";
 import { cn } from "@/lib/utils";
-import { Copy, Link2, Link2Off, MapPin, Paperclip, Pencil, Trash2, Users } from "lucide-react";
+import { Copy, Link2, Link2Off, Paperclip, Pencil, Trash2 } from "lucide-react";
 import { NPC_ATTITUDE } from "@/lib/meta/sceneMeta";
 import { isImage } from "@/components/codex/AttachmentsField";
 import { openAttachment } from "@/lib/services/openAttachment";
 import { useExpandedCard } from "@/lib/context/ExpandedCardContext";
+import CodexEntryDetails, { FilterChip } from "@/components/codex/CodexEntryDetails";
 
 export default function CodexCard({
   kind,
@@ -19,6 +20,8 @@ export default function CodexCard({
 }) {
   const attitude = NPC_ATTITUDE[entry.attitude] || NPC_ATTITUDE.neutre;
   const { expanded, cardProps } = useExpandedCard(`codex:${entry.id}`);
+  // Un PNJ montre toute sa fiche en permanence ; les autres entrées se développent au clic.
+  const full = expanded || kind === "npc";
 
   return (
     <div {...cardProps} className={cn("w-full max-w-full flex cursor-pointer flex-col rounded-xl border bg-card/50 p-4 transition-colors overflow-hidden", linked ? "corner-accent border-primary/50" : "border-border", expanded && "ring-2 ring-primary/50")}>
@@ -43,38 +46,23 @@ export default function CodexCard({
       </div>
 
       {(entry.role || entry.type) && (
-        <p className="mt-1 w-full break-all font-mono text-xs uppercase tracking-widest text-muted-foreground">
-          {entry.role || entry.type}
-        </p>
+        <div className="mt-1 w-full">
+          <FilterChip
+            filterKey={entry.role ? "role" : "type"}
+            value={entry.role || entry.type}
+            className="max-w-full break-words font-mono text-xs uppercase tracking-widest"
+          />
+        </div>
       )}
-      {entry.description && <p className={cn("mt-2 text-sm text-muted-foreground break-words overflow-hidden", !expanded && "line-clamp-3")}>{entry.description}</p>}
+      {entry.description && <p className={cn("mt-2 text-sm text-muted-foreground break-words overflow-hidden", !full && "line-clamp-3")}>{entry.description}</p>}
 
-      {locationLabel && (
-        <p className="mt-2 flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-muted-foreground overflow-hidden">
-          <MapPin className="h-3 w-3 shrink-0" />
-          <span className="truncate break-words">{locationLabel}</span>
-        </p>
-      )}
-
-      {relations?.length > 0 && (
-        <ul className="mt-2 space-y-0.5">
-          {(expanded ? relations : relations.slice(0, 3)).map((r) => (
-            <li key={r.id} className="flex items-start gap-1.5 text-xs text-muted-foreground">
-              <Users className="mt-0.5 h-3 w-3 shrink-0" />
-              <span className="truncate break-words overflow-hidden">{r.text}</span>
-            </li>
-          ))}
-          {relations.length > 3 && (
-            <li className="pl-[18px] font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-              + {relations.length - 3} autre{relations.length - 3 > 1 ? "s" : ""}
-            </li>
-          )}
-        </ul>
-      )}
+      <div className="mt-2">
+        <CodexEntryDetails kind={kind} entry={entry} locationLabel={locationLabel} relations={relations} />
+      </div>
 
       {(entry.attachments || []).length > 0 && (
         <div className="mt-3 flex flex-wrap items-center gap-2">
-          {(expanded ? entry.attachments : entry.attachments.slice(0, 3)).map((file, index) => (
+          {(full ? entry.attachments : entry.attachments.slice(0, 3)).map((file, index) => (
             <button
               type="button"
               key={`${file.url}-${index}`}
@@ -85,7 +73,7 @@ export default function CodexCard({
               {isImage(file) ? <img src={file.url} alt={file.name} className="h-full w-full object-cover" loading="lazy" /> : <span className="text-[10px] font-mono uppercase">PDF</span>}
             </button>
           ))}
-          {entry.attachments.length > 3 && (
+          {!full && entry.attachments.length > 3 && (
             <span className="tag border border-border text-muted-foreground shrink-0">
               <Paperclip className="mr-1 h-3 w-3" /> +{entry.attachments.length - 3}
             </span>

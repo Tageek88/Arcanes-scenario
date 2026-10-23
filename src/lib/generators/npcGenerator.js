@@ -69,6 +69,7 @@ export function composeDescription({ role, traits, motivation, appearance }) {
  *   levels?: string[],
  *   traitCount?: number | [number, number],
  *   ranges?: { name: string, min: number, max: number }[],
+ *   fieldNames?: Record<string, string[]>,
  *   skillPool?: { name: string, roll_modifier?: string }[],
  *   skillCount?: number | [number, number],
  *   keep?: Partial<{ name: string, gender: string, role: string, level: string, attitude: string,
@@ -87,6 +88,7 @@ export function generateNpc({
   levels,
   traitCount = [2, 3],
   ranges,
+  fieldNames,
   skillPool,
   skillCount = [2, 4],
   keep = {},
@@ -131,7 +133,12 @@ export function generateNpc({
 
   const drawnCharacteristics = {};
   for (const range of cleanRanges(ranges)) {
-    drawnCharacteristics[range.name] = { value: String(rng.int(range.min, range.max)), modifier: "", test: "", max: "" };
+    // Même forme que les fiches de personnage : la valeur, plus les champs facultatifs proposés par le modèle (vides).
+    const optional = Array.isArray(fieldNames?.[range.name]) ? fieldNames[range.name] : [];
+    drawnCharacteristics[range.name] = {
+      value: String(rng.int(range.min, range.max)),
+      fields: optional.filter(hasText).map((name) => ({ name, value: "" })),
+    };
   }
   const characteristics =
     keep.characteristics && typeof keep.characteristics === "object" ? keep.characteristics : drawnCharacteristics;
@@ -142,7 +149,7 @@ export function generateNpc({
   const drawnSkills = rng
     .shuffle(pool)
     .slice(0, skillsWanted)
-    .map((skill) => ({ name: skill.name, roll_modifier: skill.roll_modifier || "" }));
+    .map((skill) => ({ name: skill.name, roll_modifier: skill.roll_modifier || "", fields: [] }));
   const skills = Array.isArray(keep.skills) ? keep.skills : drawnSkills;
 
   const npc = {

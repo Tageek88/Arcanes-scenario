@@ -2,6 +2,7 @@ export const KIND_META = {
   npc: { entity: "NPC", title: "PNJ", singular: "PNJ", nameLabel: "Nom du PNJ" },
   location: { entity: "Location", title: "Lieux", singular: "Lieu", nameLabel: "Nom du lieu" },
   clue: { entity: "Clue", title: "Indices & infos", singular: "indice ou info", nameLabel: "Intitulé" },
+  character: { entity: "GameCharacter", title: "Personnages", singular: "Personnage", nameLabel: "Nom du personnage" },
 };
 
 /** Genres proposés pour un PNJ (les identifiants sont ceux des générateurs). */
@@ -15,7 +16,11 @@ export const CODEX_TABS = [
   { key: "npc", label: "PNJ", entity: "NPC", linkKey: "npc_ids" },
   { key: "location", label: "Lieux", entity: "Location", linkKey: "location_ids" },
   { key: "clue", label: "Indices & infos", entity: "Clue", linkKey: "clue_ids" },
+  { key: "character", label: "Personnages", entity: "GameCharacter", linkKey: "character_ids" },
 ];
+
+/** Onglets de la page Codex : les personnages (fiches de jeu) n'y figurent pas, ils restent dans le panneau de la page d'accueil. */
+export const CODEX_PAGE_TABS = CODEX_TABS.filter((tab) => tab.key !== "character");
 
 /** @param {"npc" | "location" | "clue"} kind */
 export const defaultEntry = (kind) => {
@@ -35,6 +40,7 @@ export const defaultEntry = (kind) => {
       appearance: "",
       characteristics: {},
       skills: [],
+      equipment: [],
     };
   if (kind === "location")
     return { name: "", comment: "", type: "", description: "", attachments: [], parent_id: "" };
@@ -68,9 +74,16 @@ export const duplicateDraft = (kind, source) => {
 const text = (value) => (typeof value === "string" ? value.trim() : "");
 const cell = (value) => (value === undefined || value === null ? "" : String(value));
 
+// Champs facultatifs nommés (caractéristique, compétence ou équipement) : sans nom, ils sont ignorés.
+const cleanFields = (list) =>
+  (Array.isArray(list) ? list : [])
+    .filter((field) => text(field?.name))
+    .map((field) => ({ name: text(field.name), value: cell(field.value) }));
+
 /**
  * Champs de la fiche détaillée d'un PNJ (genre, niveau, traits, motivation, signe distinctif, caractéristiques,
- * compétences), nettoyés avant enregistrement. Accepte aussi les PNJ créés avant ces champs.
+ * compétences, équipement), nettoyés avant enregistrement. Même forme que les fiches de personnage : une caractéristique
+ * a une valeur et des champs facultatifs. Accepte aussi les PNJ créés avant ces champs.
  * @param {Record<string, any>} form
  */
 export function npcSheetPayload(form) {
@@ -79,12 +92,7 @@ export function npcSheetPayload(form) {
   if (source && typeof source === "object" && !Array.isArray(source)) {
     for (const [name, entry] of Object.entries(source)) {
       if (name === "__proto__" || !name.trim()) continue;
-      characteristics[name] = {
-        value: cell(entry?.value),
-        modifier: cell(entry?.modifier),
-        test: cell(entry?.test),
-        max: cell(entry?.max),
-      };
+      characteristics[name] = { value: cell(entry?.value), fields: cleanFields(entry?.fields) };
     }
   }
   return {
@@ -96,6 +104,9 @@ export function npcSheetPayload(form) {
     characteristics,
     skills: (Array.isArray(form?.skills) ? form.skills : [])
       .filter((skill) => text(skill?.name))
-      .map((skill) => ({ name: text(skill.name), roll_modifier: text(skill.roll_modifier) })),
+      .map((skill) => ({ name: text(skill.name), roll_modifier: text(skill.roll_modifier), fields: cleanFields(skill.fields) })),
+    equipment: (Array.isArray(form?.equipment) ? form.equipment : [])
+      .filter((item) => text(item?.name))
+      .map((item) => ({ name: text(item.name), type: text(item.type), fields: cleanFields(item.fields) })),
   };
 }

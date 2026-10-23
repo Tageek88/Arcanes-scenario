@@ -2,7 +2,7 @@
 // Relie le contexte d'une campagne (univers, tables du MJ, modèle de fiche, barème, compétences connues)
 // au générateur de PNJ. Fonctions pures : le contexte est chargé ailleurs (voir lib/services/npcGeneration.js).
 //
-// Contexte : { universeId, generatorData, characteristicNames, scale, skillPool }
+// Contexte : { universeId, generatorData, characteristicNames, characteristicFields, scale, skillPool, ... }
 
 import { createRng, newSeed } from "./random";
 import { generateNpc } from "./npcGenerator";
@@ -28,6 +28,7 @@ export function buildNpcRequest(context, options) {
     level,
     levels: names,
     ranges: rangesForLevel(scale, level, context.characteristicNames),
+    fieldNames: context.characteristicFields || {},
     skillPool: context.skillPool || [],
     keep,
   };
