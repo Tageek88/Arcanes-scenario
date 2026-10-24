@@ -227,6 +227,11 @@ export default function CodexSidebar({
                     onClick={() => setExpandedId((current) => current === item.id ? null : item.id)}
                     className="min-w-0 flex-1 text-left"
                   >
+                    {tab === "npc" && (
+                      <div data-codex-badge className="mb-1">
+                        <span className={cn("tag border", attitude.badge)}>{attitude.label}</span>
+                      </div>
+                    )}
                     <div className="flex items-center gap-1 font-display text-sm font-semibold text-foreground">
                       {expandedId === item.id
                         ? <ChevronUp className="h-4 w-4 shrink-0" />
@@ -242,7 +247,6 @@ export default function CodexSidebar({
                       {tab === "character" && "Personnage"}
                     </div>
                   </button>
-                  {tab === "npc" && <span className={cn("tag shrink-0 border", attitude.badge)}>{attitude.label}</span>}
                 </div>
 
                 {expandedId === item.id && (
