@@ -219,7 +219,7 @@ export default function NpcSheetFields({ form, set, generator, generation }) {
       </div>
 
       <div className="space-y-2">
-        <Label>Équipement</Label>
+        <Label className="block">Équipement</Label>
         {equipment.map((item, index) => (
           <div key={index} className="space-y-2 rounded-lg border border-border p-3">
             <div className="flex items-center gap-2">
