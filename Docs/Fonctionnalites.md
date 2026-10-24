@@ -56,7 +56,7 @@ Les images et les PDF peuvent être joints aux fiches concernées.
 
 CALENDRIER
 
-Le calendrier sert à organiser les sessions de jeu et à les relier, lorsque c'est utile, à une scène de la campagne. Il permet de retrouver les rendez-vous et les informations associées aux séances. L'interrupteur « Toutes les campagnes » affiche dans un même calendrier les sessions de toutes les campagnes, avec le nom de la campagne sur chacune ; chaque session reste rattachée à sa campagne.
+Le calendrier sert à organiser les sessions de jeu et à les relier, lorsque c'est utile, à une scène de la campagne. Il permet de retrouver les rendez-vous et les informations associées aux séances. L'interrupteur « Toutes les campagnes » affiche dans un même calendrier les sessions de toutes les campagnes, avec le nom de la campagne sur chacune ; chaque session reste rattachée à sa campagne. À la création d'une session, on choisit sa campagne, ou « Nouvelle campagne… » avec un nom pour créer une campagne vierge en même temps.
 
 TABLES ALÉATOIRES
 

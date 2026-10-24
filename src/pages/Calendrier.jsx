@@ -19,6 +19,7 @@ import MonthGrid from "@/components/calendar/MonthGrid";
 import SessionDialog from "@/components/calendar/SessionDialog";
 import UpcomingSessions from "@/components/calendar/UpcomingSessions";
 import { dateKey, sessionStatusMeta } from "@/lib/meta/sessionMeta";
+import { NEW_CAMPAIGN } from "@/lib/meta/sessionCampaign";
 import PrintButton from "@/components/print/PrintButton";
 import SessionPollDialog from "@/components/calendar/SessionPollDialog";
 import CampaignSelect from "@/components/common/CampaignSelect";
@@ -63,7 +64,8 @@ export default function Calendrier() {
   const [pendingPollDelete, setPendingPollDelete] = useState(null);
 
   // Les scènes proposées sont celles de la campagne de la session ouverte (la campagne sélectionnée pour une nouvelle session).
-  const scenes = useScenes(form.campaign_id || campaignId);
+  const sessionCampaignId = form.campaign_id || campaignId;
+  const scenes = useScenes(sessionCampaignId === NEW_CAMPAIGN ? "" : sessionCampaignId);
   const rawData = useGameSessions(campaignId, month, { allCampaigns: showAll });
   const { loading, saving, saveSession, deleteSession } = rawData;
   const { polls, deletingPollId, updatePollCard, deletePoll } = useSessionPolls(campaignId);
@@ -132,10 +134,12 @@ export default function Calendrier() {
   };
 
   const save = () => {
-    if (!form.title.trim() || !form.date || !(form.campaign_id || campaignId)) return;
+    if (!form.title.trim() || !form.date || !sessionCampaignId) return;
+    if (sessionCampaignId === NEW_CAMPAIGN && !form.new_campaign_name?.trim()) return;
     const values = form;
+    const campaignName = sessionCampaignId === NEW_CAMPAIGN ? form.new_campaign_name.trim() : campaignNames.get(sessionCampaignId) || "";
     setDialogOpen(false);
-    saveSession(values);
+    saveSession(values, { campaignName });
   };
 
   const removeSession = () => {
@@ -379,7 +383,9 @@ export default function Calendrier() {
         form={form}
         setForm={setForm}
         scenes={scenes}
-        campaignName={campaigns.length > 1 ? campaignNames.get(form.campaign_id || campaignId) || "" : ""}
+        campaignName={form.id && campaigns.length > 1 ? campaignNames.get(sessionCampaignId) || "" : ""}
+        campaigns={campaigns}
+        activeCampaignId={campaignId}
         saving={saving}
         onSave={save}
         isEditing={!!form.id}

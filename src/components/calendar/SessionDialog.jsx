@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import ResponsiveDialog from "@/components/common/ResponsiveDialog";
 import { SESSION_STATUS_ORDER, SESSION_STATUS } from "@/lib/meta/sessionMeta";
+import { NEW_CAMPAIGN } from "@/lib/meta/sessionCampaign";
 import { dispatchTutorialAction } from "@/utils/tutorialStorage";
 
 export default function SessionDialog({
@@ -25,7 +26,16 @@ export default function SessionDialog({
   onSave,
   isEditing,
   onDelete,
+  campaignName = "",
+  campaigns = [],
+  activeCampaignId = "",
 }) {
+  // Une nouvelle session peut aller dans une autre campagne, ou dans une campagne vierge créée à l'enregistrement.
+  const campaignValue = form.campaign_id || activeCampaignId;
+  const creatingCampaign = !isEditing && campaignValue === NEW_CAMPAIGN;
+  const chooseCampaign = (value) =>
+    setForm((f) => ({ ...f, campaign_id: value, scene_id: "" }));
+
   const footer = (
     <div className="flex items-center justify-between gap-2">
       <div>
@@ -43,7 +53,7 @@ export default function SessionDialog({
         <Button variant="ghost" onClick={() => onOpenChange(false)}>
           Annuler
         </Button>
-        <Button onClick={onSave} disabled={saving || !form.title.trim() || !form.date}>
+        <Button onClick={onSave} disabled={saving || !form.title.trim() || !form.date || (creatingCampaign && !form.new_campaign_name?.trim())}>
           {saving ? "Enregistrement…" : "Enregistrer"}
         </Button>
       </div>
@@ -55,10 +65,44 @@ export default function SessionDialog({
       open={open}
       onOpenChange={onOpenChange}
       title={isEditing ? "Modifier la session" : "Nouvelle session"}
-      description="Fixez la date, l'heure et le contenu de votre prochaine partie."
+      description={
+        campaignName
+          ? `Campagne « ${campaignName} ». Fixez la date, l'heure et le contenu de votre prochaine partie.`
+          : "Fixez la date, l'heure et le contenu de votre prochaine partie."
+      }
       footer={footer}
     >
       <div className="space-y-4 py-1">
+        {!isEditing && (
+          <div className="space-y-2">
+            <Label>Campagne</Label>
+            <Select value={campaignValue || NEW_CAMPAIGN} onValueChange={chooseCampaign}>
+              <SelectTrigger data-tutorial="session-campaign">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {campaigns.map((item) => (
+                  <SelectItem key={item.id} value={item.id}>
+                    {item.name}
+                  </SelectItem>
+                ))}
+                <SelectItem value={NEW_CAMPAIGN}>＋ Nouvelle campagne…</SelectItem>
+              </SelectContent>
+            </Select>
+            {creatingCampaign && (
+              <>
+                <Input
+                  aria-label="Nom de la nouvelle campagne"
+                  value={form.new_campaign_name || ""}
+                  onChange={(e) => setForm((f) => ({ ...f, new_campaign_name: e.target.value }))}
+                  placeholder="Nom de la nouvelle campagne"
+                />
+                <p className="text-xs text-muted-foreground">Une campagne vierge portant ce nom sera créée avec la session.</p>
+              </>
+            )}
+          </div>
+        )}
+
         <div className="space-y-2">
           <Label>Titre de la session</Label>
           <Input

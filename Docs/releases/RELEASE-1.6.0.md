@@ -11,7 +11,7 @@ Version centrée sur les PNJ : génération aléatoire de fiches complètes à p
 - **Fiche de PNJ enrichie.** Niveau, genre, traits, motivation, signe distinctif, caractéristiques, compétences et **équipement**, avec des champs facultatifs comme sur les fiches de personnage.
 - **Recherche du Codex sur toute la fiche.** Un PNJ se retrouve par n'importe quelle information de sa fiche. Plusieurs mots se combinent, les guillemets cherchent une expression.
 - **Liens cliquables.** Un lieu d'attribution ou une relation ouvre directement la fiche concernée. Un rôle, un niveau, un trait, une compétence ou un équipement partagé ajoute un filtre dans la barre de recherche.
-- **Calendrier commun à toutes les campagnes.** Un interrupteur « Toutes les campagnes » affiche les sessions de chaque campagne dans le même calendrier, avec le nom de la campagne. Une session reste dans sa campagne ; une nouvelle session est créée dans la campagne sélectionnée.
+- **Calendrier commun à toutes les campagnes.** Un interrupteur « Toutes les campagnes » affiche les sessions de chaque campagne dans le même calendrier, avec le nom de la campagne. Une session reste dans sa campagne ; une nouvelle session se range dans la campagne choisie dans la fenêtre, ou dans une nouvelle campagne vierge créée en saisissant son nom.
 - **Personnages dans le panneau Codex de l'accueil.** Les fiches de personnage se consultent et se modifient depuis l'accueil ; la page Codex se concentre sur les PNJ, les lieux et les indices.
 
 ### Améliorations
