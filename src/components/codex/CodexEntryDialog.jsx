@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 // Data hooks and services used by the dialog (no direct API access in this component).
 import { useCodexEntryData } from "@/hooks/useCodexEntryData";
 import { useNpcGenerator } from "@/hooks/useNpcGenerator";
-import { useNpcFormGeneration } from "@/hooks/useNpcFormGeneration";
+import { LOCKABLE_FIELDS, useNpcFormGeneration } from "@/hooks/useNpcFormGeneration";
 import { saveCodexEntry } from "@/lib/services/codexEntries";
 
 // External and internal dependencies for the CodexEntryDialog component.
@@ -128,7 +128,7 @@ export default function CodexEntryDialog({
 
   // Générateur de PNJ (univers, tables du MJ, barème) et génération de la fiche dans le formulaire.
   const generator = useNpcGenerator({ campaignId, enabled: open && kind === "npc" });
-  const generation = useNpcFormGeneration({ open, generator, form, setForm });
+  const generation = useNpcFormGeneration({ open, generator, form, setForm, initialLocks: (entry || duplicateOf)?.generation_locks });
   const generatorData = generator.context?.generatorData;
 
   // Metadata for the current kind of codex entry, used for rendering and behavior.
@@ -223,6 +223,7 @@ export default function CodexEntryDialog({
       payload.attitude = form.attitude || "neutre";
       payload.location_id = form.location_id || "";
       Object.assign(payload, npcSheetPayload(form));
+      payload.generation_locks = Object.fromEntries(LOCKABLE_FIELDS.filter((key) => generation.locks[key]).map((key) => [key, true]));
     } else if (kind === "location") {
       payload.type = form.type || "";
       payload.description = form.description || "";
