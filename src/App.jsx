@@ -20,6 +20,19 @@ const Settings = lazy(() => import("@/pages/Settings"));
 
 const Game = lazy(() => import("@/pages/Jeu"));
 
+// Charge les pages en arrière-plan : le changement de page n'attend plus le téléchargement de leur code.
+const preloadPages = () =>
+  Promise.all([
+    import("@/pages/Home"),
+    import("@/pages/Codex"),
+    import("@/pages/Tables"),
+    import("@/pages/Calendrier"),
+    import("@/pages/Notes"),
+    import("@/pages/Settings"),
+    import("@/pages/Jeu"),
+  ]).catch(() => {});
+if (typeof window !== "undefined") window.setTimeout(preloadPages, 1500);
+
 function App() {
   return (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
