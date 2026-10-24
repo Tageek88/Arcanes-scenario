@@ -125,53 +125,68 @@
 }
 
 @layer components {
-  /* Page de grimoire : la reliure est à droite, la page pivote autour de son bord droit. */
+  /* Page de grimoire : la page se révèle par un bord oblique, du coin bas-droit (reliure) vers le coin haut-gauche. */
   .page-transition {
-    transform-origin: right center;
-    animation: page-turn-forward 900ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation: page-edge-forward 900ms cubic-bezier(0.45, 0.05, 0.25, 1) backwards;
   }
 
   .page-transition[data-turn="back"] {
-    animation-name: page-turn-back;
+    animation-name: page-edge-back;
   }
 
-  @keyframes page-turn-forward {
-    from {
-      opacity: 0;
-      transform: perspective(1600px) rotateY(48deg);
-    }
-    60% {
-      opacity: 1;
-    }
+  .page-transition > * {
+    animation: page-diagonal-forward 900ms cubic-bezier(0.45, 0.05, 0.25, 1) backwards;
+  }
+
+  .page-transition[data-turn="back"] > * {
+    animation-name: page-diagonal-back;
+  }
+
+  /* Liseré clair et ombre portée le long du bord de la page (le filtre n'existe que pendant l'animation). */
+  @keyframes page-edge-forward {
+    from,
     to {
-      opacity: 1;
-      transform: none;
+      filter: drop-shadow(-6px -5px 9px rgba(0, 0, 0, 0.55)) drop-shadow(0 0 1px rgba(255, 255, 255, 0.35));
     }
   }
 
-  @keyframes page-turn-back {
-    from {
-      opacity: 0;
-      transform: perspective(1600px) rotateY(-30deg);
+  @keyframes page-edge-back {
+    from,
+    to {
+      filter: drop-shadow(6px 5px 9px rgba(0, 0, 0, 0.55)) drop-shadow(0 0 1px rgba(255, 255, 255, 0.35));
     }
-    60% {
-      opacity: 1;
+  }
+
+  @keyframes page-diagonal-forward {
+    from {
+      clip-path: polygon(200% 0%, 100% 0%, 100% 100%, 100% 100%);
     }
     to {
-      opacity: 1;
-      transform: none;
+      clip-path: polygon(0% 0%, 100% 0%, 100% 100%, -100% 100%);
+    }
+  }
+
+  @keyframes page-diagonal-back {
+    from {
+      clip-path: polygon(-100% 100%, 0% 100%, 0% 0%, 0% 0%);
+    }
+    to {
+      clip-path: polygon(100% 100%, 0% 100%, 0% 0%, 200% 0%);
     }
   }
 
   @media (max-width: 767px) {
-    .page-transition {
+    .page-transition,
+    .page-transition > * {
       animation-duration: 600ms;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .page-transition,
-    .page-transition[data-turn="back"] {
+    .page-transition[data-turn="back"],
+    .page-transition > *,
+    .page-transition[data-turn="back"] > * {
       animation: none;
     }
   }
