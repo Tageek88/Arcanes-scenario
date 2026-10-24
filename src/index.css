@@ -125,23 +125,53 @@
 }
 
 @layer components {
+  /* Page de grimoire : la reliure est à droite, la page pivote autour de son bord droit. */
   .page-transition {
-    animation: page-enter 200ms ease-out both;
+    transform-origin: right center;
+    animation: page-turn-forward 380ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
   }
 
-  @keyframes page-enter {
+  .page-transition[data-turn="back"] {
+    animation-name: page-turn-back;
+  }
+
+  @keyframes page-turn-forward {
     from {
       opacity: 0;
-      transform: translateX(24px);
+      transform: perspective(1600px) rotateY(48deg);
+    }
+    60% {
+      opacity: 1;
     }
     to {
       opacity: 1;
-      transform: translateX(0);
+      transform: none;
+    }
+  }
+
+  @keyframes page-turn-back {
+    from {
+      opacity: 0;
+      transform: perspective(1600px) rotateY(-30deg);
+    }
+    60% {
+      opacity: 1;
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .page-transition {
+      animation-duration: 280ms;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .page-transition {
+    .page-transition,
+    .page-transition[data-turn="back"] {
       animation: none;
     }
   }
