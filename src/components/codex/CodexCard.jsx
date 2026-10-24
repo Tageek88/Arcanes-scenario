@@ -25,24 +25,28 @@ export default function CodexCard({
 
   return (
     <div {...cardProps} className={cn("w-full max-w-full flex cursor-pointer flex-col rounded-xl border bg-card/50 p-4 transition-colors overflow-hidden", linked ? "corner-accent border-primary/50" : "border-border", expanded && "ring-2 ring-primary/50")}>
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0 flex-1 overflow-hidden">
-          <h3 className="font-display text-base font-semibold text-foreground break-words">{entry.name}</h3>
-          {entry.comment && <p className="text-xs italic text-muted-foreground break-words">{entry.comment}</p>}
-        </div>
-        {kind === "npc" && <span className={cn("tag border shrink-0", attitude.badge)}>{attitude.label}</span>}
-        {kind === "clue" && (
-          <span className={cn(
-            "tag border shrink-0",
-            (entry.clue_type === "info" ? entry.known || entry.used : entry.discovered)
-              ? "border-played/40 bg-played/10 text-played"
-              : "border-border bg-secondary text-muted-foreground"
-          )}>
-            {entry.clue_type === "info"
-              ? `Info · ${entry.known ? "Connue" : "Inconnue"} · ${entry.used ? "Utilisée" : "Non utilisée"}`
-              : `Indice · ${entry.discovered ? "Découvert" : "Caché"}`}
-          </span>
+      <div className="min-w-0 overflow-hidden">
+        {kind === "npc" && (
+          <div data-codex-badge className="mb-1.5">
+            <span className={cn("tag border", attitude.badge)}>{attitude.label}</span>
+          </div>
         )}
+        {kind === "clue" && (
+          <div data-codex-badge className="mb-1.5">
+            <span className={cn(
+              "tag border max-w-full",
+              (entry.clue_type === "info" ? entry.known || entry.used : entry.discovered)
+                ? "border-played/40 bg-played/10 text-played"
+                : "border-border bg-secondary text-muted-foreground"
+            )}>
+              {entry.clue_type === "info"
+                ? `Info · ${entry.known ? "Connue" : "Inconnue"} · ${entry.used ? "Utilisée" : "Non utilisée"}`
+                : `Indice · ${entry.discovered ? "Découvert" : "Caché"}`}
+            </span>
+          </div>
+        )}
+        <h3 className="font-display text-base font-semibold text-foreground break-words">{entry.name}</h3>
+        {entry.comment && <p className="text-xs italic text-muted-foreground break-words">{entry.comment}</p>}
       </div>
 
       {(entry.role || entry.type) && (
