@@ -289,7 +289,7 @@ export default function CodexEntryDialog({
 
   // Title for the dialog, dynamically set based on whether the entry is being edited, duplicated, or created anew.
   const title = entry?.id
-    ? `Modifier — ${meta.singular}`
+    ? `Modifier — ${form.name?.trim() || entry.name || meta.singular}`
     : duplicateOf
       ? `Dupliquer — ${meta.singular}`
       : `Nouveau ${meta.singular}`;
