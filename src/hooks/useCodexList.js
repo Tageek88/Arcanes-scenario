@@ -11,9 +11,9 @@ const escapeRegex = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
  * `setItems` sert aux mises à jour optimistes (cases des indices).
  * @param {string} campaignId
  * @param {string} entity nom de l'entité (NPC, Location, Clue)
- * @param {{ term: string, linkedOnly: boolean, linkedIds: string[], refreshKey: number }} options
+ * @param {{ term: string, linkedOnly: boolean, linkedIds: string[], refreshKey: number, limit?: number }} options (limit : 100 par défaut)
  */
-export function useCodexList(campaignId, entity, { term, linkedOnly, linkedIds, refreshKey }) {
+export function useCodexList(campaignId, entity, { term, linkedOnly, linkedIds, refreshKey, limit = 100 }) {
   const { toast } = useToast();
   const [items, setItems] = useState(/** @type {any[]} */ ([]));
   const [loading, setLoading] = useState(false);
@@ -42,7 +42,7 @@ export function useCodexList(campaignId, entity, { term, linkedOnly, linkedIds, 
         query.id = { $in: ids };
       }
       try {
-        const res = await api.entities[entity].filter(query, { sort: "name", limit: 100 });
+        const res = await api.entities[entity].filter(query, { sort: "name", limit });
         if (alive) setItems(res.items);
       } catch (error) {
         console.error("Chargement du codex impossible :", error);
@@ -56,7 +56,7 @@ export function useCodexList(campaignId, entity, { term, linkedOnly, linkedIds, 
       alive = false;
       clearTimeout(timer);
     };
-  }, [campaignId, entity, term, linkedOnly, refreshKey, linkedKey, toast]);
+  }, [campaignId, entity, term, linkedOnly, refreshKey, linkedKey, limit, toast]);
 
   return { items, setItems, loading };
 }

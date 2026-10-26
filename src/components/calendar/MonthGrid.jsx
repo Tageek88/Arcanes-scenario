@@ -103,6 +103,7 @@ export default function MonthGrid({
                         e.stopPropagation();
                         onSelectSession(session);
                       }}
+                      title={session.campaign_name ? `${session.campaign_name} : ${session.title}` : session.title}
                       className={cn(
                         "min-touch flex w-full items-center gap-1.5 rounded border px-1.5 py-1 text-left text-xs transition-opacity hover:opacity-80",
                         meta.badge
@@ -113,6 +114,7 @@ export default function MonthGrid({
                         <span className="shrink-0 font-mono text-xs">{session.time}</span>
                       )}
                       <span className="hidden truncate sm:inline">{session.title}</span>
+                      {session.campaign_name && <span className="sr-only">{`(${session.campaign_name})`}</span>}
                     </button>
                   );
                 })}
@@ -145,6 +147,9 @@ export default function MonthGrid({
                             </span>
                             <span className={cn("tag border text-[10px]", meta.badge)}>{meta.label}</span>
                           </span>
+                          {session.campaign_name && (
+                            <span className="mt-1 block font-mono text-[10px] uppercase tracking-wider text-primary">{session.campaign_name}</span>
+                          )}
                           {session.location && <span className="mt-1 block text-xs text-muted-foreground">{session.location}</span>}
                           {session.notes && <span className="mt-1 block whitespace-pre-wrap text-xs text-muted-foreground">{session.notes}</span>}
                         </button>

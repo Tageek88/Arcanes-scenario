@@ -42,7 +42,7 @@ const hasContent = (value) => {
  * @param {{ open: boolean, generator: ReturnType<typeof import("./useNpcGenerator").useNpcGenerator>,
  *   form: Record<string, any>, setForm: (update: (previous: any) => any) => void }} options
  */
-export function useNpcFormGeneration({ open, generator, form, setForm }) {
+export function useNpcFormGeneration({ open, generator, form, setForm, initialLocks }) {
   const { toast } = useToast();
   const [genderAuto, setGenderAuto] = useState(false);
   const [levelChoice, setLevelChoice] = useState("random");
@@ -50,16 +50,18 @@ export function useNpcFormGeneration({ open, generator, form, setForm }) {
   const [seed, setSeed] = useState(/** @type {number | string | null} */ (null));
   const [confirming, setConfirming] = useState(false);
   const lastGenerated = useRef(/** @type {Record<string, any> | null} */ (null));
+  // Verrous enregistrés avec le PNJ, relus à l'ouverture (clé stable : pas de remise à zéro en cours d'édition).
+  const initialLocksKey = LOCKABLE_FIELDS.filter((key) => initialLocks?.[key]).join(",");
 
   useEffect(() => {
     if (!open) return;
     setGenderAuto(false);
     setLevelChoice("random");
-    setLocks({});
+    setLocks(Object.fromEntries(initialLocksKey ? initialLocksKey.split(",").map((key) => [key, true]) : []));
     setSeed(null);
     setConfirming(false);
     lastGenerated.current = null;
-  }, [open]);
+  }, [open, initialLocksKey]);
 
   const toggleLock = (key) => setLocks((current) => ({ ...current, [key]: !current[key] }));
 

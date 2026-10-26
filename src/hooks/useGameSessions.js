@@ -3,14 +3,18 @@ import { addMonths, format, startOfMonth } from "date-fns";
 import { api } from "@/api/localClient";
 import { useToast } from "@/components/ui/use-toast";
 import { useDataRefresh } from "@/lib/context/RefreshContext";
+import { withDataBatch } from "@/lib/context/dataEvents";
+import { NEW_CAMPAIGN } from "@/lib/meta/sessionCampaign";
 import { dispatchTutorialAction } from "@/utils/tutorialStorage";
 
 /**
  * Sessions de jeu d'une campagne : celles du mois affiché et les 6 prochaines.
- * @param {string} campaignId
+ * Avec `allCampaigns`, celles de toutes les campagnes (chaque session garde son `campaign_id`).
+ * @param {string} campaignId campagne sélectionnée (celle des nouvelles sessions)
  * @param {Date} month premier jour du mois affiché
+ * @param {{ allCampaigns?: boolean }} [options]
  */
-export function useGameSessions(campaignId, month) {
+export function useGameSessions(campaignId, month, { allCampaigns = false } = {}) {
   const { toast } = useToast();
   const { refreshKey } = useDataRefresh();
   const [sessions, setSessions] = useState([]);
@@ -28,7 +32,8 @@ export function useGameSessions(campaignId, month) {
       return;
     }
     let alive = true;
-    const contextKey = `${campaignId}|${monthKey}`;
+    const contextKey = `${allCampaigns ? "*" : campaignId}|${monthKey}`;
+    const scope = allCampaigns ? {} : { campaign_id: campaignId };
     const initial = loadedFor.current !== contextKey;
     if (initial) {
       setSessions([]);
@@ -42,11 +47,11 @@ export function useGameSessions(campaignId, month) {
         const today = format(new Date(), "yyyy-MM-dd");
         const [monthRes, upcomingRes] = await Promise.all([
           api.entities.GameSession.filter(
-            { campaign_id: campaignId, date: { $gte: start, $lt: nextMonth } },
+            { ...scope, date: { $gte: start, $lt: nextMonth } },
             { sort: "date", limit: 300 }
           ),
           api.entities.GameSession.filter(
-            { campaign_id: campaignId, date: { $gte: today } },
+            { ...scope, date: { $gte: today } },
             { sort: "date", limit: 6 }
           ),
         ]);
@@ -56,7 +61,7 @@ export function useGameSessions(campaignId, month) {
         loadedFor.current = contextKey;
       } catch (error) {
         console.error("Chargement des sessions impossible :", error);
-        if (alive) toast({ variant: "destructive", title: "Sessions indisponibles", description: "Impossible de charger le calendrier de cette campagne." });
+        if (alive) toast({ variant: "destructive", title: "Sessions indisponibles", description: "Impossible de charger le calendrier." });
       } finally {
         if (alive && initial) setLoading(false);
       }
@@ -65,7 +70,7 @@ export function useGameSessions(campaignId, month) {
     return () => {
       alive = false;
     };
-  }, [campaignId, monthKey, month, refreshKey, toast]);
+  }, [campaignId, allCampaigns, monthKey, month, refreshKey, toast]);
 
   const applySession = (session, replacedId) => {
     setSessions((list) => {
@@ -84,11 +89,21 @@ export function useGameSessions(campaignId, month) {
     });
   };
 
-  /** Enregistrement optimiste : la liste est mise à jour tout de suite, puis rétablie en cas d'échec. */
-  const saveSession = async (form) => {
+  /**
+   * Enregistrement optimiste : la liste est mise à jour tout de suite, puis rétablie en cas d'échec.
+   * Une nouvelle session peut viser une autre campagne que celle affichée, ou une campagne à créer
+   * (`campaign_id` = NEW_CAMPAIGN et `new_campaign_name` : la campagne est créée vierge, avec la session).
+   * @param {Record<string, any>} form
+   * @param {{ campaignName?: string }} [options] nom de la campagne visée, pour le message de confirmation
+   */
+  const saveSession = async (form, { campaignName = "" } = {}) => {
+    const targetId = form.campaign_id || campaignId;
+    const newName = String(form.new_campaign_name || "").trim();
+    if (targetId === NEW_CAMPAIGN && !newName) return;
     setSaving(true);
     const payload = {
-      campaign_id: campaignId,
+      // Une session existante reste dans sa campagne, même quand on la modifie depuis une autre.
+      campaign_id: targetId,
       title: form.title.trim(),
       date: form.date,
       time: form.time || "",
@@ -97,19 +112,41 @@ export function useGameSessions(campaignId, month) {
       notes: form.notes || "",
       scene_id: form.scene_id || "",
     };
+    // La liste affichée ne change que si la session y a sa place (vue complète, ou campagne affichée).
+    const shown = allCampaigns || targetId === campaignId;
     const optimistic = { ...payload, id: form.id || `session-${Date.now()}` };
     const previous = { sessions, upcoming };
-    applySession(optimistic);
+    if (shown) applySession(optimistic);
+    let saved;
+    let createdCampaign = null;
     try {
-      const saved = form.id
-        ? await api.entities.GameSession.update(form.id, payload)
-        : await api.entities.GameSession.create(payload);
-      if (saved?.id) applySession(saved, optimistic.id);
+      await withDataBatch(async () => {
+        if (targetId === NEW_CAMPAIGN) {
+          createdCampaign = await api.entities.Campaign.create({ name: newName, system: "", summary: "", universe_type: "arcanes" });
+          payload.campaign_id = createdCampaign.id;
+        }
+        saved = form.id
+          ? await api.entities.GameSession.update(form.id, payload)
+          : await api.entities.GameSession.create(payload);
+      });
+      if (shown && saved?.id) applySession(saved, optimistic.id);
       if (!form.id) dispatchTutorialAction("session-created");
-      toast({ title: form.id ? "Session mise à jour" : "Session planifiée" });
-    } catch {
-      setSessions(previous.sessions);
-      setUpcoming(previous.upcoming);
+      const where = createdCampaign ? newName : campaignName;
+      toast(
+        createdCampaign
+          ? { title: "Session planifiée", description: `Campagne « ${newName} » créée, vierge, avec cette session.` }
+          : !shown && where
+            ? { title: "Session planifiée", description: `Dans la campagne « ${where} » (affichez toutes les campagnes pour la voir ici).` }
+            : { title: form.id ? "Session mise à jour" : "Session planifiée" }
+      );
+    } catch (error) {
+      console.error("Enregistrement de la session impossible :", error);
+      if (shown) {
+        setSessions(previous.sessions);
+        setUpcoming(previous.upcoming);
+      }
+      // Pas de campagne vide laissée derrière si la session n'a pas pu être enregistrée.
+      if (createdCampaign) await api.entities.Campaign.delete(createdCampaign.id).catch(() => {});
       toast({
         variant: "destructive",
         title: "Enregistrement impossible",

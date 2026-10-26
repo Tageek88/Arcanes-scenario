@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import GameSheetModelEditor from "@/components/game/GameSheetModelEditor";
 import GameCharacterEditor from "@/components/game/GameCharacterEditor";
+import GameCatalogPanel, { GameTabBar } from "@/components/game/GameCatalogPanel";
 import CampaignSelect from "@/components/common/CampaignSelect";
 import PrintButton from "@/components/print/PrintButton";
 import { useExpandedCardState } from "@/lib/context/ExpandedCardContext";
@@ -52,6 +53,7 @@ export default function Jeu() {
   const [characterDraft, setCharacterDraft] = useState(null);
   const [characterToPrint, setCharacterToPrint] = useState(null);
   const [pendingDelete, setPendingDelete] = useState(null);
+  const [gameTab, setGameTab] = useState("characters");
 
   useEffect(() => {
     if (!characterToPrint) return;
@@ -180,7 +182,9 @@ export default function Jeu() {
             )}
           </section>
 
-          {modelId && (
+          <GameTabBar value={gameTab} onChange={setGameTab} />
+
+          {gameTab === "characters" && modelId && (
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -192,7 +196,9 @@ export default function Jeu() {
             </div>
           )}
 
-          {loading ? (
+          {gameTab !== "characters" ? (
+            <GameCatalogPanel key={gameTab} campaignId={campaignId} kind={gameTab} skillRollModifier={model.skillRollModifier} />
+          ) : loading ? (
             <p className="py-10 text-center font-mono text-xs uppercase tracking-widest text-muted-foreground">Chargement…</p>
           ) : !modelId ? (
             <div className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">

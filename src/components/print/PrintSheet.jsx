@@ -164,6 +164,9 @@ function Block({ block }) {
                                     {p.sheet?.skills.length > 0 && (
                                         <p className="prt-text">Compétences : {p.sheet.skills.join(", ")}</p>
                                     )}
+                                    {p.sheet?.equipment?.length > 0 && (
+                                        <p className="prt-text">Équipement : {p.sheet.equipment.join(", ")}</p>
+                                    )}
                                     {p.description && <p className="prt-text">{p.description}</p>}
                                     <Lines label="Relations" items={p.relations} />
                                     <Images images={p.images} />

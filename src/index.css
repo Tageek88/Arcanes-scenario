@@ -125,23 +125,68 @@
 }
 
 @layer components {
+  /* Page de grimoire : la page se révèle par un bord oblique, du coin bas-droit (reliure) vers le coin haut-gauche. */
   .page-transition {
-    animation: page-enter 200ms ease-out both;
+    animation: page-edge-forward 900ms cubic-bezier(0.45, 0.05, 0.25, 1) backwards;
   }
 
-  @keyframes page-enter {
+  .page-transition[data-turn="back"] {
+    animation-name: page-edge-back;
+  }
+
+  .page-transition > * {
+    animation: page-diagonal-forward 900ms cubic-bezier(0.45, 0.05, 0.25, 1) backwards;
+  }
+
+  .page-transition[data-turn="back"] > * {
+    animation-name: page-diagonal-back;
+  }
+
+  /* Liseré clair et ombre portée le long du bord de la page (le filtre n'existe que pendant l'animation). */
+  @keyframes page-edge-forward {
+    from,
+    to {
+      filter: drop-shadow(-6px -5px 9px rgba(0, 0, 0, 0.55)) drop-shadow(0 0 1px rgba(255, 255, 255, 0.35));
+    }
+  }
+
+  @keyframes page-edge-back {
+    from,
+    to {
+      filter: drop-shadow(6px 5px 9px rgba(0, 0, 0, 0.55)) drop-shadow(0 0 1px rgba(255, 255, 255, 0.35));
+    }
+  }
+
+  @keyframes page-diagonal-forward {
     from {
-      opacity: 0;
-      transform: translateX(24px);
+      clip-path: polygon(200% 0%, 100% 0%, 100% 100%, 100% 100%);
     }
     to {
-      opacity: 1;
-      transform: translateX(0);
+      clip-path: polygon(0% 0%, 100% 0%, 100% 100%, -100% 100%);
+    }
+  }
+
+  @keyframes page-diagonal-back {
+    from {
+      clip-path: polygon(-100% 100%, 0% 100%, 0% 0%, 0% 0%);
+    }
+    to {
+      clip-path: polygon(100% 100%, 0% 100%, 0% 0%, 200% 0%);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .page-transition,
+    .page-transition > * {
+      animation-duration: 600ms;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .page-transition {
+    .page-transition,
+    .page-transition[data-turn="back"],
+    .page-transition > *,
+    .page-transition[data-turn="back"] > * {
       animation: none;
     }
   }
@@ -212,5 +257,57 @@
     border-bottom: 1px solid;
     border-right: 1px solid;
     border-bottom-right-radius: 4px;
+  }
+}
+
+/* Transition de vue — hors couche : ces règles ne doivent pas être retirées par Tailwind. */
+/* Transition de vue (clic sur le menu) : l'ancienne page reste affichée et s'assombrit, la nouvelle se pose dessus. */
+html[data-turn] .page-transition {
+  view-transition-name: page;
+  animation: none;
+}
+
+html[data-turn] .page-transition > * {
+  animation: none;
+}
+
+::view-transition-group(root),
+::view-transition-group(page) {
+  animation: none;
+}
+
+::view-transition-old(root),
+::view-transition-new(root),
+::view-transition-old(page),
+::view-transition-new(page) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+html[data-turn="forward"]::view-transition-new(page) {
+  animation: page-diagonal-forward 900ms cubic-bezier(0.45, 0.05, 0.25, 1) both;
+}
+
+html[data-turn="back"]::view-transition-new(page) {
+  animation: page-diagonal-back 900ms cubic-bezier(0.45, 0.05, 0.25, 1) both;
+}
+
+html[data-turn]::view-transition-old(page) {
+  animation: page-dim 900ms cubic-bezier(0.45, 0.05, 0.25, 1) both;
+}
+
+@keyframes page-dim {
+  from {
+    filter: brightness(1);
+  }
+  to {
+    filter: brightness(0.5);
+  }
+}
+
+@media (max-width: 767px) {
+  html[data-turn]::view-transition-new(page),
+  html[data-turn]::view-transition-old(page) {
+    animation-duration: 600ms;
   }
 }
