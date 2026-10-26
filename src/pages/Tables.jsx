@@ -170,7 +170,7 @@ export default function Tables() {
           </button>
         </div>
       ) : (
-        <div className="w-full max-w-full overflow-hidden grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="-m-1 w-[calc(100%+0.5rem)] max-w-none overflow-hidden p-1 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {tables.map((table) => (
             <TableCard
               key={table.id}

@@ -106,7 +106,7 @@ export default function Notes() {
               <h2 className="flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-primary">
                 <Pin className="h-3.5 w-3.5" /> Épinglées
               </h2>
-              <div className="w-full max-w-full overflow-hidden grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="-m-1 w-[calc(100%+0.5rem)] max-w-none overflow-hidden p-1 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {pinnedNotes.map((note) => (
                   <NoteCard
                     key={note.id}
@@ -125,7 +125,7 @@ export default function Notes() {
               <h2 className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
                 {pinnedNotes.length > 0 ? "Autres notes" : "Toutes les notes"}
               </h2>
-              <div className="w-full max-w-full overflow-hidden grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="-m-1 w-[calc(100%+0.5rem)] max-w-none overflow-hidden p-1 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {notes.map((note) => (
                   <NoteCard
                     key={note.id}
