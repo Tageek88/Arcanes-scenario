@@ -125,68 +125,23 @@
 }
 
 @layer components {
-  /* Page de grimoire : la page se révèle par un bord oblique, du coin bas-droit (reliure) vers le coin haut-gauche. */
   .page-transition {
-    animation: page-edge-forward 900ms cubic-bezier(0.45, 0.05, 0.25, 1) backwards;
+    animation: page-enter 200ms ease-out both;
   }
 
-  .page-transition[data-turn="back"] {
-    animation-name: page-edge-back;
-  }
-
-  .page-transition > * {
-    animation: page-diagonal-forward 900ms cubic-bezier(0.45, 0.05, 0.25, 1) backwards;
-  }
-
-  .page-transition[data-turn="back"] > * {
-    animation-name: page-diagonal-back;
-  }
-
-  /* Liseré clair et ombre portée le long du bord de la page (le filtre n'existe que pendant l'animation). */
-  @keyframes page-edge-forward {
-    from,
-    to {
-      filter: drop-shadow(-6px -5px 9px rgba(0, 0, 0, 0.55)) drop-shadow(0 0 1px rgba(255, 255, 255, 0.35));
-    }
-  }
-
-  @keyframes page-edge-back {
-    from,
-    to {
-      filter: drop-shadow(6px 5px 9px rgba(0, 0, 0, 0.55)) drop-shadow(0 0 1px rgba(255, 255, 255, 0.35));
-    }
-  }
-
-  @keyframes page-diagonal-forward {
+  @keyframes page-enter {
     from {
-      clip-path: polygon(200% 0%, 100% 0%, 100% 100%, 100% 100%);
+      opacity: 0;
+      transform: translateX(24px);
     }
     to {
-      clip-path: polygon(0% 0%, 100% 0%, 100% 100%, -100% 100%);
-    }
-  }
-
-  @keyframes page-diagonal-back {
-    from {
-      clip-path: polygon(-100% 100%, 0% 100%, 0% 0%, 0% 0%);
-    }
-    to {
-      clip-path: polygon(100% 100%, 0% 100%, 0% 0%, 200% 0%);
-    }
-  }
-
-  @media (max-width: 767px) {
-    .page-transition,
-    .page-transition > * {
-      animation-duration: 600ms;
+      opacity: 1;
+      transform: translateX(0);
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .page-transition,
-    .page-transition[data-turn="back"],
-    .page-transition > *,
-    .page-transition[data-turn="back"] > * {
+    .page-transition {
       animation: none;
     }
   }
@@ -260,54 +215,100 @@
   }
 }
 
-/* Transition de vue — hors couche : ces règles ne doivent pas être retirées par Tailwind. */
-/* Transition de vue (clic sur le menu) : l'ancienne page reste affichée et s'assombrit, la nouvelle se pose dessus. */
-html[data-turn] .page-transition {
-  view-transition-name: page;
+/* Page de grimoire — rouleau (version finale) */
+/* Hors de toute couche Tailwind : ces règles ne doivent pas être retirées à la compilation. */
+@property --roll {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+
+html[data-vt] .page-transition {
   animation: none;
 }
 
-html[data-turn] .page-transition > * {
-  animation: none;
+.page-roll {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Fond opaque : sans lui, l'ancienne page est transparente entre ses éléments et la nouvelle page, dessous, apparaît avant le passage du rouleau. */
+html[data-turn] .page-transition {
+  view-transition-name: page;
+  background: hsl(var(--background));
+}
+
+html[data-turn] .page-roll {
+  view-transition-name: roll;
+}
+
+html[data-turn="forward"] {
+  --roll-angle: 250deg;
+}
+
+html[data-turn="back"] {
+  --roll-angle: 70deg;
 }
 
 ::view-transition-group(root),
-::view-transition-group(page) {
+::view-transition-group(page),
+::view-transition-old(root),
+::view-transition-new(root),
+::view-transition-old(roll),
+::view-transition-new(roll) {
   animation: none;
 }
 
-::view-transition-old(root),
-::view-transition-new(root),
+::view-transition-old(roll),
+::view-transition-new(roll) {
+  display: none;
+}
+
 ::view-transition-old(page),
 ::view-transition-new(page) {
   animation: none;
   mix-blend-mode: normal;
 }
 
-html[data-turn="forward"]::view-transition-new(page) {
-  animation: page-diagonal-forward 900ms cubic-bezier(0.45, 0.05, 0.25, 1) both;
+/* Nouvelle page : dessous, immobile, déjà en place. */
+::view-transition-new(page) {
+  z-index: 1;
 }
 
-html[data-turn="back"]::view-transition-new(page) {
-  animation: page-diagonal-back 900ms cubic-bezier(0.45, 0.05, 0.25, 1) both;
-}
-
+/* Ancienne page : dessus ; le rouleau la retire (masque). Elle ne s'assombrit que là où l'ombre du rouleau arrive. */
 html[data-turn]::view-transition-old(page) {
-  animation: page-dim 900ms cubic-bezier(0.45, 0.05, 0.25, 1) both;
+  z-index: 2;
+  -webkit-mask-image: linear-gradient(var(--roll-angle), transparent var(--roll), #000 calc(var(--roll) + 0.3%));
+  mask-image: linear-gradient(var(--roll-angle), transparent var(--roll), #000 calc(var(--roll) + 0.3%));
+  animation: roll-sweep 800ms cubic-bezier(0.45, 0.05, 0.25, 1) both;
 }
 
-@keyframes page-dim {
+/* Bande d'ombre devant le rouleau : opaque contre lui, elle s'estompe vers l'ancienne page. */
+html[data-turn]::view-transition-group(roll) {
+  background: linear-gradient(
+    var(--roll-angle),
+    transparent calc(var(--roll) - 2%),
+    rgba(255, 255, 255, 0.28) calc(var(--roll) - 0.2%),
+    rgba(0, 0, 0, 0.97) calc(var(--roll) + 0.3%),
+    rgba(0, 0, 0, 0.97) calc(var(--roll) + 4%),
+    transparent calc(var(--roll) + 40%)
+  );
+  animation: roll-sweep 800ms cubic-bezier(0.45, 0.05, 0.25, 1) both;
+}
+
+@keyframes roll-sweep {
   from {
-    filter: brightness(1);
+    --roll: -4%;
   }
   to {
-    filter: brightness(0.5);
+    --roll: 142%;
   }
 }
 
 @media (max-width: 767px) {
-  html[data-turn]::view-transition-new(page),
-  html[data-turn]::view-transition-old(page) {
+  html[data-turn]::view-transition-old(page),
+  html[data-turn]::view-transition-group(roll) {
     animation-duration: 600ms;
   }
 }
