@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { Plus, MoreHorizontal, Trash2 } from "lucide-react";
 import SceneNode from "@/components/home/SceneNode";
@@ -29,9 +29,59 @@ export default function ActColumn({
   onDeleteScene,
 }) {
   const ordered = [...scenes].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  const columnRef = useRef(null);
+
+  // Une scène sélectionnée : la colonne s'élargit (200 ms), puis elle est ramenée dans la zone visible.
+  useEffect(() => {
+    if (!expanded) return undefined;
+    const timer = window.setTimeout(() => {
+      const column = columnRef.current;
+      if (!column) return;
+      const margin = 24;
+      // Plus proche parent qui défile dans l'axe demandé (le tableau pour l'horizontal, la page ou son conteneur pour le vertical).
+      const scroller = (axis) => {
+        for (let node = column.parentElement; node && node !== document.body; node = node.parentElement) {
+          const style = window.getComputedStyle(node);
+          const overflow = axis === "x" ? style.overflowX : style.overflowY;
+          const room = axis === "x" ? node.scrollWidth > node.clientWidth + 1 : node.scrollHeight > node.clientHeight + 1;
+          if (/(auto|scroll)/.test(overflow) && room) return node;
+        }
+        return document.scrollingElement || document.documentElement;
+      };
+      const box = column.getBoundingClientRect();
+      // Zone visible horizontale : le tableau, à gauche du menu du Codex s'il le recouvre.
+      const boardX = scroller("x");
+      const boardBox = boardX === document.scrollingElement || boardX === document.documentElement
+        ? { left: 0, right: window.innerWidth, top: 0, bottom: window.innerHeight }
+        : boardX.getBoundingClientRect();
+      const left = Math.max(boardBox.left, 0) + margin;
+      let right = Math.min(boardBox.right, window.innerWidth) - margin;
+      const menu = document.querySelector("aside[data-keep-expanded]");
+      if (menu) {
+        const menuBox = menu.getBoundingClientRect();
+        const sameRow = menuBox.top < boardBox.bottom && menuBox.bottom > boardBox.top;
+        if (sameRow && menuBox.left > boardBox.left) right = Math.min(right, menuBox.left - margin);
+      }
+      let shiftX = 0;
+      if (box.left < left) shiftX = box.left - left;
+      else if (box.right > right) shiftX = Math.min(box.right - right, box.left - left);
+      if (shiftX !== 0) boardX.scrollBy({ left: shiftX, behavior: "smooth" });
+      // Zone visible verticale : l'écran (hors barre de navigation du bas sur mobile).
+      const top = margin;
+      const bottom = window.innerHeight - (window.innerWidth < 768 ? 96 : margin);
+      const target = column.querySelector(`[data-scene-id="${activeSceneId}"]`) || column;
+      const sceneBox = target.getBoundingClientRect();
+      let shiftY = 0;
+      if (sceneBox.top < top) shiftY = sceneBox.top - top;
+      else if (sceneBox.bottom > bottom) shiftY = Math.min(sceneBox.bottom - bottom, sceneBox.top - top);
+      if (shiftY !== 0) scroller("y").scrollBy({ top: shiftY, behavior: "smooth" });
+      console.info("[scène visible]", { shiftX, shiftY, scene: [Math.round(sceneBox.top), Math.round(sceneBox.bottom)], colonne: [Math.round(box.left), Math.round(box.right)], limites: [Math.round(left), Math.round(right)] });
+    }, 260);
+    return () => window.clearTimeout(timer);
+  }, [expanded, activeSceneId]);
 
   return (
-    <div className={cn(
+    <div ref={columnRef} className={cn(
       "flex shrink-0 flex-col rounded-xl border border-border bg-card/50 p-4 transition-[width] duration-200",
       expanded ? "w-[380px]" : activeSceneId ? "w-[250px]" : "w-[290px]"
     )}>
@@ -69,7 +119,7 @@ export default function ActColumn({
 
       <div className="mt-4 flex flex-1 flex-col gap-3">
         {ordered.map((scene, i) => (
-          <div key={scene.id} className="flex gap-3">
+          <div key={scene.id} data-scene-id={scene.id} className="flex gap-3">
             <div className="relative w-3 shrink-0">
               {ordered.length > 1 && (
                 <span
