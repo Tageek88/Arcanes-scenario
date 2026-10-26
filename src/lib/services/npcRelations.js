@@ -155,9 +155,6 @@ export function relationsByNpc(relations, npcs) {
       targetName: names.get(r.to_id),
       label: relationLabel(r),
       order: groupIndex(r.type),
-      label: relationLabel(r),
-      targetId: r.to_id,
-      targetName: names.get(r.to_id),
       text: `${relationLabel(r)} ${names.get(r.to_id)}`,
     });
   });
