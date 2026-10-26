@@ -122,11 +122,11 @@ export default function Jeu() {
     <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-6 md:px-8 md:py-8">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <span className="tag border border-primary/40 text-primary">Personnages</span>
-          <h1 data-tutorial="game-title" className="mt-3 font-display text-3xl font-bold text-foreground">Système de jeu</h1>
+          <span className="tag border border-primary/40 text-primary">Système de jeu</span>
+          <h1 data-tutorial="game-title" className="mt-3 font-display text-3xl font-bold text-foreground">Personnages, Compétences et Équipements</h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
             Définissez un modèle de fiche par campagne, puis créez les fiches des personnages.
-            Les valeurs de test sont des seuils saisis manuellement, jamais calculés par l’application.
+            Créez aussi vos compétences et équipements pour chaque personnage.
           </p>
         </div>
         <div className="flex w-full flex-wrap gap-2 sm:w-auto">
