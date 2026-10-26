@@ -1,4 +1,4 @@
-## Arcanes & Scénario 1.6.0
+## Arcanes & Scénario 1.6.1
 
 Version centrée sur les PNJ : génération aléatoire de fiches complètes à partir de l'univers de la campagne, barème d'équilibrage choisi par le MJ, et Codex qui montre toute la fiche d'un PNJ, avec une recherche étendue et des liens cliquables.
 
@@ -12,10 +12,18 @@ Version centrée sur les PNJ : génération aléatoire de fiches complètes à p
 - **Recherche du Codex sur toute la fiche.** Un PNJ se retrouve par n'importe quelle information de sa fiche. Plusieurs mots se combinent, les guillemets cherchent une expression.
 - **Liens cliquables.** Un lieu d'attribution ou une relation ouvre directement la fiche concernée. Un rôle, un niveau, un trait, une compétence ou un équipement partagé ajoute un filtre dans la barre de recherche.
 - **Calendrier commun à toutes les campagnes.** Un interrupteur « Toutes les campagnes » affiche les sessions de chaque campagne dans le même calendrier, avec le nom de la campagne. Une session reste dans sa campagne ; une nouvelle session se range dans la campagne choisie dans la fenêtre, ou dans une nouvelle campagne vierge créée en saisissant son nom.
+- **Catalogues de la campagne dans « Système de jeu ».** Deux nouveaux onglets, Compétences et Équipements, listent tout ce que la campagne contient. On y ajoute un élément, on modifie son nom et ses champs facultatifs, on le supprime. Les fiches de personnage et de PNJ qui l'utilisent déjà ne sont jamais modifiées.
+- **Changement de page en rouleau.** Au clic sur le menu, la nouvelle page se dévoile derrière un rouleau en diagonale qui retire l'ancienne ; le sens suit l'ordre du menu. L'effet est désactivé si les animations sont réduites dans le système.
 - **Personnages dans le panneau Codex de l'accueil.** Les fiches de personnage se consultent et se modifient depuis l'accueil ; la page Codex se concentre sur les PNJ, les lieux et les indices.
 
 ### Améliorations
 
+- Codex : l'étiquette d'état (allié, hostile, neutre ; indice caché, info connue) se place au-dessus du nom, sur la page Codex comme dans le panneau de l'accueil, pour ne plus décaler le texte.
+- Codex : les verrous de la génération (cadenas) sont enregistrés avec la fiche du PNJ et retrouvés à la modification.
+- Codex : la fenêtre de modification s'intitule « Modifier — nom », avec le nom saisi.
+- Fiche de PNJ : le bouton « Ajouter un équipement » se place sous le libellé « Équipement ».
+- La bordure lumineuse d'une fiche sélectionnée n'est plus coupée sur les bords de la grille (Codex, Tables aléatoires, Notes).
+- Accueil : une scène sélectionnée ramène son acte dans la zone visible, par un défilement horizontal du tableau (à gauche du panneau Codex) et vertical de la page.
 - Le Codex affiche toute la fiche d'un PNJ, sans rien masquer, sur la page Codex comme dans le panneau de l'accueil.
 - Caractéristiques et compétences : champs facultatifs nommés (Modificateur, Test, Maximum ou autres), proposés par le modèle de fiche et préremplis sur les nouvelles fiches.
 - Impression et PDF éditable : la fiche complète d'un PNJ est imprimée, équipement compris.
@@ -36,7 +44,7 @@ Version centrée sur les PNJ : génération aléatoire de fiches complètes à p
 ### Installation
 
 - **Windows** : `npm run dist`, puis lancez l'installateur du dossier `release`. Si SmartScreen s'affiche (programme non signé) : « Informations complémentaires », puis « Exécuter quand même ». Une installation par-dessus la version précédente conserve les données.
-- **Android** : `npm run build`, `npx cap sync android`, puis générez l'APK avec Gradle depuis Android Studio (`versionName` 1.6.0, `versionCode` 160).
+- **Android** : `npm run build`, `npx cap sync android`, puis générez l'APK avec Gradle depuis Android Studio (`versionName` 1.6.1, `versionCode` 161).
 
 ### À venir
 
