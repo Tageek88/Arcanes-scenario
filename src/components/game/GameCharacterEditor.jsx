@@ -32,14 +32,36 @@ export default function GameCharacterEditor({
       return;
     }
     setSaveError("");
+
+    const initialCharacteristics = structuredClone(character?.characteristics || {});
+
+    // Prépare les caractéristiques selon le modèle de la campagne
+    (model?.characteristics || []).forEach((charModel) => {
+      const charName = charModel.name;
+      if (!charName) return;
+
+      const existing = initialCharacteristics[charName] || { value: "", fields: [] };
+      const existingFields = existing.fields || [];
+
+      // Si le personnage n'a pas encore de champs pour cette caractéristique, on préremplit les champs proposés par le modèle
+      if (existingFields.length === 0 && charModel.field_names?.length > 0) {
+        existing.fields = charModel.field_names.map((name) => ({ name, value: "" }));
+      }
+
+      initialCharacteristics[charName] = existing;
+    });
+
     setForm(character ? {
       ...EMPTY,
       ...character,
-      characteristics: structuredClone(character.characteristics || {}),
+      characteristics: initialCharacteristics,
       skills: structuredClone(character.skills || []),
       equipment: structuredClone(character.equipment || []),
-    } : EMPTY);
-  }, [open, character, dismiss]);
+    } : {
+      ...EMPTY,
+      characteristics: initialCharacteristics,
+    });
+  }, [open, character, model, dismiss]);
 
   const skillNames = useMemo(
     () => [...new Set(skillCatalog.map((item) => item.name).filter(Boolean))],
@@ -305,15 +327,8 @@ export default function GameCharacterEditor({
             <h3 className="font-display font-semibold">Caractéristiques</h3>
             <div className="space-y-3">
               {model.characteristics.map((item) => {
-                const existing = form.characteristics[item.name];
-                const fields =
-                  existing?.fields && existing.fields.length > 0
-                    ? existing.fields
-                    : (item.field_names || []).map((name) => ({
-                        name,
-                        value: existing?.fields?.find((f) => f.name === name)?.value || "",
-                      }));
-                const values = existing || { value: "", fields };
+                const values = form.characteristics[item.name] || { value: "", fields: [] };
+                const fields = values.fields || [];
                 return (
                   <div key={item.name} className="space-y-2 rounded-lg border border-border p-3">
                     <Label className="font-medium text-foreground">{item.name}</Label>
