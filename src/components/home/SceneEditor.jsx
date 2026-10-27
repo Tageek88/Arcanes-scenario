@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectTrigger,
@@ -118,6 +119,16 @@ export default function SceneEditor({
           </div>
         </div>
 
+        <div className="flex items-start justify-between gap-4 rounded-lg border border-border p-3">
+          <div className="space-y-1">
+            <Label htmlFor="scene-recurring">Scène récurrente</Label>
+            <p className="text-xs text-muted-foreground">
+              Une copie est placée dans chacune des autres quêtes, et dans les quêtes créées ensuite. Les copies sont indépendantes : modifier ou supprimer l'une ne change pas les autres.
+            </p>
+          </div>
+          <Switch id="scene-recurring" checked={!!form.recurring} onCheckedChange={(value) => setField("recurring", value)} />
+        </div>
+
         <div className="space-y-2">
           <Label>Résumé</Label>
           <Textarea
@@ -143,7 +154,7 @@ export default function SceneEditor({
           items={otherScenes}
           selected={form.next_scene_ids}
           onToggle={(id) => toggleId("next_scene_ids", id)}
-          emptyText="Aucune autre scène dans cette campagne."
+          emptyText="Aucune autre scène dans cette quête."
         />
         <LinkPicker
           label="PNJ liés"

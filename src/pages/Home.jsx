@@ -4,6 +4,7 @@ import SceneBoard from "@/components/home/SceneBoard";
 import MobileSceneList from "@/components/home/MobileSceneList";
 import SceneEditor from "@/components/home/SceneEditor";
 import CampaignDialog from "@/components/home/CampaignDialog";
+import QuestBar from "@/components/home/QuestBar";
 import CodexSidebar from "@/components/codex/CodexSidebar";
 import CodexEntryDialog from "@/components/codex/CodexEntryDialog";
 import { Button } from "@/components/ui/button";
@@ -39,6 +40,7 @@ const EMPTY_SCENE = {
   npc_ids: [],
   location_ids: [],
   clue_ids: [],
+  recurring: false,
 };
 
 const EMPTY_CAMPAIGN = { name: "", system: "", summary: "", universe_type: "arcanes" };
@@ -63,7 +65,11 @@ export default function Home() {
     return nextId ? `scene:${nextId}` : null;
   });
 
+  const [preferredQuestId, setPreferredQuestId] = usePageFilter(`home.quest.${campaignId}`, "");
+
   const {
+    quests,
+    quest,
     acts,
     scenes,
     npcs,
@@ -79,9 +85,12 @@ export default function Home() {
     addAct,
     renameAct,
     deleteItem,
+    addQuest,
+    renameQuest,
+    removeQuest,
     toggleSceneLink,
     toggleClueFlag,
-  } = useCampaignContent(campaignId, { activeSceneId, setActiveSceneId });
+  } = useCampaignContent(campaignId, { activeSceneId, setActiveSceneId, preferredQuestId, setPreferredQuestId });
 
   const {
     savingCampaign,
@@ -150,7 +159,7 @@ export default function Home() {
 
   const openEditScene = (scene) => {
     setEditingSceneId(scene.id);
-    setSceneForm({ ...EMPTY_SCENE, ...scene });
+    setSceneForm({ ...EMPTY_SCENE, ...scene, recurring: !!scene.recurring_group });
     setEditorOpen(true);
   };
 
@@ -288,6 +297,19 @@ export default function Home() {
             </div>
           ) : (
             <>
+              <QuestBar
+                quests={quests}
+                quest={quest}
+                actCount={acts.length}
+                sceneCount={scenes.length}
+                onSelect={(id) => {
+                  setPreferredQuestId(id);
+                  setActiveSceneId(null);
+                }}
+                onCreate={addQuest}
+                onRename={renameQuest}
+                onDelete={removeQuest}
+              />
               <div className="hidden md:block">
                 <SceneBoard
                   acts={acts}
