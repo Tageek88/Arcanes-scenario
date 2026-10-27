@@ -3,6 +3,7 @@ import { api } from "@/api/localClient";
 import { useToast } from "@/components/ui/use-toast";
 import { useDataRefresh } from "@/lib/context/RefreshContext";
 import { nextStatus } from "@/lib/meta/sceneMeta";
+import { ensureQuests } from "@/lib/services/quests";
 import { dispatchTutorialAction } from "@/utils/tutorialStorage";
 
 /**
@@ -68,6 +69,9 @@ export function useCampaignContent(campaignId, { activeSceneId, setActiveSceneId
       setProgress({ total: 0 });
     }
     try {
+      // Rattache à une quête les actes et scènes qui n'en ont pas (migration, sauvegardes anciennes).
+      await ensureQuests(cid);
+      if (requestId !== treeRequest.current) return;
       const [a, s, n, l, c, agg] = await Promise.all([
         api.entities.Act.filter({ campaign_id: cid }, { sort: "order", limit: 200 }),
         api.entities.Scene.filter({ campaign_id: cid }, { sort: "order", limit: 500 }),

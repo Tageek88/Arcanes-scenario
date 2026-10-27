@@ -5,6 +5,10 @@
     "campaign_id": {
       "type": "string"
     },
+    "quest_id": {
+      "type": "string",
+      "description": "Quête à laquelle appartient l'acte (voir Quest)."
+    },
     "title": {
       "type": "string"
     },

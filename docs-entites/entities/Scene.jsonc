@@ -5,6 +5,14 @@
     "campaign_id": {
       "type": "string"
     },
+    "quest_id": {
+      "type": "string",
+      "description": "Quête de la scène (renseignée aussi pour une scène sans acte)."
+    },
+    "recurring_group": {
+      "type": "string",
+      "description": "Identifiant du groupe de copies d'une scène récurrente (une copie par quête). Vide pour une scène ordinaire."
+    },
     "act_id": {
       "type": "string"
     },

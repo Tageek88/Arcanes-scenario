@@ -2,7 +2,7 @@
   "name": "Quest",
   "label": "quête",
   "plural": "quêtes",
-  "description": "Représente une quête dans une campagne de jeu de rôle.",
+  "description": "Quête d'une campagne (Quête > Acte > Scène). Champs utilisés : campaign_id, title (« Quête principale » par défaut) et order ; les autres champs ci-dessous ne sont pas utilisés.",
   "fields": [
     {
       "name": "id",
