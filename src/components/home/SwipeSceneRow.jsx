@@ -1,13 +1,28 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { SCENE_STATUS } from "@/lib/meta/sceneMeta";
 
 export default function SwipeSceneRow({ scene, active, npcs, locations, clues, onOpen, onSelect, onToggleStatus }) {
   const startX = useRef(null);
+  const rowRef = useRef(null);
   const meta = SCENE_STATUS[scene.status] || SCENE_STATUS.brouillon;
+
+  // Une scène sélectionnée se déplie : on la ramène dans la zone visible une fois le dépliage fait (comme sur ordinateur).
+  useEffect(() => {
+    if (!active) return undefined;
+    const timer = setTimeout(() => {
+      const node = rowRef.current;
+      if (!node || typeof node.scrollIntoView !== "function") return;
+      const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+      node.scrollIntoView({ block: "nearest", inline: "nearest", behavior: reduced ? "auto" : "smooth" });
+    }, 260);
+    return () => clearTimeout(timer);
+  }, [active]);
 
   return (
     <div
+      ref={rowRef}
+      style={{ scrollMarginTop: "5rem", scrollMarginBottom: "6rem" }}
       data-expandable-card={`scene:${scene.id}`}
       aria-expanded={active}
       tabIndex={0}
