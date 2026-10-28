@@ -7,11 +7,13 @@ import ResponsiveDialog from "@/components/common/ResponsiveDialog";
 import { useToast } from "@/components/ui/use-toast";
 import PrintSheet from "@/components/print/PrintSheet";
 import { loadPrintData } from "@/lib/print/loadPrintData";
+import { getSelectedQuestId } from "@/lib/context/questStore";
 import {
     SECTIONS,
     buildPrintModel,
     buildTrees,
     countableIds,
+    scopeToQuests,
     selectableIds,
 } from "@/lib/print/printModel";
 
@@ -92,6 +94,7 @@ function PrintDialog({ open, onOpenChange, campaignId, preset, onPrint, allowPdf
     const [enabled, setEnabled] = useState({});
     const [selected, setSelected] = useState({});
     const [expanded, setExpanded] = useState({});
+    const [questIds, setQuestIds] = useState(/** @type {string[]} */ ([]));
     const [opts, setOpts] = useState({ secrets: true, cluesWithScenes: true, images: false });
 
     useEffect(() => {
@@ -101,7 +104,11 @@ function PrintDialog({ open, onOpenChange, campaignId, preset, onPrint, allowPdf
         loadPrintData(campaignId)
             .then((loaded) => {
                 if (!alive) return;
-                const trees = buildTrees(loaded);
+                const quests = [...(loaded.quests || [])].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+                const stored = getSelectedQuestId(campaignId);
+                const chosen = quests.some((q) => q.id === stored) ? stored : quests[0]?.id || "";
+                const trees = buildTrees(scopeToQuests(loaded, chosen ? [chosen] : []));
+                setQuestIds(chosen ? [chosen] : []);
                 setData(loaded);
                 setSelected(Object.fromEntries(SECTIONS.map((s) => [s.key, new Set(selectableIds(trees[s.key]))])));
                 setEnabled(Object.fromEntries(SECTIONS.map((s) => [s.key, preset === "all" || PRESETS[preset] === s.key])));
@@ -117,7 +124,19 @@ function PrintDialog({ open, onOpenChange, campaignId, preset, onPrint, allowPdf
         };
     }, [open, campaignId, preset, toast]);
 
-    const trees = useMemo(() => (data ? buildTrees(data) : null), [data]);
+    // Les actes et scènes des quêtes choisies ; le reste du document ne dépend pas des quêtes.
+    const scoped = useMemo(() => (data ? scopeToQuests(data, questIds) : null), [data, questIds]);
+    const trees = useMemo(() => (scoped ? buildTrees(scoped) : null), [scoped]);
+
+    // Ajoute ou retire une quête du document ; au moins une reste cochée. Les scènes à imprimer sont recochées.
+    const toggleQuest = (id) => {
+        const next = questIds.includes(id) ? questIds.filter((q) => q !== id) : [...questIds, id];
+        if (next.length === 0) return;
+        setQuestIds(next);
+        const tree = buildTrees(scopeToQuests(data, next));
+        setSelected((prev) => ({ ...prev, scenes: new Set(selectableIds(tree.scenes)) }));
+        setEnabled((prev) => ({ ...prev, scenes: true }));
+    };
 
     const counts = useMemo(() => {
         const out = {};
@@ -146,7 +165,7 @@ function PrintDialog({ open, onOpenChange, campaignId, preset, onPrint, allowPdf
 
     const submit = (action) => {
         const sel = Object.fromEntries(SECTIONS.map((s) => [s.key, enabled[s.key] ? selected[s.key] : new Set()]));
-        const model = buildPrintModel(data, sel, opts);
+        const model = buildPrintModel(scoped, sel, opts);
         if (model.blocks.length === 0) {
             toast({ title: "Rien à imprimer", description: "Cochez au moins un élément." });
             return;
@@ -201,6 +220,25 @@ function PrintDialog({ open, onOpenChange, campaignId, preset, onPrint, allowPdf
                 </p>
             ) : (
                 <div className="space-y-3 py-1">
+                    {(data?.quests?.length || 0) > 1 && (
+                        <div className="space-y-2 rounded-lg border border-border p-3">
+                            <Label>Quêtes à imprimer</Label>
+                            {[...data.quests]
+                                .sort((x, y) => (x.order ?? 0) - (y.order ?? 0))
+                                .map((q) => (
+                                    <label key={q.id} className="flex cursor-pointer items-center gap-2 text-sm text-foreground">
+                                        <input
+                                            type="checkbox"
+                                            className="h-4 w-4 shrink-0 accent-[hsl(var(--primary))]"
+                                            checked={questIds.includes(q.id)}
+                                            onChange={() => toggleQuest(q.id)}
+                                        />
+                                        <span className="min-w-0 flex-1 truncate">{q.title}</span>
+                                    </label>
+                                ))}
+                            <p className="text-xs text-muted-foreground">Les actes et les scènes de chaque quête cochée sont imprimés, quête par quête.</p>
+                        </div>
+                    )}
                     {SECTIONS.map((s) => (
                         <div key={s.key} className="rounded-lg border border-border">
                             <div className="flex items-center gap-3 p-3">

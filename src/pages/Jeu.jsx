@@ -22,6 +22,8 @@ import PrintButton from "@/components/print/PrintButton";
 import { useExpandedCardState } from "@/lib/context/ExpandedCardContext";
 import { usePageFilter } from "@/lib/context/PageFilterContext";
 import { useCampaigns } from "@/hooks/useCampaigns";
+import { useQuests } from "@/hooks/useQuests";
+import QuestSelect from "@/components/common/QuestSelect";
 import { useGameSheet } from "@/hooks/useGameSheet";
 
 const normalize = (value) =>
@@ -33,6 +35,7 @@ const normalize = (value) =>
 export default function Jeu() {
   const { expandedCardId, setExpandedCardId } = useExpandedCardState();
   const { campaigns, campaignId, selectCampaign } = useCampaigns();
+  const { quests, questId, selectQuest } = useQuests(campaignId);
   const [term, setTerm] = usePageFilter("game.term", "");
   const {
     model,
@@ -135,6 +138,7 @@ export default function Jeu() {
             value={campaignId}
             onValueChange={selectCampaign}
           />
+          <QuestSelect quests={quests} value={questId} onValueChange={selectQuest} />
           <PrintButton campaignId={campaignId} preset="characters" />
           {campaignId && (
             <Button data-tutorial="game-model" variant="outline" onClick={() => setModelOpen(true)}>

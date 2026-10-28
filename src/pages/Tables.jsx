@@ -20,6 +20,8 @@ import CampaignSelect from "@/components/common/CampaignSelect";
 import { usePageFilter } from "@/lib/context/PageFilterContext";
 import DiceRoller from "@/components/tables/DiceRoller";
 import { useCampaigns } from "@/hooks/useCampaigns";
+import { useQuests } from "@/hooks/useQuests";
+import QuestSelect from "@/components/common/QuestSelect";
 import { useTables } from "@/hooks/useTables";
 import { useNpcGenerator } from "@/hooks/useNpcGenerator";
 import GeneratorTablesDialog from "@/components/home/GeneratorTablesDialog";
@@ -38,6 +40,7 @@ const EMPTY = /** @type {{ id?: string; name: string; category: string; descript
 
 export default function Tables() {
   const { campaigns, campaignId, selectCampaign } = useCampaigns();
+  const { quests, questId, selectQuest } = useQuests(campaignId);
   const [category, setCategory] = usePageFilter("tables.category", "all");
   const { tables, loading, saving, saveTable, deleteTable } = useTables(campaignId, category);
   const [generatorOpen, setGeneratorOpen] = useState(false);
@@ -101,6 +104,7 @@ export default function Tables() {
             value={campaignId}
             onValueChange={selectCampaign}
           />
+          <QuestSelect quests={quests} value={questId} onValueChange={selectQuest} />
           <PrintButton campaignId={campaignId} preset="tables" />
           <Button variant="outline" onClick={() => setGeneratorOpen(true)} disabled={!campaignId}>
             <Dices className="mr-2 h-4 w-4" /> Tables du générateur

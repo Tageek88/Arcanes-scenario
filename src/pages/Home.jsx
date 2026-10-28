@@ -5,6 +5,7 @@ import MobileSceneList from "@/components/home/MobileSceneList";
 import SceneEditor from "@/components/home/SceneEditor";
 import CampaignDialog from "@/components/home/CampaignDialog";
 import QuestBar from "@/components/home/QuestBar";
+import { useQuests } from "@/hooks/useQuests";
 import CodexSidebar from "@/components/codex/CodexSidebar";
 import CodexEntryDialog from "@/components/codex/CodexEntryDialog";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,7 @@ import { useGameSheet } from "@/hooks/useGameSheet";
 
 const EMPTY_SCENE = {
   title: "",
+  quest_id: "",
   act_id: "",
   status: "brouillon",
   order: 0,
@@ -65,13 +67,15 @@ export default function Home() {
     return nextId ? `scene:${nextId}` : null;
   });
 
-  const [preferredQuestId, setPreferredQuestId] = usePageFilter(`home.quest.${campaignId}`, "");
+  const { storedQuestId: preferredQuestId, selectQuest: setPreferredQuestId } = useQuests(campaignId);
 
   const {
     quests,
     quest,
     acts,
     scenes,
+    allActs,
+    allScenes,
     npcs,
     locations,
     clues,
@@ -151,15 +155,15 @@ export default function Home() {
       const inAct = scenes.filter((s) => (s.act_id || "") === (actId || ""));
       const maxOrder = inAct.reduce((max, s) => Math.max(max, s.order ?? 0), 0);
       setEditingSceneId(null);
-      setSceneForm({ ...EMPTY_SCENE, act_id: actId || acts[0]?.id || "", order: maxOrder + 1 });
+      setSceneForm({ ...EMPTY_SCENE, quest_id: quest?.id || "", act_id: actId || acts[0]?.id || "", order: maxOrder + 1 });
       setEditorOpen(true);
     },
-    [scenes, acts]
+    [scenes, acts, quest]
   );
 
   const openEditScene = (scene) => {
     setEditingSceneId(scene.id);
-    setSceneForm({ ...EMPTY_SCENE, ...scene, recurring: !!scene.recurring_group });
+    setSceneForm({ ...EMPTY_SCENE, ...scene, quest_id: scene.quest_id || quest?.id || "", recurring: !!scene.recurring_group });
     setEditorOpen(true);
   };
 
@@ -382,8 +386,9 @@ export default function Home() {
         form={sceneForm}
         setField={setSceneField}
         toggleId={toggleSceneId}
-        acts={acts}
-        scenes={scenes}
+        quests={quests}
+        acts={allActs}
+        scenes={allScenes}
         npcs={npcs}
         locations={locations}
         clues={clues}

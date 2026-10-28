@@ -175,9 +175,9 @@ export default function SessionDialog({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="_none">Aucune scène</SelectItem>
-              {scenes.map((scene) => (
+              {scenes.filter((scene) => scene.in_quest !== false || scene.id === form.scene_id).map((scene) => (
                 <SelectItem key={scene.id} value={scene.id}>
-                  {scene.title}
+                  {scene.in_quest === false && scene.quest_title ? `${scene.title} · ${scene.quest_title}` : scene.title}
                 </SelectItem>
               ))}
             </SelectContent>

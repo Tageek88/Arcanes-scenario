@@ -16,12 +16,15 @@ import NoteEditor from "@/components/notes/NoteEditor";
 import PrintButton from "@/components/print/PrintButton";
 import CampaignSelect from "@/components/common/CampaignSelect";
 import { useCampaigns } from "@/hooks/useCampaigns";
+import { useQuests } from "@/hooks/useQuests";
+import QuestSelect from "@/components/common/QuestSelect";
 import { useNotes } from "@/hooks/useNotes";
 
 const EMPTY = { title: "", content: "", pinned: false };
 
 export default function Notes() {
   const { campaigns, campaignId, selectCampaign } = useCampaigns();
+  const { quests, questId, selectQuest } = useQuests(campaignId);
   const { pinnedNotes, notes, loading, saving, saveNote, togglePin, deleteNote } = useNotes(campaignId);
 
   const [open, setOpen] = useState(false);
@@ -76,6 +79,7 @@ export default function Notes() {
             value={campaignId}
             onValueChange={selectCampaign}
           />
+          <QuestSelect quests={quests} value={questId} onValueChange={selectQuest} />
           <PrintButton campaignId={campaignId} preset="notes" />
           <Button data-tutorial="notes-new" onClick={openNew} disabled={!campaignId}>
             <Plus className="mr-2 h-4 w-4" /> Nouvelle note

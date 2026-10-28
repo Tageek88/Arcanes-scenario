@@ -306,7 +306,7 @@ export async function createEditablePdf(model) {
         if (blockIndex > 0) addPage();
         switch (block.kind) {
             case "scenes":
-                drawHeading("Scènes et actes");
+                drawHeading(block.questTitle ? `Scènes et actes · ${block.questTitle}` : "Scènes et actes");
                 for (const group of block.groups) {
                     drawHeading(group.actTitle, 3);
                     for (const scene of group.scenes) {

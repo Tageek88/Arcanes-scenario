@@ -33,12 +33,15 @@ import { CodexLinksContext } from "@/lib/context/CodexLinksContext";
 import { useExpandedCardState } from "@/lib/context/ExpandedCardContext";
 import { usePageFilter } from "@/lib/context/PageFilterContext";
 import { useCampaigns } from "@/hooks/useCampaigns";
+import { useQuests } from "@/hooks/useQuests";
+import QuestSelect from "@/components/common/QuestSelect";
 import { useCodex } from "@/hooks/useCodex";
 
 const count = (n, one, many) => `${n} ${n > 1 ? many : one}`;
 
 export default function Codex() {
   const { campaigns, campaignId, selectCampaign } = useCampaigns();
+  const { quests, questId, selectQuest } = useQuests(campaignId);
   const [storedTab, setTab] = usePageFilter("codex.tab", "npc");
   // Les personnages (fiches de jeu) ne sont plus un onglet du Codex : un ancien choix mémorisé retombe sur les PNJ.
   const tab = CODEX_PAGE_TABS.some((t) => t.key === storedTab) ? storedTab : "npc";
@@ -256,6 +259,7 @@ export default function Codex() {
             value={campaignId}
             onValueChange={selectCampaign}
           />
+          <QuestSelect quests={quests} value={questId} onValueChange={selectQuest} />
           <PrintButton campaignId={campaignId} preset={tab} />
           <Button data-tutorial="codex-new" disabled={!campaignId} onClick={openNew}>
             <Plus className="mr-2 h-4 w-4" /> Nouveau {KIND_META[tab].singular}

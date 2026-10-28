@@ -88,7 +88,7 @@ function Block({ block }) {
         case "scenes":
             return (
                 <section className="prt-section">
-                    <h2>Scènes</h2>
+                    <h2>Scènes{block.questTitle ? ` · ${block.questTitle}` : ""}</h2>
                     {block.groups.map((g, gi) => (
                         <div key={gi}>
                             <h3 className="prt-act">{g.actTitle}</h3>

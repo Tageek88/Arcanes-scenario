@@ -65,6 +65,32 @@ export function npcSheet(npc, gameSheetModel) {
     return { lines, stats, skills, equipment };
 }
 
+// Ne garde que les actes et les scènes des quêtes choisies, rangés par quête dans `slices` (dans l'ordre des quêtes).
+// Ce qui n'a pas encore de quête (anciennes données) compte pour la première. Sans quête choisie ou connue,
+// les données sont rendues telles quelles. `showQuests` : le titre de la quête est repris dans le document
+// quand la campagne a plusieurs quêtes.
+export function scopeToQuests(data, questIds) {
+    const all = [...(data.quests || [])].sort(byOrder);
+    const wanted = new Set(questIds || []);
+    const chosen = all.filter((q) => wanted.has(q.id));
+    if (chosen.length === 0) return { ...data, slices: undefined, showQuests: false };
+    const first = all[0].id;
+    const questOfAct = new Map(data.acts.map((a) => [a.id, a.quest_id || first]));
+    const questOfScene = (s) => s.quest_id || (s.act_id && questOfAct.get(s.act_id)) || first;
+    const slices = chosen.map((quest) => ({
+        quest,
+        acts: data.acts.filter((a) => questOfAct.get(a.id) === quest.id),
+        scenes: data.scenes.filter((s) => questOfScene(s) === quest.id),
+    }));
+    return {
+        ...data,
+        acts: slices.flatMap((slice) => slice.acts),
+        scenes: slices.flatMap((slice) => slice.scenes),
+        slices,
+        showQuests: all.length > 1,
+    };
+}
+
 // Actes dans l'ordre, chacun avec ses scènes ; les scènes sans acte forment un dernier groupe.
 export function orderScenes(acts, scenes) {
     const actIds = new Set(acts.map((a) => a.id));
@@ -80,13 +106,14 @@ export function orderScenes(acts, scenes) {
 
 const leaf = (id, label, hint = "") => ({ id, label, hint, countable: true, derived: false, children: [] });
 
-export function buildTrees({ acts, scenes, npcs, locations, clues, notes, tables = [], sessions = [], characters = [] }) {
+export function buildTrees({ acts, scenes, slices, npcs, locations, clues, notes, tables = [], sessions = [], characters = [] }) {
     let n = 0;
-    const sceneNodes = orderScenes(acts, scenes).map((g) => {
+    const parts = slices || [{ quest: null, acts, scenes }];
+    const nodesOfSlice = (slice) => orderScenes(slice.acts, slice.scenes).map((g) => {
         const kids = g.scenes.map((s) =>
             leaf(s.id, `${++n}. ${s.title || "Sans titre"}`, SCENE_STATUS[s.status]?.label || "")
         );
-        if (!g.act) return { id: "__noact__", label: "Sans acte", hint: "", countable: false, derived: true, children: kids };
+        if (!g.act) return { id: `__noact__${slice.quest?.id || ""}`, label: "Sans acte", hint: "", countable: false, derived: true, children: kids };
         return {
             id: g.act.id,
             label: g.act.title || "Acte",
@@ -96,6 +123,17 @@ export function buildTrees({ acts, scenes, npcs, locations, clues, notes, tables
             children: kids,
         };
     });
+    // Plusieurs quêtes choisies : un niveau « Quête » regroupe leurs actes.
+    const sceneNodes = parts.length > 1
+        ? parts.map((slice) => ({
+            id: `quest:${slice.quest?.id || ""}`,
+            label: slice.quest?.title || "Quête",
+            hint: "Quête",
+            countable: false,
+            derived: true,
+            children: nodesOfSlice(slice),
+        }))
+        : nodesOfSlice(parts[0]);
 
     const map = childrenMap(locations);
     const walk = (parentId, seen) =>
@@ -165,7 +203,11 @@ export function buildPrintModel(data, sel, opts) {
             ? (entity.attachments || []).filter((a) => (a.type || "").startsWith("image/")).map((a) => ({ url: a.url, name: a.name }))
             : [];
 
-    const groups = orderScenes(acts, scenes);
+    const sliceGroups = (data.slices || [{ quest: null, acts, scenes }]).map((slice) => ({
+        quest: slice.quest,
+        groups: orderScenes(slice.acts, slice.scenes),
+    }));
+    const groups = sliceGroups.flatMap((slice) => slice.groups);
     const number = new Map();
     let n = 0;
     groups.forEach((g) => g.scenes.forEach((s) => number.set(s.id, ++n)));
@@ -199,8 +241,9 @@ export function buildPrintModel(data, sel, opts) {
 
     // 1. Scènes et actes
     const sceneIds = sel.scenes || new Set();
+    for (const slice of sliceGroups) {
     const sceneGroups = [];
-    groups.forEach((g) => {
+    slice.groups.forEach((g) => {
         const picked = g.scenes.filter((s) => sceneIds.has(s.id));
         const emptyActSelected = g.act && g.scenes.length === 0 && sceneIds.has(g.act.id);
         if (!picked.length && !emptyActSelected) return;
@@ -231,7 +274,10 @@ export function buildPrintModel(data, sel, opts) {
             }),
         });
     });
-    if (sceneGroups.length) blocks.push({ kind: "scenes", groups: sceneGroups });
+    if (sceneGroups.length) {
+        blocks.push({ kind: "scenes", questTitle: data.showQuests && slice.quest ? slice.quest.title || "" : "", groups: sceneGroups });
+    }
+    }
 
     // 2. Indices non déjà imprimés avec leur scène
     const clueIds = sel.clues || new Set();

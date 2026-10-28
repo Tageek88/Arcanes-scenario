@@ -22,6 +22,7 @@ export default function SceneEditor({
   form,
   setField,
   toggleId,
+  quests = [],
   acts,
   scenes,
   npcs,
@@ -31,7 +32,14 @@ export default function SceneEditor({
   saving,
   onSave,
 }) {
-  const otherScenes = scenes.filter((s) => s.id !== editingId);
+  // Actes et scènes proposés : ceux de la quête choisie dans le formulaire.
+  const questActs = acts.filter((a) => a.quest_id === form.quest_id);
+  const otherScenes = scenes.filter((s) => s.id !== editingId && s.quest_id === form.quest_id);
+  const changeQuest = (questId) => {
+    setField("quest_id", questId);
+    setField("act_id", "");
+    setField("next_scene_ids", []);
+  };
   const missingReason = !form.title?.trim() ? "Le titre de la scène est obligatoire." : null;
 
   const footer = (
@@ -77,7 +85,24 @@ export default function SceneEditor({
           />
         </div>
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div className={quests.length > 0 ? "grid grid-cols-1 gap-3 sm:grid-cols-4" : "grid grid-cols-1 gap-3 sm:grid-cols-3"}>
+          {quests.length > 0 && (
+            <div className="space-y-2">
+              <Label>Quête</Label>
+              <Select value={form.quest_id || ""} onValueChange={changeQuest}>
+                <SelectTrigger aria-label="Quête de la scène">
+                  <SelectValue placeholder="Choisir" />
+                </SelectTrigger>
+                <SelectContent>
+                  {quests.map((q) => (
+                    <SelectItem key={q.id} value={q.id}>
+                      {q.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <div className="space-y-2">
             <Label>Acte</Label>
             <Select value={form.act_id || "_none"} onValueChange={(v) => setField("act_id", v === "_none" ? "" : v)}>
@@ -86,7 +111,7 @@ export default function SceneEditor({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="_none">Sans acte</SelectItem>
-                {acts.map((a) => (
+                {questActs.map((a) => (
                   <SelectItem key={a.id} value={a.id}>
                     {a.title}
                   </SelectItem>

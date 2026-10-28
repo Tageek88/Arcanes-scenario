@@ -180,10 +180,11 @@ export function useCampaignContent(campaignId, { activeSceneId, setActiveSceneId
     const previousActiveId = activeSceneId;
     const existing = editingId ? allScenes.find((s) => s.id === editingId) || null : null;
     try {
-      const target = existing?.quest_id ? null : await ensureCurrentQuest();
+      const wantedQuestId = form.quest_id || existing?.quest_id || "";
+      const target = wantedQuestId ? null : await ensureCurrentQuest();
       const payload = {
         campaign_id: campaignId,
-        quest_id: existing?.quest_id || target.id,
+        quest_id: wantedQuestId || target.id,
         act_id: form.act_id || "",
         title: form.title.trim(),
         summary: form.summary || "",
@@ -246,7 +247,10 @@ export function useCampaignContent(campaignId, { activeSceneId, setActiveSceneId
         toast({ variant: "destructive", title: "Scène enregistrée, copies non créées", description: "Rouvrez la scène et cochez de nouveau « Scène récurrente »." });
         return;
       }
-      toast({ title: editingId ? "Scène mise à jour" : "Scène créée", description });
+      // Scène déplacée dans une autre quête : elle sort de l'affichage, sa sélection est levée.
+      const moved = !!existing && !!existing.quest_id && existing.quest_id !== payload.quest_id;
+      if (moved) setActiveSceneId(null);
+      toast({ title: editingId ? "Scène mise à jour" : "Scène créée", description: moved ? "La scène a été déplacée dans une autre quête." : description });
     } catch (error) {
       console.error("Quête indisponible :", error);
       toast({ variant: "destructive", title: "Enregistrement impossible", description: "La quête n'a pas pu être préparée." });
@@ -469,6 +473,8 @@ export function useCampaignContent(campaignId, { activeSceneId, setActiveSceneId
     quest,
     acts,
     scenes,
+    allActs,
+    allScenes,
     npcs,
     locations,
     clues,

@@ -27,6 +27,8 @@ import { tallyVotes } from "@/lib/services/sessionPolls";
 import { useExpandedCardState } from "@/lib/context/ExpandedCardContext";
 import { usePageFilter } from "@/lib/context/PageFilterContext";
 import { useCampaigns } from "@/hooks/useCampaigns";
+import { useQuests } from "@/hooks/useQuests";
+import QuestSelect from "@/components/common/QuestSelect";
 import { useScenes } from "@/hooks/useScenes";
 import { useGameSessions } from "@/hooks/useGameSessions";
 import { useSessionPolls } from "@/hooks/useSessionPolls";
@@ -49,6 +51,7 @@ const withCampaignName = (list, showAll, names) =>
 export default function Calendrier() {
   const { expandedCardId, setExpandedCardId } = useExpandedCardState();
   const { campaigns, campaignId, selectCampaign } = useCampaigns();
+  const { quests, questId, selectQuest } = useQuests(campaignId);
   const [month, setMonth] = useState(startOfMonth(new Date()));
   const [selectedDate, setSelectedDate] = useState("");
 
@@ -174,6 +177,7 @@ export default function Calendrier() {
               setSelectedDate("");
             }}
           />
+          <QuestSelect quests={quests} value={questId} onValueChange={selectQuest} />
           {campaigns.length > 1 && (
             <label className="flex min-h-10 cursor-pointer items-center gap-2 rounded-md border border-border px-3 text-sm text-foreground">
               <Switch checked={showAll} onCheckedChange={(value) => { setShowAll(value); setSelectedDate(""); }} aria-label="Afficher toutes les campagnes" />

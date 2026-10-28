@@ -10,9 +10,10 @@ const LIMIT = 5000;
  */
 export async function loadPrintData(campaignId) {
   const list = (entity) => api.entities[entity].filter({ campaign_id: campaignId }, { limit: LIMIT });
-  const [campaign, acts, scenes, npcs, locations, clues, notes, tables, sessions, characters, models, relations] =
+  const [campaign, quests, acts, scenes, npcs, locations, clues, notes, tables, sessions, characters, models, relations] =
     await Promise.all([
       api.entities.Campaign.get(campaignId).catch(() => null),
+      list("Quest"),
       list("Act"),
       list("Scene"),
       list("NPC"),
@@ -27,6 +28,7 @@ export async function loadPrintData(campaignId) {
     ]);
   return {
     campaign,
+    quests: quests.items,
     acts: acts.items,
     scenes: scenes.items,
     npcs: npcs.items,
