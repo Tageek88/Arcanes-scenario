@@ -10,7 +10,7 @@ import { useDataRefresh } from "@/lib/context/RefreshContext";
 import { useExpandedCardState } from "@/lib/context/ExpandedCardContext";
 
 // Ordre des rubriques du menu : il décide du sens dans lequel la page se tourne.
-const PAGE_ORDER = ["/", "/codex", "/calendrier", "/tables", "/notes", "/jeu", "/settings"];
+const PAGE_ORDER = ["/", "/codex", "/jeu", "/notes", "/tables", "/calendrier", "/settings"];
 const orderOf = (path) => {
   const index = PAGE_ORDER.findIndex((item) => (item === "/" ? path === "/" : path === item || path.startsWith(item + "/")));
   return index < 0 ? PAGE_ORDER.length : index;

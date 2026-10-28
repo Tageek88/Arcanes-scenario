@@ -6,10 +6,10 @@ import { useTabStacks } from "@/lib/context/TabStackContext";
 const SECTIONS = {
   "/": "Arcanes & Scénarios",
   "/codex": "Codex",
-  "/calendrier": "Agenda",
+  "/jeu": "Système de jeu",
+  "/notes": "Notes de MJ",
   "/tables": "Tables",
-  "/notes": "Notes",
-  "/jeu": "Jeu",
+  "/calendrier": "Agenda",
   "/settings": "Paramètres",
 };
 

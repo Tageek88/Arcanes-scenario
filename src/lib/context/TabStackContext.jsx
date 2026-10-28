@@ -2,7 +2,7 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import { useLocation, useNavigate } from "react-router-dom";
 
 // Racines de la barre d'onglets mobile : chaque onglet tient sa propre pile.
-export const TAB_ROOTS = ["/", "/codex", "/calendrier", "/tables", "/notes", "/jeu"];
+export const TAB_ROOTS = ["/", "/codex", "/jeu", "/notes", "/tables", "/calendrier"];
 
 const MAX_STACK = 20;
 

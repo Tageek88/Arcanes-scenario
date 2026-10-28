@@ -7,10 +7,10 @@ import { useTabStacks } from "@/lib/context/TabStackContext";
 const TABS = [
   { to: "/", label: "Scènes", icon: GitBranch, tutorial: "tab-arborescence" },
   { to: "/codex", label: "Codex", icon: BookMarked, tutorial: "tab-codex" },
-  { to: "/calendrier", label: "Agenda", icon: CalendarDays, tutorial: "tab-calendrier" },
+  { to: "/jeu", label: "Système de jeu", icon: Swords, tutorial: "tab-system" },
+  { to: "/notes", label: "Notes de MJ", icon: StickyNote, tutorial: "tab-notes" },
   { to: "/tables", label: "Tables", icon: Dices, tutorial: "tab-tables" },
-  { to: "/notes", label: "Notes", icon: StickyNote, tutorial: "tab-notes" },
-  { to: "/jeu", label: "Jeu", icon: Swords, tutorial: "tab-system" },
+  { to: "/calendrier", label: "Agenda", icon: CalendarDays, tutorial: "tab-calendrier" },
 ];
 
 export default function MobileNav() {
