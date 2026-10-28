@@ -62,9 +62,18 @@ TABLES ALÉATOIRES
 
 Les tables permettent de préparer des listes de résultats pour improviser pendant la partie : rencontres, noms, événements, objets ou autres idées. Les entrées peuvent être pondérées afin que certains résultats apparaissent plus souvent lors d'un tirage. Le bouton « Tables du générateur » ouvre les listes qui alimentent la génération des noms et des PNJ.
 
+QUÊTES
+
+Une campagne peut contenir plusieurs quêtes, chacune avec ses actes et ses scènes. Un menu des quêtes, à gauche du menu des actes, permet d'en choisir une, de la renommer, de la supprimer ou d'en créer une. Une campagne qui n'a qu'une quête n'affiche pas ce menu.
+
+- Une scène peut être marquée « récurrente » : une copie indépendante, avec ses liens, existe alors dans chaque quête, y compris celles créées plus tard. Supprimer une copie ne touche pas les autres.
+- Le choix de la quête de la campagne est retenu et proposé sur les autres pages (Codex, Tables, Notes de MJ, Système de jeu, Calendrier).
+- À l'impression, une ou plusieurs quêtes se cochent ; chaque quête forme un bloc « Scènes » du document.
+- Dans le Calendrier, la scène prévue d'une session se choisit parmi les scènes de la quête active.
+
 NOTES
 
-La page Notes fait office de bloc-notes pour les rappels et les idées de préparation. Les notes peuvent être titrées, modifiées et épinglées pour les retrouver rapidement.
+La page Notes de MJ fait office de bloc-notes pour les rappels et les idées de préparation. Les notes peuvent être titrées, modifiées et épinglées pour les retrouver rapidement.
 
 SYSTÈME DE JEU
 
