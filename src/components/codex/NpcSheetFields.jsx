@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FieldLabel } from "@/components/codex/NpcGeneratorPanel";
+import InventoryField from "@/components/common/InventoryField";
 import { rangesForLevel } from "@/lib/generators/npcScale";
 
 const normalize = (value) => String(value || "").trim().toLocaleLowerCase("fr");
@@ -264,6 +265,17 @@ export default function NpcSheetFields({ form, set, generator, generation }) {
         <Button type="button" variant="outline" size="sm" onClick={() => set("equipment", [...equipment, { name: "", type: "", fields: [] }])}>
           <Plus className="mr-2 h-4 w-4" /> Ajouter un équipement
         </Button>
+      </div>
+
+      <div className="space-y-2">
+        <Label className="block">Inventaire</Label>
+        <p className="text-xs text-muted-foreground">Les objets que ce PNJ possède, avec leur quantité.</p>
+        <InventoryField
+          idPrefix="npc"
+          items={form.inventory || []}
+          onChange={(items) => set("inventory", items)}
+          campaignId={generator.context?.campaignId || form.campaign_id || ""}
+        />
       </div>
 
       {report && (

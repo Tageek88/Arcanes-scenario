@@ -17,6 +17,7 @@ import {
 import GameSheetModelEditor from "@/components/game/GameSheetModelEditor";
 import GameCharacterEditor from "@/components/game/GameCharacterEditor";
 import GameCatalogPanel, { GameTabBar } from "@/components/game/GameCatalogPanel";
+import InventoryPanel from "@/components/game/InventoryPanel";
 import CampaignSelect from "@/components/common/CampaignSelect";
 import PrintButton from "@/components/print/PrintButton";
 import { useExpandedCardState } from "@/lib/context/ExpandedCardContext";
@@ -116,7 +117,8 @@ export default function Jeu() {
         const eqMatch = (character.equipment || []).some(
           (e) => normalize(e.name).includes(q) || normalize(e.type).includes(q)
         );
-        return nameMatch || notesMatch || skillMatch || eqMatch;
+        const itemMatch = (character.inventory || []).some((item) => normalize(item.name).includes(q));
+        return nameMatch || notesMatch || skillMatch || eqMatch || itemMatch;
       }),
     [characters, q]
   );
@@ -139,7 +141,7 @@ export default function Jeu() {
             onValueChange={selectCampaign}
           />
           <QuestSelect quests={quests} value={questId} onValueChange={selectQuest} />
-          <PrintButton campaignId={campaignId} preset="characters" />
+          <PrintButton campaignId={campaignId} preset={gameTab === "inventory" ? "inventory" : "characters"} />
           {campaignId && (
             <Button data-tutorial="game-model" variant="outline" onClick={() => setModelOpen(true)}>
               <Shield className="h-4 w-4" /> {modelId ? "Modifier le modèle" : "Définir le modèle"}
@@ -194,13 +196,15 @@ export default function Jeu() {
               <Input
                 value={term}
                 onChange={(e) => setTerm(e.target.value)}
-                placeholder="Rechercher un personnage, compétence, équipement…"
+                placeholder="Rechercher un personnage, compétence, équipement, objet…"
                 className="pl-9"
               />
             </div>
           )}
 
-          {gameTab !== "characters" ? (
+          {gameTab === "inventory" ? (
+            <InventoryPanel key={campaignId} campaignId={campaignId} />
+          ) : gameTab !== "characters" ? (
             <GameCatalogPanel key={gameTab} campaignId={campaignId} kind={gameTab} skillRollModifier={model.skillRollModifier} />
           ) : loading ? (
             <p className="py-10 text-center font-mono text-xs uppercase tracking-widest text-muted-foreground">Chargement…</p>
@@ -326,6 +330,7 @@ export default function Jeu() {
         onOpenChange={setCharacterOpen}
         model={model}
         character={characterDraft}
+        campaignId={campaignId}
         skillCatalog={skillCatalog}
         equipmentCatalog={equipmentCatalog}
         saving={savingCharacter}

@@ -37,6 +37,7 @@ export async function loadNpcGenerationContext(campaignId) {
     equipmentPool: equipment.items
       .filter((item) => typeof item.name === "string" && item.name.trim())
       .map((item) => ({
+        id: item.id || "",
         name: item.name,
         type: item.type || "",
         fieldNames: (item.field_names || (item.fields || []).map((field) => field.name)).filter(Boolean),

@@ -1,4 +1,5 @@
 import React from "react";
+import { cleanInventory, inventoryPrintLine } from "@/lib/meta/inventory";
 
 const CSS = `
 @page { size: A4; margin: 15mm; }
@@ -69,6 +70,22 @@ const Clue = ({ clue }) => (
 
 function Block({ block }) {
     switch (block.kind) {
+        case "inventories":
+            return (
+                <section className="prt-section">
+                    <h2>Inventaires</h2>
+                    {block.owners.map((owner) => (
+                        <article className="prt-character-item" key={`${owner.kind}-${owner.name}`}>
+                            <h3 className="prt-group">{owner.name} <span className="prt-meta">· {owner.kindLabel}</span></h3>
+                            {owner.items.length === 0 ? (
+                                <p className="prt-meta">Aucun objet.</p>
+                            ) : (
+                                owner.items.map((line, index) => <div className="prt-text" key={`${line}-${index}`}>☐ {line}</div>)
+                            )}
+                        </article>
+                    ))}
+                </section>
+            );
         case "characters":
             return (
                 <section className="prt-section">
@@ -166,6 +183,9 @@ function Block({ block }) {
                                     )}
                                     {p.sheet?.equipment?.length > 0 && (
                                         <p className="prt-text">Équipement : {p.sheet.equipment.join(", ")}</p>
+                                    )}
+                                    {p.sheet?.inventory?.length > 0 && (
+                                        <p className="prt-text">Inventaire : {p.sheet.inventory.join(", ")}</p>
                                     )}
                                     {p.description && <p className="prt-text">{p.description}</p>}
                                     <Lines label="Relations" items={p.relations} />
@@ -284,6 +304,14 @@ function CharacterContent({ character, characteristics, skillRollModifier }) {
                                 <p key={`${field.name}-${fieldIndex}`}><strong>{field.name}</strong>{hasValue(field.value) && ` : ${field.value}`}</p>
                             ))}
                         </div>
+                    ))}
+                </section>
+            )}
+            {cleanInventory(character.inventory).length > 0 && (
+                <section className="prt-section">
+                    <h2>Inventaire</h2>
+                    {cleanInventory(character.inventory).map((item) => (
+                        <div className="prt-character-item" key={item.id}>☐ {inventoryPrintLine(item)}</div>
                     ))}
                 </section>
             )}

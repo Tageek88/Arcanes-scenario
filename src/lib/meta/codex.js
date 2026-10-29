@@ -1,3 +1,5 @@
+import { cleanInventory, newItemId } from "@/lib/meta/inventory";
+
 export const KIND_META = {
   npc: { entity: "NPC", title: "PNJ", singular: "PNJ", nameLabel: "Nom du PNJ" },
   location: { entity: "Location", title: "Lieux", singular: "Lieu", nameLabel: "Nom du lieu" },
@@ -41,6 +43,7 @@ export const defaultEntry = (kind) => {
       characteristics: {},
       skills: [],
       equipment: [],
+      inventory: [],
     };
   if (kind === "location")
     return { name: "", comment: "", type: "", description: "", attachments: [], parent_id: "" };
@@ -67,6 +70,8 @@ export const duplicateDraft = (kind, source) => {
   const { id, created_date, updated_date, created_by_id, created_by, ...rest } = source;
   return {
     ...rest,
+    // Une copie reçoit de nouveaux identifiants d'objets : ils restent propres à chaque fiche.
+    ...(Array.isArray(rest.inventory) ? { inventory: rest.inventory.map((item) => ({ ...item, id: newItemId() })) } : {}),
     comment: "",
     ...(kind === "clue" ? { discovered: false, known: false, used: false } : {}),
   };
@@ -108,5 +113,6 @@ export function npcSheetPayload(form) {
     equipment: (Array.isArray(form?.equipment) ? form.equipment : [])
       .filter((item) => text(item?.name))
       .map((item) => ({ name: text(item.name), type: text(item.type), fields: cleanFields(item.fields) })),
+    inventory: cleanInventory(form?.inventory),
   };
 }

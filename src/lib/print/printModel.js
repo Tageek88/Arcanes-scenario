@@ -3,6 +3,7 @@ import { groupIndex, relationLabel } from "@/lib/meta/relationMeta";
 import { NPC_ATTITUDE, SCENE_STATUS } from "@/lib/meta/sceneMeta";
 import { sessionStatusMeta } from "@/lib/meta/sessionMeta";
 import { NPC_GENDER_OPTIONS } from "@/lib/meta/codex";
+import { cleanInventory, inventoryOwners, inventoryPrintLine } from "@/lib/meta/inventory";
 
 export const SECTIONS = [
     { key: "scenes", title: "Scènes et actes", hint: "Chaque scène est imprimée avec ses indices liés." },
@@ -12,8 +13,12 @@ export const SECTIONS = [
     { key: "notes", title: "Notes du MJ", hint: "Épinglées en premier." },
     { key: "tables", title: "Tables aléatoires", hint: "Entrées et poids de tirage." },
     { key: "sessions", title: "Sessions", hint: "Dates, heures, lieux et notes." },
-    { key: "characters", title: "Fiches de personnages", hint: "Caractéristiques, compétences, équipements et notes." },
+    { key: "characters", title: "Fiches de personnages", hint: "Caractéristiques, compétences, équipements, inventaire et notes." },
+    { key: "inventories", title: "Inventaires", hint: "Objets sans propriétaire, des personnages et des PNJ." },
 ];
+
+const OWNER_KIND_LABEL = { campaign: "Campagne", character: "Personnage", npc: "PNJ" };
+const ownerKey = (owner) => `${owner.kind}:${owner.id}`;
 
 const txt = (v) => String(v ?? "");
 const byName = (a, b) => txt(a.name).localeCompare(txt(b.name), "fr", { numeric: true });
@@ -62,7 +67,8 @@ export function npcSheet(npc, gameSheetModel) {
             const detail = [txt(item.type).trim(), ...optionalFields(item.fields)].filter(Boolean).join(" · ");
             return detail ? `${item.name} (${detail})` : item.name;
         });
-    return { lines, stats, skills, equipment };
+    const inventory = cleanInventory(npc.inventory).map(inventoryPrintLine);
+    return { lines, stats, skills, equipment, inventory };
 }
 
 // Ne garde que les actes et les scènes des quêtes choisies, rangés par quête dans `slices` (dans l'ordre des quêtes).
@@ -106,7 +112,7 @@ export function orderScenes(acts, scenes) {
 
 const leaf = (id, label, hint = "") => ({ id, label, hint, countable: true, derived: false, children: [] });
 
-export function buildTrees({ acts, scenes, slices, npcs, locations, clues, notes, tables = [], sessions = [], characters = [] }) {
+export function buildTrees({ campaign, acts, scenes, slices, npcs, locations, clues, notes, tables = [], sessions = [], characters = [] }) {
     let n = 0;
     const parts = slices || [{ quest: null, acts, scenes }];
     const nodesOfSlice = (slice) => orderScenes(slice.acts, slice.scenes).map((g) => {
@@ -168,6 +174,10 @@ export function buildTrees({ acts, scenes, slices, npcs, locations, clues, notes
         characters: [...characters].sort(byName).map((character) =>
             leaf(character.id, character.name || "Personnage")
         ),
+        // La réserve et les personnages sont toujours proposés ; un PNJ seulement s'il a des objets.
+        inventories: inventoryOwners({ campaign, characters, npcs })
+            .filter((owner) => owner.kind !== "npc" || owner.inventory.length > 0)
+            .map((owner) => leaf(ownerKey(owner), owner.name, `${OWNER_KIND_LABEL[owner.kind]} · ${owner.inventory.length} objet${owner.inventory.length === 1 ? "" : "s"}`)),
     };
 }
 
@@ -387,6 +397,18 @@ export function buildPrintModel(data, sel, opts) {
     if (selectedCharacters.length) {
         blocks.push({ kind: "characters", characters: selectedCharacters });
     }
+
+    // 9. Inventaires (réserve sans propriétaire, personnages, PNJ)
+    const inventoryIds = sel.inventories || new Set();
+    const inventoryItems = inventoryOwners({ campaign, characters, npcs })
+        .filter((owner) => inventoryIds.has(ownerKey(owner)))
+        .map((owner) => ({
+            name: owner.name,
+            kind: owner.kind,
+            kindLabel: OWNER_KIND_LABEL[owner.kind],
+            items: owner.inventory.map(inventoryPrintLine),
+        }));
+    if (inventoryItems.length) blocks.push({ kind: "inventories", owners: inventoryItems });
 
     return {
         campaignName: campaign?.name || "Campagne",

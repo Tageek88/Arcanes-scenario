@@ -20,6 +20,7 @@ export const GAME_TABS = [
   { id: "characters", label: "Personnages" },
   { id: "skills", label: "Compétences" },
   { id: "equipment", label: "Équipements" },
+  { id: "inventory", label: "Inventaire" },
 ];
 
 const LABELS = {

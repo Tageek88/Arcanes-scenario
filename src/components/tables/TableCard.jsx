@@ -2,12 +2,12 @@
 /** @jsxRuntime classic */
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Dices, Pencil, Trash2 } from "lucide-react";
+import { Backpack, Dices, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { categoryMeta, rollTable, validEntries } from "@/lib/meta/tableMeta";
 import { useExpandedCard } from "@/lib/context/ExpandedCardContext";
 
-export default function TableCard({ table, onEdit, onDelete }) {
+export default function TableCard({ table, onEdit, onDelete, onAddToInventory }) {
   const { expanded, cardProps } = useExpandedCard(`table:${table.id}`);
   const [result, setResult] = useState(null);
   const [rolling, setRolling] = useState(false);
@@ -55,6 +55,11 @@ export default function TableCard({ table, onEdit, onDelete }) {
             <span className="font-mono text-xs uppercase tracking-widest text-primary break-words">Lancer…</span>
           ) : (
             <p className="font-display text-base leading-snug text-foreground break-words">{result?.text}</p>
+          )}
+          {!rolling && result?.text && onAddToInventory && (
+            <Button type="button" variant="outline" size="sm" className="mt-3" onClick={() => onAddToInventory(result.text)}>
+              <Backpack className="mr-2 h-4 w-4" /> Ajouter à l'inventaire
+            </Button>
           )}
         </div>
       )}

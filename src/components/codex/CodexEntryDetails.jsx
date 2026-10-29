@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { NPC_GENDER_OPTIONS } from "@/lib/meta/codex";
 import { hasFilter } from "@/lib/services/codexSearch";
 import { useCodexLinks } from "@/lib/context/CodexLinksContext";
+import { cleanInventory, inventoryLabel } from "@/lib/meta/inventory";
 
 const stop = (action) => (event) => {
   event.stopPropagation();
@@ -113,6 +114,26 @@ function Skills({ skills }) {
   );
 }
 
+function Inventory({ inventory }) {
+  const rows = cleanInventory(inventory);
+  if (rows.length === 0) return null;
+  return (
+    <Section title="Inventaire :">
+      <ul className="space-y-1">
+        {rows.map((item) => {
+          const extra = [item.notes, fieldsLine(item.fields)].filter(Boolean).join(" · ");
+          return (
+            <li key={item.id} className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px]">
+              <span className="font-medium text-foreground">{inventoryLabel(item)}</span>
+              {extra && <span className="break-words text-muted-foreground">{extra}</span>}
+            </li>
+          );
+        })}
+      </ul>
+    </Section>
+  );
+}
+
 function Equipment({ equipment }) {
   const rows = list(equipment).filter((item) => item?.name);
   if (rows.length === 0) return null;
@@ -188,6 +209,7 @@ export default function CodexEntryDetails({ kind, entry, locationLabel = "", rel
           <Characteristics characteristics={entry.characteristics} />
           <Skills skills={entry.skills} />
           <Equipment equipment={entry.equipment} />
+          <Inventory inventory={entry.inventory} />
           {relations.length > 0 && (
             <Section title="Relations :">
               <ul className="space-y-1">
@@ -211,6 +233,7 @@ export default function CodexEntryDetails({ kind, entry, locationLabel = "", rel
           <Characteristics characteristics={entry.characteristics} />
           <Skills skills={entry.skills} />
           <Equipment equipment={entry.equipment} />
+          <Inventory inventory={entry.inventory} />
           {entry.notes && <p className="whitespace-pre-wrap text-sm text-muted-foreground">{entry.notes}</p>}
         </>
       )}

@@ -1,4 +1,5 @@
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
+import { cleanInventory, inventoryPrintLine } from "@/lib/meta/inventory";
 
 const PAGE_WIDTH = 595.28;
 const PAGE_HEIGHT = 841.89;
@@ -349,6 +350,7 @@ export async function createEditablePdf(model) {
                         }
                         if (npc.sheet?.skills.length) drawText(`Compétences : ${npc.sheet.skills.join(", ")}`);
                         if (npc.sheet?.equipment?.length) drawText(`Équipement : ${npc.sheet.equipment.join(", ")}`);
+                        if (npc.sheet?.inventory?.length) drawText(`Inventaire : ${npc.sheet.inventory.join(", ")}`);
                         drawField("Attitude", npc.attitude);
                         if (npc.description) drawText(npc.description);
                         drawField("Relations avec les autres PNJ", npc.relations.join("\n"), {
@@ -386,6 +388,14 @@ export async function createEditablePdf(model) {
                         color: MUTED_COLOR,
                     });
                     if (session.notes) drawField("Notes", session.notes, { multiline: true, height: 72 });
+                }
+                break;
+            case "inventories":
+                drawHeading("Inventaires");
+                for (const owner of block.owners) {
+                    drawHeading(`${owner.name} (${owner.kindLabel})`, 3);
+                    if (owner.items.length === 0) drawText("Aucun objet.", { size: 8, color: MUTED_COLOR });
+                    for (const line of owner.items) drawText(`- ${line}`);
                 }
                 break;
             case "characters":
@@ -432,6 +442,10 @@ export async function createEditablePdf(model) {
                             height: Math.max(38, Math.min(100, 26 + details.length * 12)),
                         });
                     }
+                    drawHeading("Inventaire", 3);
+                    const inventory = cleanInventory(character.inventory);
+                    if (inventory.length === 0) drawField("Inventaire", "", { multiline: true, height: 60 });
+                    for (const item of inventory) drawText(`- ${inventoryPrintLine(item)}`);
                     drawHeading("Notes du personnage", 3);
                     drawField("Notes", character.notes || "", { multiline: true, height: 96 });
                 }

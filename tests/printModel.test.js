@@ -61,3 +61,33 @@ describe("impression par quête", () => {
     expect(m.blocks[0].questTitle).toBe("");
   });
 });
+
+describe("impression des inventaires", () => {
+  const campaign = { id: "c1", name: "C", inventory: [{ id: "i0", name: "Corde", quantity: 2 }] };
+  const characters = [{ id: "h1", name: "Hero", inventory: [{ id: "i1", name: "Torche", quantity: 3, notes: "Humide", fields: [{ name: "Durée", value: "1 h" }] }] }];
+  const npcs = [
+    { id: "n1", name: "Mira", inventory: [{ id: "i2", name: "Clé", quantity: 1 }] },
+    { id: "n2", name: "Vide", inventory: [] },
+  ];
+  const full = { ...data, campaign, characters, npcs };
+
+  it("propose la réserve, les personnages et les PNJ qui ont des objets", () => {
+    const tree = buildTrees(full).inventories;
+    expect(tree.map((n) => n.id)).toEqual(["campaign:c1", "character:h1", "npc:n1"]);
+  });
+
+  it("imprime chaque propriétaire choisi avec ses objets", () => {
+    const m = buildPrintModel(full, { inventories: new Set(["campaign:c1", "character:h1"]) }, options);
+    const block = m.blocks.find((b) => b.kind === "inventories");
+    expect(block.owners.map((o) => [o.name, o.items])).toEqual([
+      ["Sans propriétaire", ["Corde × 2"]],
+      ["Hero", ["Torche × 3 (Humide · Durée : 1 h)"]],
+    ]);
+  });
+
+  it("n'ajoute aucun bloc sans sélection, et la fiche de PNJ reprend l'inventaire", () => {
+    expect(buildPrintModel(full, {}, options).blocks).toEqual([]);
+    const m = buildPrintModel(full, { npcs: new Set(["n1"]) }, options);
+    expect(m.blocks[0].groups[0].npcs[0].sheet.inventory).toEqual(["Clé"]);
+  });
+});

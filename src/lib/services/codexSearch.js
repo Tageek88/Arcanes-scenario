@@ -125,6 +125,7 @@ export function buildSearchEntry(kind, entry, context = {}) {
       entry.role, entry.description, gender, attitude, entry.level,
       ...list(entry.traits), entry.motivation, entry.appearance,
       ...characteristicsText(entry.characteristics), ...skillsText(entry.skills), ...equipmentText(entry.equipment),
+      ...list(entry.inventory).map((item) => item?.name),
       ...list(context.relations).map((relation) => `${relation.label ?? ""} ${relation.targetName ?? ""}`)
     );
     addField("role", [entry.role]);
@@ -150,7 +151,8 @@ export function buildSearchEntry(kind, entry, context = {}) {
     addField("lieu", locationPaths);
   } else {
     parts.push(
-      entry.notes, ...characteristicsText(entry.characteristics), ...skillsText(entry.skills), ...equipmentText(entry.equipment)
+      entry.notes, ...characteristicsText(entry.characteristics), ...skillsText(entry.skills), ...equipmentText(entry.equipment),
+      ...list(entry.inventory).map((item) => item?.name)
     );
     addField("competence", list(entry.skills).map((skill) => skill?.name));
     addField("equipement", list(entry.equipment).map((item) => item?.name));

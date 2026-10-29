@@ -53,4 +53,12 @@ describe("recherche du codex", () => {
     const entry = buildSearchEntry("npc", { name: "Bran" }, { relations: [{ label: "Père de", targetName: "Alba" }] });
     expect(search("alba", entry)).toBe(true);
   });
+
+  it("les objets de l'inventaire sont cherchés (PNJ et personnage)", () => {
+    const withItems = buildSearchEntry("npc", { name: "Bran", inventory: [{ id: "1", name: "Clé rouillée", quantity: 1 }] });
+    expect(search("rouillee", withItems)).toBe(true);
+    const character = buildSearchEntry("character", { name: "Hero", inventory: [{ id: "2", name: "Torche" }] });
+    expect(search("torche", character)).toBe(true);
+    expect(search("torche", buildSearchEntry("character", { name: "Hero" }))).toBe(false);
+  });
 });

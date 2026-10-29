@@ -26,6 +26,7 @@ const PRESETS = {
     tables: "tables",
     sessions: "sessions",
     characters: "characters",
+    inventory: "inventories",
 };
 
 // ---------- Arbre à cases à cocher ----------

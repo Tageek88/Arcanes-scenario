@@ -6,8 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import ResponsiveDialog from "@/components/common/ResponsiveDialog";
 import useConfirm from "@/hooks/useConfirm";
+import InventoryField from "@/components/common/InventoryField";
+import { cleanInventory } from "@/lib/meta/inventory";
 
-const EMPTY = { name: "", notes: "", characteristics: {}, skills: [], equipment: [] };
+const EMPTY = { name: "", notes: "", characteristics: {}, skills: [], equipment: [], inventory: [] };
 const normalize = (value) => String(value || "").trim().toLocaleLowerCase("fr");
 
 const blankCharacteristic = () => ({ value: "", modifier: "", test: "", max: "" });
@@ -17,6 +19,7 @@ export default function GameCharacterEditor({
   onOpenChange,
   model,
   character,
+  campaignId,
   skillCatalog,
   equipmentCatalog,
   saving,
@@ -57,6 +60,7 @@ export default function GameCharacterEditor({
       characteristics: initialCharacteristics,
       skills: structuredClone(character.skills || []),
       equipment: structuredClone(character.equipment || []),
+      inventory: structuredClone(character.inventory || []),
     } : {
       ...EMPTY,
       characteristics: initialCharacteristics,
@@ -290,6 +294,7 @@ export default function GameCharacterEditor({
             value: String(field.value ?? ""),
           })),
         })),
+        inventory: cleanInventory(form.inventory),
       });
       if (!saved) setSaveError("La fiche n’a pas été enregistrée.");
     } catch (error) {
@@ -512,6 +517,19 @@ export default function GameCharacterEditor({
               </div>
             </div>
           ))}
+        </section>
+
+        <section className="space-y-3">
+          <div>
+            <h3 className="font-display font-semibold">Inventaire</h3>
+            <p className="text-xs text-muted-foreground">Les objets possédés par le personnage, avec leur quantité.</p>
+          </div>
+          <InventoryField
+            idPrefix="character"
+            items={form.inventory}
+            onChange={(items) => setForm((current) => ({ ...current, inventory: items }))}
+            campaignId={campaignId || character?.campaign_id || ""}
+          />
         </section>
 
         <div className="space-y-2">

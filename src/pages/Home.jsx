@@ -414,6 +414,7 @@ export default function Home() {
         onOpenChange={setCharacterOpen}
         model={sheetModel}
         character={characterDraft}
+        campaignId={campaignId}
         skillCatalog={skillCatalog}
         equipmentCatalog={equipmentCatalog}
         saving={savingCharacter}

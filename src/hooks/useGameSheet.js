@@ -187,6 +187,7 @@ export function useGameSheet(campaignId) {
       characteristics: draft.characteristics || {},
       skills: draft.skills || [],
       equipment: draft.equipment || [],
+      inventory: draft.inventory || [],
     };
     try {
       const saved = draft.id

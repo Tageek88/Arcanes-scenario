@@ -13,6 +13,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import TableCard from "@/components/tables/TableCard";
+import AddToInventoryDialog from "@/components/common/AddToInventoryDialog";
 import TableEditor from "@/components/tables/TableEditor";
 import { TABLE_CATEGORIES } from "@/lib/meta/tableMeta";
 import PrintButton from "@/components/print/PrintButton";
@@ -44,6 +45,7 @@ export default function Tables() {
   const [category, setCategory] = usePageFilter("tables.category", "all");
   const { tables, loading, saving, saveTable, deleteTable } = useTables(campaignId, category);
   const [generatorOpen, setGeneratorOpen] = useState(false);
+  const [inventoryItem, setInventoryItem] = useState(/** @type {string | null} */ (null));
   const npcGenerator = useNpcGenerator({ campaignId, enabled: generatorOpen });
   const campaign = campaigns.find((item) => item.id === campaignId);
 
@@ -181,6 +183,7 @@ export default function Tables() {
               table={table}
               onEdit={openEdit}
               onDelete={(t) => setPendingDelete(t)}
+              onAddToInventory={(text) => setInventoryItem(text)}
             />
           ))}
         </div>
@@ -193,6 +196,13 @@ export default function Tables() {
         setForm={setForm}
         saving={saving}
         onSave={save}
+      />
+
+      <AddToInventoryDialog
+        open={inventoryItem !== null}
+        onOpenChange={(next) => { if (!next) setInventoryItem(null); }}
+        campaignId={campaignId}
+        initialName={inventoryItem || ""}
       />
 
       <GeneratorTablesDialog
