@@ -110,11 +110,13 @@ export async function createQuest(campaignId, title) {
       ]);
       const order = quests.reduce((max, q) => Math.max(max, q.order ?? 0), 0) + 1;
       const quest = await api.entities.Quest.create({ campaign_id: campaignId, title: name, order }, { silent: true });
-      // Une scène par groupe : la plus ancienne.
+      // Une scène par groupe : celle de la première quête (la plus ancienne en cas d'égalité), pour garder ses liens.
+      const questRank = new Map(quests.map((q) => [q.id, q.order ?? 0]));
+      const rank = (s) => questRank.get(s.quest_id) ?? Number.MAX_SAFE_INTEGER;
       const firstOfGroup = new Map();
       [...scenes]
         .filter((s) => s.recurring_group)
-        .sort((a, b) => String(a.created_date || "").localeCompare(String(b.created_date || "")))
+        .sort((a, b) => rank(a) - rank(b) || String(a.created_date || "").localeCompare(String(b.created_date || "")))
         .forEach((s) => { if (!firstOfGroup.has(s.recurring_group)) firstOfGroup.set(s.recurring_group, s); });
       await copyScenesInto(quest, [...firstOfGroup.values()], { acts, scenes });
       return quest;
