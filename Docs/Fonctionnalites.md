@@ -71,6 +71,18 @@ Une campagne peut contenir plusieurs quêtes, chacune avec ses actes et ses scè
 - À l'impression, une ou plusieurs quêtes se cochent ; chaque quête forme un bloc « Scènes » du document.
 - Dans le Calendrier, la scène prévue d'une session se choisit parmi les scènes de la quête active.
 
+INVENTAIRE
+
+Chaque personnage et chaque PNJ a un inventaire : la liste des objets qu'il possède, avec une quantité, une description et des champs facultatifs nommés. Il est distinct de l'équipement de la fiche, qui décrit ce que le personnage utilise.
+
+- L'onglet « Inventaire » du Système de jeu rassemble tous les inventaires de la campagne, avec recherche, ajout, quantité modifiable et suppression.
+- Un objet peut n'appartenir à personne : il est alors rangé dans « Sans propriétaire » (butin, objets trouvés ou perdus).
+- Le bouton « Donner » transmet un objet, en entier ou en partie, à un personnage, à un PNJ ou à la réserve. Un objet identique voit sa quantité augmenter chez le destinataire.
+- Le résultat d'un tirage des Tables aléatoires peut être ajouté à un inventaire. Le choix du propriétaire se fait avec une barre de recherche.
+- Les noms d'objets déjà utilisés dans la campagne sont proposés à la saisie.
+- L'inventaire figure sur les fiches de personnage et de PNJ imprimées ou exportées en PDF, et une section « Inventaires » à part permet d'imprimer la réserve et les inventaires choisis.
+- La recherche du Codex retrouve un PNJ d'après les objets qu'il possède.
+
 NOTES
 
 La page Notes de MJ fait office de bloc-notes pour les rappels et les idées de préparation. Les notes peuvent être titrées, modifiées et épinglées pour les retrouver rapidement.
