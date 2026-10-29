@@ -30,7 +30,7 @@ flowchart LR
     F_HOME["home : SceneBoard, ActColumn,<br/>SceneEditor, MobileSceneList,<br/>CampaignDialog, QuestBar"]
     F_CAL["calendar : MonthGrid, SessionDialog,<br/>UpcomingSessions, SessionPollDialog<br/>poll/ : PollForm, PollCard,<br/>PollResultsTable, PollServiceUrlField,<br/>PollRemovalDialog"]
     F_CODEX["codex : CodexCard, CodexEntryDetails,<br/>CodexEntryDialog, LocationTree,<br/>CodexSidebar, NpcRelations,<br/>NpcSheetFields, NpcGeneratorPanel,<br/>AttachmentsField"]
-    F_GAME["game : GameSheetModelEditor,<br/>GameCharacterEditor, GameCatalogPanel<br/>print : PrintSheet"]
+    F_GAME["game : GameSheetModelEditor,<br/>GameCharacterEditor, GameCatalogPanel,<br/>InventoryPanel, GiveItemDialog<br/>print : PrintSheet"]
     F_NOTES["notes : NoteCard, NoteEditor"]
     F_TABLES["tables : TableCard, TableEditor,<br/>DiceRoller<br/>home/GeneratorTablesDialog"]
     F_SET["BackupPanel, AutosavePanel,<br/>Tutorial/TutorialCenter"]
@@ -42,7 +42,7 @@ flowchart LR
     H_HOME["useCampaignContent<br/>useCampaignActions"]
     H_CAL["useScenes, useGameSessions,<br/>useSessionPolls,<br/>useSessionPollManager"]
     H_CODEX["useCodex, useCodexList,<br/>useCodexEntryData,<br/>useNpcRelations, useNpcGenerator,<br/>useNpcFormGeneration"]
-    H_GAME["useGameSheet, useGameCatalog"]
+    H_GAME["useGameSheet, useGameCatalog,<br/>useInventory"]
     H_NOTES["useNotes"]
     H_TABLES["useTables"]
     H_UI["useConfirm<br/>(confirmations, sans données)"]
@@ -50,9 +50,9 @@ flowchart LR
 
   subgraph LIB["lib/"]
     direction TB
-    META["meta/<br/>codex, sceneMeta, sessionMeta,<br/>sessionCampaign, tableMeta,<br/>relationMeta, universeMeta"]
+    META["meta/<br/>codex, inventory, sceneMeta,<br/>sessionMeta, sessionCampaign, tableMeta,<br/>relationMeta, universeMeta"]
     CTX["context/<br/>campaignStore, questStore, RefreshContext,<br/>PageFilterContext, ExpandedCardContext,<br/>CodexLinksContext, TabStackContext, dataEvents, AuthContext"]
-    SERV["services/<br/>campaignDelete, quests, locationTree,<br/>npcRelations, attachments,<br/>codexEntries, codexSearch,<br/>npcGeneration, openAttachment"]
+    SERV["services/<br/>campaignDelete, quests, inventory,<br/>locationTree, npcRelations, attachments,<br/>codexEntries, codexSearch,<br/>npcGeneration, openAttachment"]
     POLLS["services/polls<br/>config, client (fetch), remote,<br/>votes, sync, pollDates, pollForm,<br/>store (façade : sessionPolls.js)"]
     PRINT["print/<br/>printModel, editablePdf,<br/>loadPrintData"]
     GEN["generators/<br/>nameGenerator, nameData, random,<br/>npcData, generatorTables, npcGenerator,<br/>npcScale, scaleDraft, npcRequest"]
@@ -185,10 +185,19 @@ flowchart LR
 - **Tests automatiques** : `npm test` (Vitest + `fake-indexeddb`, `vitest.config.js`, dossier `tests/` hors du périmètre ESLint). La vraie couche Dexie tourne sur une IndexedDB simulée vidée avant chaque test. Couverture : entités, quêtes (dont trois `ensureQuests` simultanés), suppression de campagne et annulation, sauvegarde aller-retour et restauration atomique, arbre des lieux, relations de PNJ, recherche du Codex, générateurs et barèmes, impression par quête, sondages. 81 tests verts au 28/10/2026.
 - **Inventaire** : `npm run inventaire` (`scripts/inventaire.mjs`) écrit `Docs/inventaire-<date>.md` : fichiers orphelins, exports inutilisés, usage par page, comparaison avec `Docs/Fonctionnalites.md` (indices à vérifier à la main). Il refuse d'écraser un rapport sans `--force`.
 
+## Version 1.6.3 : inventaire
+
+- **Données.** Un champ `inventory` (liste d'objets `{ id, name, quantity, notes, catalog_id, fields }`) sur `NPC`, `GameCharacter` et `Campaign` (la réserve « Sans propriétaire » : objets qui n'appartiennent à personne). Pas de nouvelle table ni de nouvelle `db.version` ; sauvegarde, sauvegarde automatique et suppression de campagne le couvrent déjà. L'équipement de la fiche reste une liste à part (ce que le personnage utilise).
+- **`lib/meta/inventory.js`** (fonctions pures) : nettoyage, ajout qui additionne un objet identique, liste des propriétaires (réserve, personnages, PNJ), suggestions de noms tirées des inventaires de la campagne, ligne imprimable. **`lib/services/inventory.js`** : `loadOwners`, ajout, quantité, suppression et `transferInventoryItem` (don, entier ou partiel, retrait et ajout dans la même transaction Dexie). Chaque écriture relit la fiche dans la transaction.
+- **Écrans** : onglet « Inventaire » du Système de jeu (`InventoryPanel`, `GiveItemDialog`), `AddToInventoryDialog` (depuis les Tables aléatoires et depuis l'onglet, réserve par défaut), `OwnerPicker` (recherche dans le choix du propriétaire), `InventoryField` (section des fiches de personnage et de PNJ). Le hook `useInventory` charge les propriétaires et expose ajout, quantité, suppression et don ; `useInventoryCatalog` fournit les suggestions.
+- **Impression et PDF** : nouvelle section « Inventaires » de `printModel` (réserve, personnages, PNJ qui ont des objets), bloc `inventories`, inventaire sur les fiches de personnage et de PNJ (champ vide dans le PDF s'il n'y a aucun objet). Le préréglage `inventory` de `PrintButton` s'applique quand l'onglet Inventaire de Jeu est affiché.
+- La recherche du Codex retrouve un PNJ d'après ses objets.
+- Tests : `tests/inventory.test.js` (règles pures), `tests/inventoryService.test.js` (service, réserve et don), `tests/printModel.test.js` (impression des inventaires).
+
 ## Plateformes
 
 - **Electron 44.9.0 (Windows)** : `electron/main.cjs`, `preload.cjs` et `navigationPolicy.cjs` (`window.arcanesPdf`, `window.arcanesBackup`, sauvegardes dans `Documents\Arcanes Scenario`). La fenêtre est en `sandbox`, avec isolation de contexte ; les canaux IPC (`handle()`) n'acceptent que la page principale ; `window.open` n'autorise que `blob:` (liens `https:`/`http:`/`mailto:` envoyés au système, reste refusé) ; la fenêtre principale ne navigue que vers `file:`. Installateur via `npm run dist`.
-- **Android (Capacitor)** : `android/`, config dans `capacitor.config.ts` (`webDir: "dist"`). Flux : `npm run build`, `npx cap sync android`, puis APK avec Gradle depuis Android Studio. Les ponts Electron n'existent pas sur Android ; l'export manuel passe par `@capacitor/filesystem` et `@capacitor/share`. La version Android (`versionName`, `versionCode` dans `android/app/build.gradle`) est indépendante de `package.json` : à mettre à jour à chaque release (1.6.1 = 161).
+- **Android (Capacitor)** : `android/`, config dans `capacitor.config.ts` (`webDir: "dist"`). Flux : `npm run build`, `npx cap sync android`, puis APK avec Gradle depuis Android Studio. Les ponts Electron n'existent pas sur Android ; l'export manuel passe par `@capacitor/filesystem` et `@capacitor/share`. La version Android (`versionName`, `versionCode` dans `android/app/build.gradle`) est indépendante de `package.json` : à mettre à jour à chaque release (1.6.3 = 163).
 - Le même code React (`src/`) sert aux deux.
 
 - Sécurité du 19/10/2026 : `@capacitor/assets` retiré (inutilisé, il tirait `tar` 6 et `sharp`), Electron 31.7.7 -> 44.9.0, react-router-dom 6.30.6 -> 7.18.4, tous les paquets en `devDependencies` (l'installateur n'embarque plus de `node_modules` d'exécution : l'interface est déjà regroupée par Vite). `electron/main.cjs` durci (voir Plateformes). `npm audit` : 26 alertes dont 1 critique -> 20 (15 modérées, 5 hautes), voir ci-dessous.
@@ -207,3 +216,4 @@ flowchart LR
 - Le cas d'une très grosse base avec beaucoup d'images n'a pas été précisé lors des tests de l'export Android.
 - Transition de page « rouleau » : testée par l'utilisateur sous Windows (Electron) et sous Android.
 - Quêtes et nouvel ordre des onglets : testés à la main sous Windows (28/10/2026), logique couverte par `npm test` ; non testés sous Android.
+- Inventaire : testé à la main sous Windows (29/10/2026) ; les tests du service ne tournent que sur le PC de l'utilisateur (IndexedDB simulée) ; non testé sous Android.
