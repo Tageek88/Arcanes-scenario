@@ -83,6 +83,17 @@ Chaque personnage et chaque PNJ a un inventaire : la liste des objets qu'il poss
 - L'inventaire figure sur les fiches de personnage et de PNJ imprimées ou exportées en PDF, et une section « Inventaires » à part permet d'imprimer la réserve et les inventaires choisis.
 - La recherche du Codex retrouve un PNJ d'après les objets qu'il possède.
 
+GÉNÉRATION DE PERSONNAGES JOUEURS
+
+Dans l'éditeur d'un personnage, le bouton « Générer la fiche » compose un personnage joueur : nom, caractéristiques, compétences et équipement. Les caractéristiques suivent le barème des personnages joueurs, défini dans le modèle de fiche (une plage par caractéristique, un nombre de compétences et d'équipements) ; les compétences et équipements sont tirés des catalogues de la campagne.
+
+- Le MJ peut relancer le tirage autant de fois qu'il veut. Un cadenas sur le nom, les caractéristiques, les compétences ou l'équipement garde la rubrique lors d'un nouveau tirage ; les cadenas sont enregistrés avec le personnage.
+- Avant de remplacer une rubrique modifiée à la main, une confirmation est demandée.
+- Le genre choisi ne sert qu'à générer le nom ; il n'est pas enregistré.
+- Les écarts au barème s'affichent en repères (par exemple une valeur hors plage) ; rien n'est bloqué.
+- Le barème des personnages joueurs peut se calculer à partir des personnages existants. Le barème des PNJ se calcule désormais à partir des fiches de PNJ.
+- Dans l'éditeur du modèle, les sections Caractéristiques, Barème des PNJ et Barème des personnages joueurs se replient ; le réglage « Modificateur de lancer des compétences » n'est plus proposé.
+
 NOTES
 
 La page Notes de MJ fait office de bloc-notes pour les rappels et les idées de préparation. Les notes peuvent être titrées, modifiées et épinglées pour les retrouver rapidement.
