@@ -30,7 +30,7 @@ flowchart LR
     F_HOME["home : SceneBoard, ActColumn,<br/>SceneEditor, MobileSceneList,<br/>CampaignDialog, QuestBar"]
     F_CAL["calendar : MonthGrid, SessionDialog,<br/>UpcomingSessions, SessionPollDialog<br/>poll/ : PollForm, PollCard,<br/>PollResultsTable, PollServiceUrlField,<br/>PollRemovalDialog"]
     F_CODEX["codex : CodexCard, CodexEntryDetails,<br/>CodexEntryDialog, LocationTree,<br/>CodexSidebar, NpcRelations,<br/>NpcSheetFields, NpcGeneratorPanel,<br/>AttachmentsField"]
-    F_GAME["game : GameSheetModelEditor,<br/>GameCharacterEditor, GameCatalogPanel,<br/>InventoryPanel, GiveItemDialog<br/>print : PrintSheet"]
+    F_GAME["game : GameSheetModelEditor,<br/>GameCharacterEditor, GameCatalogPanel,<br/>InventoryPanel, GiveItemDialog,<br/>PcGeneratorPanel<br/>print : PrintSheet"]
     F_NOTES["notes : NoteCard, NoteEditor"]
     F_TABLES["tables : TableCard, TableEditor,<br/>DiceRoller<br/>home/GeneratorTablesDialog"]
     F_SET["BackupPanel, AutosavePanel,<br/>Tutorial/TutorialCenter"]
@@ -42,7 +42,7 @@ flowchart LR
     H_HOME["useCampaignContent<br/>useCampaignActions"]
     H_CAL["useScenes, useGameSessions,<br/>useSessionPolls,<br/>useSessionPollManager"]
     H_CODEX["useCodex, useCodexList,<br/>useCodexEntryData,<br/>useNpcRelations, useNpcGenerator,<br/>useNpcFormGeneration"]
-    H_GAME["useGameSheet, useGameCatalog,<br/>useInventory"]
+    H_GAME["useGameSheet, useGameCatalog,<br/>useInventory, usePcFormGeneration"]
     H_NOTES["useNotes"]
     H_TABLES["useTables"]
     H_UI["useConfirm<br/>(confirmations, sans données)"]
@@ -55,7 +55,7 @@ flowchart LR
     SERV["services/<br/>campaignDelete, quests, inventory,<br/>locationTree, npcRelations, attachments,<br/>codexEntries, codexSearch,<br/>npcGeneration, openAttachment"]
     POLLS["services/polls<br/>config, client (fetch), remote,<br/>votes, sync, pollDates, pollForm,<br/>store (façade : sessionPolls.js)"]
     PRINT["print/<br/>printModel, editablePdf,<br/>loadPrintData"]
-    GEN["generators/<br/>nameGenerator, nameData, random,<br/>npcData, generatorTables, npcGenerator,<br/>npcScale, scaleDraft, npcRequest"]
+    GEN["generators/<br/>nameGenerator, nameData, random,<br/>npcData, generatorTables, npcGenerator,<br/>npcScale, scaleDraft, npcRequest,<br/>pcScale, pcGenerator, pcRequest"]
     SAVE["save/<br/>backup, autosave, accountData,<br/>nativeShare"]
     MISC["à la racine, non classés :<br/>utils, query-client"]
   end
@@ -194,10 +194,17 @@ flowchart LR
 - La recherche du Codex retrouve un PNJ d'après ses objets.
 - Tests : `tests/inventory.test.js` (règles pures), `tests/inventoryService.test.js` (service, réserve et don), `tests/printModel.test.js` (impression des inventaires).
 
+## Version 1.6.4 : génération de personnages joueurs
+
+- **Barème des PJ** : un seul profil sans niveaux (`GameSheetModel.pc_scale` : plage par caractéristique, nombre de compétences et d'équipements), distinct du barème des PNJ. Nettoyage, contrôle (`checkPc`, avertissements seulement) et renommage dans `lib/generators/pcScale.js`. Pas de nouvelle `db.version`.
+- **Générateur** : `pcGenerator.js` (pur, à graine : nom, caractéristiques, compétences et équipement tirés dans les catalogues de la campagne) et `pcRequest.js` (contexte de campagne). Verrous enregistrés dans `GameCharacter.generation_locks`. L'inventaire n'est pas généré.
+- **Écrans** : panneau « Générer la fiche » dans `GameCharacterEditor` (`PcGeneratorPanel`, `usePcFormGeneration` : cadenas, confirmation avant écrasement, écarts au barème en direct). Dans l'éditeur du modèle, trois sections repliables (Caractéristiques, Barème des PNJ, Barème des personnages joueurs). Le barème des PNJ se dérive des fiches de PNJ (`useGameSheet` charge aussi les PNJ), celui des PJ des personnages joueurs.
+- Tests : `tests/pcGenerator.test.js` (barème, génération, verrous, brouillon, renommage).
+
 ## Plateformes
 
 - **Electron 44.9.0 (Windows)** : `electron/main.cjs`, `preload.cjs` et `navigationPolicy.cjs` (`window.arcanesPdf`, `window.arcanesBackup`, sauvegardes dans `Documents\Arcanes Scenario`). La fenêtre est en `sandbox`, avec isolation de contexte ; les canaux IPC (`handle()`) n'acceptent que la page principale ; `window.open` n'autorise que `blob:` (liens `https:`/`http:`/`mailto:` envoyés au système, reste refusé) ; la fenêtre principale ne navigue que vers `file:`. Installateur via `npm run dist`.
-- **Android (Capacitor)** : `android/`, config dans `capacitor.config.ts` (`webDir: "dist"`). Flux : `npm run build`, `npx cap sync android`, puis APK avec Gradle depuis Android Studio. Les ponts Electron n'existent pas sur Android ; l'export manuel passe par `@capacitor/filesystem` et `@capacitor/share`. La version Android (`versionName`, `versionCode` dans `android/app/build.gradle`) est indépendante de `package.json` : à mettre à jour à chaque release (1.6.3 = 163).
+- **Android (Capacitor)** : `android/`, config dans `capacitor.config.ts` (`webDir: "dist"`). Flux : `npm run build`, `npx cap sync android`, puis APK avec Gradle depuis Android Studio. Les ponts Electron n'existent pas sur Android ; l'export manuel passe par `@capacitor/filesystem` et `@capacitor/share`. La version Android (`versionName`, `versionCode` dans `android/app/build.gradle`) est indépendante de `package.json` : à mettre à jour à chaque release (1.6.4 = 164).
 - Le même code React (`src/`) sert aux deux.
 
 - Sécurité du 19/10/2026 : `@capacitor/assets` retiré (inutilisé, il tirait `tar` 6 et `sharp`), Electron 31.7.7 -> 44.9.0, react-router-dom 6.30.6 -> 7.18.4, tous les paquets en `devDependencies` (l'installateur n'embarque plus de `node_modules` d'exécution : l'interface est déjà regroupée par Vite). `electron/main.cjs` durci (voir Plateformes). `npm audit` : 26 alertes dont 1 critique -> 20 (15 modérées, 5 hautes), voir ci-dessous.
