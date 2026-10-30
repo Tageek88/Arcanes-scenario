@@ -57,3 +57,31 @@ export function levelNameProblems(levels) {
   }
   return { duplicates, empty };
 }
+
+// === SECTION PC SCALE DRAFT ===
+// Même principe pour le barème des PJ : plages rangées par clé stable de caractéristique, saisies en texte.
+
+const emptyCount = { min: "", max: "" };
+const countToDraft = (count) => (count ? { min: text(count.min), max: text(count.max) } : { ...emptyCount });
+const draftCount = (count) => (count && (text(count.min).trim() || text(count.max).trim()) ? count : null);
+
+/** Brouillon à partir d'un barème de PJ. */
+export function pcScaleToDraft(scale, items) {
+  const ranges = {};
+  for (const item of items) {
+    const range = scale?.ranges?.[item.name];
+    if (range) ranges[item._key] = { min: text(range.min), max: text(range.max) };
+  }
+  return { ranges, skills: countToDraft(scale?.skills), equipment: countToDraft(scale?.equipment) };
+}
+
+/** Barème de PJ (à nettoyer ensuite avec `sanitizePcScale`) à partir du brouillon. */
+export function draftToPcScale(draft, items) {
+  const ranges = {};
+  for (const item of items) {
+    const name = text(item.name).trim();
+    const range = draft?.ranges?.[item._key];
+    if (name && range) ranges[name] = { min: range.min, max: range.max };
+  }
+  return { ranges, skills: draftCount(draft?.skills), equipment: draftCount(draft?.equipment) };
+}

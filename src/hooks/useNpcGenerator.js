@@ -3,6 +3,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { useDataRefresh } from "@/lib/context/RefreshContext";
 import { emptyLists, hasNameData, resolveTables } from "@/lib/generators/generatorTables";
 import { generateForContext } from "@/lib/generators/npcRequest";
+import { generatePcForContext } from "@/lib/generators/pcRequest";
+import { checkPc, hasPcScale } from "@/lib/generators/pcScale";
 import { checkNpc, hasScale, levelNames } from "@/lib/generators/npcScale";
 import { loadNpcGenerationContext, saveGeneratorData } from "@/lib/services/npcGeneration";
 
@@ -51,6 +53,18 @@ export function useNpcGenerator({ campaignId, enabled = true }) {
     [context]
   );
 
+  /** Génère un personnage joueur (graine, genre pour le nom, verrous…) ; null tant que le contexte n'est pas chargé. */
+  const generatePc = useCallback(
+    (options) => (context ? generatePcForContext(context, options) : null),
+    [context]
+  );
+
+  /** Contrôle un personnage joueur avec le barème des PJ ; null tant que le contexte n'est pas chargé. */
+  const checkCharacter = useCallback(
+    (pc) => (context ? checkPc(pc, context.pcScale, context.characteristicNames) : null),
+    [context]
+  );
+
   /** Contrôle un PNJ avec le barème de la campagne ; null tant que le contexte n'est pas chargé. */
   const check = useCallback(
     (npc) => (context ? checkNpc(npc, context.scale, context.characteristicNames) : null),
@@ -88,8 +102,11 @@ export function useNpcGenerator({ campaignId, enabled = true }) {
     levelNames: context ? levelNames(context.scale) : [],
     hasScale: context ? hasScale(context.scale) : false,
     hasSheetModel: Boolean(context?.characteristicNames.length),
+    hasPcScale: context ? hasPcScale(context.pcScale) : false,
     generate,
     check,
+    generatePc,
+    checkCharacter,
     saveTables,
   };
 }

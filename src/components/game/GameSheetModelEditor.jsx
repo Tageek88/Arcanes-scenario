@@ -2,14 +2,14 @@ import React, { useEffect, useState } from "react";
 import { Download, Plus, Sparkles, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import ResponsiveDialog from "@/components/common/ResponsiveDialog";
 import { useToast } from "@/components/ui/use-toast";
 import { DEFAULT_LEVEL_NAMES, MAX_LEVELS, MAX_LEVEL_NAME_LENGTH, deriveScale, exportScale, parseScaleJson, sanitizeScale } from "@/lib/generators/npcScale";
-import { draftToScale, levelNameProblems, scaleToDraft } from "@/lib/generators/scaleDraft";
+import { MAX_EQUIPMENT_PER_PC, sanitizePcScale } from "@/lib/generators/pcScale";
+import { draftToPcScale, draftToScale, levelNameProblems, pcScaleToDraft, scaleToDraft } from "@/lib/generators/scaleDraft";
 
-const EMPTY_MODEL = { characteristics: [], skillRollModifier: false, levels: [] };
+const EMPTY_COUNT = { min: "", max: "" };
+const EMPTY_MODEL = { characteristics: [], skillRollModifier: false, levels: [], pc: { ranges: {}, skills: EMPTY_COUNT, equipment: EMPTY_COUNT } };
 
 const IMPORT_ERRORS = {
   too_large: "Le fichier est trop volumineux.",
@@ -33,10 +33,11 @@ const downloadJson = (filename, json) => {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 };
 
-export default function GameSheetModelEditor({ open, onOpenChange, model, characters = [], onSave, saving }) {
+export default function GameSheetModelEditor({ open, onOpenChange, model, characters = [], npcs = [], onSave, saving }) {
   const { toast } = useToast();
   const [form, setForm] = useState(EMPTY_MODEL);
   const [scaleReport, setScaleReport] = useState("");
+  const [pcReport, setPcReport] = useState("");
 
   useEffect(() => {
     if (open) {
@@ -45,8 +46,10 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
         characteristics,
         skillRollModifier: !!model?.skillRollModifier,
         levels: scaleToDraft(model?.scale, characteristics),
+        pc: pcScaleToDraft(model?.pcScale, characteristics),
       });
       setScaleReport("");
+      setPcReport("");
     }
   }, [open, model]);
 
@@ -115,6 +118,7 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
 
   const levelProblems = levelNameProblems(form.levels);
   const namedItems = form.characteristics.filter((item) => item.name.trim());
+  const hasPcDraft = Object.keys(form.pc.ranges).length > 0 || Boolean(form.pc.skills?.min || form.pc.skills?.max || form.pc.equipment?.min || form.pc.equipment?.max);
 
   const submit = () => {
     const names = form.characteristics.map((item) => item.name.trim()).filter(Boolean);
@@ -134,6 +138,7 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
         draftToScale(form.levels.filter((level) => level.name.trim()), form.characteristics),
         characteristics.map((item) => item.name)
       ),
+      pcScale: sanitizePcScale(draftToPcScale(form.pc, form.characteristics), characteristics.map((item) => item.name)),
     });
   };
 
@@ -166,16 +171,38 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
   const removeLevel = (index) =>
     setForm((current) => ({ ...current, levels: current.levels.filter((_, i) => i !== index) }));
 
+  const updatePcRange = (key, side, value) =>
+    setForm((current) => ({
+      ...current,
+      pc: { ...current.pc, ranges: { ...current.pc.ranges, [key]: { min: "", max: "", ...current.pc.ranges[key], [side]: value } } },
+    }));
+  const updatePcCount = (kind, side, value) =>
+    setForm((current) => ({ ...current, pc: { ...current.pc, [kind]: { ...current.pc[kind], [side]: value } } }));
+
+  // Plages observées sur les personnages existants (de la valeur la plus basse à la plus haute) : un point de départ à ajuster.
+  const derivePcScale = () => {
+    const names = namedItems.map((item) => item.name.trim());
+    const { scale, report } = deriveScale(characters, names, ["Personnage joueur"]);
+    const level = scale.levels[0];
+    const equipmentCounts = characters.map((character) => (character.equipment || []).filter((item) => item.name?.trim()).length);
+    const equipment = equipmentCounts.length && Math.max(...equipmentCounts) > 0
+      ? { min: Math.min(...equipmentCounts), max: Math.max(...equipmentCounts) }
+      : null;
+    setForm((current) => ({ ...current, pc: pcScaleToDraft({ ranges: level?.ranges || {}, skills: level?.skills, equipment }, current.characteristics) }));
+    const missing = report.withoutData.length ? ` Sans valeur numérique exploitable : ${report.withoutData.join(", ")}.` : "";
+    setPcReport(`Plages des personnages joueurs calculées à partir de ${report.characters} fiche${report.characters === 1 ? "" : "s"} : à vérifier et à ajuster.${missing}`);
+  };
+
   const applyScale = (scale) =>
     setForm((current) => ({ ...current, levels: scaleToDraft(scale, current.characteristics) }));
 
   const deriveFromCharacters = () => {
     const names = namedItems.map((item) => item.name.trim());
     const levelNames = form.levels.map((level) => level.name.trim()).filter(Boolean);
-    const { scale, report } = deriveScale(characters, names, levelNames.length ? levelNames : DEFAULT_LEVEL_NAMES);
+    const { scale, report } = deriveScale(npcs, names, levelNames.length ? levelNames : DEFAULT_LEVEL_NAMES);
     applyScale(scale);
     const missing = report.withoutData.length ? ` Sans valeur numérique exploitable : ${report.withoutData.join(", ")}.` : "";
-    setScaleReport(`Plages calculées à partir de ${report.characters} fiche${report.characters === 1 ? "" : "s"} : à vérifier et à ajuster.${missing}`);
+    setScaleReport(`Plages calculées à partir de ${report.characters} fiche${report.characters === 1 ? "" : "s"} de PNJ : à vérifier et à ajuster.${missing}`);
   };
 
   const exportCurrentScale = () => {
@@ -217,11 +244,10 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
       footer={footer}
     >
       <div className="space-y-5 py-1">
-        <div className="space-y-3">
-          <div>
-            <h3 className="font-display font-semibold">Caractéristiques</h3>
-            <p className="text-xs text-muted-foreground">Définissez les caractéristiques et leurs champs facultatifs proposés sur les fiches.</p>
-          </div>
+        <details data-tutorial="game-model-characteristics" className="rounded-lg border border-border p-3" open>
+          <summary className="cursor-pointer font-display font-semibold">Caractéristiques</summary>
+          <div className="mt-3 space-y-3">
+          <p className="text-xs text-muted-foreground">Définissez les caractéristiques et leurs champs facultatifs proposés sur les fiches.</p>
           {form.characteristics.map((item, index) => (
             <div key={item._key || index} className="space-y-2 rounded-lg border border-border p-3">
               <div className="flex items-center gap-2">
@@ -285,18 +311,8 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
           >
             <Plus className="h-4 w-4" /> Ajouter une caractéristique
           </Button>
-        </div>
-
-        <div className="flex items-center justify-between gap-4 rounded-lg border border-border p-3">
-          <div>
-            <Label>Modificateur de lancer des compétences</Label>
-            <p className="text-xs text-muted-foreground">Afficher cette colonne sur les fiches de personnage.</p>
           </div>
-          <Switch
-            checked={!!form.skillRollModifier}
-            onCheckedChange={(value) => setForm((current) => ({ ...current, skillRollModifier: value }))}
-          />
-        </div>
+        </details>
 
         <details data-tutorial="game-model-scale" className="space-y-3 rounded-lg border border-border p-3" open={form.levels.length > 0}>
           <summary className="cursor-pointer font-display font-semibold">Barème des PNJ</summary>
@@ -306,8 +322,8 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
             </p>
 
             <div className="flex flex-wrap gap-2">
-              <Button type="button" variant="outline" size="sm" onClick={deriveFromCharacters} disabled={namedItems.length === 0 || characters.length === 0}>
-                <Sparkles className="h-4 w-4" /> Dériver des fiches existantes
+              <Button type="button" variant="outline" size="sm" onClick={deriveFromCharacters} disabled={namedItems.length === 0 || npcs.length === 0}>
+                <Sparkles className="h-4 w-4" /> Dériver des fiches de PNJ
               </Button>
               <Button type="button" variant="outline" size="sm" onClick={exportCurrentScale} disabled={form.levels.length === 0}>
                 <Download className="h-4 w-4" /> Exporter (JSON)
@@ -319,8 +335,8 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
                 </label>
               </Button>
             </div>
-            {characters.length === 0 && (
-              <p className="text-xs text-muted-foreground">La dérivation s'appuie sur les personnages déjà créés : il n'y en a pas encore dans cette campagne.</p>
+            {npcs.length === 0 && (
+              <p className="text-xs text-muted-foreground">La dérivation s'appuie sur les fiches de PNJ déjà créées dans le Codex : il n'y en a pas encore dans cette campagne.</p>
             )}
             {scaleReport && <p className="text-xs text-foreground" role="status">{scaleReport}</p>}
 
@@ -398,6 +414,64 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
                 </Button>
               )}
             </div>
+          </div>
+        </details>
+
+        <details data-tutorial="game-model-pc-scale" className="space-y-3 rounded-lg border border-border p-3" open={hasPcDraft}>
+          <summary className="cursor-pointer font-display font-semibold">Barème des personnages joueurs</summary>
+          <div className="mt-3 space-y-3">
+            <p className="text-xs text-muted-foreground">
+              Fixez la plage de valeurs de chaque caractéristique d'un personnage joueur, et le nombre de compétences et d'équipements. Le générateur de personnages s'en sert pour tirer une fiche, que vous pouvez relancer ou verrouiller champ par champ. Ces plages sont des repères : rien n'est bloqué.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <Button type="button" variant="outline" size="sm" onClick={derivePcScale} disabled={namedItems.length === 0 || characters.length === 0}>
+                <Sparkles className="h-4 w-4" /> Dériver des fiches de personnages
+              </Button>
+            </div>
+            {characters.length === 0 && (
+              <p className="text-xs text-muted-foreground">La dérivation s'appuie sur les personnages déjà créés : il n'y en a pas encore dans cette campagne.</p>
+            )}
+            {pcReport && <p className="text-xs text-foreground" role="status">{pcReport}</p>}
+            {namedItems.length === 0 && <p className="text-xs text-muted-foreground">Ajoutez des caractéristiques au modèle pour saisir leurs plages.</p>}
+            {namedItems.map((item) => (
+              <div key={item._key} className="grid grid-cols-[minmax(0,1fr)_5rem_5rem] items-center gap-2">
+                <span className="truncate text-sm">{item.name}</span>
+                <Input
+                  inputMode="numeric"
+                  aria-label={`${item.name} : minimum d'un personnage joueur`}
+                  placeholder="Min"
+                  value={form.pc.ranges[item._key]?.min ?? ""}
+                  onChange={(event) => updatePcRange(item._key, "min", event.target.value)}
+                />
+                <Input
+                  inputMode="numeric"
+                  aria-label={`${item.name} : maximum d'un personnage joueur`}
+                  placeholder="Max"
+                  value={form.pc.ranges[item._key]?.max ?? ""}
+                  onChange={(event) => updatePcRange(item._key, "max", event.target.value)}
+                />
+              </div>
+            ))}
+            {[["skills", "Nombre de compétences", "Compétences"], ["equipment", "Nombre d'équipements", "Équipements"]].map(([kind, label, short]) => (
+              <div key={kind} className="grid grid-cols-[minmax(0,1fr)_5rem_5rem] items-center gap-2">
+                <span className="text-sm text-muted-foreground">{label}</span>
+                <Input
+                  inputMode="numeric"
+                  aria-label={`${short} : minimum d'un personnage joueur`}
+                  placeholder="Min"
+                  value={form.pc[kind]?.min ?? ""}
+                  onChange={(event) => updatePcCount(kind, "min", event.target.value)}
+                />
+                <Input
+                  inputMode="numeric"
+                  aria-label={`${short} : maximum d'un personnage joueur`}
+                  placeholder="Max"
+                  value={form.pc[kind]?.max ?? ""}
+                  onChange={(event) => updatePcCount(kind, "max", event.target.value)}
+                />
+              </div>
+            ))}
+            <p className="text-xs text-muted-foreground">Compétences : 20 au plus ; équipements : {MAX_EQUIPMENT_PER_PC} au plus.</p>
           </div>
         </details>
       </div>

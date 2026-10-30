@@ -8,6 +8,11 @@ import ResponsiveDialog from "@/components/common/ResponsiveDialog";
 import useConfirm from "@/hooks/useConfirm";
 import InventoryField from "@/components/common/InventoryField";
 import { cleanInventory } from "@/lib/meta/inventory";
+import { FieldLabel } from "@/components/codex/NpcGeneratorPanel";
+import PcGeneratorPanel, { LockedHeading } from "@/components/game/PcGeneratorPanel";
+import { useNpcGenerator } from "@/hooks/useNpcGenerator";
+import { usePcFormGeneration } from "@/hooks/usePcFormGeneration";
+import { PC_LOCKABLE_FIELDS } from "@/lib/generators/pcGenerator";
 
 const EMPTY = { name: "", notes: "", characteristics: {}, skills: [], equipment: [], inventory: [] };
 const normalize = (value) => String(value || "").trim().toLocaleLowerCase("fr");
@@ -28,6 +33,15 @@ export default function GameCharacterEditor({
   const [form, setForm] = useState(EMPTY);
   const [saveError, setSaveError] = useState("");
   const { confirm, confirmDialog, dismiss } = useConfirm();
+  const generator = useNpcGenerator({ campaignId, enabled: open });
+  const generation = usePcFormGeneration({ open, generator, form, setForm, initialLocks: character?.generation_locks });
+  // Écarts au barème, affichés dès que la fiche contient quelque chose (une fiche vide n'a rien à contrôler).
+  const hasContent = Object.values(form.characteristics || {}).some((entry) => String(entry?.value ?? "").trim() !== "")
+    || form.skills.some((skill) => skill.name?.trim())
+    || form.equipment.some((item) => item.name?.trim());
+  const issues = hasContent && generator.hasPcScale
+    ? generator.checkCharacter({ characteristics: form.characteristics, skills: form.skills, equipment: form.equipment })?.issues || []
+    : [];
 
   useEffect(() => {
     if (!open) {
@@ -295,6 +309,7 @@ export default function GameCharacterEditor({
           })),
         })),
         inventory: cleanInventory(form.inventory),
+        generation_locks: Object.fromEntries(PC_LOCKABLE_FIELDS.filter((key) => generation.locks[key]).map((key) => [key, true])),
       });
       if (!saved) setSaveError("La fiche n’a pas été enregistrée.");
     } catch (error) {
@@ -323,13 +338,15 @@ export default function GameCharacterEditor({
     >
       <form id="game-character-form" onSubmit={submit} className="space-y-5 py-1">
         <div className="space-y-2">
-          <Label htmlFor="game-character-name">Nom du personnage</Label>
+          <FieldLabel label="Nom du personnage" locked={!!generation.locks.name} onToggle={() => generation.toggleLock("name")} htmlFor="game-character-name" />
           <Input id="game-character-name" data-tutorial="game-character-name" autoFocus value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} />
         </div>
 
+        <PcGeneratorPanel generator={generator} generation={generation} issues={issues} />
+
         {model.characteristics.length > 0 && (
           <section className="space-y-3">
-            <h3 className="font-display font-semibold">Caractéristiques</h3>
+            <LockedHeading label="Caractéristiques" locked={!!generation.locks.characteristics} onToggle={() => generation.toggleLock("characteristics")} />
             <div className="space-y-3">
               {model.characteristics.map((item) => {
                 const values = form.characteristics[item.name] || { value: "", fields: [] };
@@ -394,7 +411,7 @@ export default function GameCharacterEditor({
         <section className="space-y-3">
           <div className="flex items-center justify-between gap-2">
             <div>
-              <h3 className="font-display font-semibold">Compétences</h3>
+              <LockedHeading label="Compétences" locked={!!generation.locks.skills} onToggle={() => generation.toggleLock("skills")} />
               <p className="text-xs text-muted-foreground">Les noms saisis sont retenus dans le catalogue de la campagne.</p>
             </div>
             <Button type="button" variant="outline" size="sm" onClick={() => setForm((current) => ({ ...current, skills: [...current.skills, { name: "", roll_modifier: "", fields: [] }] }))}>
@@ -451,7 +468,7 @@ export default function GameCharacterEditor({
         <section className="space-y-3">
           <div className="flex items-center justify-between gap-2">
             <div>
-              <h3 className="font-display font-semibold">Équipement</h3>
+              <LockedHeading label="Équipement" locked={!!generation.locks.equipment} onToggle={() => generation.toggleLock("equipment")} />
               <p className="text-xs text-muted-foreground">Les champs facultatifs déjà connus pour un type sont proposés vides pour un nouvel objet.</p>
             </div>
             <Button type="button" variant="outline" size="sm" onClick={() => setForm((current) => ({ ...current, equipment: [...current.equipment, { name: "", type: "", fields: [] }] }))}>

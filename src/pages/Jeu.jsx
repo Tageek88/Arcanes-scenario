@@ -42,6 +42,7 @@ export default function Jeu() {
     model,
     modelId,
     characters,
+    npcs,
     skillCatalog,
     equipmentCatalog,
     loading,
@@ -321,6 +322,7 @@ export default function Jeu() {
         onOpenChange={setModelOpen}
         model={model}
         characters={characters}
+        npcs={npcs}
         onSave={handleSaveModel}
         saving={savingModel}
       />

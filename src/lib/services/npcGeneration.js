@@ -1,6 +1,7 @@
 import { api } from "@/api/localClient";
 import { sanitizeGeneratorData } from "@/lib/generators/generatorTables";
 import { characteristicNamesOf, sanitizeScale } from "@/lib/generators/npcScale";
+import { sanitizePcScale } from "@/lib/generators/pcScale";
 
 /**
  * Charge ce qu'il faut pour générer un PNJ dans une campagne : univers, tables du MJ, caractéristiques du modèle
@@ -30,6 +31,7 @@ export async function loadNpcGenerationContext(campaignId) {
     characteristicFields,
     skillRollModifier: !!model?.skillRollModifier,
     scale: sanitizeScale(model?.scale, characteristicNames),
+    pcScale: sanitizePcScale(model?.pc_scale, characteristicNames),
     skillPool: skills.items
       .filter((skill) => typeof skill.name === "string" && skill.name.trim())
       .map((skill) => ({ name: skill.name, roll_modifier: skill.roll_modifier || "" })),

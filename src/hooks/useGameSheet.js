@@ -5,8 +5,9 @@ import { useToast } from "@/components/ui/use-toast";
 import { useDataRefresh } from "@/lib/context/RefreshContext";
 import { dispatchTutorialAction } from "@/utils/tutorialStorage";
 import { characteristicNamesOf, renameScaleCharacteristics, sanitizeScale } from "@/lib/generators/npcScale";
+import { renamePcScaleCharacteristics, sanitizePcScale } from "@/lib/generators/pcScale";
 
-const EMPTY_MODEL = { characteristics: [], skillRollModifier: false, scale: { levels: [] } };
+const EMPTY_MODEL = { characteristics: [], skillRollModifier: false, scale: { levels: [] }, pcScale: sanitizePcScale(null) };
 
 // Modèle tel que l'interface l'utilise, à partir de la ligne enregistrée (le barème est optionnel).
 const readModel = (row) => {
@@ -15,6 +16,7 @@ const readModel = (row) => {
     characteristics,
     skillRollModifier: !!row?.skillRollModifier,
     scale: sanitizeScale(row?.scale, characteristicNamesOf(characteristics)),
+    pcScale: sanitizePcScale(row?.pc_scale, characteristicNamesOf(characteristics)),
   };
 };
 const normalize = (value) => String(value || "").trim().toLocaleLowerCase("fr");
@@ -30,6 +32,8 @@ export function useGameSheet(campaignId) {
   const [model, setModel] = useState(EMPTY_MODEL);
   const [modelId, setModelId] = useState("");
   const [characters, setCharacters] = useState([]);
+  // PNJ de la campagne : ils servent à dériver le barème des PNJ (les personnages joueurs servent à celui des PJ).
+  const [npcs, setNpcs] = useState([]);
   const [skillCatalog, setSkillCatalog] = useState([]);
   const [equipmentCatalog, setEquipmentCatalog] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -42,6 +46,7 @@ export function useGameSheet(campaignId) {
       setModel(EMPTY_MODEL);
       setModelId("");
       setCharacters([]);
+      setNpcs([]);
       setSkillCatalog([]);
       setEquipmentCatalog([]);
       return;
@@ -51,17 +56,19 @@ export function useGameSheet(campaignId) {
     const load = async () => {
       if (initial) setLoading(true);
       try {
-        const [models, people, skills, equipment] = await Promise.all([
+        const [models, people, skills, equipment, npcRows] = await Promise.all([
           api.entities.GameSheetModel.filter({ campaign_id: campaignId }, { limit: 10 }),
           api.entities.GameCharacter.filter({ campaign_id: campaignId }, { sort: "name", limit: 1000 }),
           api.entities.SkillCatalog.filter({ campaign_id: campaignId }, { sort: "name", limit: 1000 }),
           api.entities.EquipmentCatalog.filter({ campaign_id: campaignId }, { sort: "name", limit: 1000 }),
+          api.entities.NPC.filter({ campaign_id: campaignId }, { limit: 1000 }),
         ]);
         if (!alive) return;
         const savedModel = models.items[0] || null;
         setModelId(savedModel?.id || "");
         setModel(readModel(savedModel));
         setCharacters(people.items);
+        setNpcs(npcRows.items);
         setSkillCatalog(skills.items);
         setEquipmentCatalog(equipment.items);
         loadedFor.current = campaignId;
@@ -92,7 +99,13 @@ export function useGameSheet(campaignId) {
         renameScaleCharacteristics(nextModel.scale ?? model.scale, updatedNames),
         characteristicNamesOf(nextModel.characteristics)
       );
-      const payload = { campaign_id: campaignId, ...nextModel, scale };
+      // Barème des personnages joueurs (champ `pc_scale`) : même règle, avec les renommages appliqués.
+      const { pcScale: nextPcScale, ...modelFields } = nextModel;
+      const pcScale = sanitizePcScale(
+        renamePcScaleCharacteristics(nextPcScale ?? model.pcScale, updatedNames),
+        characteristicNamesOf(nextModel.characteristics)
+      );
+      const payload = { campaign_id: campaignId, ...modelFields, scale, pc_scale: pcScale };
       let saved;
       if (modelId) {
         saved = await api.entities.GameSheetModel.update(modelId, payload);
@@ -188,6 +201,8 @@ export function useGameSheet(campaignId) {
       skills: draft.skills || [],
       equipment: draft.equipment || [],
       inventory: draft.inventory || [],
+      // Verrous de la génération (cadenas) : absents du brouillon, la valeur enregistrée est conservée.
+      ...(draft.generation_locks ? { generation_locks: draft.generation_locks } : {}),
     };
     try {
       const saved = draft.id
@@ -270,6 +285,7 @@ export function useGameSheet(campaignId) {
     model,
     modelId,
     characters,
+    npcs,
     skillCatalog,
     equipmentCatalog,
     loading,
