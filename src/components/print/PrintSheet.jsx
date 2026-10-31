@@ -203,6 +203,7 @@ function Block({ block }) {
                     {block.notes.map((x, i) => (
                         <div key={i} className="prt-item">
                             <div className="prt-title">{x.pinned ? "★ " : ""}{x.title}</div>
+                            {x.target && <p className="prt-text">Post-it · {x.target}</p>}
                             {x.content && <p className="prt-text">{x.content}</p>}
                         </div>
                     ))}

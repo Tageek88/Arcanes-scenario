@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { SCENE_STATUS } from "@/lib/meta/sceneMeta";
+import PostItButton from "@/components/common/PostItButton";
 
 export default function SwipeSceneRow({ scene, active, npcs, locations, clues, onOpen, onSelect, onToggleStatus }) {
   const startX = useRef(null);
@@ -86,7 +87,8 @@ export default function SwipeSceneRow({ scene, active, npcs, locations, clues, o
           </div>
         )}
       </button>
-      <div className="flex gap-2 justify-end shrink-0">
+      <div className="flex items-center gap-2 justify-end shrink-0">
+        <PostItButton target={{ kind: "scene", id: scene.id }} label={`la scène « ${scene.title || "Sans titre"} »`} />
         <button type="button" onClick={() => onToggleStatus(scene)} className={cn("tag border", meta.badge)}>
           {meta.label}
         </button>

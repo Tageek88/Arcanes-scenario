@@ -6,6 +6,7 @@ import { useDataRefresh } from "@/lib/context/RefreshContext";
 import { dispatchTutorialAction } from "@/utils/tutorialStorage";
 import { characteristicNamesOf, renameScaleCharacteristics, sanitizeScale } from "@/lib/generators/npcScale";
 import { renamePcScaleCharacteristics, sanitizePcScale } from "@/lib/generators/pcScale";
+import { renameCharacteristicNotes } from "@/lib/services/notes";
 
 const EMPTY_MODEL = { characteristics: [], skillRollModifier: false, scale: { levels: [] }, pcScale: sanitizePcScale(null) };
 
@@ -140,6 +141,14 @@ export function useGameSheet(campaignId) {
             valuesMigrated = false;
             console.error("Migration des valeurs de caractéristiques impossible :", error);
           }
+        }
+      }
+      if (updatedNames.size > 0) {
+        // Les post-it collés sur une caractéristique suivent son nouveau nom.
+        try {
+          await renameCharacteristicNotes(campaignId, updatedNames);
+        } catch (error) {
+          console.error("Renommage des post-it de caractéristiques impossible :", error);
         }
       }
       setModel(readModel(saved));

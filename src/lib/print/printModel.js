@@ -3,6 +3,7 @@ import { groupIndex, relationLabel } from "@/lib/meta/relationMeta";
 import { NPC_ATTITUDE, SCENE_STATUS } from "@/lib/meta/sceneMeta";
 import { sessionStatusMeta } from "@/lib/meta/sessionMeta";
 import { NPC_GENDER_OPTIONS } from "@/lib/meta/codex";
+import { describeTarget } from "@/lib/meta/postit";
 import { cleanInventory, inventoryOwners, inventoryPrintLine } from "@/lib/meta/inventory";
 
 export const SECTIONS = [
@@ -201,6 +202,13 @@ export const countableIds = (nodes) => {
 
 // ---------- Modèle du document imprimé ----------
 
+/** Libellé « Scène · Nom » de l'élément d'un post-it, vide pour une note libre. */
+function noteTargetLabel(note, lookup) {
+    const described = describeTarget(note, lookup);
+    // Élément absent des données imprimées (supprimé, ou hors des quêtes choisies) : on n'affiche rien plutôt qu'un faux libellé.
+    return described && !described.missing ? `${described.kindLabel} · ${described.label}` : "";
+}
+
 export function buildPrintModel(data, sel, opts) {
     const { campaign, acts, scenes, npcs, locations, clues, notes, tables = [], sessions = [], relations, characters = [], gameSheetModel } = data;
     const sceneById = new Map(scenes.map((s) => [s.id, s]));
@@ -350,10 +358,12 @@ export function buildPrintModel(data, sel, opts) {
 
     // 5. Notes du MJ
     const noteIds = sel.notes || new Set();
+    const byId = (rows) => new Map((rows || []).map((row) => [row.id, row]));
+    const noteLookup = { scene: byId(scenes), npc: byId(npcs), location: byId(locations), clue: byId(clues), character: byId(characters) };
     const noteItems = notes
         .filter((x) => noteIds.has(x.id))
         .sort((a, b) => Number(!!b.pinned) - Number(!!a.pinned) || txt(b.updated_date).localeCompare(txt(a.updated_date)))
-        .map((x) => ({ title: x.title || "Note", content: x.content || "", pinned: !!x.pinned }));
+        .map((x) => ({ title: x.title || "Note", content: x.content || "", pinned: !!x.pinned, target: noteTargetLabel(x, noteLookup) }));
     if (noteItems.length) blocks.push({ kind: "notes", notes: noteItems });
 
     // 6. Tables aléatoires

@@ -1,8 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "@/api/localClient";
 import { useToast } from "@/components/ui/use-toast";
 import { useDataRefresh } from "@/lib/context/RefreshContext";
 import { dispatchTutorialAction } from "@/utils/tutorialStorage";
+import { cleanTarget, describeTarget, isFreeNote, targetFields } from "@/lib/meta/postit";
+import { detachNote, loadTargetLookup } from "@/lib/services/notes";
 
 export function useNotes(campaignId) {
   const { toast } = useToast();
@@ -11,12 +13,14 @@ export function useNotes(campaignId) {
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [lookup, setLookup] = useState(null);
   const loadedFor = useRef("");
 
   useEffect(() => {
     if (!campaignId) {
       setPinnedNotes([]);
       setNotes([]);
+      setLookup(null);
       setLoading(false);
       return;
     }
@@ -36,10 +40,14 @@ export function useNotes(campaignId) {
           ),
           api.entities.Note.filter(
             { campaign_id: campaignId, pinned: false },
-            { sort: "-updated_date", limit: 100 }
+            { sort: "-updated_date", limit: 1000 }
           ),
         ]);
+        // Les post-it (notes collées sur un élément) ont besoin du nom de leur cible.
+        const hasTargets = [...pinnedRes.items, ...restRes.items].some((note) => !isFreeNote(note));
+        const targets = hasTargets ? await loadTargetLookup(campaignId) : null;
         if (!alive) return;
+        setLookup(targets);
         setPinnedNotes(pinnedRes.items);
         setNotes(restRes.items);
         loadedFor.current = campaignId;
@@ -128,5 +136,49 @@ export function useNotes(campaignId) {
     }
   };
 
-  return { pinnedNotes, notes, loading, saving, saveNote, togglePin, deleteNote };
+  // Nom de la cible de chaque post-it (absente pour une note libre).
+  const targets = useMemo(() => {
+    const result = new Map();
+    for (const note of [...pinnedNotes, ...notes]) {
+      if (isFreeNote(note)) continue;
+      result.set(note.id, describeTarget(note, lookup || {}) || null);
+    }
+    return result;
+  }, [pinnedNotes, notes, lookup]);
+
+  // Détache un post-it : il devient une note libre.
+  const detach = async (note) => {
+    const previous = { pinnedNotes, notes };
+    applyNote({ ...note, ...targetFields(null) });
+    try {
+      await detachNote(note.id);
+      toast({ title: "Post-it détaché", description: "Il est devenu une note libre." });
+    } catch (error) {
+      console.error("Détachement du post-it impossible :", error);
+      restore(previous);
+      toast({ variant: "destructive", title: "Détachement impossible", description: "Le post-it est resté sur son élément." });
+    }
+  };
+
+  // Rattache une note (libre, ou déjà collée ailleurs) à un élément. Renvoie true si c'est fait.
+  const attach = async (note, ref) => {
+    const target = cleanTarget(ref);
+    if (!target) return false;
+    const fields = targetFields(target);
+    const previous = { pinnedNotes, notes };
+    applyNote({ ...note, ...fields });
+    try {
+      await api.entities.Note.update(note.id, fields);
+      setLookup(await loadTargetLookup(campaignId));
+      toast({ title: "Post-it rattaché", description: "La note est collée sur l'élément choisi." });
+      return true;
+    } catch (error) {
+      console.error("Rattachement du post-it impossible :", error);
+      restore(previous);
+      toast({ variant: "destructive", title: "Rattachement impossible", description: "La note n'a pas été modifiée." });
+      return false;
+    }
+  };
+
+  return { pinnedNotes, notes, loading, saving, targets, saveNote, togglePin, deleteNote, detach, attach };
 }

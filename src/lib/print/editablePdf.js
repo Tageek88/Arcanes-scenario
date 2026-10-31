@@ -365,6 +365,7 @@ export async function createEditablePdf(model) {
                 drawHeading("Notes du MJ");
                 for (const note of block.notes) {
                     drawHeading(`${note.pinned ? "Épinglée - " : ""}${note.title}`, 3);
+                    if (note.target) drawText(`Post-it · ${note.target}`, { size: 8, color: MUTED_COLOR });
                     drawField("Contenu", note.content, { multiline: true, height: 96 });
                 }
                 break;

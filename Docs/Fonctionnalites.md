@@ -94,6 +94,17 @@ Dans l'éditeur d'un personnage, le bouton « Générer la fiche » compose un p
 - Le barème des personnages joueurs peut se calculer à partir des personnages existants. Le barème des PNJ se calcule désormais à partir des fiches de PNJ.
 - Dans l'éditeur du modèle, les sections Caractéristiques, Barème des PNJ et Barème des personnages joueurs se replient ; le réglage « Modificateur de lancer des compétences » n'est plus proposé.
 
+NOTES DE MJ EN POST-IT
+
+Une note peut être collée comme un post-it sur un élément : une scène, une fiche du Codex (PNJ, lieu, indice), un personnage, et, dans une fiche de PNJ ou de personnage, une caractéristique, une compétence, un équipement ou un objet d'inventaire. Une note sans élément reste une note libre.
+
+- Un bouton « Post-it » sur chaque élément ouvre la liste de ses post-it : lire, ajouter, modifier, supprimer. Une pastille indique le nombre de post-it de l'élément.
+- La page « Notes de MJ » affiche toutes les notes et tous les post-it, avec l'élément sur lequel chacun est collé. Un filtre sépare les notes libres, les post-it collés et les post-it orphelins, et permet de ne voir que ceux d'un élément.
+- Le bouton « Rattacher » d'une note choisit un élément (et une partie de sa fiche) ; il sert aussi à changer l'élément d'un post-it. Le bouton « Détacher » en fait une note libre.
+- Si l'élément est supprimé, le post-it est conservé et signalé en rouge (orphelin) : on peut le rattacher ailleurs, le détacher ou le supprimer.
+- Renommer une caractéristique dans le modèle de fiche déplace ses post-it avec elle.
+- L'impression des notes du MJ indique l'élément de chaque post-it.
+
 NOTES
 
 La page Notes de MJ fait office de bloc-notes pour les rappels et les idées de préparation. Les notes peuvent être titrées, modifiées et épinglées pour les retrouver rapidement.

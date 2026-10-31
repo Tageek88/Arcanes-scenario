@@ -5,6 +5,7 @@ import { NPC_GENDER_OPTIONS } from "@/lib/meta/codex";
 import { hasFilter } from "@/lib/services/codexSearch";
 import { useCodexLinks } from "@/lib/context/CodexLinksContext";
 import { cleanInventory, inventoryLabel } from "@/lib/meta/inventory";
+import { PartPostItButton } from "@/components/common/PostItButton";
 
 const stop = (action) => (event) => {
   event.stopPropagation();
@@ -72,14 +73,15 @@ function Section({ title, children }) {
   );
 }
 
-function Characteristics({ characteristics }) {
+function Characteristics({ characteristics, owner }) {
   const entries = Object.entries(characteristics && typeof characteristics === "object" ? characteristics : {});
   if (entries.length === 0) return null;
   return (
     <Section title="Caractéristiques :">
       <div className="grid grid-cols-2 gap-1 font-mono text-[11px]">
         {entries.map(([name, entry]) => (
-          <div key={name} className="min-w-0 rounded bg-secondary/50 px-1.5 py-1">
+          <div key={name} className="group relative min-w-0 rounded bg-secondary/50 px-1.5 py-1">
+            <PartPostItButton owner={owner} partKind="characteristic" part={{ name }} label={`la caractéristique ${name}`} className="absolute right-0.5 top-0.5" />
             <span className="uppercase text-muted-foreground">{name} : </span>
             <span className="font-semibold text-foreground">{entry?.value || "—"}</span>
             {list(entry?.fields).filter((field) => field?.name || field?.value).map((field, index) => (
@@ -94,18 +96,19 @@ function Characteristics({ characteristics }) {
   );
 }
 
-function Skills({ skills }) {
-  const rows = list(skills).filter((skill) => skill?.name);
+function Skills({ skills, owner }) {
+  const rows = list(skills).map((skill, rawIndex) => ({ skill, rawIndex })).filter(({ skill }) => skill?.name);
   if (rows.length === 0) return null;
   return (
     <Section title="Compétences :">
       <ul className="space-y-1">
-        {rows.map((skill, index) => {
+        {rows.map(({ skill, rawIndex }) => {
           const extra = [skill.roll_modifier ? `modif. ${skill.roll_modifier}` : "", fieldsLine(skill.fields)].filter(Boolean).join(" · ");
           return (
-            <li key={index} className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px]">
+            <li key={rawIndex} className="group flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px]">
               <FilterChip filterKey="competence" value={skill.name} className="px-1.5 py-0.5 text-[11px]" />
               {extra && <span className="break-words text-muted-foreground">{extra}</span>}
+              <PartPostItButton owner={owner} partKind="skill" part={skill} index={rawIndex} label={`la compétence ${skill.name}`} />
             </li>
           );
         })}
@@ -114,7 +117,7 @@ function Skills({ skills }) {
   );
 }
 
-function Inventory({ inventory }) {
+function Inventory({ inventory, owner }) {
   const rows = cleanInventory(inventory);
   if (rows.length === 0) return null;
   return (
@@ -123,9 +126,10 @@ function Inventory({ inventory }) {
         {rows.map((item) => {
           const extra = [item.notes, fieldsLine(item.fields)].filter(Boolean).join(" · ");
           return (
-            <li key={item.id} className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px]">
+            <li key={item.id} className="group flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px]">
               <span className="font-medium text-foreground">{inventoryLabel(item)}</span>
               {extra && <span className="break-words text-muted-foreground">{extra}</span>}
+              <PartPostItButton owner={owner} partKind="inventory" part={item} label={`l'objet ${item.name}`} />
             </li>
           );
         })}
@@ -134,19 +138,20 @@ function Inventory({ inventory }) {
   );
 }
 
-function Equipment({ equipment }) {
-  const rows = list(equipment).filter((item) => item?.name);
+function Equipment({ equipment, owner }) {
+  const rows = list(equipment).map((item, rawIndex) => ({ item, rawIndex })).filter(({ item }) => item?.name);
   if (rows.length === 0) return null;
   return (
     <Section title="Équipement :">
       <ul className="space-y-1">
-        {rows.map((item, index) => {
+        {rows.map(({ item, rawIndex }) => {
           const extra = fieldsLine(item.fields);
           return (
-            <li key={index} className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px]">
+            <li key={rawIndex} className="group flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px]">
               <FilterChip filterKey="equipement" value={item.name} className="px-1.5 py-0.5 text-[11px]" />
               <FilterChip filterKey="type" value={item.type} className="px-1.5 py-0.5 text-[11px]" />
               {extra && <span className="break-words text-muted-foreground">{extra}</span>}
+              <PartPostItButton owner={owner} partKind="equipment" part={item} index={rawIndex} label={`l'équipement ${item.name}`} />
             </li>
           );
         })}
@@ -166,6 +171,7 @@ export default function CodexEntryDetails({ kind, entry, locationLabel = "", rel
   const links = useCodexLinks();
   const gender = NPC_GENDER_OPTIONS.find((option) => option.id === entry.gender)?.label;
   const traits = list(entry.traits).filter(Boolean);
+  const owner = { kind: kind === "npc" ? "npc" : "character", id: entry.id };
 
   return (
     <div className="space-y-2 text-xs">
@@ -206,10 +212,10 @@ export default function CodexEntryDetails({ kind, entry, locationLabel = "", rel
               {entry.appearance}
             </p>
           )}
-          <Characteristics characteristics={entry.characteristics} />
-          <Skills skills={entry.skills} />
-          <Equipment equipment={entry.equipment} />
-          <Inventory inventory={entry.inventory} />
+          <Characteristics characteristics={entry.characteristics} owner={owner} />
+          <Skills skills={entry.skills} owner={owner} />
+          <Equipment equipment={entry.equipment} owner={owner} />
+          <Inventory inventory={entry.inventory} owner={owner} />
           {relations.length > 0 && (
             <Section title="Relations :">
               <ul className="space-y-1">
@@ -230,10 +236,10 @@ export default function CodexEntryDetails({ kind, entry, locationLabel = "", rel
 
       {kind === "character" && (
         <>
-          <Characteristics characteristics={entry.characteristics} />
-          <Skills skills={entry.skills} />
-          <Equipment equipment={entry.equipment} />
-          <Inventory inventory={entry.inventory} />
+          <Characteristics characteristics={entry.characteristics} owner={owner} />
+          <Skills skills={entry.skills} owner={owner} />
+          <Equipment equipment={entry.equipment} owner={owner} />
+          <Inventory inventory={entry.inventory} owner={owner} />
           {entry.notes && <p className="whitespace-pre-wrap text-sm text-muted-foreground">{entry.notes}</p>}
         </>
       )}

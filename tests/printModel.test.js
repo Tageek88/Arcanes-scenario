@@ -91,3 +91,21 @@ describe("impression des inventaires", () => {
     expect(m.blocks[0].groups[0].npcs[0].sheet.inventory).toEqual(["Clé"]);
   });
 });
+
+describe("impression des post-it", () => {
+  it("ajoute l'élément cible aux notes collées, rien pour une note libre", () => {
+    const notes = [
+      { id: "n1", title: "Libre", content: "a", pinned: false },
+      { id: "n2", title: "Collée", content: "b", pinned: false, target_kind: "npc", target_id: "p1" },
+      { id: "n3", title: "Orpheline", content: "c", pinned: false, target_kind: "npc", target_id: "absent" },
+    ];
+    const model = buildPrintModel(
+      { ...data, notes, npcs: [{ id: "p1", name: "Garde" }] },
+      { notes: new Set(["n1", "n2", "n3"]) },
+      options
+    );
+    const block = model.blocks.find((b) => b.kind === "notes");
+    const byTitle = Object.fromEntries(block.notes.map((n) => [n.title, n.target]));
+    expect(byTitle).toEqual({ Libre: "", Collée: "PNJ · Garde", Orpheline: "" });
+  });
+});

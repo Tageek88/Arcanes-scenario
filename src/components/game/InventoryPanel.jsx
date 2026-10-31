@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import AddToInventoryDialog from "@/components/common/AddToInventoryDialog";
 import GiveItemDialog from "@/components/game/GiveItemDialog";
+import { PartPostItButton } from "@/components/common/PostItButton";
 import { useInventory } from "@/hooks/useInventory";
 import { inventoryCount } from "@/lib/meta/inventory";
 
@@ -105,7 +106,7 @@ export default function InventoryPanel({ campaignId }) {
               ) : (
                 <ul className="space-y-2">
                   {owner.inventory.map((item) => (
-                    <li key={item.id} className="flex items-center gap-2">
+                    <li key={item.id} className="group flex items-center gap-2">
                       <div className="min-w-0 flex-1">
                         <p className={`break-words text-sm ${item.quantity === 0 ? "text-muted-foreground line-through" : "text-foreground"}`}>{item.name}</p>
                         {(item.notes || item.fields.length > 0) && (
@@ -115,6 +116,9 @@ export default function InventoryPanel({ campaignId }) {
                         )}
                       </div>
                       <div className="flex shrink-0 items-center gap-1">
+                        {owner.kind !== "campaign" && (
+                          <PartPostItButton owner={{ kind: owner.kind, id: owner.id }} partKind="inventory" part={item} label={`l'objet ${item.name}`} />
+                        )}
                         <Button type="button" variant="ghost" size="icon" className="h-8 w-8" aria-label={`Retirer un ${item.name}`} onClick={() => setQuantity(owner, item.id, item.quantity - 1)} disabled={item.quantity <= 0}>
                           <Minus className="h-4 w-4" />
                         </Button>

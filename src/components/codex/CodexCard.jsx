@@ -6,6 +6,7 @@ import { isImage } from "@/components/codex/AttachmentsField";
 import { openAttachment } from "@/lib/services/openAttachment";
 import { useExpandedCard } from "@/lib/context/ExpandedCardContext";
 import CodexEntryDetails, { FilterChip } from "@/components/codex/CodexEntryDetails";
+import PostItButton from "@/components/common/PostItButton";
 
 export default function CodexCard({
   kind,
@@ -96,6 +97,7 @@ export default function CodexCard({
             {linked ? "Lié à la scène" : "Lier à la scène"}
           </button>
         )}
+        <PostItButton variant="tag" target={{ kind, id: entry.id }} label={entry.name || "cette fiche"} />
         <button type="button" data-tutorial={kind === "npc" ? "codex-edit" : undefined} aria-label={`Modifier ${entry.name}`} onClick={() => onEdit(kind, entry)} className="tag min-touch border border-border text-muted-foreground transition-colors hover:text-foreground shrink-0">
           <Pencil className="mr-1.5 h-3 w-3" /> Modifier
         </button>

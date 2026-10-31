@@ -201,10 +201,19 @@ flowchart LR
 - **Écrans** : panneau « Générer la fiche » dans `GameCharacterEditor` (`PcGeneratorPanel`, `usePcFormGeneration` : cadenas, confirmation avant écrasement, écarts au barème en direct). Dans l'éditeur du modèle, trois sections repliables (Caractéristiques, Barème des PNJ, Barème des personnages joueurs). Le barème des PNJ se dérive des fiches de PNJ (`useGameSheet` charge aussi les PNJ), celui des PJ des personnages joueurs.
 - Tests : `tests/pcGenerator.test.js` (barème, génération, verrous, brouillon, renommage).
 
+## Version 1.7.0 : notes de MJ en post-it
+
+- **Données.** Champs facultatifs sur `Note` : `target_kind`, `target_id`, `part_kind`, `part_id`. Pas de nouvelle table ni de nouvelle `db.version`. Une note sans cible est une note libre ; les notes existantes le restent.
+- **`lib/meta/postit.js`** (pur) : cibles, clés, comptes (`direct` et `total`), description (`describeTarget`, orphelins signalés). **`lib/services/notes.js`** : libellés des cibles, identifiants stables des compétences et équipements, détachement, suivi du renommage d'une caractéristique.
+- **Écrans** : `PostItProvider` (dans `Layout`) et `PostItDialog` ; boutons `PostItButton` / `PartPostItButton` sur les scènes, fiches du Codex et leurs parties, personnages, caractéristiques, compétences, équipements et objets d'inventaire ; pastille avec le nombre de post-it. Page « Notes de MJ » : puce de cible, filtres (libres, collés, orphelins, par élément), détacher, rattacher (`AttachNoteDialog`, avec choix de la partie de fiche).
+- **Impression et PDF** : le bloc « Notes du MJ » indique l'élément de chaque post-it.
+- Limites : donner un objet d'inventaire laisse son post-it chez l'ancien propriétaire (orphelin) ; régénérer un PJ orpheline les post-it de ses compétences et équipements remplacés.
+- Tests : `tests/postit.test.js` (règles pures ; les cas qui touchent la base ne tournent que sur le PC de l'utilisateur), `tests/printModel.test.js`.
+
 ## Plateformes
 
 - **Electron 44.9.0 (Windows)** : `electron/main.cjs`, `preload.cjs` et `navigationPolicy.cjs` (`window.arcanesPdf`, `window.arcanesBackup`, sauvegardes dans `Documents\Arcanes Scenario`). La fenêtre est en `sandbox`, avec isolation de contexte ; les canaux IPC (`handle()`) n'acceptent que la page principale ; `window.open` n'autorise que `blob:` (liens `https:`/`http:`/`mailto:` envoyés au système, reste refusé) ; la fenêtre principale ne navigue que vers `file:`. Installateur via `npm run dist`.
-- **Android (Capacitor)** : `android/`, config dans `capacitor.config.ts` (`webDir: "dist"`). Flux : `npm run build`, `npx cap sync android`, puis APK avec Gradle depuis Android Studio. Les ponts Electron n'existent pas sur Android ; l'export manuel passe par `@capacitor/filesystem` et `@capacitor/share`. La version Android (`versionName`, `versionCode` dans `android/app/build.gradle`) est indépendante de `package.json` : à mettre à jour à chaque release (1.6.4 = 164).
+- **Android (Capacitor)** : `android/`, config dans `capacitor.config.ts` (`webDir: "dist"`). Flux : `npm run build`, `npx cap sync android`, puis APK avec Gradle depuis Android Studio. Les ponts Electron n'existent pas sur Android ; l'export manuel passe par `@capacitor/filesystem` et `@capacitor/share`. La version Android (`versionName`, `versionCode` dans `android/app/build.gradle`) est indépendante de `package.json` : à mettre à jour à chaque release (1.7.0 = 170).
 - Le même code React (`src/`) sert aux deux.
 
 - Sécurité du 19/10/2026 : `@capacitor/assets` retiré (inutilisé, il tirait `tar` 6 et `sharp`), Electron 31.7.7 -> 44.9.0, react-router-dom 6.30.6 -> 7.18.4, tous les paquets en `devDependencies` (l'installateur n'embarque plus de `node_modules` d'exécution : l'interface est déjà regroupée par Vite). `electron/main.cjs` durci (voir Plateformes). `npm audit` : 26 alertes dont 1 critique -> 20 (15 modérées, 5 hautes), voir ci-dessous.
@@ -223,4 +232,5 @@ flowchart LR
 - Le cas d'une très grosse base avec beaucoup d'images n'a pas été précisé lors des tests de l'export Android.
 - Transition de page « rouleau » : testée par l'utilisateur sous Windows (Electron) et sous Android.
 - Quêtes et nouvel ordre des onglets : testés à la main sous Windows (28/10/2026), logique couverte par `npm test` ; non testés sous Android.
+- Post-it (1.7.0) : testés à la main sous Windows (31/10/2026) ; tests de base de données seulement chez l'utilisateur ; non testé sous Android.
 - Inventaire : testé à la main sous Windows (29/10/2026) ; les tests du service ne tournent que sur le PC de l'utilisateur (IndexedDB simulée) ; non testé sous Android.

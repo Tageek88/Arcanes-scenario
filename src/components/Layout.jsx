@@ -5,6 +5,7 @@ import { RefreshProvider } from "@/lib/context/RefreshContext";
 import { TabStackProvider } from "@/lib/context/TabStackContext";
 import { ExpandedCardProvider } from "@/lib/context/ExpandedCardContext";
 import { PageFilterProvider } from "@/lib/context/PageFilterContext";
+import PostItProvider from "@/components/common/PostItProvider";
 
 export default function Layout() {
   const outlet = useOutlet();
@@ -14,7 +15,9 @@ export default function Layout() {
       <TabStackProvider>
         <PageFilterProvider>
           <ExpandedCardProvider>
-            <AppShell>{outlet}</AppShell>
+            <PostItProvider>
+              <AppShell>{outlet}</AppShell>
+            </PostItProvider>
           </ExpandedCardProvider>
         </PageFilterProvider>
       </TabStackProvider>

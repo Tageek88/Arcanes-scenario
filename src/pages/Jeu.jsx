@@ -20,6 +20,7 @@ import GameCatalogPanel, { GameTabBar } from "@/components/game/GameCatalogPanel
 import InventoryPanel from "@/components/game/InventoryPanel";
 import CampaignSelect from "@/components/common/CampaignSelect";
 import PrintButton from "@/components/print/PrintButton";
+import PostItButton, { PartPostItButton } from "@/components/common/PostItButton";
 import { useExpandedCardState } from "@/lib/context/ExpandedCardContext";
 import { usePageFilter } from "@/lib/context/PageFilterContext";
 import { useCampaigns } from "@/hooks/useCampaigns";
@@ -247,7 +248,8 @@ export default function Jeu() {
                         {(character.skills || []).length} compétence{(character.skills || []).length === 1 ? "" : "s"} · {(character.equipment || []).length} équipement{(character.equipment || []).length === 1 ? "" : "s"}
                       </p>
                     </div>
-                    <div className="flex shrink-0 gap-1">
+                    <div className="flex shrink-0 items-center gap-1">
+                      <PostItButton target={{ kind: "character", id: character.id }} label={character.name} />
                       <Button size="icon" variant="ghost" aria-label={`Imprimer ${character.name}`} onClick={() => setCharacterToPrint(character)}>
                         <Printer className="h-4 w-4" />
                       </Button>
@@ -268,7 +270,8 @@ export default function Jeu() {
                         const values = character.characteristics?.[item.name] || {};
                         const fields = (values.fields || []).filter((field) => field.name || field.value);
                         return (
-                          <div key={item.name} className="rounded-md bg-secondary/50 px-3 py-2">
+                          <div key={item.name} className="group relative rounded-md bg-secondary/50 px-3 py-2">
+                            <PartPostItButton owner={{ kind: "character", id: character.id }} partKind="characteristic" part={{ name: item.name }} label={`la caractéristique ${item.name}`} className="absolute right-1 top-1" />
                             <dt className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{item.name}</dt>
                             <dd className="mt-1 text-sm font-semibold">{values.value || "—"}</dd>
                             {fields.map((field, fieldIndex) => (
@@ -286,10 +289,13 @@ export default function Jeu() {
                       <h3 className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Compétences</h3>
                       <ul className="mt-1 flex flex-wrap gap-2 text-xs">
                         {character.skills.map((skill, index) => (
-                          <li key={`${skill.name}-${index}`} className="rounded-md bg-secondary/50 px-2 py-1">
+                          <li key={`${skill.name}-${index}`} className="group inline-flex items-center gap-1 rounded-md bg-secondary/50 px-2 py-1">
+                            <span>
                             <span className="font-medium text-foreground">{skill.name}</span>
                             {model.skillRollModifier && skill.roll_modifier ? ` · ${skill.roll_modifier}` : ""}
                             {(skill.fields || []).filter((field) => field.value).map((field) => ` · ${field.name} : ${field.value}`).join("")}
+                            </span>
+                            <PartPostItButton owner={{ kind: "character", id: character.id }} partKind="skill" part={skill} index={index} label={`la compétence ${skill.name}`} />
                           </li>
                         ))}
                       </ul>
@@ -300,10 +306,11 @@ export default function Jeu() {
                       <h3 className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Équipement</h3>
                       <ul className="mt-1 space-y-1 text-xs text-muted-foreground">
                         {character.equipment.map((item, index) => (
-                          <li key={`${item.name}-${index}`}>
+                          <li key={`${item.name}-${index}`} className="group flex flex-wrap items-center gap-x-1">
                             <span className="text-foreground">{item.name}</span>
                             {item.type && ` · ${item.type}`}
                             {(item.fields || []).filter((field) => field.value).map((field) => ` · ${field.name} : ${field.value}`).join("")}
+                            <PartPostItButton owner={{ kind: "character", id: character.id }} partKind="equipment" part={item} index={index} label={`l'équipement ${item.name}`} />
                           </li>
                         ))}
                       </ul>

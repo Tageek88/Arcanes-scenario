@@ -10,6 +10,7 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { useExpandedCard } from "@/lib/context/ExpandedCardContext";
+import PostItButton from "@/components/common/PostItButton";
 
 export default function SceneNode({
   scene,
@@ -59,7 +60,8 @@ export default function SceneNode({
           <span className={cn("mr-1.5 h-1.5 w-1.5 rounded-full", meta.dot)} />
           {meta.label}
         </button>
-        <div onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center" onClick={(e) => e.stopPropagation()}>
+          <PostItButton target={{ kind: "scene", id: scene.id }} label={`la scène « ${scene.title || "Sans titre"} »`} />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button

@@ -109,10 +109,10 @@ export function npcSheetPayload(form) {
     characteristics,
     skills: (Array.isArray(form?.skills) ? form.skills : [])
       .filter((skill) => text(skill?.name))
-      .map((skill) => ({ name: text(skill.name), roll_modifier: text(skill.roll_modifier), fields: cleanFields(skill.fields) })),
+      .map((skill) => ({ ...(text(skill.id) ? { id: text(skill.id) } : {}), name: text(skill.name), roll_modifier: text(skill.roll_modifier), fields: cleanFields(skill.fields) })),
     equipment: (Array.isArray(form?.equipment) ? form.equipment : [])
       .filter((item) => text(item?.name))
-      .map((item) => ({ name: text(item.name), type: text(item.type), fields: cleanFields(item.fields) })),
+      .map((item) => ({ ...(text(item.id) ? { id: text(item.id) } : {}), name: text(item.name), type: text(item.type), fields: cleanFields(item.fields) })),
     inventory: cleanInventory(form?.inventory),
   };
 }

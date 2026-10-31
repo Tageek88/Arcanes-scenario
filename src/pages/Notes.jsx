@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Pin, Plus, StickyNote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,23 +13,29 @@ import {
 } from "@/components/ui/alert-dialog";
 import NoteCard from "@/components/notes/NoteCard";
 import NoteEditor from "@/components/notes/NoteEditor";
+import AttachNoteDialog from "@/components/notes/AttachNoteDialog";
 import PrintButton from "@/components/print/PrintButton";
 import CampaignSelect from "@/components/common/CampaignSelect";
 import { useCampaigns } from "@/hooks/useCampaigns";
 import { useQuests } from "@/hooks/useQuests";
 import QuestSelect from "@/components/common/QuestSelect";
 import { useNotes } from "@/hooks/useNotes";
+import NotesFilterBar from "@/components/notes/NotesFilterBar";
+import { noteTarget } from "@/lib/meta/postit";
 
 const EMPTY = { title: "", content: "", pinned: false };
 
 export default function Notes() {
   const { campaigns, campaignId, selectCampaign } = useCampaigns();
   const { quests, questId, selectQuest } = useQuests(campaignId);
-  const { pinnedNotes, notes, loading, saving, saveNote, togglePin, deleteNote } = useNotes(campaignId);
+  const { pinnedNotes: allPinned, notes: allNotes, loading, saving, targets, saveNote, togglePin, deleteNote, detach, attach } = useNotes(campaignId);
+  const [show, setShow] = useState("all");
+  const [element, setElement] = useState("");
 
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(EMPTY);
   const [pendingDelete, setPendingDelete] = useState(null);
+  const [attaching, setAttaching] = useState(null);
 
   const openNew = () => {
     setForm(EMPTY);
@@ -60,7 +66,21 @@ export default function Notes() {
     if (pending) deleteNote(pending);
   };
 
-  const isEmpty = pinnedNotes.length === 0 && notes.length === 0;
+  // Filtre : notes libres, post-it collés, post-it orphelins, ou ceux d'un élément précis (parties comprises).
+  const matches = (note) => {
+    const target = noteTarget(note);
+    if (show === "free" && target) return false;
+    if (show === "postit" && !target) return false;
+    if (show === "orphans" && !(target && targets.get(note.id)?.missing)) return false;
+    if (element && !(target && `${target.kind}:${target.id}` === element)) return false;
+    return true;
+  };
+  const pinnedNotes = useMemo(() => allPinned.filter(matches), [allPinned, show, element, targets]); // eslint-disable-line react-hooks/exhaustive-deps
+  const notes = useMemo(() => allNotes.filter(matches), [allNotes, show, element, targets]); // eslint-disable-line react-hooks/exhaustive-deps
+  const everything = [...allPinned, ...allNotes];
+  const hasPostIts = everything.some((note) => noteTarget(note));
+  const isEmpty = everything.length === 0;
+  const nothingShown = !isEmpty && pinnedNotes.length === 0 && notes.length === 0;
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-6 md:px-8 md:py-8">
@@ -105,6 +125,10 @@ export default function Notes() {
         </div>
       ) : (
         <div className="space-y-6">
+          {hasPostIts && (
+            <NotesFilterBar notes={everything} targets={targets} show={show} onShow={setShow} element={element} onElement={setElement} />
+          )}
+          {nothingShown && <p className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">Aucune note ne correspond à ce filtre.</p>}
           {pinnedNotes.length > 0 && (
             <section className="space-y-3">
               <h2 className="flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-primary">
@@ -115,9 +139,12 @@ export default function Notes() {
                   <NoteCard
                     key={note.id}
                     note={note}
+                    target={targets.get(note.id)}
                     onEdit={openEdit}
                     onDelete={setPendingDelete}
                     onTogglePin={togglePin}
+                    onDetach={detach}
+                    onAttach={setAttaching}
                   />
                 ))}
               </div>
@@ -134,9 +161,12 @@ export default function Notes() {
                   <NoteCard
                     key={note.id}
                     note={note}
+                    target={targets.get(note.id)}
                     onEdit={openEdit}
                     onDelete={setPendingDelete}
                     onTogglePin={togglePin}
+                    onDetach={detach}
+                    onAttach={setAttaching}
                   />
                 ))}
               </div>
@@ -145,6 +175,7 @@ export default function Notes() {
         </div>
       )}
 
+      <AttachNoteDialog note={attaching} campaignId={campaignId} onClose={() => setAttaching(null)} onAttach={attach} />
       <NoteEditor
         open={open}
         onOpenChange={setOpen}
