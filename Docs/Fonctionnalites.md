@@ -105,6 +105,29 @@ Une note peut être collée comme un post-it sur un élément : une scène, une 
 - Renommer une caractéristique dans le modèle de fiche déplace ses post-it avec elle.
 - L'impression des notes du MJ indique l'élément de chaque post-it.
 
+VISIONNEUSE DE PIÈCES JOINTES
+
+Un clic sur une pièce jointe d'une fiche du Codex (cartes et liste) l'ouvre dans une visionneuse plein écran.
+
+- Les images se zooment (boutons, double-clic, Ctrl + molette) ; les PDF s'affichent dans la fenêtre sur ordinateur.
+- Précédent/suivant entre les pièces jointes de la fiche : boutons, flèches du clavier ou balayage sur mobile.
+- « Enregistrer » télécharge le fichier ; « Partager » ouvre la feuille de partage sur Android et copie l'image sur ordinateur quand c'est possible.
+- Sur Android, un PDF s'ouvre depuis la feuille de partage. Les fichiers distants ou d'un type refusé (SVG, HTML) s'ouvrent dans un nouvel onglet.
+
+
+PDF DE CAMPAGNE
+
+La page Notes de MJ a deux onglets : « Post-it » et « PDF ». L'onglet PDF garde les PDF de la campagne dans l'application, pour les relire ou les saisir plus tard.
+
+- Ajout d'un ou plusieurs PDF (50 Mo maximum chacun) ; ouverture dans la visionneuse.
+- Nom et commentaire modifiables (par exemple « à saisir : chapitre 3 »). Suppression avec confirmation.
+- Les PDF sont inclus dans l'export manuel de sauvegarde, pas dans la sauvegarde automatique. Supprimer une campagne supprime ses PDF.
+
+
+NOTES DE VERSION
+
+Un clic sur la version, dans Paramètres, ouvre les notes de version : un résumé très court de la version installée, la version complète à la demande, et les versions précédentes.
+
 NOTES
 
 La page Notes de MJ fait office de bloc-notes pour les rappels et les idées de préparation. Les notes peuvent être titrées, modifiées et épinglées pour les retrouver rapidement.

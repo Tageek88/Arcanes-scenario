@@ -32,7 +32,7 @@ function write(options) {
     chain = chain.then(async () => {
         setStatus({ state: "saving" });
         try {
-            const payload = await buildBackupPayload();
+            const payload = await buildBackupPayload({ light: true });
             const result = await window.arcanesBackup.write(JSON.stringify(payload), options);
             if (!result?.ok) throw new Error(result?.error || "Écriture impossible.");
             setStatus({ state: "ok", savedAt: result.savedAt, error: "" });

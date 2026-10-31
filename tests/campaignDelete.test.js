@@ -48,6 +48,8 @@ describe("suppression d'une campagne en cascade", () => {
   it("la liste des entités rattachées couvre toutes les tables sauf la campagne", async () => {
     const { TABLES } = await import("@/api/localClient");
     const linked = LINKED_ENTITIES.map((item) => item.entity).sort();
-    expect(linked).toEqual(TABLES.filter((t) => t !== "Campaign").sort());
+    const { FILE_TABLES } = await import("@/api/localClient");
+    // Les tables de contenu de fichiers sont supprimées à part, par clés.
+    expect(linked).toEqual(TABLES.filter((t) => t !== "Campaign" && !FILE_TABLES.includes(t)).sort());
   });
 });

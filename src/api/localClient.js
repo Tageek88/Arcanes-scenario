@@ -1,5 +1,5 @@
 // === SECTION IMPORTS ===
-import { db, TABLES } from "./dbConfig";
+import { db, TABLES, FILE_TABLES } from "./dbConfig";
 import { makeEntity } from "./entityFactory";
 
 // === SECTION UTILS ===
@@ -28,4 +28,4 @@ export const api = {
 };
 
 // === SECTION RE-EXPORTS (pour compatibilité avec les 24 fichiers existants) ===
-export { db, TABLES };
+export { db, TABLES, FILE_TABLES };

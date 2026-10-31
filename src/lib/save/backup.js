@@ -1,4 +1,4 @@
-import { db, TABLES } from "@/api/localClient";
+import { db, TABLES, FILE_TABLES } from "@/api/localClient";
 import { isNativeApp, shareTextFile } from "@/lib/save/nativeShare";
 
 const APP_ID = "arcanes-scenario";
@@ -19,9 +19,16 @@ export function validateBackupPayload(parsed) {
   }
 }
 
-export async function buildBackupPayload() {
+/**
+ * @param {{ light?: boolean }} [options] `light` : sans le contenu des PDF de campagne (sauvegarde automatique, qui
+ * est réécrite à chaque modification). L'export manuel les inclut.
+ */
+export async function buildBackupPayload({ light = false } = {}) {
   const data = {};
-  for (const t of TABLES) data[t] = await db.table(t).toArray();
+  for (const t of TABLES) {
+    if (light && FILE_TABLES.includes(t)) continue;
+    data[t] = await db.table(t).toArray();
+  }
   return { app: APP_ID, version: BACKUP_VERSION, exported_at: new Date().toISOString(), data };
 }
 
@@ -29,6 +36,8 @@ export async function restoreFromPayload(parsed) {
   validateBackupPayload(parsed);
   await db.transaction("rw", TABLES.map((t) => db.table(t)), async () => {
     for (const t of TABLES) {
+      // Une sauvegarde sans le contenu des PDF (sauvegarde automatique, ancienne version) ne les efface pas.
+      if (FILE_TABLES.includes(t) && parsed.data[t] == null) continue;
       await db.table(t).clear();
       const rows = parsed.data[t] || [];
       if (rows.length) await db.table(t).bulkPut(rows);

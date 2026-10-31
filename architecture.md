@@ -210,10 +210,17 @@ flowchart LR
 - Limites : donner un objet d'inventaire laisse son post-it chez l'ancien propriétaire (orphelin) ; régénérer un PJ orpheline les post-it de ses compétences et équipements remplacés.
 - Tests : `tests/postit.test.js` (règles pures ; les cas qui touchent la base ne tournent que sur le PC de l'utilisateur), `tests/printModel.test.js`.
 
+## Version 1.7.1 : visionneuse, PDF de campagne, notes de version
+
+- **Visionneuse de pièces jointes** : `AttachmentViewer` et `useAttachmentViewer` (image avec zoom, PDF, précédent/suivant, enregistrer, partager), ouverte depuis les cartes et la liste du Codex ; `lib/services/attachmentFile.js` (types autorisés, blob, téléchargement, partage ; SVG et HTML refusés), `shareBase64File` pour Android.
+- **PDF de campagne** (onglet « PDF » des Notes de MJ) : deux tables, `CampaignDocument` (informations) et `CampaignDocumentFile` (contenu), `db.version(6)`. La liste ne lit jamais les fichiers (50 Mo maximum chacun). `FILE_TABLES` : exclues de la sauvegarde automatique (`buildBackupPayload({ light: true })`), incluses dans l'export manuel, laissées intactes par une restauration qui ne les contient pas, supprimées par clés avec la campagne.
+- **Notes de version** : clic sur la version dans Paramètres (`ReleaseNotesDialog`) : résumé automatique (introduction et titres des nouveautés), version complète à la demande, versions précédentes. Source : `Docs/releases/RELEASE-X.Y.Z.md` embarqués à la compilation (`import.meta.glob`).
+- Tests : `tests/attachmentFile.test.js`, `tests/releaseNotes.test.js`, `tests/campaignDocument.test.js`, `tests/campaignDelete.test.js`.
+
 ## Plateformes
 
 - **Electron 44.9.0 (Windows)** : `electron/main.cjs`, `preload.cjs` et `navigationPolicy.cjs` (`window.arcanesPdf`, `window.arcanesBackup`, sauvegardes dans `Documents\Arcanes Scenario`). La fenêtre est en `sandbox`, avec isolation de contexte ; les canaux IPC (`handle()`) n'acceptent que la page principale ; `window.open` n'autorise que `blob:` (liens `https:`/`http:`/`mailto:` envoyés au système, reste refusé) ; la fenêtre principale ne navigue que vers `file:`. Installateur via `npm run dist`.
-- **Android (Capacitor)** : `android/`, config dans `capacitor.config.ts` (`webDir: "dist"`). Flux : `npm run build`, `npx cap sync android`, puis APK avec Gradle depuis Android Studio. Les ponts Electron n'existent pas sur Android ; l'export manuel passe par `@capacitor/filesystem` et `@capacitor/share`. La version Android (`versionName`, `versionCode` dans `android/app/build.gradle`) est indépendante de `package.json` : à mettre à jour à chaque release (1.7.0 = 170).
+- **Android (Capacitor)** : `android/`, config dans `capacitor.config.ts` (`webDir: "dist"`). Flux : `npm run build`, `npx cap sync android`, puis APK avec Gradle depuis Android Studio. Les ponts Electron n'existent pas sur Android ; l'export manuel passe par `@capacitor/filesystem` et `@capacitor/share`. La version Android (`versionName`, `versionCode` dans `android/app/build.gradle`) est indépendante de `package.json` : à mettre à jour à chaque release (1.7.1 = 171).
 - Le même code React (`src/`) sert aux deux.
 
 - Sécurité du 19/10/2026 : `@capacitor/assets` retiré (inutilisé, il tirait `tar` 6 et `sharp`), Electron 31.7.7 -> 44.9.0, react-router-dom 6.30.6 -> 7.18.4, tous les paquets en `devDependencies` (l'installateur n'embarque plus de `node_modules` d'exécution : l'interface est déjà regroupée par Vite). `electron/main.cjs` durci (voir Plateformes). `npm audit` : 26 alertes dont 1 critique -> 20 (15 modérées, 5 hautes), voir ci-dessous.
@@ -232,5 +239,6 @@ flowchart LR
 - Le cas d'une très grosse base avec beaucoup d'images n'a pas été précisé lors des tests de l'export Android.
 - Transition de page « rouleau » : testée par l'utilisateur sous Windows (Electron) et sous Android.
 - Quêtes et nouvel ordre des onglets : testés à la main sous Windows (28/10/2026), logique couverte par `npm test` ; non testés sous Android.
+- Visionneuse, PDF de campagne et notes de version (1.7.1) : testés à la main sous Windows (31/10/2026) ; non testés sous Android (feuille de partage, PDF) ; les tests de base de données ne tournent que chez l'utilisateur.
 - Post-it (1.7.0) : testés à la main sous Windows (31/10/2026) ; tests de base de données seulement chez l'utilisateur ; non testé sous Android.
 - Inventaire : testé à la main sous Windows (29/10/2026) ; les tests du service ne tournent que sur le PC de l'utilisateur (IndexedDB simulée) ; non testé sous Android.

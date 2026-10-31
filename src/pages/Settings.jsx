@@ -18,6 +18,7 @@ import { useToast } from "@/components/ui/use-toast";
 import PrintButton from "@/components/print/PrintButton";
 import AutosavePanel from "@/components/AutosavePanel";
 import CampaignSelect from "@/components/common/CampaignSelect";
+import ReleaseNotesDialog from "@/components/common/ReleaseNotesDialog";
 import TutorialCenter from "@/components/Tutorial/TutorialCenter";
 import { useCampaigns } from "@/hooks/useCampaigns";
 
@@ -26,6 +27,7 @@ export default function Settings() {
   const { campaigns, campaignId, selectCampaign } = useCampaigns();
   const [open, setOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [notesOpen, setNotesOpen] = useState(false);
 
   const confirmDelete = async () => {
     setDeleting(true);
@@ -120,9 +122,18 @@ export default function Settings() {
         <h2 className="font-display text-base font-semibold text-foreground">À propos</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Arcanes &amp; Scénario · version{" "}
-          <span className="font-mono text-foreground">{__APP_VERSION__}</span>
+          <button
+            type="button"
+            onClick={() => setNotesOpen(true)}
+            title="Voir les notes de version"
+            className="font-mono text-foreground underline decoration-dotted underline-offset-4 hover:text-primary"
+          >
+            {__APP_VERSION__}
+          </button>
         </p>
+        <p className="mt-1 text-xs text-muted-foreground">Touchez la version pour lire les notes de version.</p>
       </section>
+      <ReleaseNotesDialog open={notesOpen} onOpenChange={setNotesOpen} currentVersion={__APP_VERSION__} />
     </div>
   );
 }

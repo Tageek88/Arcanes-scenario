@@ -7,7 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { CODEX_TABS } from "@/lib/meta/codex";
 import { NPC_ATTITUDE } from "@/lib/meta/sceneMeta";
 import { isImage } from "@/components/codex/AttachmentsField";
-import { openAttachment } from "@/lib/services/openAttachment";
+import { useAttachmentViewer } from "@/hooks/useAttachmentViewer";
 import { usePageFilter } from "@/lib/context/PageFilterContext";
 import { useCodexList } from "@/hooks/useCodexList";
 import { useNpcRelations } from "@/hooks/useNpcRelations";
@@ -40,6 +40,7 @@ export default function CodexSidebar({
   // Tous les PNJ de la campagne (même hors recherche ou hors scène) : les relations en citent d'autres que ceux affichés.
   const { items: npcDirectory } = useCodexList(campaignId, "NPC", { term: "", linkedOnly: false, linkedIds: NO_IDS, refreshKey, limit: 1000 });
   const { relations: npcRelationsList } = useNpcRelations(campaignId);
+  const attachmentViewer = useAttachmentViewer();
   const npcRelationMap = useMemo(
     () => (tab === "npc" ? relationsByNpc(npcRelationsList, npcDirectory) : new Map()),
     [tab, npcRelationsList, npcDirectory]
@@ -278,7 +279,7 @@ export default function CodexSidebar({
                           <button
                             type="button"
                             key={`${file.url}-${index}`}
-                            onClick={() => openAttachment(file)}
+                            onClick={() => attachmentViewer.open(item.attachments, index)}
                             title={file.name}
                             className="grid h-12 w-12 place-items-center overflow-hidden rounded-md border border-border bg-secondary/40 text-muted-foreground"
                           >
@@ -340,6 +341,7 @@ export default function CodexSidebar({
           })}
         </div>
       </ScrollArea>
+      {attachmentViewer.viewer}
     </aside>
     </CodexLinksContext.Provider>
   );

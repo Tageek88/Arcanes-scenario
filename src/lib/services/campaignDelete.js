@@ -1,8 +1,9 @@
-import { api, db } from "@/api/localClient";
+import { api, db, FILE_TABLES } from "@/api/localClient";
 import { withDataBatch } from "@/lib/context/dataEvents";
 
 // Enfants d'abord, la campagne en dernier.
 export const LINKED_ENTITIES = [
+  { entity: "CampaignDocument", label: "PDF de campagne", plural: "PDF de campagne" },
   { entity: "SessionPoll", label: "sondage", plural: "sondages" },
   { entity: "NPCRelation", label: "relation entre PNJ", plural: "relations entre PNJ" },
   { entity: "GameCharacter", label: "personnage", plural: "personnages" },
@@ -44,9 +45,14 @@ export async function countCampaignContent(campaignId) {
 // Le tout dans une seule transaction Dexie : si une étape échoue (y compris la vérification),
 // rien n'est supprimé.
 export async function deleteCampaignCascade(campaignId) {
-  const tableNames = [...LINKED_ENTITIES.map(({ entity }) => entity), "Campaign"];
+  const tableNames = [...LINKED_ENTITIES.map(({ entity }) => entity), ...FILE_TABLES, "Campaign"];
   await withDataBatch(() =>
     db.transaction("rw", tableNames, async () => {
+      // Contenu des fichiers : supprimé par clés, sans charger les fichiers en mémoire.
+      for (const table of FILE_TABLES) {
+        const keys = await db.table(table).where("campaign_id").equals(campaignId).primaryKeys();
+        await db.table(table).bulkDelete(keys);
+      }
       for (const { entity } of LINKED_ENTITIES) {
         await api.entities[entity].deleteMany({ campaign_id: campaignId });
         const left = await api.entities[entity].filter({ campaign_id: campaignId }, { limit: 1 });

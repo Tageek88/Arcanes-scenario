@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { Copy, Link2, Link2Off, Paperclip, Pencil, Trash2 } from "lucide-react";
 import { NPC_ATTITUDE } from "@/lib/meta/sceneMeta";
 import { isImage } from "@/components/codex/AttachmentsField";
-import { openAttachment } from "@/lib/services/openAttachment";
+import { useAttachmentViewer } from "@/hooks/useAttachmentViewer";
 import { useExpandedCard } from "@/lib/context/ExpandedCardContext";
 import CodexEntryDetails, { FilterChip } from "@/components/codex/CodexEntryDetails";
 import PostItButton from "@/components/common/PostItButton";
@@ -23,6 +23,7 @@ export default function CodexCard({
   const { expanded, cardProps } = useExpandedCard(`codex:${entry.id}`);
   // Un PNJ montre toute sa fiche en permanence ; les autres entrées se développent au clic.
   const full = expanded || kind === "npc";
+  const attachmentViewer = useAttachmentViewer();
 
   return (
     <div {...cardProps} className={cn("w-full max-w-full flex cursor-pointer flex-col rounded-xl border bg-card/50 p-4 transition-colors overflow-hidden", linked ? "corner-accent border-primary/50" : "border-border", expanded && "ring-2 ring-primary/50")}>
@@ -71,7 +72,7 @@ export default function CodexCard({
             <button
               type="button"
               key={`${file.url}-${index}`}
-              onClick={() => openAttachment(file)}
+              onClick={() => attachmentViewer.open(entry.attachments, index)}
               title={file.name}
               className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-md border border-border bg-secondary/40 text-muted-foreground hover:border-primary/50"
             >
@@ -110,6 +111,7 @@ export default function CodexCard({
           <Trash2 className="mr-1.5 h-3 w-3" /> Supprimer
         </button>
       </div>
+      {attachmentViewer.viewer}
     </div>
   );
 }

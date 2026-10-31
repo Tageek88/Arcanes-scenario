@@ -21,6 +21,8 @@ import { useQuests } from "@/hooks/useQuests";
 import QuestSelect from "@/components/common/QuestSelect";
 import { useNotes } from "@/hooks/useNotes";
 import NotesFilterBar from "@/components/notes/NotesFilterBar";
+import PdfPanel from "@/components/notes/PdfPanel";
+import { cn } from "@/lib/utils";
 import { noteTarget } from "@/lib/meta/postit";
 
 const EMPTY = { title: "", content: "", pinned: false };
@@ -29,6 +31,7 @@ export default function Notes() {
   const { campaigns, campaignId, selectCampaign } = useCampaigns();
   const { quests, questId, selectQuest } = useQuests(campaignId);
   const { pinnedNotes: allPinned, notes: allNotes, loading, saving, targets, saveNote, togglePin, deleteNote, detach, attach } = useNotes(campaignId);
+  const [tab, setTab] = useState("postit");
   const [show, setShow] = useState("all");
   const [element, setElement] = useState("");
 
@@ -100,14 +103,36 @@ export default function Notes() {
             onValueChange={selectCampaign}
           />
           <QuestSelect quests={quests} value={questId} onValueChange={selectQuest} />
-          <PrintButton campaignId={campaignId} preset="notes" />
-          <Button data-tutorial="notes-new" onClick={openNew} disabled={!campaignId}>
-            <Plus className="mr-2 h-4 w-4" /> Nouvelle note
-          </Button>
+          {tab === "postit" && <PrintButton campaignId={campaignId} preset="notes" />}
+          {tab === "postit" && (
+            <Button data-tutorial="notes-new" onClick={openNew} disabled={!campaignId}>
+              <Plus className="mr-2 h-4 w-4" /> Nouvelle note
+            </Button>
+          )}
         </div>
       </header>
 
-      {!campaignId ? (
+      <div role="tablist" aria-label="Notes de MJ" className="flex gap-1 border-b border-border">
+        {[["postit", "Post-it"], ["pdf", "PDF"]].map(([value, label]) => (
+          <button
+            key={value}
+            type="button"
+            role="tab"
+            aria-selected={tab === value}
+            onClick={() => setTab(value)}
+            className={cn(
+              "min-touch -mb-px border-b-2 px-4 py-2 font-mono text-xs uppercase tracking-widest transition-colors",
+              tab === value ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
+            )}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {tab === "pdf" ? (
+        <PdfPanel campaignId={campaignId} />
+      ) : !campaignId ? (
         <div className="rounded-xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">
           Créez une campagne depuis l'arborescence pour commencer votre bloc-notes.
         </div>

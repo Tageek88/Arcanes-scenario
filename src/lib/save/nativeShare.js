@@ -59,3 +59,20 @@ export async function shareTextFile(text, fileName, title) {
     throw error;
   }
 }
+
+/**
+ * Écrit un fichier binaire (base64) dans le cache de l'application puis ouvre la feuille de partage.
+ * Renvoie true si la feuille a été ouverte, false si l'utilisateur l'a fermée sans choisir.
+ */
+export async function shareBase64File(base64, fileName, title) {
+  await Filesystem.writeFile({ path: fileName, data: base64, directory: Directory.Cache, recursive: true });
+  const { uri } = await Filesystem.getUri({ path: fileName, directory: Directory.Cache });
+  try {
+    await Share.share({ title, dialogTitle: title, files: [uri] });
+    return true;
+  } catch (error) {
+    if (/cancel/i.test(String(error?.message || error))) return false;
+    console.error("Erreur du partage natif :", error);
+    throw error;
+  }
+}
