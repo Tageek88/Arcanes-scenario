@@ -42,3 +42,7 @@ audit.zip
 audit-src.zip
 
 .claude/agents/
+
+# Code-signing certificates (never commit)
+*.pfx
+*.p12

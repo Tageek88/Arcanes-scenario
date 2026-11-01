@@ -173,6 +173,72 @@ handle("theme:set-window-background", REFUSED, (_event, color) => {
   }
 });
 
+// ---------- Updates (GitHub Releases, only when the user asks) ----------
+
+const UPDATE_NOT_PACKAGED = { ok: false, error: "Les mises à jour ne sont disponibles que dans l'application installée." };
+const UPDATE_BUSY = { ok: false, error: "Une opération de mise à jour est déjà en cours." };
+
+let updater = null;
+let updateBusy = false;
+let updateDownloaded = false;
+
+function getUpdater() {
+  if (!updater) {
+    ({ autoUpdater: updater } = require("electron-updater"));
+    updater.autoDownload = false;
+    updater.autoInstallOnAppQuit = false;
+    updater.allowPrerelease = false;
+    updater.allowDowngrade = false;
+    updater.on("download-progress", (info) => {
+      mainWindow?.webContents.send("update:progress", Math.round(info.percent));
+    });
+  }
+  return updater;
+}
+
+// Runs one update step at a time; `fail` is the French message shown when it throws.
+async function updateStep(fail, run) {
+  if (!app.isPackaged) return UPDATE_NOT_PACKAGED;
+  if (updateBusy) return UPDATE_BUSY;
+  updateBusy = true;
+  try {
+    return await run(getUpdater());
+  } catch (error) {
+    console.error("Mise à jour :", error);
+    return { ok: false, error: fail };
+  } finally {
+    updateBusy = false;
+  }
+}
+
+handle("update:check", REFUSED, () =>
+  updateStep("Impossible de vérifier les mises à jour. Vérifiez votre connexion Internet.", async (u) => {
+    updateDownloaded = false;
+    const result = await u.checkForUpdates();
+    return {
+      ok: true,
+      available: !!result?.isUpdateAvailable,
+      version: String(result?.updateInfo?.version || ""),
+      current: app.getVersion(),
+    };
+  })
+);
+
+handle("update:download", REFUSED, () =>
+  updateStep("Le téléchargement de la mise à jour a échoué.", async (u) => {
+    await u.downloadUpdate();
+    updateDownloaded = true;
+    return { ok: true };
+  })
+);
+
+handle("update:install", REFUSED, () => {
+  if (!updateDownloaded) return { ok: false, error: "Aucune mise à jour téléchargée." };
+  // Silent NSIS update, then the app starts again.
+  setImmediate(() => getUpdater().quitAndInstall(true, true));
+  return { ok: true };
+});
+
 handle("pdf:save", REFUSED, async (_event, bytes, filename) => {
   if (!(bytes instanceof Uint8Array) || bytes.length < 5 || Buffer.from(bytes.subarray(0, 5)).toString("ascii") !== "%PDF-") {
     return { ok: false, error: "Le document PDF est invalide." };

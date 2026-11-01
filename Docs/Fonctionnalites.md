@@ -126,6 +126,8 @@ La page Notes de MJ a deux onglets : « Post-it » et « PDF ». L'onglet PDF ga
 
 NOTES DE VERSION
 
+Dans le programme Windows, Paramètres › À propos propose **Vérifier les mises à jour** : l'application interroge GitHub uniquement à ce moment-là (aucune donnée de jeu n'est envoyée), annonce la nouvelle version s'il y en a une, et demande confirmation avant de la télécharger. Vos données sont sauvegardées avant le redémarrage.
+
 Un clic sur la version, dans Paramètres, ouvre les notes de version : un résumé très court de la version installée, la version complète à la demande, et les versions précédentes.
 
 APPARENCE ET THÈMES

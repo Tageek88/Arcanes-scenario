@@ -23,12 +23,18 @@
     },
     "nsis": {
       "oneClick": false,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "Arcanes-Scenario-Setup-${version}.${ext}"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "Tageek88",
+      "repo": "Arcanes-scenario"
     }
   },
   "scripts": {
     "electron": "vite build && electron .",
-    "dist": "vite build && electron-builder",
+    "dist": "vite build && electron-builder --publish never",
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint . --quiet",
@@ -101,5 +107,8 @@
     "vaul": "^1.1.2",
     "vite": "^8.2.0",
     "vitest": "^5.0.5"
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.11"
   }
 }

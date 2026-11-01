@@ -2,7 +2,7 @@
 
 **Un atelier de préparation pour maîtres du jeu : organisez votre scénario en actes et scènes, et gardez PNJ, lieux, indices, tables aléatoires, notes et sessions sous la main, avec vos campagnes conservées hors ligne sur votre ordinateur.**
 
-![Version](https://img.shields.io/badge/version-1.8.0-d4a63c)
+![Version](https://img.shields.io/badge/version-1.8.2-d4a63c)
 ![Node](https://img.shields.io/badge/node-%3E%3D20.19-339933?logo=node.js&logoColor=white)
 ![React](https://img.shields.io/badge/React-18-61dafb?logo=react&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-8-646cff?logo=vite&logoColor=white)
@@ -39,6 +39,7 @@ Retrouvez le descriptif complet de l'application, onglet par onglet, dans le fic
 - **Calendrier** : planification des sessions liées à une scène et sondages de disponibilités partagés par lien.
 - **Cartes, campagnes et impression** : développez les cartes de contenu au clic, choisissez la campagne depuis chaque onglet et imprimez le contenu associé, y compris les tables, sessions et fiches de personnages.
 - **Notes du MJ** : bloc-notes avec épinglage.
+- **Mises à jour** (Windows) : Paramètres › À propos › « Vérifier les mises à jour », avec confirmation avant le téléchargement depuis GitHub.
 - **Sauvegarde** : export et import JSON depuis les Paramètres (sur Android, l'export passe par la feuille de partage ; sans sauvegarde automatique, l'import commence par exporter vos données actuelles).
 - **Données de campagne locales** : aucun compte n'est nécessaire et les campagnes restent sur votre machine. Les sondages partagés sont hébergés sur Cloudflare uniquement si vous configurez ce service (voir [cloudflare/README.md](./cloudflare/README.md)).
 

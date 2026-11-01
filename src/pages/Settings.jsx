@@ -19,6 +19,7 @@ import PrintButton from "@/components/print/PrintButton";
 import AutosavePanel from "@/components/AutosavePanel";
 import CampaignSelect from "@/components/common/CampaignSelect";
 import ReleaseNotesDialog from "@/components/common/ReleaseNotesDialog";
+import UpdatePanel from "@/components/common/UpdatePanel";
 import AppearanceSection from "@/components/theme/AppearanceSection";
 import TutorialCenter from "@/components/Tutorial/TutorialCenter";
 import { useCampaigns } from "@/hooks/useCampaigns";
@@ -134,6 +135,7 @@ export default function Settings() {
           </button>
         </p>
         <p className="mt-1 text-xs text-muted-foreground">Touchez la version pour lire les notes de version.</p>
+        <UpdatePanel currentVersion={__APP_VERSION__} />
       </section>
       <ReleaseNotesDialog open={notesOpen} onOpenChange={setNotesOpen} currentVersion={__APP_VERSION__} />
     </div>
