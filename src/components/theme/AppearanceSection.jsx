@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import CampaignSelect from "@/components/common/CampaignSelect";
 import ThemeEditorDialog from "@/components/theme/ThemeEditorDialog";
+import { useCampaignLayout } from "@/hooks/useCampaignLayout";
 import { useAppTheme } from "@/lib/context/ThemeContext";
 import useConfirm from "@/hooks/useConfirm";
 import { fontById } from "@/lib/theme/fonts";
@@ -39,6 +41,7 @@ function Choice({ label, value, options, onChange }) {
 export default function AppearanceSection() {
   const { settings, updateSettings, setDefaultTheme, resetTheme } = useAppTheme();
   const { confirm, confirmDialog } = useConfirm();
+  const layout = useCampaignLayout();
   const [editorOpen, setEditorOpen] = useState(false);
   const preset = getPreset(settings.theme.presetId);
 
@@ -95,6 +98,26 @@ export default function AppearanceSection() {
           <p className="text-xs text-muted-foreground">Supprime les transitions et le flou des panneaux.</p>
         </div>
         <Switch id="reduce-motion" checked={settings.motion === "reduced"} onCheckedChange={(checked) => updateSettings({ motion: checked ? "reduced" : "normal" })} />
+      </div>
+
+      <div className="space-y-3 rounded-lg border border-border p-3" data-tutorial="campaign-layout">
+        <div>
+          <p className="text-sm font-medium text-foreground">Disposition de l'arborescence</p>
+          <p className="text-xs text-muted-foreground">
+            Propre à chaque campagne. Par défaut, les actes sont des colonnes et leurs scènes se lisent de haut en bas. Activée, les actes se lisent de haut en bas et leurs scènes de gauche à droite (écrans larges ; sur téléphone, la liste reste identique).
+          </p>
+        </div>
+        {layout.campaigns.length === 0 ? (
+          <p className="text-xs text-muted-foreground">Créez d'abord une campagne pour régler sa disposition.</p>
+        ) : (
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <CampaignSelect campaigns={layout.campaigns} value={layout.campaignId} onValueChange={layout.selectCampaign} />
+            <div className="flex items-center gap-2">
+              <label htmlFor="acts-as-rows" className="text-sm text-foreground">Actes en lignes</label>
+              <Switch id="acts-as-rows" checked={layout.actsAsRows} onCheckedChange={layout.setActsAsRows} />
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="flex items-center justify-between gap-3 rounded-lg border border-border p-3">

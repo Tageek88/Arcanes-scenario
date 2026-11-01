@@ -6,6 +6,7 @@ import SceneEditor from "@/components/home/SceneEditor";
 import CampaignDialog from "@/components/home/CampaignDialog";
 import ThemeEditorDialog from "@/components/theme/ThemeEditorDialog";
 import { useAppTheme } from "@/lib/context/ThemeContext";
+import { actsAsRows } from "@/lib/services/campaignLayout";
 import QuestBar from "@/components/home/QuestBar";
 import { useQuests } from "@/hooks/useQuests";
 import CodexSidebar from "@/components/codex/CodexSidebar";
@@ -331,6 +332,7 @@ export default function Home() {
               />
               <div className="hidden md:block">
                 <SceneBoard
+                  actsAsRows={actsAsRows(campaign)}
                   acts={acts}
                   scenes={scenes}
                   npcs={npcs}
