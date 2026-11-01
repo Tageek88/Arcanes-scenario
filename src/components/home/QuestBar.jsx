@@ -87,7 +87,7 @@ export default function QuestBar({ quests, quest, actCount, sceneCount, onSelect
           </div>
         }
       >
-        <div className="space-y-2 py-1">
+        <div className="stack-y-2 py-1">
           <Label htmlFor="quest-name">Titre</Label>
           <Input
             id="quest-name"

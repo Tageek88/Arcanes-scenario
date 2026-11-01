@@ -55,19 +55,19 @@ export default function AddToInventoryDialog({ open, onOpenChange, campaignId, i
         </>
       }
     >
-      <form id="add-to-inventory-form" onSubmit={submit} className="space-y-4">
-        <div className="space-y-2">
+      <form id="add-to-inventory-form" onSubmit={submit} className="stack-y-4">
+        <div className="stack-y-2">
           <Label htmlFor="inventory-item-name">Objet</Label>
           <Input id="inventory-item-name" list="inventory-item-suggestions" value={name} onChange={(event) => setName(event.target.value)} />
           <datalist id="inventory-item-suggestions">
             {suggestions.map((entry) => <option key={entry.name} value={entry.name} />)}
           </datalist>
         </div>
-        <div className="space-y-2">
+        <div className="stack-y-2">
           <Label htmlFor="inventory-item-quantity">Quantité</Label>
           <Input id="inventory-item-quantity" type="number" inputMode="numeric" min={0} value={quantity} onChange={(event) => setQuantity(event.target.value)} />
         </div>
-        <div className="space-y-2">
+        <div className="stack-y-2">
           <Label>Propriétaire</Label>
           {loading ? (
             <p className="text-sm text-muted-foreground">Chargement…</p>

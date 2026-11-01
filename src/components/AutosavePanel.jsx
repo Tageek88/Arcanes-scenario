@@ -33,7 +33,7 @@ export default function AutosavePanel() {
 
     if (!hasAutosave()) {
         return (
-            <section className="space-y-2 rounded-xl border border-border bg-card/50 p-4">
+            <section className="stack-y-2 rounded-xl border border-border bg-card/50 p-4">
                 <h2 className="font-display text-base font-semibold text-foreground">Sauvegarde automatique</h2>
                 <p className="text-sm text-muted-foreground">
                     Disponible dans le programme Windows (installateur ou <code>npm run electron</code>), pas dans le
@@ -99,7 +99,7 @@ export default function AutosavePanel() {
     const files = (info?.files || []).slice(0, 12);
 
     return (
-        <section className="space-y-3 rounded-xl border border-border bg-card/50 p-4">
+        <section className="stack-y-3 rounded-xl border border-border bg-card/50 p-4">
             {confirmDialog}
             <h2 className="font-display text-base font-semibold text-foreground">Sauvegarde automatique</h2>
             <p className="text-sm text-muted-foreground">
@@ -125,7 +125,7 @@ export default function AutosavePanel() {
             </div>
 
             {files.length > 0 && (
-                <ul className="max-h-64 space-y-1.5 overflow-y-auto pt-1">
+                <ul className="max-h-64 stack-y-1.5 overflow-y-auto pt-1">
                     {files.map((file) => (
                         <li
                             key={file.name}

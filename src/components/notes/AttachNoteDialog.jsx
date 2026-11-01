@@ -114,8 +114,8 @@ export default function AttachNoteDialog({ note, campaignId, onClose, onAttach }
         </>
       }
     >
-      <form id="attach-note-form" onSubmit={submit} className="space-y-3">
-        <div className="space-y-1.5">
+      <form id="attach-note-form" onSubmit={submit} className="stack-y-3">
+        <div className="stack-y-1.5">
           <Label>Type d'élément</Label>
           <Select value={kind} onValueChange={(value) => { setKind(value); setId(""); setSearch(""); }}>
             <SelectTrigger aria-label="Type d'élément"><SelectValue /></SelectTrigger>
@@ -124,7 +124,7 @@ export default function AttachNoteDialog({ note, campaignId, onClose, onAttach }
             </SelectContent>
           </Select>
         </div>
-        <div className="space-y-1.5">
+        <div className="stack-y-1.5">
           <Label htmlFor="attach-search">Élément</Label>
           <Input id="attach-search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Rechercher par nom…" disabled={!lookup} />
           {failed ? (
@@ -134,7 +134,7 @@ export default function AttachNoteDialog({ note, campaignId, onClose, onAttach }
           ) : options.length === 0 ? (
             <p className="text-sm text-muted-foreground">Aucun élément de ce type.</p>
           ) : (
-            <ul role="listbox" aria-label="Éléments" className="max-h-56 space-y-1 overflow-y-auto rounded-lg border border-border p-1">
+            <ul role="listbox" aria-label="Éléments" className="max-h-56 stack-y-1 overflow-y-auto rounded-lg border border-border p-1">
               {options.map((option) => (
                 <li key={option.id} role="option" aria-selected={id === option.id}>
                   <button
@@ -150,7 +150,7 @@ export default function AttachNoteDialog({ note, campaignId, onClose, onAttach }
           )}
         </div>
         {hasParts && (
-          <div className="space-y-1.5">
+          <div className="stack-y-1.5">
             <Label>Partie de la fiche</Label>
             <Select value={partKind} onValueChange={(value) => { setPartKind(value); setPartIndex(""); }}>
               <SelectTrigger aria-label="Partie de la fiche"><SelectValue /></SelectTrigger>

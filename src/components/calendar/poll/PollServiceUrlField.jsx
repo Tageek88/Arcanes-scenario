@@ -7,8 +7,8 @@ import { Label } from "@/components/ui/label";
 /** Adresse du site Cloudflare Pages : lecture seule tant qu'on n'a pas cliqué sur le crayon. */
 export default function PollServiceUrlField({ value, editing, onChange, onEdit, onCommit }) {
   return (
-    <section className="space-y-3 rounded-lg border border-border p-3">
-      <div className="space-y-2">
+    <section className="stack-y-3 rounded-lg border border-border p-3">
+      <div className="stack-y-2">
         <div className="flex items-center justify-between">
           <Label htmlFor="poll-service-url">Adresse du site Cloudflare Pages</Label>
           {!editing && (

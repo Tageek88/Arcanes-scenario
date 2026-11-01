@@ -67,15 +67,15 @@ export default function PostItDialog({ open, onOpenChange, label, notes, onAdd, 
         description="Notes collées sur cet élément. Elles figurent aussi dans la page Notes de MJ."
         footer={<Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Fermer</Button>}
       >
-        <div className="space-y-4">
+        <div className="stack-y-4">
           {notes.length === 0 ? (
             <p className="text-sm text-muted-foreground">Aucun post-it pour le moment.</p>
           ) : (
-            <ul className="space-y-2">
+            <ul className="stack-y-2">
               {notes.map((note) => (
                 <li key={note.id} className="rounded-lg border border-border bg-card/50 p-3">
                   {editingId === note.id ? (
-                    <div className="space-y-2">
+                    <div className="stack-y-2">
                       <Textarea aria-label="Texte du post-it" rows={4} value={editText} onChange={(event) => setEditText(event.target.value)} />
                       <div className="flex justify-end gap-2">
                         <Button type="button" variant="ghost" size="sm" onClick={() => setEditingId("")}>Annuler</Button>
@@ -85,7 +85,7 @@ export default function PostItDialog({ open, onOpenChange, label, notes, onAdd, 
                   ) : (
                     <div className="flex items-start gap-2">
                       <div className="min-w-0 flex-1">
-                        <p className="whitespace-pre-wrap break-words text-sm text-foreground">{note.content || note.title}</p>
+                        <p className="whitespace-pre-wrap wrap-break-word text-sm text-foreground">{note.content || note.title}</p>
                         <p className="mt-1 font-mono text-xs uppercase tracking-wider text-muted-foreground">{dateOf(note)}</p>
                       </div>
                       <div className="flex shrink-0 items-center gap-1">
@@ -103,7 +103,7 @@ export default function PostItDialog({ open, onOpenChange, label, notes, onAdd, 
             </ul>
           )}
 
-          <form onSubmit={add} className="space-y-2">
+          <form onSubmit={add} className="stack-y-2">
             <Label htmlFor="postit-new">Nouveau post-it</Label>
             <Textarea id="postit-new" rows={3} value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Ce que vous ne voulez pas oublier…" />
             <div className="flex justify-end">

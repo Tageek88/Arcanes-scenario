@@ -42,8 +42,8 @@ export default function NoteEditor({ open, onOpenChange, form, setForm, saving, 
       description="Consignez ce que vous ne voulez pas oublier en cours de partie."
       footer={footer}
     >
-      <div className="space-y-4">
-        <div className="space-y-2">
+      <div className="stack-y-4">
+        <div className="stack-y-2">
           <Label htmlFor="note-title">Titre</Label>
           <Input
             data-tutorial="note-title"
@@ -54,7 +54,7 @@ export default function NoteEditor({ open, onOpenChange, form, setForm, saving, 
           />
         </div>
 
-        <div className="space-y-2">
+        <div className="stack-y-2">
           <Label htmlFor="note-content">Contenu</Label>
           <Textarea
             id="note-content"

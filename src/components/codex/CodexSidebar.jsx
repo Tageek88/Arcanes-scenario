@@ -190,7 +190,7 @@ export default function CodexSidebar({
       </div>
 
       <ScrollArea className="flex-1">
-        <div className="space-y-2 p-3">
+        <div className="stack-y-2 p-3">
           {!campaignId && (
             <p className="p-4 text-center text-sm text-muted-foreground">
               Créez une campagne pour constituer votre codex.
@@ -237,7 +237,7 @@ export default function CodexSidebar({
                       {expandedId === item.id
                         ? <ChevronUp className="h-4 w-4 shrink-0" />
                         : <ChevronDown className="h-4 w-4 shrink-0" />}
-                      <span className={cn("min-w-0", expandedId === item.id ? "break-words" : "truncate")}>
+                      <span className={cn("min-w-0", expandedId === item.id ? "wrap-break-word" : "truncate")}>
                         {item.name}
                       </span>
                     </div>
@@ -251,7 +251,7 @@ export default function CodexSidebar({
                 </div>
 
                 {expandedId === item.id && (
-                  <div className="mt-3 space-y-3 border-t border-border pt-3 text-xs">
+                  <div className="mt-3 stack-y-3 border-t border-border pt-3 text-xs">
                     {item.comment && <p className="italic text-muted-foreground">{item.comment}</p>}
 
                     {(item.role || item.type) && (

@@ -47,8 +47,8 @@ export default function CodexCard({
             </span>
           </div>
         )}
-        <h3 className="font-display text-base font-semibold text-foreground break-words">{entry.name}</h3>
-        {entry.comment && <p className="text-xs italic text-muted-foreground break-words">{entry.comment}</p>}
+        <h3 className="font-display text-base font-semibold text-foreground wrap-break-word">{entry.name}</h3>
+        {entry.comment && <p className="text-xs italic text-muted-foreground wrap-break-word">{entry.comment}</p>}
       </div>
 
       {(entry.role || entry.type) && (
@@ -56,11 +56,11 @@ export default function CodexCard({
           <FilterChip
             filterKey={entry.role ? "role" : "type"}
             value={entry.role || entry.type}
-            className="max-w-full break-words font-mono text-xs uppercase tracking-widest"
+            className="max-w-full wrap-break-word font-mono text-xs uppercase tracking-widest"
           />
         </div>
       )}
-      {entry.description && <p className={cn("mt-2 text-sm text-muted-foreground break-words overflow-hidden", !full && "line-clamp-3")}>{entry.description}</p>}
+      {entry.description && <p className={cn("mt-2 text-sm text-muted-foreground wrap-break-word overflow-hidden", !full && "line-clamp-3")}>{entry.description}</p>}
 
       <div className="mt-2">
         <CodexEntryDetails kind={kind} entry={entry} locationLabel={locationLabel} relations={relations} />

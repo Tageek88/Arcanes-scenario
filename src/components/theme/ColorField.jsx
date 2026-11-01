@@ -41,7 +41,7 @@ export default function ColorField({ id, label, value, onChange, hint, badge, ba
         value={text}
         onChange={(event) => commit(event.target.value.trim())}
         onBlur={() => setText(value || "")}
-        className="h-9 w-24 rounded-md border border-input bg-transparent px-2 font-mono text-sm min-h-11 md:min-h-0 aria-[invalid=true]:border-destructive"
+        className="h-9 w-24 rounded-md border border-input bg-transparent px-2 font-mono text-sm min-h-11 md:min-h-0 aria-invalid:border-destructive"
       />
       {badge && (
         <span

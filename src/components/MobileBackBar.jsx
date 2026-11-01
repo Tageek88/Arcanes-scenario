@@ -19,7 +19,7 @@ export default function MobileBackBar() {
 
   if (pathname === "/") {
     return (
-      <div className="sticky top-0 z-30 flex items-center gap-2 border-b border-border bg-background/90 px-4 py-2 pt-[env(safe-area-inset-top)] backdrop-blur md:hidden">
+      <div className="sticky top-0 z-30 flex items-center gap-2 border-b border-border bg-background/90 px-4 py-2 pt-[env(safe-area-inset-top)] backdrop-blur-sm md:hidden">
         <span className="grid h-6 w-6 place-items-center rounded bg-primary font-display text-xs font-bold text-primary-foreground">
           A
         </span>
@@ -31,7 +31,7 @@ export default function MobileBackBar() {
   }
 
   return (
-    <div className="sticky top-0 z-30 flex items-center gap-1 border-b border-border bg-background/90 px-1 py-1 pt-[env(safe-area-inset-top)] backdrop-blur md:hidden">
+    <div className="sticky top-0 z-30 flex items-center gap-1 border-b border-border bg-background/90 px-1 py-1 pt-[env(safe-area-inset-top)] backdrop-blur-sm md:hidden">
       <button
         type="button"
         aria-label="Retour"

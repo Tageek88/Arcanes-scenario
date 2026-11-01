@@ -6,7 +6,7 @@ export default function LinkPicker({ label, items, selected, onToggle, emptyText
   const selectedIds = selected || [];
 
   return (
-    <div className="space-y-2">
+    <div className="stack-y-2">
       <Label>{label}</Label>
       {items.length === 0 ? (
         <p className="text-xs text-muted-foreground">{emptyText}</p>

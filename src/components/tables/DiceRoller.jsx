@@ -33,7 +33,7 @@ const DiceRoller = () => {
     <div className="rounded-xl border border-border bg-card/50 p-4">
       <h2 className="mb-3 text-lg font-semibold">Générateur de Dés</h2>
       <div>
-        <div className="flex space-x-2">
+        <div className="flex stack-x-2">
           <Select value={String(dieType)} onValueChange={(v) => setDieType(Number(v))}>
             <SelectTrigger>
               <SelectValue placeholder="Type de dé" />

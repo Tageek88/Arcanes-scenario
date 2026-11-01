@@ -158,7 +158,7 @@ export default function Calendrier() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-[1400px] space-y-6 px-4 py-6 md:px-8 md:py-8 overflow-x-hidden">
+    <div className="mx-auto w-full max-w-[1400px] stack-y-6 px-4 py-6 md:px-8 md:py-8 overflow-x-hidden">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <span className="tag border border-primary/40 text-primary">Agenda du MJ</span>
@@ -203,7 +203,7 @@ export default function Calendrier() {
           className="grid gap-6 lg:grid-cols-[minmax(0,2.2fr)_minmax(0,1fr)]"
           onClick={() => setSelectedDate("")}
         >
-          <section className="space-y-4">
+          <section className="stack-y-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <Button
@@ -261,7 +261,7 @@ export default function Calendrier() {
             />
           </section>
 
-          <div className="space-y-6">
+          <div className="stack-y-6">
             <div data-tutorial="calendar-upcoming">
               <UpcomingSessions sessions={upcoming} onOpen={openEdit} onAdd={() => openNew()} />
             </div>
@@ -271,7 +271,7 @@ export default function Calendrier() {
                 <h2 className="font-display text-sm font-semibold text-foreground">
                   Ce mois-ci
                 </h2>
-                <ul className="mt-3 space-y-2">
+                <ul className="mt-3 stack-y-2">
                   {sessions.map((session) => {
                     const meta = sessionStatusMeta(session.status);
                     const day = dateKey(session.date);
@@ -307,7 +307,7 @@ export default function Calendrier() {
                   Aucun sondage en cours pour cette campagne.
                 </p>
               ) : (
-                <ul className="mt-3 space-y-2">
+                <ul className="mt-3 stack-y-2">
                   {polls.map((poll) => (
                     <li key={poll.id} className="rounded-lg border border-border bg-background/60 p-3">
                       <div className="flex items-start justify-between gap-2">

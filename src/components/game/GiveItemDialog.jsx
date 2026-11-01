@@ -47,12 +47,12 @@ export default function GiveItemDialog({ target, owners, onOpenChange, onGive })
         </>
       }
     >
-      <form id="give-item-form" onSubmit={submit} className="space-y-4">
-        <div className="space-y-2">
+      <form id="give-item-form" onSubmit={submit} className="stack-y-4">
+        <div className="stack-y-2">
           <Label>Donner à</Label>
           <OwnerPicker owners={others} value={toRef} onChange={setToRef} label="Nouveau propriétaire" />
         </div>
-        <div className="space-y-2">
+        <div className="stack-y-2">
           <Label htmlFor="give-item-quantity">Quantité{target ? ` (sur ${target.item.quantity})` : ""}</Label>
           <Input id="give-item-quantity" type="number" inputMode="numeric" min={1} max={target?.item.quantity || 1} value={quantity} onChange={(event) => setQuantity(event.target.value)} />
         </div>

@@ -34,7 +34,7 @@ export default function UpdatePanel({ currentVersion }) {
   }[phase];
 
   return (
-    <div className="mt-3 space-y-2 border-t border-border pt-3">
+    <div className="mt-3 stack-y-2 border-t border-border pt-3">
       {confirmDialog}
       <div className="flex flex-wrap gap-2">
         <Button type="button" variant="outline" onClick={verify} disabled={busy}>

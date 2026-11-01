@@ -86,7 +86,7 @@ export default function Notes() {
   const nothingShown = !isEmpty && pinnedNotes.length === 0 && notes.length === 0;
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-6 md:px-8 md:py-8">
+    <div className="mx-auto w-full max-w-6xl stack-y-6 px-4 py-6 md:px-8 md:py-8">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <span className="tag border border-primary/40 text-primary">Bloc-notes</span>
@@ -149,13 +149,13 @@ export default function Notes() {
           </Button>
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="stack-y-6">
           {hasPostIts && (
             <NotesFilterBar notes={everything} targets={targets} show={show} onShow={setShow} element={element} onElement={setElement} />
           )}
           {nothingShown && <p className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">Aucune note ne correspond à ce filtre.</p>}
           {pinnedNotes.length > 0 && (
-            <section className="space-y-3">
+            <section className="stack-y-3">
               <h2 className="flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-primary">
                 <Pin className="h-3.5 w-3.5" /> Épinglées
               </h2>
@@ -177,7 +177,7 @@ export default function Notes() {
           )}
 
           {notes.length > 0 && (
-            <section className="space-y-3">
+            <section className="stack-y-3">
               <h2 className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
                 {pinnedNotes.length > 0 ? "Autres notes" : "Toutes les notes"}
               </h2>

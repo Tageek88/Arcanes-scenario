@@ -244,7 +244,7 @@ export default function Codex() {
 
   return (
     <CodexLinksContext.Provider value={links}>
-    <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-6 md:px-8 md:py-8">
+    <div className="mx-auto w-full max-w-6xl stack-y-6 px-4 py-6 md:px-8 md:py-8">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <span className="tag border border-primary/40 text-primary">Codex du monde</span>
@@ -364,7 +364,7 @@ export default function Codex() {
                 ? pathOf(items, item.id).slice(0, -1).map((l) => l.name).join(" › ")
                 : "";
             return (
-              <div key={item.id} className="space-y-1">
+              <div key={item.id} className="stack-y-1">
                 {path && (
                   <p className="truncate px-1 font-mono text-xs uppercase tracking-wider text-muted-foreground">
                     {path}
@@ -407,14 +407,14 @@ export default function Codex() {
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
             <AlertDialogDescription asChild>
-              <div className="space-y-3 text-sm text-muted-foreground">
+              <div className="stack-y-3 text-sm text-muted-foreground">
                 <p>« {pendingDelete?.entry?.name} » sera définitivement supprimé du codex.</p>
                 {hasChildren && (
                   <>
                     <p>
                       Ce lieu contient {count(pendingDelete.totalCount, "sous-lieu", "sous-lieux")}. Que faire ?
                     </p>
-                    <div role="radiogroup" className="space-y-2">
+                    <div role="radiogroup" className="stack-y-2">
                       {deleteChoices.map((choice) => (
                         <button
                           key={choice.key}

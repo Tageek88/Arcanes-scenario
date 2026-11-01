@@ -88,7 +88,7 @@ export default function GameCatalogPanel({ campaignId, kind, skillRollModifier =
   };
 
   return (
-    <section className="space-y-4" data-tutorial={`game-catalog-${kind}`}>
+    <section className="stack-y-4" data-tutorial={`game-catalog-${kind}`}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="relative w-full sm:max-w-xs">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -122,7 +122,7 @@ export default function GameCatalogPanel({ campaignId, kind, skillRollModifier =
               <li key={item.id} className="rounded-xl border border-border bg-card/50 p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <h3 className="break-words font-display text-base font-semibold text-foreground">{item.name}</h3>
+                    <h3 className="wrap-break-word font-display text-base font-semibold text-foreground">{item.name}</h3>
                     {kind === "skills" && item.roll_modifier && (
                       <p className="mt-1 text-xs text-muted-foreground">Modificateur de lancer : {item.roll_modifier}</p>
                     )}
@@ -165,8 +165,8 @@ export default function GameCatalogPanel({ campaignId, kind, skillRollModifier =
         )}
       >
         {draft && (
-          <div className="space-y-4 py-1">
-            <div className="space-y-2">
+          <div className="stack-y-4 py-1">
+            <div className="stack-y-2">
               <Label htmlFor="catalog-name">Nom</Label>
               <Input
                 id="catalog-name"
@@ -176,7 +176,7 @@ export default function GameCatalogPanel({ campaignId, kind, skillRollModifier =
               />
             </div>
             {kind === "skills" && (
-              <div className="space-y-2">
+              <div className="stack-y-2">
                 <Label htmlFor="catalog-roll">Modificateur de lancer{skillRollModifier ? "" : " (facultatif)"}</Label>
                 <Input
                   id="catalog-roll"
@@ -188,7 +188,7 @@ export default function GameCatalogPanel({ campaignId, kind, skillRollModifier =
             )}
             {kind === "equipment" && (
               <>
-                <div className="space-y-2">
+                <div className="stack-y-2">
                   <Label htmlFor="catalog-type">Type</Label>
                   <Input
                     id="catalog-type"
@@ -197,7 +197,7 @@ export default function GameCatalogPanel({ campaignId, kind, skillRollModifier =
                     maxLength={80}
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="stack-y-2">
                   <Label>Champs facultatifs</Label>
                   <p className="text-xs text-muted-foreground">Proposés à la création d'un équipement de ce type (dégâts, poids, portée…).</p>
                   {draft.field_names.map((name, index) => (

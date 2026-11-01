@@ -28,7 +28,7 @@ export default function NoteCard({ note, target, onEdit, onDelete, onTogglePin, 
         <div className="mb-2 flex flex-wrap items-center gap-1.5">
           <span
             className={cn(
-              "tag max-w-full break-words border",
+              "tag max-w-full wrap-break-word border",
               target.missing ? "border-destructive/40 bg-destructive/10 text-destructive" : "border-warning/40 bg-warning/10 text-warning"
             )}
           >
@@ -38,7 +38,7 @@ export default function NoteCard({ note, target, onEdit, onDelete, onTogglePin, 
         </div>
       )}
       <header className="flex items-start justify-between gap-3">
-        <h3 className="font-display text-base leading-snug text-foreground break-words min-w-0 flex-1">{note.title}</h3>
+        <h3 className="font-display text-base leading-snug text-foreground wrap-break-word min-w-0 flex-1">{note.title}</h3>
         <button
           type="button"
           title={note.pinned ? "Désépingler la note" : "Épingler la note"}
@@ -56,7 +56,7 @@ export default function NoteCard({ note, target, onEdit, onDelete, onTogglePin, 
       </header>
 
       {note.content ? (
-        <p className={cn("mt-2 whitespace-pre-wrap break-words text-sm text-muted-foreground", !expanded && "line-clamp-5")}>
+        <p className={cn("mt-2 whitespace-pre-wrap wrap-break-word text-sm text-muted-foreground", !expanded && "line-clamp-5")}>
           {note.content}
         </p>
       ) : (
@@ -64,7 +64,7 @@ export default function NoteCard({ note, target, onEdit, onDelete, onTogglePin, 
       )}
 
       <footer className="mt-4 flex items-center justify-between gap-2 border-t border-border pt-3">
-        <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground break-words">
+        <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground wrap-break-word">
           {updated}
         </span>
         <div className="flex items-center gap-1 shrink-0">

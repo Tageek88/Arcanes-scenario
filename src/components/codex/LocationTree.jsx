@@ -59,7 +59,7 @@ export default function LocationTree({ locations, collapsed, onToggle, onEdit, o
         key={location.id}
         className={cn(
           "rounded-xl border p-3",
-          depth % 2 === 0 ? "border-primary/30 bg-primary/[0.04]" : "border-border bg-secondary/30"
+          depth % 2 === 0 ? "border-primary/30 bg-primary/4" : "border-border bg-secondary/30"
         )}
       >
         <div className="flex items-start gap-2">
@@ -75,7 +75,7 @@ export default function LocationTree({ locations, collapsed, onToggle, onEdit, o
           <div className="min-w-0 flex-1">{body}</div>
         </div>
         {!isCollapsed && (
-          <div className="ml-2 mt-3 space-y-3 border-l-2 border-primary/30 pl-2 sm:pl-4">
+          <div className="ml-2 mt-3 stack-y-3 border-l-2 border-primary/30 pl-2 sm:pl-4">
             {kids.map((kid) => renderNode(kid, depth + 1, nextSeen))}
           </div>
         )}
@@ -84,5 +84,5 @@ export default function LocationTree({ locations, collapsed, onToggle, onEdit, o
   };
 
   const roots = map.get("") || [];
-  return <div className="max-w-3xl space-y-4">{roots.map((root) => renderNode(root, 0, new Set()))}</div>;
+  return <div className="max-w-3xl stack-y-4">{roots.map((root) => renderNode(root, 0, new Set()))}</div>;
 }

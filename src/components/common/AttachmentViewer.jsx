@@ -104,7 +104,7 @@ export default function AttachmentViewer({ files, index, onIndexChange, onClose 
     <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
       <DialogContent
         aria-describedby="attachment-viewer-desc"
-        className="left-0 top-0 flex h-[100dvh] w-screen max-w-none translate-x-0 translate-y-0 flex-col gap-0 rounded-none border-0 p-0 sm:rounded-none data-[state=closed]:slide-out-to-left-0 data-[state=closed]:slide-out-to-top-0 data-[state=open]:slide-in-from-left-0 data-[state=open]:slide-in-from-top-0"
+        className="left-0 top-0 flex h-dvh w-screen max-w-none translate-x-0 translate-y-0 flex-col gap-0 rounded-none border-0 p-0 sm:rounded-none data-[state=closed]:slide-out-to-left-0 data-[state=closed]:slide-out-to-top-0 data-[state=open]:slide-in-from-left-0 data-[state=open]:slide-in-from-top-0"
       >
         {file && (
           <>
@@ -152,7 +152,7 @@ export default function AttachmentViewer({ files, index, onIndexChange, onClose 
               {kind === "pdf" && pdfUrl && <iframe title={file.name} src={pdfUrl} className="h-full w-full bg-white" />}
               {kind === "pdf" && !pdfUrl && (
                 <div className="grid h-full place-items-center p-6 text-center">
-                  <div className="space-y-3">
+                  <div className="stack-y-3">
                     <p className="text-sm text-muted-foreground">Ce PDF s'ouvre dans une autre application.</p>
                     <Button type="button" onClick={share}><Share2 className="mr-2 h-4 w-4" /> Ouvrir avec…</Button>
                   </div>
@@ -160,7 +160,7 @@ export default function AttachmentViewer({ files, index, onIndexChange, onClose 
               )}
               {!kind && (
                 <div className="grid h-full place-items-center p-6 text-center">
-                  <div className="space-y-3">
+                  <div className="stack-y-3">
                     <p className="text-sm text-muted-foreground">Ce fichier ne peut pas être affiché ici.</p>
                     <Button type="button" onClick={() => openAttachment(file)}><ExternalLink className="mr-2 h-4 w-4" /> Ouvrir</Button>
                   </div>

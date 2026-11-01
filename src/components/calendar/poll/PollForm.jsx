@@ -16,17 +16,17 @@ export default function PollForm({ form, campaignId }) {
   } = form;
 
   return (
-    <section className="space-y-4 rounded-lg border border-border p-3">
+    <section className="stack-y-4 rounded-lg border border-border p-3">
       <h3 className="font-display text-base font-semibold text-foreground">
         {editingPoll ? "Modifier le sondage" : "Créer un sondage"}
       </h3>
       {editLoading && <p className="text-sm text-muted-foreground">Chargement des données du sondage…</p>}
       {editLoadError && <p className="text-sm text-destructive">{editLoadError}</p>}
-      <div className="space-y-2">
+      <div className="stack-y-2">
         <Label htmlFor="poll-title-input">Nom de la session</Label>
         <Input data-tutorial="poll-title" id="poll-title-input" value={title} maxLength={120} onChange={(event) => setTitle(event.target.value)} placeholder="Ex. Session 5 — La tour oubliée" />
       </div>
-      <div className="space-y-2">
+      <div className="stack-y-2">
         <Label htmlFor="poll-comment">Commentaire visible par les participants (facultatif)</Label>
         <Textarea
           id="poll-comment"
@@ -37,16 +37,16 @@ export default function PollForm({ form, campaignId }) {
           placeholder="Ajoutez des précisions sur la séance ou le choix des dates…"
         />
       </div>
-      <div className="space-y-2">
+      <div className="stack-y-2">
         <Label htmlFor="poll-players">Joueurs attendus (un nom par ligne)</Label>
         <Textarea id="poll-players" rows={4} value={playerNames} onChange={(event) => setPlayerNames(event.target.value)} placeholder={"Léa\nMarc\nNora"} />
         <p className="text-xs text-muted-foreground">Les joueurs choisiront un nom dans cette liste. Un même nom met à jour sa réponse.</p>
       </div>
-      <div className="space-y-2">
+      <div className="stack-y-2">
         <Label htmlFor="poll-timezone">Fuseau horaire du MJ</Label>
         <Input id="poll-timezone" value={timezone} onChange={(event) => setTimezone(event.target.value)} placeholder="Europe/Paris" />
       </div>
-      <div className="space-y-2">
+      <div className="stack-y-2">
         <Label>Dates et heures proposées (heure du MJ)</Label>
         {slots.map((slot, index) => (
           <div key={index} className="flex items-center gap-2">
@@ -74,7 +74,7 @@ export default function PollForm({ form, campaignId }) {
           <Plus className="mr-2 h-4 w-4" /> Ajouter une date
         </Button>
       </div>
-      <div className="space-y-2">
+      <div className="stack-y-2">
         <Label htmlFor="poll-expires-on">Conserver le sondage et ses résultats jusqu'au (heure du MJ)</Label>
         <Input
           id="poll-expires-on"

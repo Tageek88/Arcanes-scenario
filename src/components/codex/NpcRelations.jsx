@@ -172,7 +172,7 @@ export default function NpcRelations({ npc, campaignId }) {
       : RELATION_TYPES[inverseOf(form.type)]?.label || "";
 
   return (
-    <div data-tutorial="npc-relations" className="space-y-3 rounded-lg border border-border p-3">
+    <div data-tutorial="npc-relations" className="stack-y-3 rounded-lg border border-border p-3">
       <div className="flex items-center justify-between gap-2">
         <Label>Relations ({mine.length})</Label>
         {!editor && (
@@ -189,7 +189,7 @@ export default function NpcRelations({ npc, campaignId }) {
       )}
 
       {mine.length > 0 && (
-        <ul className="space-y-2">
+        <ul className="stack-y-2">
           {mine.map((row) => {
             const status = pairStatus(row, relations);
             return (
@@ -265,12 +265,12 @@ export default function NpcRelations({ npc, campaignId }) {
       )}
 
       {editor && (
-        <div className="space-y-3 rounded-lg border border-primary/40 bg-primary/[0.04] p-3">
+        <div className="stack-y-3 rounded-lg border border-primary/40 bg-primary/4 p-3">
           <p className="text-sm font-medium text-foreground">
             {editor.row ? "Modifier la relation" : "Nouvelle relation"}
           </p>
 
-          <div className="space-y-2">
+          <div className="stack-y-2">
             <Label>Type de relation</Label>
             <Select value={form.type} onValueChange={(v) => setField("type", v)}>
               <SelectTrigger>
@@ -288,7 +288,7 @@ export default function NpcRelations({ npc, campaignId }) {
 
           {form.type === CUSTOM_TYPE && (
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <div className="space-y-2">
+              <div className="stack-y-2">
                 <Label>{npc.name || "Ce PNJ"} …</Label>
                 <Input
                   value={form.label}
@@ -297,7 +297,7 @@ export default function NpcRelations({ npc, campaignId }) {
                 />
               </div>
               {!form.manual && (
-                <div className="space-y-2">
+                <div className="stack-y-2">
                   <Label>{targetName} … (inverse)</Label>
                   <Input
                     value={form.inverseLabel}
@@ -309,7 +309,7 @@ export default function NpcRelations({ npc, campaignId }) {
             </div>
           )}
 
-          <div className="space-y-2">
+          <div className="stack-y-2">
             <Label>Avec le PNJ</Label>
             <Select value={form.targetId} onValueChange={(v) => setField("targetId", v)}>
               <SelectTrigger>
@@ -325,7 +325,7 @@ export default function NpcRelations({ npc, campaignId }) {
             </Select>
           </div>
 
-          <div className="space-y-2">
+          <div className="stack-y-2">
             <Label>Précisions (facultatif)</Label>
             <Input
               value={form.notes}
@@ -350,7 +350,7 @@ export default function NpcRelations({ npc, campaignId }) {
           </button>
 
           {form.manual && (
-            <div className="space-y-2 rounded-lg border border-destructive/50 bg-destructive/10 p-3 text-xs">
+            <div className="stack-y-2 rounded-lg border border-destructive/50 bg-destructive/10 p-3 text-xs">
               <p className="flex items-center gap-2 font-medium text-destructive">
                 <AlertTriangle className="h-4 w-4 shrink-0" /> Attention : mode manuel
               </p>

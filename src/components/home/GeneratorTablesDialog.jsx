@@ -56,7 +56,7 @@ export default function GeneratorTablesDialog({ open, onOpenChange, universeId, 
       {!ready ? (
         <p className="py-4 text-sm text-muted-foreground">Chargement…</p>
       ) : (
-        <div className="space-y-3 py-1">
+        <div className="stack-y-3 py-1">
           <p className="text-xs text-muted-foreground">
             Une ligne par élément. Les doublons et les lignes vides sont ignorés ; chaque élément fait au plus {MAX_ITEM_LENGTH} caractères, et chaque liste {MAX_ITEMS_PER_LIST} éléments. Une liste « remplacée » laissée vide est ignorée : la liste de l'application reste utilisée.
           </p>
@@ -70,7 +70,7 @@ export default function GeneratorTablesDialog({ open, onOpenChange, universeId, 
                     {builtin[def.key].length} intégré{builtin[def.key].length > 1 ? "s" : ""} · {count} ajouté{count > 1 ? "s" : ""}
                   </span>
                 </summary>
-                <div className="mt-3 space-y-2">
+                <div className="mt-3 stack-y-2">
                   <Label htmlFor={`gen-mode-${def.key}`}>Mode</Label>
                   <Select value={modes[def.key] || "add"} onValueChange={(value) => setModes((current) => ({ ...current, [def.key]: value }))}>
                     <SelectTrigger id={`gen-mode-${def.key}`}>

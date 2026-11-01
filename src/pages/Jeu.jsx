@@ -126,7 +126,7 @@ export default function Jeu() {
   );
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-6 md:px-8 md:py-8">
+    <div className="mx-auto w-full max-w-6xl stack-y-6 px-4 py-6 md:px-8 md:py-8">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <span className="tag border border-primary/40 text-primary">Système de jeu</span>
@@ -243,7 +243,7 @@ export default function Jeu() {
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <h2 className="break-words font-display text-lg font-semibold">{character.name}</h2>
+                      <h2 className="wrap-break-word font-display text-lg font-semibold">{character.name}</h2>
                       <p className="mt-1 text-xs text-muted-foreground">
                         {(character.skills || []).length} compétence{(character.skills || []).length === 1 ? "" : "s"} · {(character.equipment || []).length} équipement{(character.equipment || []).length === 1 ? "" : "s"}
                       </p>
@@ -304,7 +304,7 @@ export default function Jeu() {
                   {(character.equipment || []).length > 0 && (
                     <div className="mt-3">
                       <h3 className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Équipement</h3>
-                      <ul className="mt-1 space-y-1 text-xs text-muted-foreground">
+                      <ul className="mt-1 stack-y-1 text-xs text-muted-foreground">
                         {character.equipment.map((item, index) => (
                           <li key={`${item.name}-${index}`} className="group flex flex-wrap items-center gap-x-1">
                             <span className="text-foreground">{item.name}</span>

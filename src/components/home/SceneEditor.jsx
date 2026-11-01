@@ -74,8 +74,8 @@ export default function SceneEditor({
       description="Décrivez la scène, son statut et ses ramifications."
       footer={footer}
     >
-      <div className="space-y-5 py-1">
-        <div className="space-y-2">
+      <div className="stack-y-5 py-1">
+        <div className="stack-y-2">
           <Label>Titre</Label>
           <Input
             data-tutorial="scene-title"
@@ -87,7 +87,7 @@ export default function SceneEditor({
 
         <div className={quests.length > 0 ? "grid grid-cols-1 gap-3 sm:grid-cols-4" : "grid grid-cols-1 gap-3 sm:grid-cols-3"}>
           {quests.length > 0 && (
-            <div className="space-y-2">
+            <div className="stack-y-2">
               <Label>Quête</Label>
               <Select value={form.quest_id || ""} onValueChange={changeQuest}>
                 <SelectTrigger aria-label="Quête de la scène">
@@ -103,7 +103,7 @@ export default function SceneEditor({
               </Select>
             </div>
           )}
-          <div className="space-y-2">
+          <div className="stack-y-2">
             <Label>Acte</Label>
             <Select value={form.act_id || "_none"} onValueChange={(v) => setField("act_id", v === "_none" ? "" : v)}>
               <SelectTrigger>
@@ -119,7 +119,7 @@ export default function SceneEditor({
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-2">
+          <div className="stack-y-2">
             <Label>Statut</Label>
             <Select value={form.status} onValueChange={(v) => setField("status", v)}>
               <SelectTrigger>
@@ -134,7 +134,7 @@ export default function SceneEditor({
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-2">
+          <div className="stack-y-2">
             <Label>Ordre</Label>
             <Input
               type="number"
@@ -145,7 +145,7 @@ export default function SceneEditor({
         </div>
 
         <div className="flex items-start justify-between gap-4 rounded-lg border border-border p-3">
-          <div className="space-y-1">
+          <div className="stack-y-1">
             <Label htmlFor="scene-recurring">Scène récurrente</Label>
             <p className="text-xs text-muted-foreground">
               Une copie est placée dans chacune des autres quêtes, et dans les quêtes créées ensuite. Les copies sont indépendantes : modifier ou supprimer l'une ne change pas les autres.
@@ -154,7 +154,7 @@ export default function SceneEditor({
           <Switch id="scene-recurring" checked={!!form.recurring} onCheckedChange={(value) => setField("recurring", value)} />
         </div>
 
-        <div className="space-y-2">
+        <div className="stack-y-2">
           <Label>Résumé</Label>
           <Textarea
             rows={3}
@@ -164,7 +164,7 @@ export default function SceneEditor({
           />
         </div>
 
-        <div className="space-y-2">
+        <div className="stack-y-2">
           <Label>Notes du MJ</Label>
           <Textarea
             rows={3}

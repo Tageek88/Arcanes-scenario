@@ -86,7 +86,7 @@ function Segmented({ label, value, options, onChange }) {
 
 function Section({ title, hint, children }) {
   return (
-    <section className="space-y-2">
+    <section className="stack-y-2">
       <div>
         <h3 className="font-display text-sm font-semibold text-foreground">{title}</h3>
         {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
@@ -118,7 +118,7 @@ export default function ThemeEditor({ theme, onChange }) {
   };
 
   return (
-    <div className="space-y-5">
+    <div className="stack-y-5">
       <ThemePreview theme={theme} />
 
       <Section title="Thèmes prédéfinis" hint="Un clic applique le thème entier. Le préréglage lui-même n'est jamais modifié.">
@@ -164,7 +164,7 @@ export default function ThemeEditor({ theme, onChange }) {
       <Section title="Couleurs" hint="Choisissez une couleur d'accent : toutes les autres sont calculées, lisibles, en clair comme en sombre.">
         <Segmented label="Harmonie des couleurs" value={theme.palette?.mode || "preset"} options={theme.presetId === "custom" ? MODE_OPTIONS.slice(1) : MODE_OPTIONS} onChange={(mode) => onChange(setPaletteMode(theme, mode))} />
         {derived && (
-          <div className="space-y-2 rounded-lg border border-border p-3">
+          <div className="stack-y-2 rounded-lg border border-border p-3">
             <ColorField id="palette-accent" label="Couleur d'accent" value={theme.palette.accent} onChange={(hex) => onChange(setPaletteColor(theme, "accent", hex))} />
             <ColorField
               id="palette-background"
@@ -180,8 +180,8 @@ export default function ThemeEditor({ theme, onChange }) {
       </Section>
 
       <Section title="Style">
-        <div className="space-y-3">
-          <div className="space-y-1">
+        <div className="stack-y-3">
+          <div className="stack-y-1">
             <label htmlFor="theme-title-font" className="text-sm font-medium text-foreground">Police des titres</label>
             <Select value={theme.titleFont} onValueChange={(value) => onChange(setThemeField(theme, "titleFont", value))}>
               <SelectTrigger id="theme-title-font"><SelectValue /></SelectTrigger>
@@ -192,19 +192,19 @@ export default function ThemeEditor({ theme, onChange }) {
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-1">
+          <div className="stack-y-1">
             <span className="text-sm font-medium text-foreground">Arrondi des coins</span>
             <Segmented label="Arrondi des coins" value={theme.radius} options={Object.keys(RADIUS_VALUES).map((key) => [key, RADIUS_LABELS[key]])} onChange={(value) => onChange(setThemeField(theme, "radius", value))} />
           </div>
-          <div className="space-y-1">
+          <div className="stack-y-1">
             <span className="text-sm font-medium text-foreground">Épaisseur du trait des icônes</span>
             <Segmented label="Épaisseur du trait des icônes" value={theme.iconStroke} options={ICON_STROKES.map((value) => [value, STROKE_LABELS[value]])} onChange={(value) => onChange(setThemeField(theme, "iconStroke", value))} />
           </div>
-          <div className="space-y-1">
+          <div className="stack-y-1">
             <span className="text-sm font-medium text-foreground">Couleur des icônes</span>
             <Segmented label="Couleur des icônes" value={theme.iconColor} options={[["text", "Celle du texte"], ["accent", "Celle de l'accent"]]} onChange={(value) => onChange(setThemeField(theme, "iconColor", value))} />
           </div>
-          <div className="space-y-1">
+          <div className="stack-y-1">
             <span className="text-sm font-medium text-foreground">Motif de fond</span>
             <Segmented label="Motif de fond" value={theme.pattern} options={Object.entries(PATTERN_LABELS)} onChange={(value) => onChange(setThemeField(theme, "pattern", value))} />
           </div>
@@ -219,12 +219,12 @@ export default function ThemeEditor({ theme, onChange }) {
         ) : (
           report.map(({ appearance, pairs }) =>
             pairs.length === 0 ? null : (
-              <div key={appearance} className="space-y-2 rounded-lg border border-warning/50 bg-warning/15 p-3 text-sm">
+              <div key={appearance} className="stack-y-2 rounded-lg border border-warning/50 bg-warning/15 p-3 text-sm">
                 <p className="flex items-center gap-2 font-medium text-warning">
                   <AlertTriangle className="h-4 w-4 shrink-0" />
                   Mode {APPEARANCE_LABELS[appearance]} : {pairs.length} combinaison{pairs.length > 1 ? "s" : ""} peu lisible{pairs.length > 1 ? "s" : ""}
                 </p>
-                <ul className="space-y-0.5 text-xs text-foreground">
+                <ul className="stack-y-0.5 text-xs text-foreground">
                   {pairs.map((pair) => (
                     <li key={`${pair.fg}/${pair.bg}`}>
                       {pairName(pair)} : {String(pair.ratio).replace(".", ",")} : 1 (minimum {String(pair.min).replace(".", ",")} : 1)
@@ -242,7 +242,7 @@ export default function ThemeEditor({ theme, onChange }) {
 
       <details className="rounded-lg border border-border p-3">
         <summary className="cursor-pointer select-none font-display text-sm font-semibold text-foreground">Mode avancé : couleur par couleur</summary>
-        <div className="mt-3 space-y-4">
+        <div className="mt-3 stack-y-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <Segmented label="Apparence à modifier" value={advAppearance} options={APPEARANCE_LIST.map((key) => [key, `Mode ${APPEARANCE_LABELS[key]}`])} onChange={setAdvAppearance} />
             {hasOverrides(theme, advAppearance) && (
@@ -256,7 +256,7 @@ export default function ThemeEditor({ theme, onChange }) {
             )}
           </div>
           {GROUPS.map(([title, tokens]) => (
-            <div key={title} className="space-y-2">
+            <div key={title} className="stack-y-2">
               <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</h4>
               {tokens.filter((token) => COLOR_TOKENS.includes(token)).map((token) => {
                 const { badge, ok } = tokenBadge(token);

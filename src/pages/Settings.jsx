@@ -50,7 +50,7 @@ export default function Settings() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-6 px-4 py-6 md:px-8 md:py-8 overflow-x-hidden">
+    <div className="mx-auto w-full max-w-3xl stack-y-6 px-4 py-6 md:px-8 md:py-8 overflow-x-hidden">
       <header>
         <span className="tag border border-primary/40 text-primary">Configuration</span>
         <h1 className="mt-3 font-display text-3xl font-bold text-foreground">Paramètres</h1>
@@ -62,7 +62,7 @@ export default function Settings() {
       <div data-tutorial="section-auto-save"><AutosavePanel /></div>
       <div data-tutorial="section-export-import"><BackupPanel /></div>
 
-      <section data-tutorial="section-print" className="space-y-3 rounded-xl border border-border bg-card/50 p-4">
+      <section data-tutorial="section-print" className="stack-y-3 rounded-xl border border-border bg-card/50 p-4">
         <h2 className="font-display text-base font-semibold text-foreground">Impression</h2>
         <CampaignSelect
           campaigns={campaigns}
@@ -82,10 +82,10 @@ export default function Settings() {
 
       <div data-tutorial="section-help"><TutorialCenter /></div>
 
-      <section data-tutorial="section-clear-data" className="rounded-xl border border-destructive/40 bg-destructive/[0.06] p-5">
+      <section data-tutorial="section-clear-data" className="rounded-xl border border-destructive/40 bg-destructive/6 p-5">
         <div className="flex items-start gap-3">
           <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
-          <div className="space-y-1">
+          <div className="stack-y-1">
             <h2 className="font-display text-lg font-semibold text-foreground">Effacer toutes les données</h2>
             <p className="text-sm text-muted-foreground">
               Cette action supprime définitivement toutes les données de ce navigateur : campagnes,

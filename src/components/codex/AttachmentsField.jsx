@@ -46,7 +46,7 @@ export default function AttachmentsField({ value = [], onChange }) {
   const remove = (index) => onChange((value || []).filter((_, i) => i !== index));
 
   return (
-    <div className="space-y-2 rounded-lg border border-border p-3">
+    <div className="stack-y-2 rounded-lg border border-border p-3">
       <div className="flex items-center justify-between">
         <Label>Cartes et visuels ({(value || []).length})</Label>
         <Button type="button" size="sm" variant="outline" disabled={uploading} onClick={() => inputRef.current?.click()}>

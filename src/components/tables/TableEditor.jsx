@@ -88,8 +88,8 @@ export default function TableEditor({ open, onOpenChange, form, setForm, saving,
       description="Listez les résultats possibles, puis tirez au hasard en pleine partie."
       footer={footer}
     >
-      <div className="space-y-5 py-1">
-        <div className="space-y-2">
+      <div className="stack-y-5 py-1">
+        <div className="stack-y-2">
           <Label>Nom de la table</Label>
           <Input
             data-tutorial="table-name"
@@ -100,7 +100,7 @@ export default function TableEditor({ open, onOpenChange, form, setForm, saving,
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div className="space-y-2">
+          <div className="stack-y-2">
             <Label>Catégorie</Label>
             <Select
               value={form.category || "autre"}
@@ -118,7 +118,7 @@ export default function TableEditor({ open, onOpenChange, form, setForm, saving,
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-2">
+          <div className="stack-y-2">
             <Label>Description</Label>
             <Input
               value={form.description || ""}
@@ -128,7 +128,7 @@ export default function TableEditor({ open, onOpenChange, form, setForm, saving,
           </div>
         </div>
 
-        <div className="space-y-2">
+        <div className="stack-y-2">
           <div className="flex items-center justify-between">
             <Label>Entrées ({entries.length})</Label>
             <Button size="sm" variant="ghost" onClick={addEntry} className="text-muted-foreground hover:text-primary">
@@ -141,7 +141,7 @@ export default function TableEditor({ open, onOpenChange, form, setForm, saving,
               Aucune entrée pour l'instant.
             </p>
           ) : (
-            <div className="space-y-2">
+            <div className="stack-y-2">
               <div className="flex items-center gap-2 px-1 font-mono text-xs uppercase tracking-wider text-muted-foreground">
                 <span className="flex-1">Résultat</span>
                 <span className="w-16 text-center">Poids</span>
@@ -176,7 +176,7 @@ export default function TableEditor({ open, onOpenChange, form, setForm, saving,
           )}
         </div>
 
-        <div className="space-y-2 rounded-lg border border-border p-3">
+        <div className="stack-y-2 rounded-lg border border-border p-3">
           <Label>Ajout rapide</Label>
           <p className="text-xs text-muted-foreground">Collez une liste : une entrée par ligne.</p>
           <Textarea

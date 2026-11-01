@@ -336,8 +336,8 @@ export default function GameCharacterEditor({
       description="Les seuils « Test » sont renseignés manuellement. Ils sont conservés à la duplication."
       footer={footer}
     >
-      <form id="game-character-form" onSubmit={submit} className="space-y-5 py-1">
-        <div className="space-y-2">
+      <form id="game-character-form" onSubmit={submit} className="stack-y-5 py-1">
+        <div className="stack-y-2">
           <FieldLabel label="Nom du personnage" locked={!!generation.locks.name} onToggle={() => generation.toggleLock("name")} htmlFor="game-character-name" />
           <Input id="game-character-name" data-tutorial="game-character-name" autoFocus value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} />
         </div>
@@ -345,17 +345,17 @@ export default function GameCharacterEditor({
         <PcGeneratorPanel generator={generator} generation={generation} issues={issues} />
 
         {model.characteristics.length > 0 && (
-          <section className="space-y-3">
+          <section className="stack-y-3">
             <LockedHeading label="Caractéristiques" locked={!!generation.locks.characteristics} onToggle={() => generation.toggleLock("characteristics")} />
-            <div className="space-y-3">
+            <div className="stack-y-3">
               {model.characteristics.map((item) => {
                 const values = form.characteristics[item.name] || { value: "", fields: [] };
                 const fields = values.fields || [];
                 return (
-                  <div key={item.name} className="space-y-2 rounded-lg border border-border p-3">
+                  <div key={item.name} className="stack-y-2 rounded-lg border border-border p-3">
                     <Label className="font-medium text-foreground">{item.name}</Label>
                     <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                      <label className="space-y-1 text-xs text-muted-foreground">
+                      <label className="stack-y-1 text-xs text-muted-foreground">
                         Valeur
                         <Input
                           aria-label={`${item.name} valeur`}
@@ -366,7 +366,7 @@ export default function GameCharacterEditor({
                       </label>
                     </div>
 
-                    <div className="space-y-2 pt-1">
+                    <div className="stack-y-2 pt-1">
                       {fields.map((field, fieldIndex) => (
                         <div key={fieldIndex} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_2.5rem] items-center gap-2">
                           <Input
@@ -408,7 +408,7 @@ export default function GameCharacterEditor({
           </section>
         )}
 
-        <section className="space-y-3">
+        <section className="stack-y-3">
           <div className="flex items-center justify-between gap-2">
             <div>
               <LockedHeading label="Compétences" locked={!!generation.locks.skills} onToggle={() => generation.toggleLock("skills")} />
@@ -419,10 +419,10 @@ export default function GameCharacterEditor({
             </Button>
           </div>
           {form.skills.map((skill, index) => (
-            <div key={index} className="space-y-3 rounded-lg border border-border p-3">
+            <div key={index} className="stack-y-3 rounded-lg border border-border p-3">
               <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-2">
                 <div className={model.skillRollModifier ? "grid gap-2 sm:grid-cols-2" : ""}>
-                  <label className="space-y-1 text-xs text-muted-foreground">
+                  <label className="stack-y-1 text-xs text-muted-foreground">
                     Compétence
                     <Input
                       list={`skill-catalog-${index}`}
@@ -436,7 +436,7 @@ export default function GameCharacterEditor({
                     </datalist>
                   </label>
                   {model.skillRollModifier && (
-                    <label className="space-y-1 text-xs text-muted-foreground">
+                    <label className="stack-y-1 text-xs text-muted-foreground">
                       Modificateur de lancer
                       <Input value={skill.roll_modifier || ""} onChange={(event) => setSkill(index, "roll_modifier", event.target.value)} />
                     </label>
@@ -447,7 +447,7 @@ export default function GameCharacterEditor({
                 </Button>
               </div>
 
-              <div className="space-y-2">
+              <div className="stack-y-2">
                 {(skill.fields || []).map((field, fieldIndex) => (
                   <div key={fieldIndex} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_2.5rem] items-center gap-2">
                     <Input aria-label="Nom du champ de compétence" value={field.name} onChange={(event) => setSkillField(index, fieldIndex, "name", event.target.value)} placeholder="Champ facultatif (ex. Spécialisation)" />
@@ -465,7 +465,7 @@ export default function GameCharacterEditor({
           ))}
         </section>
 
-        <section className="space-y-3">
+        <section className="stack-y-3">
           <div className="flex items-center justify-between gap-2">
             <div>
               <LockedHeading label="Équipement" locked={!!generation.locks.equipment} onToggle={() => generation.toggleLock("equipment")} />
@@ -476,10 +476,10 @@ export default function GameCharacterEditor({
             </Button>
           </div>
           {form.equipment.map((item, index) => (
-            <div key={index} className="space-y-3 rounded-lg border border-border p-3">
+            <div key={index} className="stack-y-3 rounded-lg border border-border p-3">
               <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-2">
                 <div className="grid gap-2 sm:grid-cols-2">
-                  <label className="space-y-1 text-xs text-muted-foreground">
+                  <label className="stack-y-1 text-xs text-muted-foreground">
                     Équipement
                     <Input
                       list={`equipment-catalog-${index}`}
@@ -492,7 +492,7 @@ export default function GameCharacterEditor({
                       {equipmentNames.map((name) => <option key={name} value={name} />)}
                     </datalist>
                   </label>
-                  <label className="space-y-1 text-xs text-muted-foreground">
+                  <label className="stack-y-1 text-xs text-muted-foreground">
                     Type
                     <Input
                       list={`equipment-types-${index}`}
@@ -518,7 +518,7 @@ export default function GameCharacterEditor({
                   <Trash2 className="h-4 w-4 text-muted-foreground" />
                 </Button>
               </div>
-              <div className="space-y-2">
+              <div className="stack-y-2">
                 {item.fields.map((field, fieldIndex) => (
                   <div key={fieldIndex} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_2.5rem] items-center gap-2">
                     <Input aria-label="Nom du champ d'équipement" value={field.name} onChange={(event) => setEquipmentField(index, fieldIndex, "name", event.target.value)} placeholder="Champ facultatif" />
@@ -536,7 +536,7 @@ export default function GameCharacterEditor({
           ))}
         </section>
 
-        <section className="space-y-3">
+        <section className="stack-y-3">
           <div>
             <h3 className="font-display font-semibold">Inventaire</h3>
             <p className="text-xs text-muted-foreground">Les objets possédés par le personnage, avec leur quantité.</p>
@@ -549,7 +549,7 @@ export default function GameCharacterEditor({
           />
         </section>
 
-        <div className="space-y-2">
+        <div className="stack-y-2">
           <Label htmlFor="game-character-notes">Notes</Label>
           <Textarea id="game-character-notes" rows={3} value={form.notes || ""} onChange={(event) => setForm((current) => ({ ...current, notes: event.target.value }))} />
         </div>

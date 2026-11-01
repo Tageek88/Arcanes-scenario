@@ -13,7 +13,7 @@ export default function TutorialCenter() {
   } = useTutorial();
 
   return (
-    <section data-tutorial="section-help" className="space-y-3 rounded-xl border border-border bg-card/50 p-4">
+    <section data-tutorial="section-help" className="stack-y-3 rounded-xl border border-border bg-card/50 p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="font-display text-base font-semibold text-foreground">Centre d'aide</h2>

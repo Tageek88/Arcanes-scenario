@@ -29,9 +29,9 @@ export default function InventoryField({ items, onChange, campaignId, idPrefix }
   };
 
   return (
-    <div className="space-y-2">
+    <div className="stack-y-2">
       {list.map((item, index) => (
-        <div key={item.id} className="space-y-2 rounded-lg border border-border p-3">
+        <div key={item.id} className="stack-y-2 rounded-lg border border-border p-3">
           <div className="flex items-center gap-2">
             <Input
               list={listId}

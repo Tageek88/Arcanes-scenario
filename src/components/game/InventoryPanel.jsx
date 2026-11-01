@@ -68,7 +68,7 @@ export default function InventoryPanel({ campaignId }) {
   const total = owners.reduce((sum, owner) => sum + inventoryCount(owner.inventory), 0);
 
   return (
-    <div className="space-y-4">
+    <div className="stack-y-4">
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative min-w-0 flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -93,9 +93,9 @@ export default function InventoryPanel({ campaignId }) {
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           {shown.map((owner) => (
-            <section key={`${owner.kind}-${owner.id}`} className="space-y-3 rounded-xl border border-border bg-card/50 p-4">
+            <section key={`${owner.kind}-${owner.id}`} className="stack-y-3 rounded-xl border border-border bg-card/50 p-4">
               <div className="flex items-start justify-between gap-2">
-                <h3 className="min-w-0 break-words font-display text-base font-semibold">{owner.name}</h3>
+                <h3 className="min-w-0 wrap-break-word font-display text-base font-semibold">{owner.name}</h3>
                 <span className="tag shrink-0 border border-border text-muted-foreground">{KIND_LABEL[owner.kind]}</span>
               </div>
               {owner.kind === "campaign" && (
@@ -104,13 +104,13 @@ export default function InventoryPanel({ campaignId }) {
               {owner.inventory.length === 0 ? (
                 <p className="text-xs text-muted-foreground">Aucun objet.</p>
               ) : (
-                <ul className="space-y-2">
+                <ul className="stack-y-2">
                   {owner.inventory.map((item) => (
                     <li key={item.id} className="group flex items-center gap-2">
                       <div className="min-w-0 flex-1">
-                        <p className={`break-words text-sm ${item.quantity === 0 ? "text-muted-foreground line-through" : "text-foreground"}`}>{item.name}</p>
+                        <p className={`wrap-break-word text-sm ${item.quantity === 0 ? "text-muted-foreground line-through" : "text-foreground"}`}>{item.name}</p>
                         {(item.notes || item.fields.length > 0) && (
-                          <p className="break-words text-xs text-muted-foreground">
+                          <p className="wrap-break-word text-xs text-muted-foreground">
                             {[item.notes, ...item.fields.map((field) => `${field.name}${field.value ? ` : ${field.value}` : ""}`)].filter(Boolean).join(" · ")}
                           </p>
                         )}

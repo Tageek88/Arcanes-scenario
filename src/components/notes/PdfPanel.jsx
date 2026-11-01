@@ -62,7 +62,7 @@ export default function PdfPanel({ campaignId }) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="stack-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm text-muted-foreground">
           Gardez ici les PDF de la campagne pour les relire ou les saisir plus tard. {MAX_PDF_MB} Mo maximum par fichier.
@@ -100,13 +100,13 @@ export default function PdfPanel({ campaignId }) {
                   {opening === document.id ? <Loader2 className="h-5 w-5 animate-spin" /> : <FileText className="h-5 w-5" />}
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block break-words font-display text-sm font-semibold text-foreground">{document.name}</span>
+                  <span className="block wrap-break-word font-display text-sm font-semibold text-foreground">{document.name}</span>
                   <span className="block font-mono text-xs uppercase tracking-wider text-muted-foreground">
                     {formatSize(document.size)} · {dateOf(document)}
                   </span>
                 </span>
               </button>
-              {document.comment && <p className="mt-2 whitespace-pre-wrap break-words text-sm text-muted-foreground">{document.comment}</p>}
+              {document.comment && <p className="mt-2 whitespace-pre-wrap wrap-break-word text-sm text-muted-foreground">{document.comment}</p>}
               <div className="mt-3 flex items-center justify-end gap-1">
                 <Button type="button" variant="ghost" size="icon" className="h-8 w-8" aria-label={`Modifier ${document.name}`} onClick={() => startEdit(document)}>
                   <Pencil className="h-4 w-4" />
@@ -132,12 +132,12 @@ export default function PdfPanel({ campaignId }) {
           </>
         }
       >
-        <form id="pdf-edit-form" onSubmit={saveEdit} className="space-y-3">
-          <div className="space-y-1.5">
+        <form id="pdf-edit-form" onSubmit={saveEdit} className="stack-y-3">
+          <div className="stack-y-1.5">
             <Label htmlFor="pdf-name">Nom</Label>
             <Input id="pdf-name" value={form.name} onChange={(event) => setForm((f) => ({ ...f, name: event.target.value }))} />
           </div>
-          <div className="space-y-1.5">
+          <div className="stack-y-1.5">
             <Label htmlFor="pdf-comment">Commentaire</Label>
             <Textarea id="pdf-comment" rows={4} value={form.comment} onChange={(event) => setForm((f) => ({ ...f, comment: event.target.value }))} placeholder="Par exemple : à saisir, chapitre 3…" />
           </div>

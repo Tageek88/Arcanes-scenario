@@ -92,7 +92,7 @@ export default function MonthGrid({
                 )}
               </div>
 
-              <div className="mt-1 space-y-1">
+              <div className="mt-1 stack-y-1">
                 {(expanded ? daySessions : daySessions.slice(0, 3)).map((session) => {
                   const meta = sessionStatusMeta(session.status);
                   return (
@@ -125,7 +125,7 @@ export default function MonthGrid({
                 )}
               </div>
               {expanded && (
-                <div className="mt-2 space-y-2 border-t border-border pt-2">
+                <div className="mt-2 stack-y-2 border-t border-border pt-2">
                   {daySessions.length === 0 ? (
                     <p className="px-1 text-xs text-muted-foreground">Aucune session prévue ce jour.</p>
                   ) : (

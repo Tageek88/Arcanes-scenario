@@ -29,21 +29,21 @@ export default function TableCard({ table, onEdit, onDelete, onAddToInventory })
   return (
     <div {...cardProps} className={cn("w-full max-w-full flex cursor-pointer flex-col rounded-xl border border-border bg-card/50 p-4", expanded && "ring-2 ring-primary/50")}>
       <div className="flex items-start justify-between gap-3">
-        <h3 className="font-display text-base font-semibold text-foreground break-words min-w-0 flex-1">{table.name}</h3>
+        <h3 className="font-display text-base font-semibold text-foreground wrap-break-word min-w-0 flex-1">{table.name}</h3>
         <span className={cn("tag shrink-0 border", meta.badge)}>{meta.label}</span>
       </div>
 
-      <span className="mt-1 font-mono text-xs uppercase tracking-widest text-muted-foreground break-words">
+      <span className="mt-1 font-mono text-xs uppercase tracking-widest text-muted-foreground wrap-break-word">
         {`${entries.length} entrée${entries.length > 1 ? "s" : ""}`}
       </span>
 
       {table.description && (
-        <p className={cn("mt-2 text-sm text-muted-foreground break-words", !expanded && "line-clamp-2")}>{table.description}</p>
+        <p className={cn("mt-2 text-sm text-muted-foreground wrap-break-word", !expanded && "line-clamp-2")}>{table.description}</p>
       )}
 
       {expanded && entries.length > 0 && (
-        <ol className="mt-3 list-inside list-decimal space-y-1 text-xs text-muted-foreground">
-          {entries.map((entry, index) => <li key={`${entry.text}-${index}`} className="break-words">{entry.text}</li>)}
+        <ol className="mt-3 list-inside list-decimal stack-y-1 text-xs text-muted-foreground">
+          {entries.map((entry, index) => <li key={`${entry.text}-${index}`} className="wrap-break-word">{entry.text}</li>)}
         </ol>
       )}
 
@@ -52,9 +52,9 @@ export default function TableCard({ table, onEdit, onDelete, onAddToInventory })
       {(rolling || result) && (
         <div className="corner-accent mb-3 w-full rounded-lg border border-primary/40 bg-primary/[0.07] p-4">
           {rolling ? (
-            <span className="font-mono text-xs uppercase tracking-widest text-primary break-words">Lancer…</span>
+            <span className="font-mono text-xs uppercase tracking-widest text-primary wrap-break-word">Lancer…</span>
           ) : (
-            <p className="font-display text-base leading-snug text-foreground break-words">{result?.text}</p>
+            <p className="font-display text-base leading-snug text-foreground wrap-break-word">{result?.text}</p>
           )}
           {!rolling && result?.text && onAddToInventory && (
             <Button type="button" variant="outline" size="sm" className="mt-3" onClick={() => onAddToInventory(result.text)}>

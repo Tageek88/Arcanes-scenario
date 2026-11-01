@@ -94,8 +94,8 @@ export default function CampaignDialog({ open, onOpenChange, form, setField, sav
       footer={footer}
     >
       <form onSubmit={handleSubmit}>
-      <div className="space-y-4 py-1">
-        <div className="space-y-2">
+      <div className="stack-y-4 py-1">
+        <div className="stack-y-2">
           <label htmlFor="campaign-name" className="text-sm font-medium leading-none">
             Nom de la campagne
           </label>
@@ -107,7 +107,7 @@ export default function CampaignDialog({ open, onOpenChange, form, setField, sav
             placeholder="Ex. Les Ombres de Val-Cendre"
           />
         </div>
-        <div className="space-y-2">
+        <div className="stack-y-2">
           <label htmlFor="campaign-system" className="text-sm font-medium leading-none">
             Système de jeu
           </label>
@@ -118,7 +118,7 @@ export default function CampaignDialog({ open, onOpenChange, form, setField, sav
             placeholder="Ex. D&D 5e, Call of Cthulhu, Chroniques Oubliées…"
           />
         </div>
-        <div className="space-y-2">
+        <div className="stack-y-2">
           <label htmlFor="campaign-summary" className="text-sm font-medium leading-none">
             Synopsis
           </label>
@@ -130,7 +130,7 @@ export default function CampaignDialog({ open, onOpenChange, form, setField, sav
             placeholder="L'intrigue générale de la campagne…"
           />
         </div>
-          <div className="space-y-2">
+          <div className="stack-y-2">
             <label htmlFor="universe_type" className="text-sm font-medium leading-none">
               Type d'univers
             </label>

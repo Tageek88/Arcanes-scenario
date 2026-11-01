@@ -93,7 +93,7 @@ export default function ActColumn({
               const value = e.target.value.trim();
               if (value && value !== act.title) onRenameAct(act.id, value);
             }}
-            className="min-w-0 flex-1 bg-transparent font-display text-sm font-semibold text-foreground outline-none focus:text-primary"
+            className="min-w-0 flex-1 bg-transparent font-display text-sm font-semibold text-foreground outline-hidden focus:text-primary"
           />
         ) : (
           <span className="flex-1 font-display text-sm font-semibold text-muted-foreground">Sans acte</span>

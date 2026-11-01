@@ -21,7 +21,7 @@ export default function UpcomingSessions({ sessions, onOpen, onAdd }) {
           Aucune session à venir. Cliquez sur une date du calendrier pour en planifier une.
         </p>
       ) : (
-        <ul className="mt-3 space-y-2">
+        <ul className="mt-3 stack-y-2">
           {sessions.map((session) => {
             const meta = sessionStatusMeta(session.status);
             let label = "";

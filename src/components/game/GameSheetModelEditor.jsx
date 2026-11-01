@@ -243,13 +243,13 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
       description="Définissez les colonnes une fois. Les valeurs de chaque personnage restent indépendantes."
       footer={footer}
     >
-      <div className="space-y-5 py-1">
+      <div className="stack-y-5 py-1">
         <details data-tutorial="game-model-characteristics" className="rounded-lg border border-border p-3" open>
           <summary className="cursor-pointer font-display font-semibold">Caractéristiques</summary>
-          <div className="mt-3 space-y-3">
+          <div className="mt-3 stack-y-3">
           <p className="text-xs text-muted-foreground">Définissez les caractéristiques et leurs champs facultatifs proposés sur les fiches.</p>
           {form.characteristics.map((item, index) => (
-            <div key={item._key || index} className="space-y-2 rounded-lg border border-border p-3">
+            <div key={item._key || index} className="stack-y-2 rounded-lg border border-border p-3">
               <div className="flex items-center gap-2">
                 <Input
                   data-tutorial="game-model-name"
@@ -264,7 +264,7 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
                 </Button>
               </div>
 
-              <div className="space-y-1.5 pl-2 border-l-2 border-border/60">
+              <div className="stack-y-1.5 pl-2 border-l-2 border-border/60">
                 <p className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">Champs facultatifs proposés :</p>
                 {(item.field_names || []).map((fieldName, fieldIndex) => (
                   <div key={fieldIndex} className="flex items-center gap-2">
@@ -314,9 +314,9 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
           </div>
         </details>
 
-        <details data-tutorial="game-model-scale" className="space-y-3 rounded-lg border border-border p-3" open={form.levels.length > 0}>
+        <details data-tutorial="game-model-scale" className="stack-y-3 rounded-lg border border-border p-3" open={form.levels.length > 0}>
           <summary className="cursor-pointer font-display font-semibold">Barème des PNJ</summary>
-          <div className="mt-3 space-y-3">
+          <div className="mt-3 stack-y-3">
             <p className="text-xs text-muted-foreground">
               Fixez, pour chaque niveau de PNJ, la plage de valeurs de chaque caractéristique. Le générateur de PNJ s'en sert pour tirer les valeurs, et le Codex signale les fiches qui s'en écartent. Ces plages sont des repères : rien n'est bloqué.
             </p>
@@ -345,7 +345,7 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
             )}
 
             {form.levels.map((level, index) => (
-              <div key={index} className="space-y-2 rounded-lg border border-border p-3">
+              <div key={index} className="stack-y-2 rounded-lg border border-border p-3">
                 <div className="flex items-center gap-2">
                   <Input
                     aria-label={`Nom du niveau ${index + 1}`}
@@ -417,9 +417,9 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
           </div>
         </details>
 
-        <details data-tutorial="game-model-pc-scale" className="space-y-3 rounded-lg border border-border p-3" open={hasPcDraft}>
+        <details data-tutorial="game-model-pc-scale" className="stack-y-3 rounded-lg border border-border p-3" open={hasPcDraft}>
           <summary className="cursor-pointer font-display font-semibold">Barème des personnages joueurs</summary>
-          <div className="mt-3 space-y-3">
+          <div className="mt-3 stack-y-3">
             <p className="text-xs text-muted-foreground">
               Fixez la plage de valeurs de chaque caractéristique d'un personnage joueur, et le nombre de compétences et d'équipements. Le générateur de personnages s'en sert pour tirer une fiche, que vous pouvez relancer ou verrouiller champ par champ. Ces plages sont des repères : rien n'est bloqué.
             </p>

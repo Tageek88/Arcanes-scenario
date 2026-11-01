@@ -261,9 +261,9 @@ export default function Home() {
   }, [campaignId, openNewScene, toast]);
 
   return (
-    <div className="mx-auto w-full max-w-[1600px] space-y-6 px-4 py-6 md:px-8 md:py-8">
+    <div className="mx-auto w-full max-w-[1600px] stack-y-6 px-4 py-6 md:px-8 md:py-8">
       {/* HEADER STANDARDISÉ CONFORME AUX RÈGLES */}
-      <header className="space-y-3">
+      <header className="stack-y-3">
         <span className="tag">Campagne</span>
         <h1 data-tutorial="home-title" className="font-display text-3xl font-bold text-foreground">
           {campaign?.name || "Aucune campagne"}
@@ -502,7 +502,7 @@ export default function Home() {
           <AlertDialogHeader>
             <AlertDialogTitle>Supprimer la campagne « {pendingCampaignDelete?.campaign?.name} » ?</AlertDialogTitle>
             <AlertDialogDescription asChild>
-              <div className="space-y-3 text-sm text-muted-foreground">
+              <div className="stack-y-3 text-sm text-muted-foreground">
                 {pendingCampaignDelete?.counts === null ? (
                   <p>Calcul du contenu à supprimer…</p>
                 ) : pendingCampaignDelete?.countError ? (
@@ -544,7 +544,7 @@ export default function Home() {
           type="button"
           onClick={() => openNewScene(null)}
           aria-label="Nouvel élément"
-          className="fixed bottom-[calc(5.5rem_+_env(safe-area-inset-bottom))] right-[calc(1rem_+_env(safe-area-inset-right))] z-40 grid h-14 w-14 place-items-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform active:scale-95 md:hidden"
+          className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-[calc(1rem+env(safe-area-inset-right))] z-40 grid h-14 w-14 place-items-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform active:scale-95 md:hidden"
         >
           <Plus className="h-6 w-6" />
         </button>

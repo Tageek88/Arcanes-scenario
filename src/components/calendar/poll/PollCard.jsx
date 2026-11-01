@@ -12,7 +12,7 @@ export default function PollCard({ poll, busy, onRefresh, onCopyLink, onClose, o
   const slots = poll.slots || [];
 
   return (
-    <article className="space-y-3 rounded-lg border border-border bg-card/50 p-3">
+    <article className="stack-y-3 rounded-lg border border-border bg-card/50 p-3">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <h4 className="font-display font-semibold text-foreground">{poll.title}</h4>

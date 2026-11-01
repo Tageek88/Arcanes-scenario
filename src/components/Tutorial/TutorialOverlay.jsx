@@ -182,7 +182,7 @@ export default function TutorialOverlay({
   const introId = "tutorial-intro";
 
   return createPortal(
-    <div className="pointer-events-none fixed inset-0 z-[9999]">
+    <div className="pointer-events-none fixed inset-0 z-9999">
       {rect ? (
         <div
           aria-hidden="true"
@@ -231,7 +231,7 @@ export default function TutorialOverlay({
               <button
                 type="button"
                 onClick={() => setShowSolution((shown) => !shown)}
-                className="mt-1 text-xs text-primary underline focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="mt-1 text-xs text-primary underline focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
               >
                 {showSolution ? "Masquer la solution" : "Voir la solution"}
               </button>
@@ -244,14 +244,14 @@ export default function TutorialOverlay({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="rounded-lg px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
             >
               Ignorer ce tuto
             </button>
             <button
               type="button"
               onClick={onPause}
-              className="rounded-lg px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="rounded-lg px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
             >
               Pause
             </button>
@@ -261,7 +261,7 @@ export default function TutorialOverlay({
               <button
                 type="button"
                 onClick={onPrevious}
-                className="rounded-lg bg-secondary px-3 py-1.5 text-sm text-secondary-foreground transition-colors hover:bg-secondary/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="rounded-lg bg-secondary px-3 py-1.5 text-sm text-secondary-foreground transition-colors hover:bg-secondary/80 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
               >
                 Précédent
               </button>
@@ -270,7 +270,7 @@ export default function TutorialOverlay({
               ref={nextRef}
               type="button"
               onClick={onNext}
-              className="rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
             >
               {isLast ? "Terminer" : "Suivant"}
             </button>

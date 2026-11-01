@@ -1,8 +1,132 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss" source("../src");
+@source "../index.html";
+
+@plugin "tailwindcss-animate";
+
+@custom-variant dark (&:is(.dark *));
+
+/* `inline`: the utilities read the CSS variables where they are used, so a scoped theme (preview panel, campaign theme) still works. */
+@theme inline {
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-played: hsl(var(--played));
+  --color-played-foreground: hsl(var(--played-foreground));
+  --color-key: hsl(var(--key));
+  --color-warning: hsl(var(--warning));
+  --color-warning-foreground: hsl(var(--warning-foreground));
+  --color-icon: hsl(var(--icon));
+  --color-icon-active: hsl(var(--icon-active));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
+  --color-sidebar: hsl(var(--sidebar-background));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+
+  --font-heading: var(--font-heading);
+  --font-body: var(--font-body);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
+}
+
+@theme {
+  /* Tailwind 3 line heights: fixed lengths, not ratios (a ratio makes children with another font size change height). */
+  --text-xs--line-height: 1rem;
+  --text-sm--line-height: 1.25rem;
+  --text-base--line-height: 1.5rem;
+  --text-lg--line-height: 1.75rem;
+  --text-xl--line-height: 1.75rem;
+  --text-2xl--line-height: 2rem;
+  --text-3xl--line-height: 2.25rem;
+  --text-4xl--line-height: 2.5rem;
+  --text-5xl--line-height: 1;
+  --text-6xl--line-height: 1;
+  --text-7xl--line-height: 1;
+  --text-8xl--line-height: 1;
+  --text-9xl--line-height: 1;
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+}
+
+/* stack-x-* and stack-y-* replace space-x-* and space-y-* with their Tailwind 3 behaviour: the margin goes on every following
+   visible sibling, with the specificity of a class (so it still beats utilities such as -m-1 or mt-4). Tailwind 4 puts the margin on
+   the previous sibling with zero specificity, which moves many layouts. */
+@utility stack-y-* {
+  & > :not([hidden]) ~ :not([hidden]) {
+    margin-top: calc(var(--spacing) * --value(number));
+    margin-bottom: 0;
+  }
+}
+
+@utility stack-x-* {
+  & > :not([hidden]) ~ :not([hidden]) {
+    margin-left: calc(var(--spacing) * --value(number));
+    margin-right: 0;
+  }
+}
 
 @layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+
+  /* Tailwind 4 buttons keep the default cursor: restore the pointer. */
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
   :root {
     --background: 40 33% 97%;
     --foreground: 220 20% 12%;
@@ -174,27 +298,6 @@
     background-image: repeating-linear-gradient(135deg, hsl(var(--border) / 0.35) 0 1px, transparent 1px 14px);
     background-attachment: fixed;
   }
-
-  /* Mode table de jeu : zones cliquables confortables (44 px minimum), sur ordinateur comme sur mobile. */
-  :root[data-game-table="on"] :is(button:not([role="switch"], [role="checkbox"]), [role="button"], [role="menuitem"], [role="option"], [role="radio"], select, summary, input:not([type="checkbox"], [type="radio"], [type="color"], [type="file"], [type="hidden"])) {
-    min-height: 2.75rem;
-  }
-
-  /* Animations réduites : choix de l'utilisateur ou réglage du système (EXG-76). */
-  :root[data-motion="reduced"] *,
-  :root[data-motion="reduced"] *::before,
-  :root[data-motion="reduced"] *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-
-  :root[data-motion="reduced"] .glass-panel {
-    background-color: hsl(var(--card));
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-  }
 }
 
 @layer components {
@@ -286,6 +389,28 @@
     border-right: 1px solid;
     border-bottom-right-radius: 4px;
   }
+}
+
+/* Réglages de confort : ils doivent l'emporter sur les classes utilitaires, donc hors des couches (Tailwind 4 : un style hors couche passe avant toute couche). */
+/* Mode table de jeu : zones cliquables confortables (44 px minimum), sur ordinateur comme sur mobile. */
+:root[data-game-table="on"] :is(button:not([role="switch"], [role="checkbox"]), [role="button"], [role="menuitem"], [role="option"], [role="radio"], select, summary, input:not([type="checkbox"], [type="radio"], [type="color"], [type="file"], [type="hidden"])) {
+  min-height: 2.75rem;
+}
+
+/* Animations réduites : choix de l'utilisateur ou réglage du système (EXG-76). */
+:root[data-motion="reduced"] *,
+:root[data-motion="reduced"] *::before,
+:root[data-motion="reduced"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+:root[data-motion="reduced"] .glass-panel {
+  background-color: hsl(var(--card));
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 /* Page de grimoire — rouleau (version finale) */

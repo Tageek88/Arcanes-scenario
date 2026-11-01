@@ -348,8 +348,8 @@ export default function CodexEntryDialog({
       }
       footer={footer}
     >
-      <div className="space-y-4 py-1">
-        <div className="space-y-2">
+      <div className="stack-y-4 py-1">
+        <div className="stack-y-2">
           <FieldLabel
             label={meta.nameLabel}
             locked={!!generation.locks.name}
@@ -396,7 +396,7 @@ export default function CodexEntryDialog({
         )}
 
         {/* Comment field for the codex entry, optional for the user to fill out. */}
-        <div className="space-y-2">
+        <div className="stack-y-2">
           <Label>Commentaire (facultatif)</Label>
           <Input
             value={form.comment || ""}
@@ -428,7 +428,7 @@ export default function CodexEntryDialog({
         {/* NPC-specific fields, conditionally rendered when the kind of entry is "npc". */}
         {kind === "npc" && (
           <>
-            <div className="space-y-2">
+            <div className="stack-y-2">
               <FieldLabel label="Rôle" locked={!!generation.locks.role} onToggle={() => generation.toggleLock("role")} htmlFor="npc-role" />
               <Input
                 id="npc-role"
@@ -439,7 +439,7 @@ export default function CodexEntryDialog({
             </div>
 
             {/* Role field for the NPC, allowing the user to specify the character's role or occupation. */}
-            <div className="space-y-2">
+            <div className="stack-y-2">
               <FieldLabel label="Attitude" locked={!!generation.locks.attitude} onToggle={() => generation.toggleLock("attitude")} />
               <Select value={form.attitude || "neutre"} onValueChange={(v) => set("attitude", v)}>
                 <SelectTrigger>
@@ -455,7 +455,7 @@ export default function CodexEntryDialog({
               </Select>
             </div>
             {/* Attitude field for the NPC, allowing the user to specify the character's general demeanor or disposition. */}
-            <div className="space-y-2">
+            <div className="stack-y-2">
               <Label>Lieu d'attribution</Label>
               <Select
                 value={form.location_id || "_none"}
@@ -485,7 +485,7 @@ export default function CodexEntryDialog({
         {/* Location-specific fields, conditionally rendered when the kind of entry is "location". */}
         {kind === "location" && (
           <>
-            <div className="space-y-2">
+            <div className="stack-y-2">
               <Label>Type de lieu</Label>
               <Input
                 value={form.type || ""}
@@ -496,7 +496,7 @@ export default function CodexEntryDialog({
 
             {/* Type field for the location, allowing the user to specify the kind of location (e.g., country, city, street, house, dungeon). */}
             {/* Parent location field for the location, allowing the user to specify the hierarchical parent of the current location (e.g., a city belongs to a country, a street belongs to a city). */}
-            <div className="space-y-2">
+            <div className="stack-y-2">
               <Label>Lieu parent</Label>
               <Select
                 value={form.parent_id || "_none"}
@@ -524,7 +524,7 @@ export default function CodexEntryDialog({
         {kind === "clue" && (
           <>
             {/* Clue-specific fields, conditionally rendered when the kind of entry is "clue". */}
-            <div className="space-y-2">
+            <div className="stack-y-2">
               {/* Type field for the clue, allowing the user to specify whether it is an "info" or an "indice". */}
               <Label>Type</Label>
               <Select
@@ -541,7 +541,7 @@ export default function CodexEntryDialog({
               </Select>
             </div>
 
-            <div className="space-y-2">
+            <div className="stack-y-2">
               {/* Location assignment field for the clue, allowing the user to specify the location where the clue is assigned. */}
               <Label>Lieu d'attribution</Label>
               <Select

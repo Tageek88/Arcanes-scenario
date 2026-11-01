@@ -44,7 +44,7 @@ export default function SceneNode({
       }}
       className={cn(
         "group flex-1 cursor-pointer rounded-lg border bg-background/70 p-3 transition-colors",
-        active || expanded ? "corner-accent border-primary/60 bg-primary/[0.06] ring-2 ring-primary/40" : "border-border hover:border-primary/30"
+        active || expanded ? "corner-accent border-primary/60 bg-primary/6 ring-2 ring-primary/40" : "border-border hover:border-primary/30"
       )}
     >
       <div className="flex items-start justify-between gap-2">
@@ -99,7 +99,7 @@ export default function SceneNode({
         </div>
       )}
       {(active || expanded) && (
-        <div className="mt-3 space-y-3 border-t border-border pt-3 text-xs">
+        <div className="mt-3 stack-y-3 border-t border-border pt-3 text-xs">
           {scene.summary && <p className="whitespace-pre-wrap text-muted-foreground">{scene.summary}</p>}
           {scene.gm_notes && (
             <div>
@@ -116,7 +116,7 @@ export default function SceneNode({
           {linkedClues.length > 0 && (
             <div>
               <p className="mb-1 font-medium text-foreground">Indices &amp; infos</p>
-              <ul className="space-y-1">
+              <ul className="stack-y-1">
                 {linkedClues.map((entry) => (
                   <li key={entry.id} className="flex items-start justify-between gap-2 text-muted-foreground">
                     <span>{entry.name}</span>

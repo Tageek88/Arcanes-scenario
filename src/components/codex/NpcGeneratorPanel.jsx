@@ -43,7 +43,7 @@ export function NpcGenderField({ form, generation, tables }) {
       ? "Genre tiré au hasard : un nouveau tirage peut le changer (cadenas pour le garder)."
       : "Ce genre est utilisé pour les noms générés et pour les prochains tirages.";
   return (
-    <div className="space-y-2">
+    <div className="stack-y-2">
       <FieldLabel label="Genre" locked={!!locks.gender} onToggle={() => toggleLock("gender")} htmlFor="npc-gender" />
       <Select value={form.gender || "_auto"} onValueChange={(value) => setGender(value === "_auto" ? "" : value)}>
         <SelectTrigger id="npc-gender" aria-label="Genre du PNJ">
@@ -72,7 +72,7 @@ export default function NpcGeneratorPanel({ generator, generation }) {
   const missingLists = generator.emptyLists.filter((key) => key !== "neutral");
 
   return (
-    <div className="space-y-3 rounded-lg border border-border p-3" data-tutorial="npc-generator">
+    <div className="stack-y-3 rounded-lg border border-border p-3" data-tutorial="npc-generator">
       <div>
         <p className="text-sm font-medium text-foreground">Générer la fiche</p>
         <p className="text-xs text-muted-foreground">
@@ -109,7 +109,7 @@ export default function NpcGeneratorPanel({ generator, generation }) {
           </div>
 
           {confirming && (
-            <div role="alert" className="space-y-2 rounded-md border border-destructive/40 bg-destructive/10 p-3">
+            <div role="alert" className="stack-y-2 rounded-md border border-destructive/40 bg-destructive/10 p-3">
               <p className="text-sm text-foreground">
                 Des champs déjà remplis seront remplacés. Verrouillez (cadenas) ceux que vous voulez garder.
               </p>

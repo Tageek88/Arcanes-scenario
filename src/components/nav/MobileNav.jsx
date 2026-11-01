@@ -20,7 +20,7 @@ export default function MobileNav() {
   return (
     <nav 
       data-tutorial="sidebar" 
-      className="glass-panel fixed bottom-0 left-0 right-0 z-40 flex w-full items-center justify-between px-1 py-1.5 pb-[calc(0.4rem_+_env(safe-area-inset-bottom))] md:hidden"
+      className="glass-panel fixed bottom-0 left-0 right-0 z-40 flex w-full items-center justify-between px-1 py-1.5 pb-[calc(0.4rem+env(safe-area-inset-bottom))] md:hidden"
     >
       {TABS.map((tab) => {
         const Icon = tab.icon;

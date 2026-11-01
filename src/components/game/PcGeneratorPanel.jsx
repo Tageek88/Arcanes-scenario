@@ -36,7 +36,7 @@ export default function PcGeneratorPanel({ generator, generation, issues }) {
   const noCatalog = ready && generator.context.skillPool.length === 0 && generator.context.equipmentPool.length === 0;
 
   return (
-    <div className="space-y-3 rounded-lg border border-border p-3" data-tutorial="pc-generator">
+    <div className="stack-y-3 rounded-lg border border-border p-3" data-tutorial="pc-generator">
       <div>
         <p className="text-sm font-medium text-foreground">Générer la fiche</p>
         <p className="text-xs text-muted-foreground">
@@ -70,7 +70,7 @@ export default function PcGeneratorPanel({ generator, generation, issues }) {
           </div>
 
           {confirming && (
-            <div role="alert" className="space-y-2 rounded-md border border-destructive/40 bg-destructive/10 p-3">
+            <div role="alert" className="stack-y-2 rounded-md border border-destructive/40 bg-destructive/10 p-3">
               <p className="text-sm text-foreground">
                 Des champs déjà remplis seront remplacés. Verrouillez (cadenas) ceux que vous voulez garder.
               </p>
@@ -104,9 +104,9 @@ export default function PcGeneratorPanel({ generator, generation, issues }) {
             </p>
           )}
           {issues.length > 0 && (
-            <div className="space-y-1" role="status">
+            <div className="stack-y-1" role="status">
               <p className="text-xs font-medium text-foreground">Écarts au barème (simples repères, rien n'est bloqué) :</p>
-              <ul className="list-disc space-y-0.5 pl-4 text-xs text-muted-foreground">
+              <ul className="list-disc stack-y-0.5 pl-4 text-xs text-muted-foreground">
                 {issues.map((issue, index) => <li key={`${issue.code}-${index}`}>{issue.message}</li>)}
               </ul>
             </div>

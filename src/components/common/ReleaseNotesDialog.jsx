@@ -16,15 +16,15 @@ function Inline({ text }) {
 function FullNotes({ markdown }) {
   const notes = parseReleaseNotes(markdown);
   return (
-    <div className="space-y-4 text-sm text-muted-foreground">
+    <div className="stack-y-4 text-sm text-muted-foreground">
       {notes.intro.map((line, index) => <p key={index}><Inline text={line} /></p>)}
       {notes.sections.map((section) => (
-        <section key={section.heading} className="space-y-2">
+        <section key={section.heading} className="stack-y-2">
           <h3 className="font-display text-sm font-semibold text-foreground">{section.heading}</h3>
           {section.blocks.map((block, index) =>
             block.type === "list" ? (
-              <ul key={index} className="list-disc space-y-1.5 pl-5">
-                {block.items.map((item, i) => <li key={i} className="break-words"><Inline text={item} /></li>)}
+              <ul key={index} className="list-disc stack-y-1.5 pl-5">
+                {block.items.map((item, i) => <li key={i} className="wrap-break-word"><Inline text={item} /></li>)}
               </ul>
             ) : (
               <p key={index}><Inline text={block.text} /></p>
@@ -39,11 +39,11 @@ function FullNotes({ markdown }) {
 function LightNotes({ markdown }) {
   const { intro, highlights } = lightNotes(markdown);
   return (
-    <div className="space-y-3 text-sm text-muted-foreground">
+    <div className="stack-y-3 text-sm text-muted-foreground">
       {intro && <p><Inline text={intro} /></p>}
       {highlights.length > 0 && (
-        <ul className="list-disc space-y-1 pl-5">
-          {highlights.map((item, index) => <li key={index} className="break-words text-foreground">{item}</li>)}
+        <ul className="list-disc stack-y-1 pl-5">
+          {highlights.map((item, index) => <li key={index} className="wrap-break-word text-foreground">{item}</li>)}
         </ul>
       )}
     </div>
@@ -76,7 +76,7 @@ export default function ReleaseNotesDialog({ open, onOpenChange, currentVersion 
       description={markdown ? "Ce qui change d'une version à l'autre." : undefined}
       footer={<Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Fermer</Button>}
     >
-      <div className="space-y-4">
+      <div className="stack-y-4">
         <Select value={version} onValueChange={(value) => { setVersion(value); setFull(false); }}>
           <SelectTrigger aria-label="Version" className="h-9 w-56">
             <SelectValue />

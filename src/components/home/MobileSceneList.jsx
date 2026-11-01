@@ -41,8 +41,8 @@ export default function MobileSceneList({
   }
 
   return (
-    <div className="space-y-3">
-      <Accordion type="multiple" defaultValue={groups.map((g) => g.id)} className="space-y-3">
+    <div className="stack-y-3">
+      <Accordion type="multiple" defaultValue={groups.map((g) => g.id)} className="stack-y-3">
         {groups.map((group) => (
           <AccordionItem
             key={group.id}
@@ -57,7 +57,7 @@ export default function MobileSceneList({
                 </span>
               </span>
             </AccordionTrigger>
-            <AccordionContent className="space-y-2 pt-1">
+            <AccordionContent className="stack-y-2 pt-1">
               {[...group.scenes]
                 .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
                 .map((scene) => (

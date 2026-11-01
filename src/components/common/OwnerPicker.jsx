@@ -25,7 +25,7 @@ export default function OwnerPicker({ owners, value, onChange, label = "Proprié
   );
 
   return (
-    <div className="space-y-2">
+    <div className="stack-y-2">
       <div className="relative">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
@@ -38,7 +38,7 @@ export default function OwnerPicker({ owners, value, onChange, label = "Proprié
           className="pl-9"
         />
       </div>
-      <div role="listbox" aria-label={label} className="max-h-56 space-y-2 overflow-y-auto rounded-md border border-border p-1">
+      <div role="listbox" aria-label={label} className="max-h-56 stack-y-2 overflow-y-auto rounded-md border border-border p-1">
         {groups.length === 0 && <p className="p-3 text-center text-sm text-muted-foreground">Aucun résultat.</p>}
         {groups.map(([title, list]) => (
           <div key={title}>
@@ -54,7 +54,7 @@ export default function OwnerPicker({ owners, value, onChange, label = "Proprié
                   onClick={() => onChange(refOf(owner))}
                   className={`flex w-full items-center justify-between gap-2 rounded-sm px-2 py-1.5 text-left text-sm hover:bg-accent ${selected ? "bg-accent font-medium" : ""}`}
                 >
-                  <span className="min-w-0 break-words">{owner.name}</span>
+                  <span className="min-w-0 wrap-break-word">{owner.name}</span>
                   {selected && <Check className="h-4 w-4 shrink-0" />}
                 </button>
               );

@@ -55,7 +55,7 @@ export default function AppearanceSection() {
   };
 
   return (
-    <section data-tutorial="section-appearance" className="space-y-4 rounded-xl border border-border bg-card/50 p-4">
+    <section data-tutorial="section-appearance" className="stack-y-4 rounded-xl border border-border bg-card/50 p-4">
       <div>
         <h2 className="font-display text-base font-semibold text-foreground">Apparence</h2>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -82,12 +82,12 @@ export default function AppearanceSection() {
         </Button>
       </div>
 
-      <div className="space-y-1.5">
+      <div className="stack-y-1.5">
         <span className="text-sm font-medium text-foreground">Taille du texte</span>
         <Choice label="Taille du texte" value={settings.textScale} options={TEXT_SCALES.map((value) => [value, `${value} %`])} onChange={(textScale) => updateSettings({ textScale })} />
       </div>
 
-      <div className="space-y-1.5">
+      <div className="stack-y-1.5">
         <span className="text-sm font-medium text-foreground">Police du texte</span>
         <Choice label="Police du texte" value={settings.bodyFont} options={Object.entries(BODY_FONT_LABELS)} onChange={(bodyFont) => updateSettings({ bodyFont })} />
       </div>
@@ -100,7 +100,7 @@ export default function AppearanceSection() {
         <Switch id="reduce-motion" checked={settings.motion === "reduced"} onCheckedChange={(checked) => updateSettings({ motion: checked ? "reduced" : "normal" })} />
       </div>
 
-      <div className="space-y-3 rounded-lg border border-border p-3" data-tutorial="campaign-layout">
+      <div className="stack-y-3 rounded-lg border border-border p-3" data-tutorial="campaign-layout">
         <div>
           <p className="text-sm font-medium text-foreground">Disposition de l'arborescence</p>
           <p className="text-xs text-muted-foreground">

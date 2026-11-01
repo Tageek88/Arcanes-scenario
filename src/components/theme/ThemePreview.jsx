@@ -21,10 +21,10 @@ export default function ThemePreview({ theme }) {
       aria-label="Aperçu du thème"
       role="group"
       style={style}
-      className={`${resolved.appearance === "dark" ? "dark " : ""}space-y-3 rounded-xl border border-border p-3`}
+      className={`${resolved.appearance === "dark" ? "dark " : ""}stack-y-3 rounded-xl border border-border p-3`}
     >
       <div className="grid gap-3 sm:grid-cols-2">
-        <div className="rounded-xl border border-border bg-card p-3 text-card-foreground shadow-sm">
+        <div className="rounded-xl border border-border bg-card p-3 text-card-foreground shadow-xs">
           <h3 className="font-display text-lg font-semibold">La Crypte oubliée</h3>
           <p className="mt-1 text-sm text-muted-foreground">Acte I · Scène 3. Les aventuriers découvrent une porte scellée.</p>
           <div className="mt-3 flex flex-wrap gap-2">
@@ -33,7 +33,7 @@ export default function ThemePreview({ theme }) {
             <span className="tag bg-accent text-accent-foreground">Lieu</span>
           </div>
         </div>
-        <div className="space-y-2 rounded-xl border border-border bg-popover p-3 text-popover-foreground">
+        <div className="stack-y-2 rounded-xl border border-border bg-popover p-3 text-popover-foreground">
           <div className="flex items-center gap-2 rounded-md border border-input bg-background px-2 py-1.5 text-sm text-muted-foreground">
             <Search className="h-4 w-4" />
             Rechercher dans le codex…

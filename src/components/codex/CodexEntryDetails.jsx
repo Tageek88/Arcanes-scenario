@@ -85,7 +85,7 @@ function Characteristics({ characteristics, owner }) {
             <span className="uppercase text-muted-foreground">{name} : </span>
             <span className="font-semibold text-foreground">{entry?.value || "—"}</span>
             {list(entry?.fields).filter((field) => field?.name || field?.value).map((field, index) => (
-              <div key={index} className="break-words text-muted-foreground">
+              <div key={index} className="wrap-break-word text-muted-foreground">
                 {field.name}{field.value ? `${field.name ? " : " : ""}${field.value}` : ""}
               </div>
             ))}
@@ -101,13 +101,13 @@ function Skills({ skills, owner }) {
   if (rows.length === 0) return null;
   return (
     <Section title="Compétences :">
-      <ul className="space-y-1">
+      <ul className="stack-y-1">
         {rows.map(({ skill, rawIndex }) => {
           const extra = [skill.roll_modifier ? `modif. ${skill.roll_modifier}` : "", fieldsLine(skill.fields)].filter(Boolean).join(" · ");
           return (
             <li key={rawIndex} className="group flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px]">
               <FilterChip filterKey="competence" value={skill.name} className="px-1.5 py-0.5 text-[11px]" />
-              {extra && <span className="break-words text-muted-foreground">{extra}</span>}
+              {extra && <span className="wrap-break-word text-muted-foreground">{extra}</span>}
               <PartPostItButton owner={owner} partKind="skill" part={skill} index={rawIndex} label={`la compétence ${skill.name}`} />
             </li>
           );
@@ -122,13 +122,13 @@ function Inventory({ inventory, owner }) {
   if (rows.length === 0) return null;
   return (
     <Section title="Inventaire :">
-      <ul className="space-y-1">
+      <ul className="stack-y-1">
         {rows.map((item) => {
           const extra = [item.notes, fieldsLine(item.fields)].filter(Boolean).join(" · ");
           return (
             <li key={item.id} className="group flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px]">
               <span className="font-medium text-foreground">{inventoryLabel(item)}</span>
-              {extra && <span className="break-words text-muted-foreground">{extra}</span>}
+              {extra && <span className="wrap-break-word text-muted-foreground">{extra}</span>}
               <PartPostItButton owner={owner} partKind="inventory" part={item} label={`l'objet ${item.name}`} />
             </li>
           );
@@ -143,14 +143,14 @@ function Equipment({ equipment, owner }) {
   if (rows.length === 0) return null;
   return (
     <Section title="Équipement :">
-      <ul className="space-y-1">
+      <ul className="stack-y-1">
         {rows.map(({ item, rawIndex }) => {
           const extra = fieldsLine(item.fields);
           return (
             <li key={rawIndex} className="group flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px]">
               <FilterChip filterKey="equipement" value={item.name} className="px-1.5 py-0.5 text-[11px]" />
               <FilterChip filterKey="type" value={item.type} className="px-1.5 py-0.5 text-[11px]" />
-              {extra && <span className="break-words text-muted-foreground">{extra}</span>}
+              {extra && <span className="wrap-break-word text-muted-foreground">{extra}</span>}
               <PartPostItButton owner={owner} partKind="equipment" part={item} index={rawIndex} label={`l'équipement ${item.name}`} />
             </li>
           );
@@ -174,11 +174,11 @@ export default function CodexEntryDetails({ kind, entry, locationLabel = "", rel
   const owner = { kind: kind === "npc" ? "npc" : "character", id: entry.id };
 
   return (
-    <div className="space-y-2 text-xs">
+    <div className="stack-y-2 text-xs">
       {(kind === "npc" || kind === "clue") && locationLabel && (
         <p className="flex items-start gap-1.5 font-mono uppercase tracking-wider text-muted-foreground">
           <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
-          <EntryLink kind="location" id={entry.location_id} className="break-words font-mono uppercase tracking-wider">
+          <EntryLink kind="location" id={entry.location_id} className="wrap-break-word font-mono uppercase tracking-wider">
             {locationLabel}
           </EntryLink>
         </p>
@@ -218,11 +218,11 @@ export default function CodexEntryDetails({ kind, entry, locationLabel = "", rel
           <Inventory inventory={entry.inventory} owner={owner} />
           {relations.length > 0 && (
             <Section title="Relations :">
-              <ul className="space-y-1">
+              <ul className="stack-y-1">
                 {relations.map((relation) => (
                   <li key={relation.id} className="flex items-start gap-1.5 text-muted-foreground">
                     <Users className="mt-0.5 h-3 w-3 shrink-0" />
-                    <span className="break-words">
+                    <span className="wrap-break-word">
                       <span>{relation.label} </span>
                       <EntryLink kind="npc" id={relation.targetId}>{relation.targetName || "PNJ"}</EntryLink>
                     </span>

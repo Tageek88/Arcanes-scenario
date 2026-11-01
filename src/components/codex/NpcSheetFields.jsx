@@ -16,7 +16,7 @@ function OptionalFields({ fields, onChange, suggested = [], subject }) {
   const missing = suggested.filter((name) => !present.has(normalize(name)));
   const update = (index, patch) => onChange(fields.map((field, i) => (i === index ? { ...field, ...patch } : field)));
   return (
-    <div className="space-y-2">
+    <div className="stack-y-2">
       {fields.map((field, index) => (
         <div key={index} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_2rem] items-center gap-2">
           <Input
@@ -117,7 +117,7 @@ export default function NpcSheetFields({ form, set, generator, generation }) {
   return (
     <>
       {(levelOptions.length > 0 || form.level) && (
-        <div className="space-y-2">
+        <div className="stack-y-2">
           <FieldLabel label="Niveau" locked={!!locks.level} onToggle={() => toggleLock("level")} />
           <Select value={form.level || "_none"} onValueChange={(value) => set("level", value === "_none" ? "" : value)}>
             <SelectTrigger>
@@ -135,31 +135,31 @@ export default function NpcSheetFields({ form, set, generator, generation }) {
         </div>
       )}
 
-      <div className="space-y-2">
+      <div className="stack-y-2">
         <FieldLabel label="Traits de caractère" locked={!!locks.traits} onToggle={() => toggleLock("traits")} htmlFor="npc-traits" />
         <ListInput id="npc-traits" value={traits} onChange={(list) => set("traits", list)} placeholder="Ex. Loyal·e, Méfiant·e (séparés par des virgules)" />
       </div>
 
-      <div className="space-y-2">
+      <div className="stack-y-2">
         <FieldLabel label="Motivation" locked={!!locks.motivation} onToggle={() => toggleLock("motivation")} htmlFor="npc-motivation" />
         <Input id="npc-motivation" value={form.motivation || ""} onChange={(event) => set("motivation", event.target.value)} />
       </div>
 
-      <div className="space-y-2">
+      <div className="stack-y-2">
         <FieldLabel label="Signe distinctif" locked={!!locks.appearance} onToggle={() => toggleLock("appearance")} htmlFor="npc-appearance" />
         <Input id="npc-appearance" value={form.appearance || ""} onChange={(event) => set("appearance", event.target.value)} />
       </div>
 
       {names.length > 0 && (
-        <div className="space-y-2">
+        <div className="stack-y-2">
           <FieldLabel label="Caractéristiques" locked={!!locks.characteristics} onToggle={() => toggleLock("characteristics")} />
           <div className="grid gap-2 sm:grid-cols-2">
             {names.map((name) => {
               const range = rangeOf(name);
               const entry = characteristics[name] || {};
               return (
-                <div key={name} className="space-y-2 rounded-lg border border-border p-3">
-                  <label className="space-y-1">
+                <div key={name} className="stack-y-2 rounded-lg border border-border p-3">
+                  <label className="stack-y-1">
                     <span className="block text-xs font-medium text-foreground">{name}</span>
                     <Input
                       aria-label={`${name} valeur`}
@@ -181,10 +181,10 @@ export default function NpcSheetFields({ form, set, generator, generation }) {
         </div>
       )}
 
-      <div className="space-y-2">
+      <div className="stack-y-2">
         <FieldLabel label="Compétences" locked={!!locks.skills} onToggle={() => toggleLock("skills")} />
         {skills.map((skill, index) => (
-          <div key={index} className="space-y-2 rounded-lg border border-border p-3">
+          <div key={index} className="stack-y-2 rounded-lg border border-border p-3">
             <div className="flex items-center gap-2">
               <Input
                 list="npc-skill-options"
@@ -219,10 +219,10 @@ export default function NpcSheetFields({ form, set, generator, generation }) {
         </Button>
       </div>
 
-      <div className="space-y-2">
+      <div className="stack-y-2">
         <Label className="block">Équipement</Label>
         {equipment.map((item, index) => (
-          <div key={index} className="space-y-2 rounded-lg border border-border p-3">
+          <div key={index} className="stack-y-2 rounded-lg border border-border p-3">
             <div className="flex items-center gap-2">
               <Input
                 list="npc-equipment-names"
@@ -267,7 +267,7 @@ export default function NpcSheetFields({ form, set, generator, generation }) {
         </Button>
       </div>
 
-      <div className="space-y-2">
+      <div className="stack-y-2">
         <Label className="block">Inventaire</Label>
         <p className="text-xs text-muted-foreground">Les objets que ce PNJ possède, avec leur quantité.</p>
         <InventoryField
@@ -279,20 +279,20 @@ export default function NpcSheetFields({ form, set, generator, generation }) {
       </div>
 
       {report && (
-        <div className="space-y-1 rounded-lg border border-border p-3" aria-live="polite">
+        <div className="stack-y-1 rounded-lg border border-border p-3" aria-live="polite">
           <p className="text-sm font-medium text-foreground">Équilibrage</p>
           {warnings.length === 0 && form.level ? (
             <p className="text-xs text-muted-foreground">Cohérent avec le barème du niveau {form.level}.</p>
           ) : null}
           {warnings.length > 0 && (
-            <ul className="list-disc space-y-0.5 pl-5 text-xs text-destructive">
+            <ul className="list-disc stack-y-0.5 pl-5 text-xs text-destructive">
               {warnings.map((issue, index) => (
                 <li key={`${issue.code}-${index}`}>{issue.message}</li>
               ))}
             </ul>
           )}
           {notes.length > 0 && (
-            <ul className="list-disc space-y-0.5 pl-5 text-xs text-muted-foreground">
+            <ul className="list-disc stack-y-0.5 pl-5 text-xs text-muted-foreground">
               {notes.map((issue, index) => (
                 <li key={`${issue.code}-${index}`}>{issue.message}</li>
               ))}

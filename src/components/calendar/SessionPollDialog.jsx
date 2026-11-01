@@ -33,7 +33,7 @@ export default function SessionPollDialog({
         description="Les campagnes restent sur cet appareil. Seuls le sondage, les dates proposées, les noms et les disponibilités sont envoyés à Cloudflare."
         footer={footer}
       >
-        <div className="max-h-[70vh] space-y-6 overflow-y-auto py-1">
+        <div className="max-h-[70vh] stack-y-6 overflow-y-auto py-1">
           <PollServiceUrlField
             value={manager.serviceUrl}
             editing={manager.editingServiceUrl}
@@ -45,7 +45,7 @@ export default function SessionPollDialog({
           <PollForm form={manager} campaignId={campaignId} />
 
           {polls.length > 0 && (
-            <section className="space-y-3">
+            <section className="stack-y-3">
               <h3 className="font-display text-base font-semibold text-foreground">Sondages de cette campagne</h3>
               {polls.map((poll) => (
                 <PollCard

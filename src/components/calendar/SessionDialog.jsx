@@ -72,9 +72,9 @@ export default function SessionDialog({
       }
       footer={footer}
     >
-      <div className="space-y-4 py-1">
+      <div className="stack-y-4 py-1">
         {!isEditing && (
-          <div className="space-y-2">
+          <div className="stack-y-2">
             <Label>Campagne</Label>
             <Select value={campaignValue || NEW_CAMPAIGN} onValueChange={chooseCampaign}>
               <SelectTrigger data-tutorial="session-campaign">
@@ -103,7 +103,7 @@ export default function SessionDialog({
           </div>
         )}
 
-        <div className="space-y-2">
+        <div className="stack-y-2">
           <Label>Titre de la session</Label>
           <Input
             data-tutorial="session-title"
@@ -114,7 +114,7 @@ export default function SessionDialog({
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-2">
+          <div className="stack-y-2">
             <Label>Date</Label>
             <Input
               type="date"
@@ -122,7 +122,7 @@ export default function SessionDialog({
               onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
             />
           </div>
-          <div className="space-y-2">
+          <div className="stack-y-2">
             <Label>Heure</Label>
             <Input
               type="time"
@@ -133,7 +133,7 @@ export default function SessionDialog({
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div className="space-y-2">
+          <div className="stack-y-2">
             <Label>Lieu</Label>
             <Input
               value={form.location || ""}
@@ -141,7 +141,7 @@ export default function SessionDialog({
               placeholder="Ex. Chez Léa, en ligne…"
             />
           </div>
-          <div className="space-y-2">
+          <div className="stack-y-2">
             <Label>Statut</Label>
             <Select
               value={form.status || "planifiee"}
@@ -161,7 +161,7 @@ export default function SessionDialog({
           </div>
         </div>
 
-        <div className="space-y-2">
+        <div className="stack-y-2">
           <Label>Scène prévue</Label>
           <Select
             value={form.scene_id || "_none"}
@@ -184,7 +184,7 @@ export default function SessionDialog({
           </Select>
         </div>
 
-        <div className="space-y-2">
+        <div className="stack-y-2">
           <Label>Notes de préparation</Label>
           <Textarea
             rows={3}

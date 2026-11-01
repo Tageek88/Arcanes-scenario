@@ -220,9 +220,9 @@ function PrintDialog({ open, onOpenChange, campaignId, preset, onPrint, allowPdf
                     Chargement…
                 </p>
             ) : (
-                <div className="space-y-3 py-1">
+                <div className="stack-y-3 py-1">
                     {(data?.quests?.length || 0) > 1 && (
-                        <div className="space-y-2 rounded-lg border border-border p-3">
+                        <div className="stack-y-2 rounded-lg border border-border p-3">
                             <Label>Quêtes à imprimer</Label>
                             {[...data.quests]
                                 .sort((x, y) => (x.order ?? 0) - (y.order ?? 0))
@@ -267,7 +267,7 @@ function PrintDialog({ open, onOpenChange, campaignId, preset, onPrint, allowPdf
                                 </Button>
                             </div>
                             {expanded[s.key] && (
-                                <div className="space-y-2 border-t border-border p-3">
+                                <div className="stack-y-2 border-t border-border p-3">
                                     <div className="flex gap-2">
                                         <Button type="button" size="sm" variant="outline" onClick={() => setAll(s.key, true)}>
                                             Tout
@@ -293,7 +293,7 @@ function PrintDialog({ open, onOpenChange, campaignId, preset, onPrint, allowPdf
                         </div>
                     ))}
 
-                    <div className="space-y-3 rounded-lg border border-border p-3">
+                    <div className="stack-y-3 rounded-lg border border-border p-3">
                         <Label>Options</Label>
                         {option("secrets", "Inclure les notes du MJ dans les scènes", "Notes secrètes de chaque scène, à décocher pour un document destiné aux joueurs.")}
                         {option("cluesWithScenes", "Imprimer les indices avec leur scène", "Sinon, les indices liés ne sont pas repris dans les scènes.")}

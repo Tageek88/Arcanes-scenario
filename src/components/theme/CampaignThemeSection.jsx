@@ -26,7 +26,7 @@ export default function CampaignThemeSection({ campaignId, onCustomize }) {
   };
 
   return (
-    <div className="space-y-2" data-tutorial="campaign-theme">
+    <div className="stack-y-2" data-tutorial="campaign-theme">
       <label htmlFor="campaign-theme" className="text-sm font-medium leading-none">
         Thème de la campagne
       </label>

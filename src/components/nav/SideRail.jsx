@@ -16,7 +16,7 @@ export default function SideRail() {
   const { pathname } = useLocation();
 
   return (
-    <aside data-tutorial="sidebar" className="glass-panel fixed bottom-[calc(0.75rem_+_env(safe-area-inset-bottom))] left-[calc(0.75rem_+_env(safe-area-inset-left))] top-[calc(0.75rem_+_env(safe-area-inset-top))] z-40 hidden w-12 flex-col items-center gap-2 rounded-xl py-3 md:flex">
+    <aside data-tutorial="sidebar" className="glass-panel fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom))] left-[calc(0.75rem+env(safe-area-inset-left))] top-[calc(0.75rem+env(safe-area-inset-top))] z-40 hidden w-12 flex-col items-center gap-2 rounded-xl py-3 md:flex">
       <Link
         to="/"
         title="Arcanes & Scénarios"

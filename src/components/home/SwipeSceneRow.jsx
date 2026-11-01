@@ -44,7 +44,7 @@ export default function SwipeSceneRow({ scene, active, npcs, locations, clues, o
       }}
       className={cn(
         "w-full max-w-full flex flex-col gap-2 rounded-lg border p-3 transition-colors overflow-hidden",
-        active ? "border-primary/60 bg-primary/[0.06]" : "border-border bg-background/70"
+        active ? "border-primary/60 bg-primary/6" : "border-border bg-background/70"
       )}
     >
       <button type="button" className="w-full min-w-0 text-left overflow-hidden" onClick={() => onSelect(scene)} onDoubleClick={() => onOpen(scene)}>
@@ -53,28 +53,28 @@ export default function SwipeSceneRow({ scene, active, npcs, locations, clues, o
           <span className="truncate font-display text-sm font-semibold text-foreground">{scene.title}</span>
         </div>
         {scene.summary && (
-          <p className={cn("mt-1 text-xs text-muted-foreground break-words overflow-hidden", active ? "whitespace-pre-wrap" : "line-clamp-1")}>
+          <p className={cn("mt-1 text-xs text-muted-foreground wrap-break-word overflow-hidden", active ? "whitespace-pre-wrap" : "line-clamp-1")}>
             {scene.summary}
           </p>
         )}
         {active && scene.gm_notes && (
-          <p className="mt-2 whitespace-pre-wrap text-xs text-muted-foreground break-words overflow-hidden">
+          <p className="mt-2 whitespace-pre-wrap text-xs text-muted-foreground wrap-break-word overflow-hidden">
             <span className="font-medium text-foreground">Notes du MJ : </span>{scene.gm_notes}
           </p>
         )}
         {active && (scene.npc_ids?.length > 0 || scene.location_ids?.length > 0 || scene.clue_ids?.length > 0) && (
-          <div className="mt-2 space-y-1 text-xs text-muted-foreground overflow-hidden">
+          <div className="mt-2 stack-y-1 text-xs text-muted-foreground overflow-hidden">
             {scene.npc_ids?.length > 0 && (
-              <p className="break-words overflow-hidden"><span className="font-medium text-foreground">PNJ :</span> {scene.npc_ids.map((id) => npcs.find((item) => item.id === id)?.name).filter(Boolean).join(" · ")}</p>
+              <p className="wrap-break-word overflow-hidden"><span className="font-medium text-foreground">PNJ :</span> {scene.npc_ids.map((id) => npcs.find((item) => item.id === id)?.name).filter(Boolean).join(" · ")}</p>
             )}
             {scene.location_ids?.length > 0 && (
-              <p className="break-words overflow-hidden"><span className="font-medium text-foreground">Lieux :</span> {scene.location_ids.map((id) => locations.find((item) => item.id === id)?.name).filter(Boolean).join(" · ")}</p>
+              <p className="wrap-break-word overflow-hidden"><span className="font-medium text-foreground">Lieux :</span> {scene.location_ids.map((id) => locations.find((item) => item.id === id)?.name).filter(Boolean).join(" · ")}</p>
             )}
             {scene.clue_ids?.length > 0 && (
-              <ul className="space-y-1">
+              <ul className="stack-y-1">
                 {scene.clue_ids.map((id) => clues.find((item) => item.id === id)).filter(Boolean).map((item) => (
                   <li key={item.id} className="flex justify-between gap-2">
-                    <span className="break-words overflow-hidden">{item.name}</span>
+                    <span className="wrap-break-word overflow-hidden">{item.name}</span>
                     <span className="shrink-0 font-mono uppercase">
                       {item.clue_type === "info"
                         ? [item.known && "Connue", item.used && "Utilisée"].filter(Boolean).join(" · ") || "Info"

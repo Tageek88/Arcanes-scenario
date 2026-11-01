@@ -65,7 +65,7 @@ export default function BackupPanel() {
 
   return (
     <>
-    <div className="space-y-3 rounded-xl border border-border bg-card/50 p-4">
+    <div className="stack-y-3 rounded-xl border border-border bg-card/50 p-4">
       <h2 className="font-display text-base font-semibold text-foreground">Export et import manuels</h2>
       <p className="text-sm text-muted-foreground">
         Créez un fichier de sauvegarde à conserver ailleurs (clé USB, cloud), ou restaurez-en un.

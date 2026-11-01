@@ -219,6 +219,7 @@ flowchart LR
 - **Visionneuse de pièces jointes** : `AttachmentViewer` et `useAttachmentViewer` (image avec zoom, PDF, précédent/suivant, enregistrer, partager), ouverte depuis les cartes et la liste du Codex ; `lib/services/attachmentFile.js` (types autorisés, blob, téléchargement, partage ; SVG et HTML refusés), `shareBase64File` pour Android.
 - **PDF de campagne** (onglet « PDF » des Notes de MJ) : deux tables, `CampaignDocument` (informations) et `CampaignDocumentFile` (contenu), `db.version(6)`. La liste ne lit jamais les fichiers (50 Mo maximum chacun). `FILE_TABLES` : exclues de la sauvegarde automatique (`buildBackupPayload({ light: true })`), incluses dans l'export manuel, laissées intactes par une restauration qui ne les contient pas, supprimées par clés avec la campagne.
 - **Notes de version** : clic sur la version dans Paramètres (`ReleaseNotesDialog`) : résumé automatique (introduction et titres des nouveautés), version complète à la demande, versions précédentes. Source : `Docs/releases/RELEASE-X.Y.Z.md` embarqués à la compilation (`import.meta.glob`).
+- **Tailwind 4** : configuration dans `src/index.css` (plugin Vite `@tailwindcss/vite`, `@theme inline`, `@plugin tailwindcss-animate`) ; `stack-x-*` / `stack-y-*` remplacent `space-x-*` / `space-y-*` (comportement de Tailwind 3). Voir `AGENTS.md`, section TAILWIND 4.
 - **Mises à jour** (Windows, sur demande) : bouton « Vérifier les mises à jour » dans Paramètres › À propos (`UpdatePanel`, hook `useAppUpdate`) ; `electron/main.cjs` pilote `electron-updater` (canaux `update:check`, `update:download`, `update:install`, pont `window.arcanesUpdate`) avec GitHub Releases comme source. Voir `AGENTS.md`, section UPDATES AND SIGNING.
 - Tests : `tests/attachmentFile.test.js`, `tests/releaseNotes.test.js`, `tests/campaignDocument.test.js`, `tests/campaignDelete.test.js`.
 
@@ -245,7 +246,7 @@ flowchart LR
 
 - `utils.js` et `query-client.js` sont à la racine de `lib/`, non classés.
 - Les sélecteurs de quête de Codex, Tables, Notes et Jeu ne servent qu'à l'impression par défaut : ces pages n'affichent pas leur contenu par quête.
-- `npm audit` : 20 alertes acceptées au 19/10/2026 (0 critique, 5 hautes, 15 modérées) : `tailwindcss` 3 et sa chaîne de build (seule correction : tailwindcss 4, migration lourde ; s'exécute à la build sur nos propres fichiers), `@capacitor/cli` via `xcode`/`uuid` (la correction proposée est un retour en arrière) et la chaîne d'emballage `electron-builder`. Ne pas lancer `npm audit fix --force`. `npm audit --omit=dev` renvoie 0 parce que tout est en `devDependencies` : ce n'est pas une preuve que l'interface est sans alerte.
+- `npm audit` : 28 alertes acceptées au 1/11/2026 (0 critique, 2 hautes, 26 modérées), la chaîne `tailwindcss` 3 a disparu avec la migration vers Tailwind 4 : `@capacitor/cli` via `xcode`/`uuid` (la correction proposée est un retour en arrière), la chaîne d'emballage `electron-builder` et `minimatch` côté ESLint. Les deux hautes (`electron`, `undici`) sont de nouveaux avis à examiner à part. Ne pas lancer `npm audit fix --force`. `npm audit --omit=dev` renvoie 0 parce que tout est en `devDependencies` : ce n'est pas une preuve que l'interface est sans alerte.
 
 ## Points non vérifiés
 
