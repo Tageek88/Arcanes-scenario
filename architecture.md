@@ -246,7 +246,7 @@ flowchart LR
 
 - `utils.js` et `query-client.js` sont à la racine de `lib/`, non classés.
 - Les sélecteurs de quête de Codex, Tables, Notes et Jeu ne servent qu'à l'impression par défaut : ces pages n'affichent pas leur contenu par quête.
-- `npm audit` : 28 alertes acceptées au 1/11/2026 (0 critique, 2 hautes, 26 modérées), la chaîne `tailwindcss` 3 a disparu avec la migration vers Tailwind 4 : `@capacitor/cli` via `xcode`/`uuid` (la correction proposée est un retour en arrière), la chaîne d'emballage `electron-builder` et `minimatch` côté ESLint. Les deux hautes (`electron`, `undici`) sont de nouveaux avis à examiner à part. Ne pas lancer `npm audit fix --force`. `npm audit --omit=dev` renvoie 0 parce que tout est en `devDependencies` : ce n'est pas une preuve que l'interface est sans alerte.
+- `npm audit` : 25 alertes acceptées au 1/11/2026 (0 critique, 0 haute, 25 modérées). La chaîne `tailwindcss` 3 a disparu avec la migration vers Tailwind 4 ; `electron` 44.10.1 et les mises à jour du fichier de verrouillage (`undici`, `fast-uri`) ont fermé les deux hautes. Restent : `@capacitor/cli` via `xcode`/`uuid` (la correction proposée est un retour en arrière), la chaîne d'emballage `electron-builder` et `minimatch` côté ESLint (build et lint seulement). Ne pas lancer `npm audit fix --force`. `npm audit --omit=dev` renvoie 0 parce que tout est en `devDependencies` : ce n'est pas une preuve que l'interface est sans alerte.
 
 ## Points non vérifiés
 
