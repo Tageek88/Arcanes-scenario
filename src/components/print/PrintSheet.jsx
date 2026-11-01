@@ -1,42 +1,7 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { cleanInventory, inventoryPrintLine } from "@/lib/meta/inventory";
-
-const CSS = `
-@page { size: A4; margin: 15mm; }
-@media screen { .print-root { display: none; } }
-@media print {
-  html, body { background: #fff !important; color: #111 !important; }
-  body > *:not(.print-root) { display: none !important; }
-  .print-root { display: block; font-family: Inter, system-ui, sans-serif; font-size: 10.5pt; line-height: 1.45; color: #111; }
-  .print-root h1, .print-root h2, .print-root h3, .print-root h4 { font-family: Cinzel, Georgia, serif; color: #111; margin: 0; break-after: avoid; }
-  .prt-header { border-bottom: 2px solid #111; padding-bottom: 6px; margin-bottom: 14px; }
-  .prt-header h1 { font-size: 20pt; }
-  .prt-header p { margin: 2px 0 0; color: #555; font-size: 9pt; }
-  .prt-section { margin-top: 18px; }
-  .prt-block-break { break-before: page; }
-  .prt-block-break > .prt-section { margin-top: 0; }
-  .prt-section > h2 { font-size: 14pt; border-bottom: 1px solid #999; padding-bottom: 3px; margin-bottom: 10px; }
-  .prt-act { margin: 14px 0 8px; font-size: 12pt; text-transform: uppercase; letter-spacing: 0.06em; color: #444; }
-  .prt-scene { margin: 0 0 14px; padding: 8px 10px; border: 1px solid #888; border-left: 4px solid #111; border-radius: 3px; }
-  .prt-scene > h3 { font-size: 12pt; }
-  .prt-meta { font-size: 9pt; color: #555; margin: 2px 0 6px; }
-  .prt-label { font-weight: 600; font-size: 9pt; text-transform: uppercase; letter-spacing: 0.05em; color: #444; margin: 6px 0 2px; }
-  .prt-text { white-space: pre-wrap; margin: 0; }
-  .prt-secret { border: 1px dashed #666; padding: 4px 8px; margin-top: 6px; background: #f2f2f2; }
-  .prt-list { margin: 2px 0 0; padding-left: 16px; }
-  .prt-clue, .prt-item, .prt-npc { margin: 4px 0; padding: 4px 8px; border: 1px solid #bbb; border-radius: 3px; break-inside: avoid; }
-  .prt-group { margin: 12px 0 6px; font-size: 11.5pt; }
-  .prt-img { max-height: 60mm; max-width: 100%; margin-top: 6px; }
-  .prt-title { font-weight: 700; }
-  .prt-character-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(48mm, 1fr)); gap: 8px; }
-  .prt-blank { display: inline-block; min-width: 14mm; height: 5mm; border: 1px solid #666; vertical-align: middle; }
-  .prt-character-stat, .prt-character-item { border: 1px solid #bbb; border-radius: 3px; padding: 6px 8px; break-inside: avoid; }
-  .prt-character-stat h3 { font-size: 11pt; margin-bottom: 4px; }
-  .prt-character-stat p, .prt-character-item p { margin: 1px 0; }
-  .prt-character-notes { white-space: pre-wrap; }
-  .prt-character + .prt-character { break-before: page; }
-}
-`;
+import { useAppTheme } from "@/lib/context/ThemeContext";
+import { generatePrintCSS } from "@/lib/print/printStyles";
 
 const Lines = ({ label, items }) =>
     items?.length > 0 ? (
@@ -327,11 +292,14 @@ function CharacterContent({ character, characteristics, skillRollModifier }) {
 }
 
 export default function PrintSheet({ model }) {
+    const { resolved } = useAppTheme();
+    const css = useMemo(() => generatePrintCSS(resolved.tokens), [resolved.tokens]);
+
     if (model.character) {
         const { character, campaignName, characteristics, skillRollModifier } = model;
         return (
             <div className="print-root">
-                <style>{CSS}</style>
+                <style>{css}</style>
                 <header className="prt-header">
                     <h1>{character.name}</h1>
                     <p>{campaignName} · Fiche de personnage</p>
@@ -347,7 +315,7 @@ export default function PrintSheet({ model }) {
 
     return (
         <div className="print-root">
-            <style>{CSS}</style>
+            <style>{css}</style>
             <header className="prt-header">
                 <h1>{model.campaignName}</h1>
                 <p>Document de préparation · {model.dateLabel}</p>
