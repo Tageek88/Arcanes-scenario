@@ -128,6 +128,38 @@ NOTES DE VERSION
 
 Un clic sur la version, dans Paramètres, ouvre les notes de version : un résumé très court de la version installée, la version complète à la demande, et les versions précédentes.
 
+APPARENCE ET THÈMES
+
+Paramètres › Apparence ouvre l'éditeur de thème. Sept thèmes sont prêts à l'emploi : Arcanes (aspect d'origine), Fantasy, Horreur cosmique, Gothique, Cyberpunk, Space opera et Dark fantasy, chacun en clair et en sombre.
+
+- Un clic sur un thème l'applique ; le thème prêt à l'emploi n'est jamais modifié, « Dupliquer en thème personnalisé » en crée une copie à modifier.
+- Couleurs : une couleur d'accent suffit, les autres sont calculées en trois harmonies (monochrome, analogue, complémentaire) ; un mode avancé règle chaque couleur, séparément en clair et en sombre.
+- Style : police des titres, arrondi des coins, épaisseur et couleur des icônes, motif de fond (aucun, points, lignes), apparence (sombre, clair ou celle du système).
+- L'aperçu en direct montre le thème dans toute l'application ; « Annuler » rétablit l'état précédent, « Appliquer » l'enregistre.
+- Un avertissement de lisibilité (rapport de contraste) liste les combinaisons peu lisibles, ne bloque jamais l'enregistrement et propose « Corriger automatiquement ».
+- Un thème s'exporte et s'importe en fichier ; un fichier invalide est refusé avec un message.
+- Chaque campagne peut avoir son thème (Modifier la campagne › Thème de la campagne : thème par défaut, un thème prêt à l'emploi ou « Personnaliser les couleurs… »). Changer de campagne change l'ambiance.
+- Les thèmes sont inclus dans les sauvegardes. « Effacer toutes les données » remet l'apparence d'origine. L'impression et le PDF ne suivent pas encore le thème.
+
+
+RÉGLAGES DE CONFORT
+
+Paramètres › Apparence regroupe aussi les réglages de confort de lecture, valables pour toutes les campagnes.
+
+- Taille du texte : 90, 100, 110 ou 125 %.
+- Police du texte : Inter (d'origine) ou Atkinson Hyperlegible, conçue pour être très lisible.
+- Réduire les animations : supprime les transitions et le flou des panneaux.
+- « Réinitialiser l'apparence » remet ces réglages et le thème par défaut à leurs valeurs d'origine.
+
+
+MODE TABLE DE JEU
+
+Un interrupteur de Paramètres › Apparence pense l'application pour jouer à table, sans toucher au thème enregistré.
+
+- Contraste renforcé, fonds moins lumineux, texte un peu plus grand.
+- Animations et flou coupés ; boutons et champs plus larges (44 px minimum).
+- Le désactiver restitue exactement le thème d'avant.
+
 NOTES
 
 La page Notes de MJ fait office de bloc-notes pour les rappels et les idées de préparation. Les notes peuvent être titrées, modifiées et épinglées pour les retrouver rapidement.

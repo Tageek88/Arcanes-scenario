@@ -310,11 +310,11 @@ export default function CodexEntryDialog({
         <div
           role="status"
           aria-live="polite"
-          className="relative mb-1 flex items-center gap-1.5 rounded-lg border border-amber-500/50 bg-amber-500/15 px-3 py-1.5 text-xs text-amber-300 shadow-md animate-in fade-in slide-in-from-bottom-1"
+          className="relative mb-1 flex items-center gap-1.5 rounded-lg border border-warning/50 bg-warning/15 px-3 py-1.5 text-xs text-warning shadow-md animate-in fade-in slide-in-from-bottom-1"
         >
-          <AlertCircle className="h-3.5 w-3.5 shrink-0 text-amber-400" />
+          <AlertCircle className="h-3.5 w-3.5 shrink-0 text-warning" />
           <span>{missingReason}</span>
-          <div className="absolute -bottom-1 right-8 h-2 w-2 rotate-45 border-b border-r border-amber-500/50 bg-amber-950" />
+          <div className="absolute -bottom-1 right-8 h-2 w-2 rotate-45 border-b border-r border-warning/50 bg-popover" />
         </div>
       )}
       <div className="flex justify-end gap-2 w-full">

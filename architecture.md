@@ -34,6 +34,7 @@ flowchart LR
     F_NOTES["notes : NoteCard, NoteEditor"]
     F_TABLES["tables : TableCard, TableEditor,<br/>DiceRoller<br/>home/GeneratorTablesDialog"]
     F_SET["BackupPanel, AutosavePanel,<br/>Tutorial/TutorialCenter"]
+    F_THEME["theme : ThemeProvider, ThemeEditor,<br/>ThemeEditorDialog, AppearanceSection,<br/>CampaignThemeSection, ThemePreview"]
   end
 
   subgraph HOOKS["hooks/"]
@@ -52,11 +53,12 @@ flowchart LR
     direction TB
     META["meta/<br/>codex, inventory, sceneMeta,<br/>sessionMeta, sessionCampaign, tableMeta,<br/>relationMeta, universeMeta"]
     CTX["context/<br/>campaignStore, questStore, RefreshContext,<br/>PageFilterContext, ExpandedCardContext,<br/>CodexLinksContext, TabStackContext, dataEvents, AuthContext"]
-    SERV["services/<br/>campaignDelete, quests, inventory,<br/>locationTree, npcRelations, attachments,<br/>codexEntries, codexSearch,<br/>npcGeneration, openAttachment"]
+    SERV["services/<br/>campaignDelete, quests, inventory,<br/>locationTree, npcRelations, attachments,<br/>codexEntries, codexSearch,<br/>npcGeneration, openAttachment,<br/>appSettings, themeFile"]
     POLLS["services/polls<br/>config, client (fetch), remote,<br/>votes, sync, pollDates, pollForm,<br/>store (façade : sessionPolls.js)"]
     PRINT["print/<br/>printModel, editablePdf,<br/>loadPrintData"]
     GEN["generators/<br/>nameGenerator, nameData, random,<br/>npcData, generatorTables, npcGenerator,<br/>npcScale, scaleDraft, npcRequest,<br/>pcScale, pcGenerator, pcRequest"]
     SAVE["save/<br/>backup, autosave, accountData,<br/>nativeShare"]
+    THEME["theme/ (pur)<br/>tokens, color, contrast, palette,<br/>presets, fonts, validate, resolve,<br/>editor, gameTable"]
     MISC["à la racine, non classés :<br/>utils, query-client"]
   end
 
@@ -64,9 +66,9 @@ flowchart LR
     direction TB
     API["localClient.js<br/>api (entities), réexporte db et TABLES"]
     EF["entityFactory.js<br/>makeEntity : CRUD"]
-    DBC["dbConfig.js<br/>db (Dexie), TABLES, versions v1 à v5"]
+    DBC["dbConfig.js<br/>db (Dexie), TABLES, versions v1 à v7"]
     LU["localUser.js<br/>LOCAL_USER"]
-    TAB[("IndexedDB<br/>schéma v1 à v5")]
+    TAB[("IndexedDB<br/>schéma v1 à v7")]
   end
 
   POLL(["Service de sondage externe<br/>arcanes-planification.pages.dev<br/>(HTTPS, URL configurable)"])
@@ -81,7 +83,9 @@ flowchart LR
   Jeu --> F_GAME
   Notes --> F_NOTES
   Tables --> F_TABLES
-  Settings --> F_SET
+  Settings --> F_SET & F_THEME
+  F_THEME --> THEME
+  F_THEME -->|appSettings, themeFile| SERV
 
   %% Pages -> hooks
   Home & Calendrier & Codex & Jeu & Notes & Tables & Settings --> H_CAMP
@@ -217,10 +221,21 @@ flowchart LR
 - **Notes de version** : clic sur la version dans Paramètres (`ReleaseNotesDialog`) : résumé automatique (introduction et titres des nouveautés), version complète à la demande, versions précédentes. Source : `Docs/releases/RELEASE-X.Y.Z.md` embarqués à la compilation (`import.meta.glob`).
 - Tests : `tests/attachmentFile.test.js`, `tests/releaseNotes.test.js`, `tests/campaignDocument.test.js`, `tests/campaignDelete.test.js`.
 
+## Version 1.8.0 : thèmes et apparence
+
+- **Un thème est une donnée** (`{ presetId, appearance, palette, overrides, titleFont, radius, iconStroke, pattern, iconColor }`), jamais du code ni du CSS libre. `ThemeProvider` (qui remplace `next-themes`) l'applique en variables CSS sur `<html>` ; les couleurs de Tailwind lisent `hsl(var(--jeton))` ; la classe `dark` est la seule source de vérité clair/sombre. Aucune couleur n'est écrite en dur dans un composant (jetons `primary`, `warning`, `played`, `icon`...).
+- **Modules purs** dans `lib/theme/` (sans React, Dexie ni alias `@/` : importables par Node) : `tokens`, `color`, `contrast` (WCAG 2.1 AA), `palette` (une couleur d'accent → les 40 jetons, trois harmonies), `presets` (Arcanes identique à `index.css` + six ambiances dérivées), `fonts`, `validate` (liste blanche, jamais d'exception), `resolve` (thème → variables, attributs, cache de démarrage), `editor` (opérations de l'éditeur), `gameTable` (surcouche).
+- **Stockage** : table `AppSettings` (une ligne `global` : thème par défaut, taille du texte, police du texte, animations, mode table de jeu), `db.version(7)` ; thème d'une campagne = champ facultatif `theme` de la ligne `Campaign`. `NON_CAMPAIGN_TABLES` (`Campaign`, `AppSettings`) sort ces tables de la suppression en cascade. Services : `lib/services/appSettings.js` (réglages, thème de campagne) et `themeFile.js` (export et import JSON). La sauvegarde, la sauvegarde automatique et la restauration l'incluent ; « Effacer toutes les données » réinitialise aussi le thème.
+- **Démarrage sans flash** : un script de `index.html` lit `localStorage["arcanes_theme_boot"]` (écrit par le fournisseur pour le thème enregistré seulement) et pose classe, variables et attributs avant React. Electron : `arcanesTheme.setWindowBackground` (canal `theme:set-window-background`) règle le fond de la fenêtre.
+- **Polices embarquées** (Fontsource, import par graisse dans `main.jsx`) : Cinzel, Almendra, IM Fell English, Playfair Display, Chakra Petch, Orbitron, Pirata One pour les titres ; Inter et Atkinson Hyperlegible pour le texte ; JetBrains Mono. `npm run check:fonts` vérifie les caractères du français.
+- **Éditeur** : `ThemeEditor` (unique, contrôlé) dans `ThemeEditorDialog` (brouillon, aperçu en direct dans toute l'application, Annuler restaure, Appliquer enregistre, réinitialiser, export et import) ; utilisé par `AppearanceSection` (Paramètres) et `CampaignThemeSection` (fenêtre de la campagne). Avertissement de contraste non bloquant avec correction automatique ; réglages avancés séparés pour le clair et le sombre.
+- **Mode table de jeu** : surcouche calculée à l'affichage (fonds plus sombres, contraste 7 : 1, texte ×1,1, sans animations ni flou, zones cliquables de 44 px) ; le thème enregistré n'est jamais modifié.
+- **Contrôles** : `npm run check:themes`, `npm run check:fonts`, `tests/theme.test.js`. Impression et PDF : pas encore thémés. Icônes : Lucide conservé.
+
 ## Plateformes
 
 - **Electron 44.9.0 (Windows)** : `electron/main.cjs`, `preload.cjs` et `navigationPolicy.cjs` (`window.arcanesPdf`, `window.arcanesBackup`, sauvegardes dans `Documents\Arcanes Scenario`). La fenêtre est en `sandbox`, avec isolation de contexte ; les canaux IPC (`handle()`) n'acceptent que la page principale ; `window.open` n'autorise que `blob:` (liens `https:`/`http:`/`mailto:` envoyés au système, reste refusé) ; la fenêtre principale ne navigue que vers `file:`. Installateur via `npm run dist`.
-- **Android (Capacitor)** : `android/`, config dans `capacitor.config.ts` (`webDir: "dist"`). Flux : `npm run build`, `npx cap sync android`, puis APK avec Gradle depuis Android Studio. Les ponts Electron n'existent pas sur Android ; l'export manuel passe par `@capacitor/filesystem` et `@capacitor/share`. La version Android (`versionName`, `versionCode` dans `android/app/build.gradle`) est indépendante de `package.json` : à mettre à jour à chaque release (1.7.1 = 171).
+- **Android (Capacitor)** : `android/`, config dans `capacitor.config.ts` (`webDir: "dist"`). Flux : `npm run build`, `npx cap sync android`, puis APK avec Gradle depuis Android Studio. Les ponts Electron n'existent pas sur Android ; l'export manuel passe par `@capacitor/filesystem` et `@capacitor/share`. La version Android (`versionName`, `versionCode` dans `android/app/build.gradle`) est indépendante de `package.json` : à mettre à jour à chaque release (1.8.0 = 180).
 - Le même code React (`src/`) sert aux deux.
 
 - Sécurité du 19/10/2026 : `@capacitor/assets` retiré (inutilisé, il tirait `tar` 6 et `sharp`), Electron 31.7.7 -> 44.9.0, react-router-dom 6.30.6 -> 7.18.4, tous les paquets en `devDependencies` (l'installateur n'embarque plus de `node_modules` d'exécution : l'interface est déjà regroupée par Vite). `electron/main.cjs` durci (voir Plateformes). `npm audit` : 26 alertes dont 1 critique -> 20 (15 modérées, 5 hautes), voir ci-dessous.

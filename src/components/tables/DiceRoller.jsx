@@ -63,7 +63,7 @@ const DiceRoller = () => {
               key={index}
               className={`badge ${
                 result === 1 ? 'text-destructive' : ''
-              } ${result === dieType ? 'text-green-600' : ''}`}
+              } ${result === dieType ? 'text-played' : ''}`}
             >
               {result}
             </span>

@@ -186,7 +186,7 @@ export default function TutorialOverlay({
       {rect ? (
         <div
           aria-hidden="true"
-          className={`pointer-events-none fixed rounded-lg ring-2 ring-blue-500/50 ${isTour ? "" : "shadow-[0_0_0_9999px_rgba(0,0,0,0.7)]"} transition-all duration-300 motion-reduce:transition-none`}
+          className={`pointer-events-none fixed rounded-lg ring-2 ring-primary/50 ${isTour ? "" : "shadow-[0_0_0_9999px_rgba(0,0,0,0.7)]"} transition-all duration-300 motion-reduce:transition-none`}
           style={{ top: rect.top, left: rect.left, width: rect.width, height: rect.height }}
         />
       ) : (
@@ -199,44 +199,44 @@ export default function TutorialOverlay({
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={introId}
-        className={`pointer-events-auto fixed rounded-lg border border-gray-700 bg-gray-800 p-4 text-white shadow-xl transition-all duration-300 motion-reduce:transition-none ${
+        className={`pointer-events-auto fixed rounded-lg border border-border bg-popover p-4 text-popover-foreground shadow-xl transition-all duration-300 motion-reduce:transition-none ${
           visible ? "opacity-100" : "opacity-0"
         }`}
         style={{ ...tooltipStyle, width: `min(${TOOLTIP_WIDTH}px, calc(100vw - ${EDGE * 2}px))` }}
       >
-        <p className="text-xs text-gray-400">
+        <p className="text-xs text-muted-foreground">
           {step.phase ? `Phase ${step.phase}/3 · ` : ""}{step.title ? `${tutorial.name} · ` : ""}
           Étape {step.phaseStep || stepIndex + 1} / {step.phaseTotal || tutorial.steps.length}
         </p>
         <h2 id={titleId} className="mt-1 text-base font-semibold">
           {step.title}
         </h2>
-        <p id={introId} className="mt-2 whitespace-pre-line text-sm leading-relaxed text-gray-200">
+        <p id={introId} className="mt-2 whitespace-pre-line text-sm leading-relaxed text-foreground">
           {step.intro}
         </p>
         {(isLast || isPhaseLast) && (
-          <p className="mt-2 text-sm font-medium text-emerald-300">
+          <p className="mt-2 text-sm font-medium text-played">
             {isLast
               ? tutorial.summary || `Bravo, le tutoriel « ${tutorial.name} » est terminé.`
               : "Bravo, cette phase est terminée."}
           </p>
         )}
         {step.hint && !canAdvance && (
-          <p className="mt-2 text-xs text-amber-200">{step.hint}</p>
+          <p className="mt-2 text-xs text-warning">{step.hint}</p>
         )}
         {blockedLong && (
           <div className="mt-2">
-            <p className="text-xs text-amber-200">Besoin d'aide ? Vous pouvez afficher une solution ou terminer le tutoriel.</p>
+            <p className="text-xs text-warning">Besoin d'aide ? Vous pouvez afficher une solution ou terminer le tutoriel.</p>
             {step.solution && (
               <button
                 type="button"
                 onClick={() => setShowSolution((shown) => !shown)}
-                className="mt-1 text-xs text-blue-300 underline focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                className="mt-1 text-xs text-primary underline focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 {showSolution ? "Masquer la solution" : "Voir la solution"}
               </button>
             )}
-            {showSolution && <p className="mt-1 text-xs text-gray-200">{step.solution}</p>}
+            {showSolution && <p className="mt-1 text-xs text-foreground">{step.solution}</p>}
           </div>
         )}
         <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
@@ -244,14 +244,14 @@ export default function TutorialOverlay({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg px-2 py-1.5 text-sm text-gray-400 transition-colors hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              className="rounded-lg px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               Ignorer ce tuto
             </button>
             <button
               type="button"
               onClick={onPause}
-              className="rounded-lg px-2 py-1.5 text-sm text-gray-400 transition-colors hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              className="rounded-lg px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               Pause
             </button>
@@ -261,7 +261,7 @@ export default function TutorialOverlay({
               <button
                 type="button"
                 onClick={onPrevious}
-                className="rounded-lg bg-gray-700 px-3 py-1.5 text-sm text-white transition-colors hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                className="rounded-lg bg-secondary px-3 py-1.5 text-sm text-secondary-foreground transition-colors hover:bg-secondary/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 Précédent
               </button>
@@ -270,7 +270,7 @@ export default function TutorialOverlay({
               ref={nextRef}
               type="button"
               onClick={onNext}
-              className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-300"
+              className="rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               {isLast ? "Terminer" : "Suivant"}
             </button>

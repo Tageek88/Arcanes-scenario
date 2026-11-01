@@ -12,7 +12,10 @@ const VERSION_4_TABLES = [...VERSION_3_TABLES, "SessionPoll"];
 const VERSION_5_TABLES = [...VERSION_4_TABLES, "Quest"];
 // PDF de campagne : les informations (CampaignDocument) et le contenu du fichier (CampaignDocumentFile) sont dans deux
 // tables, pour que la liste n'ait jamais à charger les fichiers (jusqu'à 50 Mo chacun).
-export const TABLES = [...VERSION_5_TABLES, "CampaignDocument", "CampaignDocumentFile"];
+const VERSION_6_TABLES = [...VERSION_5_TABLES, "CampaignDocument", "CampaignDocumentFile"];
+// Réglages de l'application (thème par défaut, accessibilité) : une seule ligne, sans campagne.
+export const TABLES = [...VERSION_6_TABLES, "AppSettings"];
+export const NON_CAMPAIGN_TABLES = ["Campaign", "AppSettings"];
 // Tables lourdes : exclues de la sauvegarde automatique, laissées intactes par une restauration qui ne les contient pas.
 export const FILE_TABLES = ["CampaignDocumentFile"];
 
@@ -23,7 +26,8 @@ db.version(2).stores(Object.fromEntries(RELATION_TABLES.map((t) => [t, "id, camp
 db.version(3).stores(Object.fromEntries(VERSION_3_TABLES.map((t) => [t, "id, campaign_id"])));
 db.version(4).stores(Object.fromEntries(VERSION_4_TABLES.map((t) => [t, "id, campaign_id"])));
 db.version(5).stores(Object.fromEntries(VERSION_5_TABLES.map((t) => [t, "id, campaign_id"])));
-db.version(6).stores(Object.fromEntries(TABLES.map((t) => [t, "id, campaign_id"])));
+db.version(6).stores(Object.fromEntries(VERSION_6_TABLES.map((t) => [t, "id, campaign_id"])));
+db.version(7).stores(Object.fromEntries(TABLES.map((t) => [t, "id, campaign_id"])));
 
 try {
   navigator.storage?.persist?.();

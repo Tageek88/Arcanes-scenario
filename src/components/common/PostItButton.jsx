@@ -33,7 +33,7 @@ export default function PostItButton({ target, label, variant = "icon", classNam
     return (
       <button
         {...common}
-        className={cn("tag min-touch shrink-0 border transition-colors", count > 0 ? "border-amber-500/50 bg-amber-500/10 text-amber-300" : "border-border text-muted-foreground hover:text-foreground", className)}
+        className={cn("tag min-touch shrink-0 border transition-colors", count > 0 ? "border-warning/50 bg-warning/10 text-warning" : "border-border text-muted-foreground hover:text-foreground", className)}
       >
         <StickyNote className="mr-1.5 h-3 w-3" /> Post-it{count > 0 ? ` · ${count}` : ""}
       </button>
@@ -46,13 +46,13 @@ export default function PostItButton({ target, label, variant = "icon", classNam
         {...common}
         className={cn(
           "relative inline-grid h-5 w-5 shrink-0 place-items-center rounded transition-opacity hover:bg-secondary focus:opacity-100",
-          count > 0 ? "text-amber-300 opacity-100" : "text-muted-foreground opacity-60 md:opacity-0 md:group-hover:opacity-100",
+          count > 0 ? "text-warning opacity-100" : "text-muted-foreground opacity-60 md:opacity-0 md:group-hover:opacity-100",
           className
         )}
       >
         <StickyNote className="h-3 w-3" />
         {count > 0 && (
-          <span className="absolute -right-1 -top-1 grid h-3 min-w-3 place-items-center rounded-full bg-amber-500 px-0.5 font-mono text-[8px] font-semibold leading-none text-black">{count}</span>
+          <span className="absolute -right-1 -top-1 grid h-3 min-w-3 place-items-center rounded-full bg-warning px-0.5 font-mono text-[8px] font-semibold leading-none text-warning-foreground">{count}</span>
         )}
       </button>
     );
@@ -61,11 +61,11 @@ export default function PostItButton({ target, label, variant = "icon", classNam
   return (
     <button
       {...common}
-      className={cn("relative grid h-11 w-11 shrink-0 place-items-center rounded-md transition-colors hover:bg-secondary md:h-7 md:w-7", count > 0 ? "text-amber-300" : "text-muted-foreground hover:text-foreground", className)}
+      className={cn("relative grid h-11 w-11 shrink-0 place-items-center rounded-md transition-colors hover:bg-secondary md:h-7 md:w-7", count > 0 ? "text-warning" : "text-muted-foreground hover:text-foreground", className)}
     >
       <StickyNote className="h-4 w-4" />
       {count > 0 && (
-        <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-amber-500 px-1 font-mono text-[10px] font-semibold leading-none text-black">{count}</span>
+        <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-warning px-1 font-mono text-[10px] font-semibold leading-none text-warning-foreground">{count}</span>
       )}
     </button>
   );

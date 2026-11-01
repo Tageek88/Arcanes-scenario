@@ -4,6 +4,8 @@ import SceneBoard from "@/components/home/SceneBoard";
 import MobileSceneList from "@/components/home/MobileSceneList";
 import SceneEditor from "@/components/home/SceneEditor";
 import CampaignDialog from "@/components/home/CampaignDialog";
+import ThemeEditorDialog from "@/components/theme/ThemeEditorDialog";
+import { useAppTheme } from "@/lib/context/ThemeContext";
 import QuestBar from "@/components/home/QuestBar";
 import { useQuests } from "@/hooks/useQuests";
 import CodexSidebar from "@/components/codex/CodexSidebar";
@@ -118,6 +120,8 @@ export default function Home() {
 
   const [campaignOpen, setCampaignOpen] = useState(false);
   const [campaignForm, setCampaignForm] = useState(EMPTY_CAMPAIGN);
+  const [themeOpen, setThemeOpen] = useState(false);
+  const { campaignTheme, settings: appSettings, setCampaignTheme } = useAppTheme();
   const [editingCampaignId, setEditingCampaignId] = useState(null);
 
   const {
@@ -208,6 +212,17 @@ export default function Home() {
       universe_type: campaign.universe_type || "arcanes",
     });
     setCampaignOpen(true);
+  };
+
+  // Le thème s'édite dans sa propre fenêtre : on masque celle de la campagne (sans perdre ce qui a été saisi) puis on la rouvre.
+  const openCampaignTheme = () => {
+    setCampaignOpen(false);
+    setThemeOpen(true);
+  };
+
+  const closeCampaignTheme = (open) => {
+    setThemeOpen(open);
+    if (!open) setCampaignOpen(true);
   };
 
   const requestDeleteCampaign = () => {
@@ -406,7 +421,21 @@ export default function Home() {
         onSave={saveCampaign}
         editing={!!editingCampaignId}
         onDelete={requestDeleteCampaign}
+        campaignId={editingCampaignId || undefined}
+        onCustomizeTheme={openCampaignTheme}
       />
+
+      {editingCampaignId && (
+        <ThemeEditorDialog
+          open={themeOpen}
+          onOpenChange={closeCampaignTheme}
+          title="Thème de la campagne"
+          description="Réservé à cette campagne. L'aperçu est visible dans toute l'application ; « Annuler » rétablit l'apparence précédente."
+          initialTheme={campaignTheme ?? appSettings.theme}
+          onApply={(theme) => setCampaignTheme(editingCampaignId, theme)}
+          onUseDefault={() => setCampaignTheme(editingCampaignId, null)}
+        />
+      )}
 
       <GameCharacterEditor
         key={characterDraft?.id || (characterDraft ? "duplicate" : "new")}

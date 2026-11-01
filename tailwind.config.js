@@ -46,6 +46,14 @@ module.exports = {
 					foreground: 'hsl(var(--played-foreground))'
 				},
 				key: 'hsl(var(--key))',
+				warning: {
+					DEFAULT: 'hsl(var(--warning))',
+					foreground: 'hsl(var(--warning-foreground))'
+				},
+				icon: {
+					DEFAULT: 'hsl(var(--icon))',
+					active: 'hsl(var(--icon-active))'
+				},
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',

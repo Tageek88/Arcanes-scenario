@@ -158,6 +158,21 @@ handle("backup:open-folder", undefined, async () => {
   await shell.openPath(backupFolder());
 });
 
+// Couleur de fond de la fenêtre : celle du thème, pour qu'aucun flash n'apparaisse au démarrage suivant.
+const DEFAULT_WINDOW_BACKGROUND = "#0b0b0f";
+const isHexColor = (value) => typeof value === "string" && /^#[0-9a-fA-F]{6}$/.test(value);
+
+handle("theme:set-window-background", REFUSED, (_event, color) => {
+  if (!isHexColor(color)) return { ok: false, error: "Couleur invalide." };
+  try {
+    mainWindow?.setBackgroundColor(color);
+    if (readConfig().windowBackground !== color) writeConfig({ ...readConfig(), windowBackground: color });
+    return { ok: true };
+  } catch (error) {
+    return { ok: false, error: String(error?.message || error) };
+  }
+});
+
 handle("pdf:save", REFUSED, async (_event, bytes, filename) => {
   if (!(bytes instanceof Uint8Array) || bytes.length < 5 || Buffer.from(bytes.subarray(0, 5)).toString("ascii") !== "%PDF-") {
     return { ok: false, error: "Le document PDF est invalide." };
@@ -186,7 +201,7 @@ function createWindow() {
     height: 900,
     minWidth: 900,
     minHeight: 600,
-    backgroundColor: "#0b0b0f",
+    backgroundColor: isHexColor(readConfig().windowBackground) ? readConfig().windowBackground : DEFAULT_WINDOW_BACKGROUND,
     autoHideMenuBar: true,
     icon: path.join(__dirname, "build", "icon.png"),
     webPreferences: {

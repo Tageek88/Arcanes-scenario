@@ -1,5 +1,5 @@
 import { Suspense, lazy } from "react";
-import { ThemeProvider } from "next-themes";
+import ThemeProvider from "@/components/theme/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClientInstance } from "@/lib/query-client";
@@ -35,7 +35,7 @@ if (typeof window !== "undefined") window.setTimeout(preloadPages, 1500);
 
 function App() {
   return (
-    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+    <ThemeProvider>
       <AuthProvider>
         <QueryClientProvider client={queryClientInstance}>
           <Router>

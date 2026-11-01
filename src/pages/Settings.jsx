@@ -19,6 +19,7 @@ import PrintButton from "@/components/print/PrintButton";
 import AutosavePanel from "@/components/AutosavePanel";
 import CampaignSelect from "@/components/common/CampaignSelect";
 import ReleaseNotesDialog from "@/components/common/ReleaseNotesDialog";
+import AppearanceSection from "@/components/theme/AppearanceSection";
 import TutorialCenter from "@/components/Tutorial/TutorialCenter";
 import { useCampaigns } from "@/hooks/useCampaigns";
 
@@ -56,6 +57,7 @@ export default function Settings() {
           Sauvegardez vos données de jeu ou repartez de zéro. Tout est stocké dans ce navigateur.
         </p>
       </header>
+      <AppearanceSection />
       <div data-tutorial="section-auto-save"><AutosavePanel /></div>
       <div data-tutorial="section-export-import"><BackupPanel /></div>
 

@@ -29,7 +29,7 @@ export default function NoteCard({ note, target, onEdit, onDelete, onTogglePin, 
           <span
             className={cn(
               "tag max-w-full break-words border",
-              target.missing ? "border-destructive/40 bg-destructive/10 text-destructive" : "border-amber-500/40 bg-amber-500/10 text-amber-300"
+              target.missing ? "border-destructive/40 bg-destructive/10 text-destructive" : "border-warning/40 bg-warning/10 text-warning"
             )}
           >
             <StickyNote className="mr-1.5 h-3 w-3 shrink-0" />

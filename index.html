@@ -1,10 +1,31 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <title>Arcanes &amp; Scénario</title>
+    <!-- Thème appliqué avant le premier affichage (pas de flash). Lit seulement le cache écrit par l'application. -->
+    <script>
+      (function () {
+        var root = document.documentElement;
+        var dark = true;
+        try {
+          var cache = JSON.parse(localStorage.getItem("arcanes_theme_boot") || "null");
+          if (cache) {
+            dark = cache.a === "system" ? window.matchMedia("(prefers-color-scheme: dark)").matches : cache.a !== "light";
+            var vars = dark ? cache.d : cache.l;
+            if (vars) for (var name in vars) if (/^--[a-z0-9-]+$/.test(name)) root.style.setProperty(name, String(vars[name]));
+            var attrs = cache.t;
+            if (attrs) for (var key in attrs) if (/^data-[a-z-]+$/.test(key)) root.setAttribute(key, String(attrs[key]));
+          }
+        } catch (error) {
+          dark = true;
+        }
+        root.classList.toggle("dark", dark);
+        root.style.colorScheme = dark ? "dark" : "light";
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

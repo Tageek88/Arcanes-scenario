@@ -9,6 +9,10 @@ contextBridge.exposeInMainWorld("arcanesBackup", {
     openFolder: () => ipcRenderer.invoke("backup:open-folder"),
 });
 
+contextBridge.exposeInMainWorld("arcanesTheme", {
+    setWindowBackground: (color) => ipcRenderer.invoke("theme:set-window-background", color),
+});
+
 contextBridge.exposeInMainWorld("arcanesPdf", {
     save: (bytes, filename) => ipcRenderer.invoke("pdf:save", bytes, filename),
 });

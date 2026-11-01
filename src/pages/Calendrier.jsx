@@ -365,8 +365,8 @@ export default function Calendrier() {
                               }).format(new Date(`${slot.date}T${slot.time}:00Z`))}
                             </p>
                             <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs">
-                              <span className="text-green-500">Présent : {counts.available}</span>
-                              <span className="text-amber-500">Peut-être : {counts.maybe}</span>
+                              <span className="text-played">Présent : {counts.available}</span>
+                              <span className="text-warning">Peut-être : {counts.maybe}</span>
                               <span className="text-muted-foreground">Indisponible : {counts.unavailable}</span>
                             </div>
                           </div>

@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import ResponsiveDialog from "@/components/common/ResponsiveDialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import CampaignThemeSection from "@/components/theme/CampaignThemeSection";
 import { UNIVERSE_TYPES, DEFAULT_UNIVERSE } from '@/lib/meta/universeMeta';
 
 const TypedInput = /** @type {React.ComponentType<React.InputHTMLAttributes<HTMLInputElement>>} */ (Input);
@@ -19,10 +20,12 @@ const TypedTextarea = /** @type {React.ComponentType<React.TextareaHTMLAttribute
  * @property {() => void} onSave
  * @property {boolean} [editing]
  * @property {() => void} [onDelete]
+ * @property {string} [campaignId] campagne modifiée (active uniquement en modification)
+ * @property {() => void} [onCustomizeTheme]
  */
 
 /** @param {CampaignDialogProps} props */
-export default function CampaignDialog({ open, onOpenChange, form, setField, saving, onSave, editing = false, onDelete }) {
+export default function CampaignDialog({ open, onOpenChange, form, setField, saving, onSave, editing = false, onDelete, campaignId, onCustomizeTheme }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!form.name?.trim()) return;
@@ -37,11 +40,11 @@ export default function CampaignDialog({ open, onOpenChange, form, setField, sav
         <div
           role="status"
           aria-live="polite"
-          className="relative mb-1 flex items-center gap-1.5 rounded-lg border border-amber-500/50 bg-amber-500/15 px-3 py-1.5 text-xs text-amber-300 shadow-md animate-in fade-in slide-in-from-bottom-1"
+          className="relative mb-1 flex items-center gap-1.5 rounded-lg border border-warning/50 bg-warning/15 px-3 py-1.5 text-xs text-warning shadow-md animate-in fade-in slide-in-from-bottom-1"
         >
-          <AlertCircle className="h-3.5 w-3.5 shrink-0 text-amber-400" />
+          <AlertCircle className="h-3.5 w-3.5 shrink-0 text-warning" />
           <span>{missingReason}</span>
-          <div className="absolute -bottom-1 right-8 h-2 w-2 rotate-45 border-b border-r border-amber-500/50 bg-amber-950" />
+          <div className="absolute -bottom-1 right-8 h-2 w-2 rotate-45 border-b border-r border-warning/50 bg-popover" />
         </div>
       )}
       <div className="flex items-center justify-between gap-2 w-full">
@@ -147,6 +150,11 @@ export default function CampaignDialog({ open, onOpenChange, form, setField, sav
               </SelectContent>
             </Select>
       </div>
+          {editing && campaignId && onCustomizeTheme ? (
+            <CampaignThemeSection campaignId={campaignId} onCustomize={onCustomizeTheme} />
+          ) : (
+            !editing && <p className="text-xs text-muted-foreground">Le thème de la campagne se choisit après sa création.</p>
+          )}
         </div>
       </form>
     </ResponsiveDialog>
