@@ -46,3 +46,7 @@ audit-src.zip
 # Code-signing certificates (never commit)
 *.pfx
 *.p12
+
+lint-report.txt
+
+lint-report.txt
