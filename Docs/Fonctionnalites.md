@@ -184,6 +184,17 @@ Le système de jeu permet de définir un modèle de fiche pour chaque campagne, 
 - Une fiche peut être modifiée, dupliquée, supprimée ou imprimée. La duplication conserve les valeurs saisies.
 - Une barre de recherche retrouve un personnage par son nom, ses notes, ses compétences ou son équipement.
 
+CORBEILLE
+
+Ce que l'on supprime est gardé 30 jours dans Paramètres › Corbeille, puis disparaît.
+
+- Sont concernés : scènes, actes (avec leurs scènes), quêtes, PNJ (avec leurs relations), lieux, indices, notes, tables aléatoires, personnages, sessions de jeu, éléments des catalogues de jeu et campagnes entières avec tout leur contenu.
+- Chaque entrée indique son type, sa campagne, ce qu'elle contient et les jours restants. « Restaurer » remet l'élément et son contenu à leur place ; « Supprimer définitivement » et « Vider » les effacent pour de bon, après confirmation.
+- Restaurer un élément dont la campagne est supprimée est refusé : restaurez d'abord la campagne.
+- La restauration remet les éléments supprimés, pas les liens qui les citaient ailleurs (un lieu retiré d'une scène ne revient pas dans cette scène).
+- Les PDF de campagne et les sondages ne passent pas par la corbeille : leur suppression reste définitive.
+- La corbeille reste sur l'appareil : elle n'est pas dans les sauvegardes ni dans la sauvegarde automatique, et restaurer une sauvegarde ne la modifie pas. « Effacer toutes les données » la vide.
+
 PARAMÈTRES
 
 Les Paramètres donnent accès à la sauvegarde et à la gestion des données :

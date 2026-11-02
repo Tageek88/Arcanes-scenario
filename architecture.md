@@ -239,6 +239,11 @@ flowchart LR
 - `components/common/GlobalSearch.jsx` (monté dans `AppShell`) : Ctrl+K, loupe de `SideRail` et de `MobileBackBar`, résultats groupés, navigation clavier. Données : `hooks/useGlobalSearch.js` ; moteur pur : `lib/services/globalSearch.js` ; état partagé sans React : `lib/context/searchStore.js` (demande d'ouverture de la fenêtre, élément à ouvrir à l'arrivée sur la page, périmé après 5 s).
 - Les pages Home, Codex, Notes et Tables prennent l'élément choisi avec `takePendingOpen` quand leurs données sont chargées. Pas de nouvelle `db.version`.
 
+## Version 1.10.0 : corbeille
+
+- Table `Trash` (`db.version(8)`), alimentée par `api/trashCapture.js` (`captureDeleted`, appelé par `entityFactory.delete` et `deleteMany`) : une ligne = un groupe de lignes supprimées par une même action (`withTrashGroup`). Service : `lib/services/trash.js` (liste, restauration en transaction, suppression, purge à 30 jours) ; hook `useTrash` ; écran `TrashPanel` dans Paramètres.
+- La corbeille est locale à l'appareil (`LOCAL_ONLY_TABLES`) : hors sauvegardes et sauvegarde automatique. PDF de campagne et sondages exclus.
+
 ## Plateformes
 
 - **Electron 44.9.0 (Windows)** : `electron/main.cjs`, `preload.cjs` et `navigationPolicy.cjs` (`window.arcanesPdf`, `window.arcanesBackup`, sauvegardes dans `Documents\Arcanes Scenario`). La fenêtre est en `sandbox`, avec isolation de contexte ; les canaux IPC (`handle()`) n'acceptent que la page principale ; `window.open` n'autorise que `blob:` (liens `https:`/`http:`/`mailto:` envoyés au système, reste refusé) ; la fenêtre principale ne navigue que vers `file:`. Installateur via `npm run dist`.
