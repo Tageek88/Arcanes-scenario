@@ -74,7 +74,8 @@ Feuille de route décidée le 27/10/2026 (la 1.6.0 et la 1.7.0 d'origine sont fu
 | 1.8.2 | **Publiée** (01/11/2026). Mise à jour depuis l'application (Windows) ; impression et PDF aux couleurs du thème |
 | 1.8.3 | **Publiée** (01/11/2026). Migration Tailwind CSS 4, sans changement d'aspect |
 | 1.8.4 | **Publiée** (01/11/2026). Electron 44.10.1, alertes `npm audit` |
-| 1.9.0 (à décider) | Recherche globale (Ctrl+K : scènes, Codex, notes, tables) ; corbeille (suppression récupérable 30 jours) ; ensuite journal de séance, suivi d'initiative et de PV, tutoriel sélectif, échange d'icônes |
+| 1.9.0 | **Code validé** (02/11/2026), reste la release (`scripts/release-190.mjs`, `Docs/releases/RELEASE-1.9.0.md`). Recherche globale (Ctrl+K) dans la campagne sélectionnée : scènes, actes, PNJ, lieux, indices, notes, tables ; ouverture de l'élément sur sa page ; pas de nouvelle `db.version` |
+| 1.10.0 (à décider) | Corbeille (suppression récupérable 30 jours, `db.version(8)`, touche la sauvegarde et `deleteCampaignCascade`) ; ensuite journal de séance, suivi d'initiative et de PV, tutoriel sélectif, échange d'icônes |
 
 Inventaire (décisions, 1.6.3) : le propriétaire d'un objet est un personnage, un PNJ ou personne (réserve « Sans propriétaire » = `Campaign.inventory`) ; un objet a nom, quantité, notes, lien facultatif vers le catalogue d'équipement et champs facultatifs nommés ; le bouton des Tables ajoute le résultat du tirage ; les suggestions de noms viennent des inventaires déjà présents, pas du catalogue d'équipement ; l'équipement de la fiche reste une liste séparée ; pas de nouvelle `db.version`. Détails dans `AGENTS.md` (section INVENTORY) et `architecture.md`.
 
@@ -100,6 +101,8 @@ Ensuite, idées pour la suite, sans ordre imposé (à choisir avec l'utilisateur
 4. Décidé de laisser en l'état : `utils.js` (9 lignes, importé par 31 fichiers), `query-client.js` (10 lignes, 2 importeurs), l'entité `Quest` (la retirer demande une nouvelle `db.version`, gain nul) et les 25 alertes `npm audit` restantes (0 critique, 0 haute, toutes modérées : `@capacitor/cli` via `xcode`/`uuid`, chaîne `electron-builder`, `minimatch` des plugins ESLint ; npm ne propose que des retours en arrière majeurs).
 
 ## 6. Non vérifié
+
+- Recherche globale 1.9.0 : testée à la main par l'utilisateur sous Windows (02/11/2026) ; les tests purs (`tests/globalSearch.test.js`) ont tourné chez Claude ; non testée sous Android (loupe de `MobileBackBar`, clavier virtuel).
 
 - Inventaire 1.6.3 : testé à la main par l'utilisateur ; les tests `inventoryService` et `printModel` n'ont tourné que chez lui (Claude n'a pu valider que les tests purs avec une maquette de Vitest). Non testé sous Android.
 - Post-it 1.7.0 : testés à la main par l'utilisateur ; les tests de base de données (`ensurePartIds`, renommage, détachement) n'ont tourné que chez lui.

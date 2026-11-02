@@ -13,6 +13,15 @@ La page d'accueil rassemble les campagnes, les actes et les scènes sous forme d
 - faire défiler la liste des actes à la molette de la souris ;
 - retrouver, dans le panneau Codex, les éléments associés à la scène sélectionnée : PNJ, lieux, indices et informations, et personnages joueurs.
 
+RECHERCHE GLOBALE
+
+Une seule fenêtre cherche dans toute la campagne sélectionnée : scènes, actes, PNJ, lieux, indices, notes de MJ et tables aléatoires.
+
+- Elle s'ouvre avec Ctrl+K (Cmd+K sur Mac) ou avec la loupe de la barre latérale ; sur téléphone, avec la loupe en haut à droite de chaque page.
+- Elle cherche dans les titres et dans le texte (synopsis, notes de scène, descriptions, contenu des notes, entrées des tables). Les accents et les majuscules sont ignorés ; tous les mots tapés doivent correspondre ; les titres passent avant le contenu.
+- Les résultats sont groupés par type, avec un court extrait quand le mot est trouvé dans le texte. Flèches pour choisir, Entrée pour ouvrir, Échap pour fermer.
+- Choisir un résultat ouvre la bonne page : la scène est dépliée dans sa quête, le PNJ, le lieu ou l'indice est déplié dans le Codex, la note ou la table s'ouvre dans sa fenêtre d'édition.
+
 CODEX
 
 Le codex regroupe les éléments du monde de la campagne : PNJ, lieux, indices et informations. Les entrées peuvent être recherchées et associées aux scènes.
