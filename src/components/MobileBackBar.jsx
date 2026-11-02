@@ -1,7 +1,21 @@
 import React from "react";
 import { useLocation } from "react-router-dom";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Search } from "lucide-react";
 import { useTabStacks } from "@/lib/context/TabStackContext";
+import { requestSearch } from "@/lib/context/searchStore";
+
+function SearchButton() {
+  return (
+    <button
+      type="button"
+      aria-label="Rechercher dans la campagne"
+      onClick={requestSearch}
+      className="ml-auto grid h-11 w-11 place-items-center rounded-lg text-muted-foreground transition-colors active:bg-secondary"
+    >
+      <Search className="h-5 w-5" />
+    </button>
+  );
+}
 
 const SECTIONS = {
   "/": "Arcanes & Scénarios",
@@ -26,6 +40,7 @@ export default function MobileBackBar() {
         <span className="font-display text-sm font-semibold text-foreground">
           {SECTIONS["/"]}
         </span>
+        <SearchButton />
       </div>
     );
   }
@@ -43,6 +58,7 @@ export default function MobileBackBar() {
       <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
         {SECTIONS[pathname] || "Retour"}
       </span>
+      <SearchButton />
     </div>
   );
 }

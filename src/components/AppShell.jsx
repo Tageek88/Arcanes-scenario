@@ -4,6 +4,7 @@ import SideRail from "@/components/nav/SideRail";
 import MobileNav from "@/components/nav/MobileNav";
 import MobileBackBar from "@/components/MobileBackBar";
 import PageLoader from "@/components/PageLoader";
+import GlobalSearch from "@/components/common/GlobalSearch";
 import PullToRefresh from "@/components/PullToRefresh";
 import { queryClientInstance } from "@/lib/query-client";
 import { useDataRefresh } from "@/lib/context/RefreshContext";
@@ -97,6 +98,7 @@ export default function AppShell({ children }) {
       </main>
       <div className="page-roll" aria-hidden="true" />
       <MobileNav />
+      <GlobalSearch />
     </div>
   );
 }

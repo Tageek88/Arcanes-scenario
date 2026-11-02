@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Dices, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -19,6 +19,7 @@ import { TABLE_CATEGORIES } from "@/lib/meta/tableMeta";
 import PrintButton from "@/components/print/PrintButton";
 import CampaignSelect from "@/components/common/CampaignSelect";
 import { usePageFilter } from "@/lib/context/PageFilterContext";
+import { peekPendingOpen, takePendingOpen } from "@/lib/context/searchStore";
 import DiceRoller from "@/components/tables/DiceRoller";
 import { useCampaigns } from "@/hooks/useCampaigns";
 import { useQuests } from "@/hooks/useQuests";
@@ -73,6 +74,21 @@ export default function Tables() {
     });
     setOpen(true);
   };
+
+  // Table choisie dans la recherche globale : on l'ouvre dès qu'elle est chargée (le filtre de catégorie est levé si besoin).
+  useEffect(() => {
+    if (loading) return;
+    const request = peekPendingOpen(["table"]);
+    if (!request) return;
+    const table = tables.find((item) => item.id === request.id);
+    if (table) {
+      takePendingOpen(["table"]);
+      openEdit(table);
+    } else if (category !== "all") {
+      setCategory("all");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, tables, category]);
 
   const save = async (override = {}) => {
     if (!form.name.trim() || !campaignId) return;

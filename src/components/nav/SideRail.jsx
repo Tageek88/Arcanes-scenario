@@ -1,7 +1,8 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { GitBranch, BookMarked, CalendarDays, Dices, StickyNote, Settings, Swords } from "lucide-react";
+import { GitBranch, BookMarked, CalendarDays, Dices, StickyNote, Settings, Swords, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { requestSearch } from "@/lib/context/searchStore";
 
 const ITEMS = [
   { to: "/", label: "Arborescence", icon: GitBranch, tutorial: "tab-arborescence" },
@@ -44,7 +45,16 @@ export default function SideRail() {
           </Link>
         );
       })}
-      <div className="mt-auto">
+      <div className="mt-auto flex flex-col items-center gap-2">
+        <button
+          type="button"
+          title="Rechercher (Ctrl+K)"
+          aria-label="Rechercher dans la campagne"
+          onClick={requestSearch}
+          className="grid h-10 w-10 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+        >
+          <Search className="h-5 w-5" />
+        </button>
         <Link
           to="/settings"
           title="Paramètres"

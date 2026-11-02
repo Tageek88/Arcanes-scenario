@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Pin, Plus, StickyNote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,6 +24,7 @@ import NotesFilterBar from "@/components/notes/NotesFilterBar";
 import PdfPanel from "@/components/notes/PdfPanel";
 import { cn } from "@/lib/utils";
 import { noteTarget } from "@/lib/meta/postit";
+import { takePendingOpen } from "@/lib/context/searchStore";
 
 const EMPTY = { title: "", content: "", pinned: false };
 
@@ -54,6 +55,14 @@ export default function Notes() {
     });
     setOpen(true);
   };
+
+  // Note choisie dans la recherche globale : on l'ouvre dès qu'elle est chargée.
+  useEffect(() => {
+    const all = [...allPinned, ...allNotes];
+    const request = takePendingOpen(["note"], (id) => all.some((note) => note.id === id));
+    const note = request && all.find((item) => item.id === request.id);
+    if (note) openEdit(note);
+  }, [allPinned, allNotes]);
 
   const save = () => {
     if (!form.title.trim() || !campaignId) return;

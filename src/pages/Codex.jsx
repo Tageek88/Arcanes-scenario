@@ -32,6 +32,7 @@ import { buildLocationIndex, buildSearchEntry, filterToken, matchesSearch, parse
 import { CodexLinksContext } from "@/lib/context/CodexLinksContext";
 import { useExpandedCardState } from "@/lib/context/ExpandedCardContext";
 import { usePageFilter } from "@/lib/context/PageFilterContext";
+import { takePendingOpen } from "@/lib/context/searchStore";
 import { useCampaigns } from "@/hooks/useCampaigns";
 import { useQuests } from "@/hooks/useQuests";
 import QuestSelect from "@/components/common/QuestSelect";
@@ -124,6 +125,14 @@ export default function Codex() {
     setCollapsed(new Set());
     setFocusTarget({ kind, id });
   };
+
+  // Élément choisi dans la recherche globale : même chemin qu'un lien interactif (onglet, dépliage, défilement).
+  useEffect(() => {
+    if (!campaignId) return;
+    const request = takePendingOpen(["npc", "location", "clue"]);
+    if (request) goTo(request.kind, request.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [campaignId]);
 
   // Éléments d'un type rattachés à un lieu (lui et ses sous-lieux), par un filtre « lieu » dans la recherche.
   const showAt = (kind, locationId) => {

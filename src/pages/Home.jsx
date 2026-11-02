@@ -27,6 +27,7 @@ import PrintButton from "@/components/print/PrintButton";
 import CampaignSelect from "@/components/common/CampaignSelect";
 import { useExpandedCardState } from "@/lib/context/ExpandedCardContext";
 import { usePageFilter } from "@/lib/context/PageFilterContext";
+import { takePendingOpen } from "@/lib/context/searchStore";
 import { useCampaigns } from "@/hooks/useCampaigns";
 import { useCampaignContent } from "@/hooks/useCampaignContent";
 import { useCampaignActions } from "@/hooks/useCampaignActions";
@@ -171,6 +172,16 @@ export default function Home() {
     setSceneForm({ ...EMPTY_SCENE, ...scene, quest_id: scene.quest_id || quest?.id || "", recurring: !!scene.recurring_group });
     setEditorOpen(true);
   };
+
+  // Scène ou acte choisi dans la recherche globale : on affiche sa quête, puis on déplie la scène.
+  useEffect(() => {
+    const request = takePendingOpen(["scene", "act"], (id) => allScenes.some((s) => s.id === id) || allActs.some((a) => a.id === id));
+    if (!request) return;
+    const target = (request.kind === "scene" ? allScenes : allActs).find((item) => item.id === request.id);
+    if (target?.quest_id && target.quest_id !== quest?.id) setPreferredQuestId(target.quest_id);
+    if (request.kind === "scene") setActiveSceneId(request.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allScenes, allActs]);
 
   const setSceneField = (key, value) => setSceneForm((f) => ({ ...f, [key]: value }));
 
