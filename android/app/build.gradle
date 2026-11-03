@@ -7,8 +7,8 @@ android {
         applicationId "com.arcanes.scenario"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 200
-        versionName "1.10.0"
+        versionCode 212
+        versionName "1.11.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -16,8 +16,29 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    // ClÃ© de signature fixe : toutes les APK (quel que soit le PC de build) s'installent par-dessus la prÃ©cÃ©dente.
+    // Valeurs lues dans android/keystore.properties (jamais versionnÃ©, voir AGENTS.md, ANDROID SIGNING).
+    def keystoreFile = rootProject.file("keystore.properties")
+    def keystoreProps = new Properties()
+    if (keystoreFile.exists()) {
+        keystoreFile.withInputStream { keystoreProps.load(it) }
+    }
+    signingConfigs {
+        if (keystoreFile.exists()) {
+            fixed {
+                storeFile rootProject.file(keystoreProps['storeFile'])
+                storePassword keystoreProps['storePassword']
+                keyAlias keystoreProps['keyAlias']
+                keyPassword keystoreProps['keyPassword']
+            }
+        }
+    }
     buildTypes {
+        debug {
+            if (keystoreFile.exists()) signingConfig signingConfigs.fixed
+        }
         release {
+            if (keystoreFile.exists()) signingConfig signingConfigs.fixed
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
@@ -25,7 +46,7 @@ android {
 
     applicationVariants.all { variant ->
         variant.outputs.all {
-            outputFileName = "Arcanes&Scénario-${variant.versionName}.apk"
+            outputFileName = "Arcanes-Scenario-${variant.versionName}.apk"
         }
     }
 }

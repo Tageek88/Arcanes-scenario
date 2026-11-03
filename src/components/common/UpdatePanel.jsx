@@ -3,12 +3,15 @@ import { Download, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import useConfirm from "@/hooks/useConfirm";
 import useAppUpdate from "@/hooks/useAppUpdate";
+import AndroidUpdatePanel from "@/components/common/AndroidUpdatePanel";
+import { isNativeApp } from "@/lib/save/nativeShare";
 
 export default function UpdatePanel({ currentVersion }) {
   const { supported, phase, version, progress, check, install } = useAppUpdate();
   const { confirm, confirmDialog } = useConfirm();
 
-  if (!supported) return null;
+  // Windows : mise à jour intégrée. Android : recherche puis téléchargement de l'APK. Navigateur : rien.
+  if (!supported) return isNativeApp() ? <AndroidUpdatePanel currentVersion={currentVersion} /> : null;
 
   const askInstall = async (target) => {
     const accepted = await confirm({

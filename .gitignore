@@ -50,3 +50,8 @@ audit-src.zip
 lint-report.txt
 
 lint-report.txt
+
+# Android signing key (never commit, back it up elsewhere)
+*.jks
+*.keystore
+keystore.properties
