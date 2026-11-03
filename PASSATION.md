@@ -1,4 +1,4 @@
-# Passation - Arcanes & Scénario (état au 02/11/2026, version 1.9.0 publiée, 1.10.0 en préparation)
+# Passation - Arcanes & Scénario (état au 02/11/2026, version 1.11.0 publiée)
 
 À coller (ou joindre) au début d'une nouvelle conversation, avec `AGENTS.md`, `architecture.md` et, si possible, le zip du code (`audit-src.zip`).
 
@@ -9,7 +9,7 @@
 - Plateformes : Electron 44.10.1 (Windows, `electron/main.cjs` + `navigationPolicy.cjs`, ponts `window.arcanesPdf`, `window.arcanesBackup` et `window.arcanesUpdate`) et Android via Capacitor 8 (`android/`, `capacitor.config.ts`, `webDir: dist`, plugins `@capacitor/filesystem` et `@capacitor/share` pour l'export). Flux Android : `npm run build`, `npx cap sync android`, APK par Gradle depuis Android Studio, test sur téléphone en débogage Wi-Fi. Même code `src/` pour les deux. La version Android (`versionName` et `versionCode` dans `android/app/build.gradle`) est indépendante de `package.json` : `versionCode` suit la version (X*100 + Y*10 + Z : 1.5.3 = 153) et doit toujours augmenter.
 - 100 % local, pas de backend. Seul service réseau : sondages, sur Cloudflare Pages/D1 (`https://arcanes-planification.pages.dev`, dossier `cloudflare/`). Le `owner_token` des sondages est un secret stocké dans l'entité locale `SessionPoll` (donc présent dans les sauvegardes et dans les exports).
 - Dépôt : GitHub (`Tageek88/Arcanes-scenario`). Historique des versions : voir `git --no-pager tag` et `Docs/releases/`. Les releases GitHub sont créées avec `gh release create` (voir `AGENTS.md`, flux de release).
-- **État au 01/11/2026 (soir).** Dernière version publiée : **1.9.0** (tag `v1.9.0`, commit `5788ca5`, `main` = `origin/main`). 1.8.2 (mise à jour depuis l'application, impression thémée), 1.8.3 (Tailwind 4) et 1.8.4 (Electron 44.10.1, alertes `npm audit`) ont été codées avec GitHub Copilot dans VS Code ; le travail avec Claude a repris le 01/11 au soir. Seule branche volontairement non fusionnée : `Siganture` (section « Politique de signature du code » du README, pour la demande SignPath). Ménage de la racine du dépôt fait le 01/11 (fichiers parasites retirés, voir la section 5). L'utilisateur lance lui-même tous les `git` et crée la release GitHub : l'agent lui donne les commandes (voir `AGENTS.md`, flux de release).
+- **État au 01/11/2026 (soir).** Dernière version publiée : **1.11.0** (tag `v1.11.0`, `main` = `origin/main` ; le commit exact : `git --no-pager log -1 v1.11.0`). 1.9.0 (recherche globale), 1.10.0 (corbeille) et 1.11.0 (journal de séance) ont été codées avec Claude les 02 et 03/11. 1.8.2 (mise à jour depuis l'application, impression thémée), 1.8.3 (Tailwind 4) et 1.8.4 (Electron 44.10.1, alertes `npm audit`) ont été codées avec GitHub Copilot dans VS Code ; le travail avec Claude a repris le 01/11 au soir. Seule branche volontairement non fusionnée : `Siganture` (section « Politique de signature du code » du README, pour la demande SignPath). Ménage de la racine du dépôt fait le 01/11 (fichiers parasites retirés, voir la section 5). L'utilisateur lance lui-même tous les `git` et crée la release GitHub : l'agent lui donne les commandes (voir `AGENTS.md`, flux de release).
 - Alias `@/` = `src/` (jsconfig.json).
 
 ## 2. Architecture (règles à respecter)
@@ -75,8 +75,10 @@ Feuille de route décidée le 27/10/2026 (la 1.6.0 et la 1.7.0 d'origine sont fu
 | 1.8.3 | **Publiée** (01/11/2026). Migration Tailwind CSS 4, sans changement d'aspect |
 | 1.8.4 | **Publiée** (01/11/2026). Electron 44.10.1, alertes `npm audit` |
 | 1.9.0 | **Publiée** (02/11/2026). Recherche globale (Ctrl+K) dans la campagne sélectionnée : scènes, actes, PNJ, lieux, indices, notes, tables ; ouverture de l'élément sur sa page ; pas de nouvelle `db.version` |
-| 1.10.0 | **Code validé** (02/11/2026), reste la release (`scripts/release-1100.mjs`, `Docs/releases/RELEASE-1.10.0.md`). Corbeille : copie avant suppression dans `Trash` (`db.version(8)`), 30 jours, Paramètres › Corbeille, campagnes entières restaurables, PDF et sondages exclus ; locale à l'appareil (hors sauvegardes) |
-| 1.11.0 (à décider) | Journal de séance ; suivi d'initiative et de PV ; tutoriel sélectif ; échange d'icônes |
+| 1.10.0 | **Publiée** (02/11/2026). Corbeille : copie avant suppression dans `Trash` (`db.version(8)`), 30 jours, Paramètres › Corbeille, campagnes entières restaurables, PDF et sondages exclus ; locale à l'appareil (hors sauvegardes) |
+| 1.11.0 | **Publiée** (03/11/2026). Journal de séance : champ `journal` de `GameSession` (résumé, scènes jouées avec proposition de les passer en « Joué », PNJ, indices, à retenir), carte « Journal de la campagne » du Calendrier, séances dans la recherche globale ; pas de nouvelle `db.version` ; pas d'impression ni de PDF du journal |
+| 1.11.1 | **Code validé** (03/11/2026), reste la release (`scripts/release-1111.mjs`, `Docs/releases/RELEASE-1.11.1.md`). Correctifs : suppression des actes et des scènes sur la liste mobile ; compétences et équipements d'un PNJ ajoutés au catalogue du système de jeu à l'enregistrement (entrées existantes jamais modifiées) |
+| 1.12.0 (à décider) | Suivi d'initiative et de PV ; tutoriel sélectif ; échange d'icônes ; impression du journal |
 
 Inventaire (décisions, 1.6.3) : le propriétaire d'un objet est un personnage, un PNJ ou personne (réserve « Sans propriétaire » = `Campaign.inventory`) ; un objet a nom, quantité, notes, lien facultatif vers le catalogue d'équipement et champs facultatifs nommés ; le bouton des Tables ajoute le résultat du tirage ; les suggestions de noms viennent des inventaires déjà présents, pas du catalogue d'équipement ; l'équipement de la fiche reste une liste séparée ; pas de nouvelle `db.version`. Détails dans `AGENTS.md` (section INVENTORY) et `architecture.md`.
 
@@ -102,6 +104,10 @@ Ensuite, idées pour la suite, sans ordre imposé (à choisir avec l'utilisateur
 4. Décidé de laisser en l'état : `utils.js` (9 lignes, importé par 31 fichiers), `query-client.js` (10 lignes, 2 importeurs), l'entité `Quest` (la retirer demande une nouvelle `db.version`, gain nul) et les 25 alertes `npm audit` restantes (0 critique, 0 haute, toutes modérées : `@capacitor/cli` via `xcode`/`uuid`, chaîne `electron-builder`, `minimatch` des plugins ESLint ; npm ne propose que des retours en arrière majeurs).
 
 ## 6. Non vérifié
+
+- Correctifs 1.11.1 : testés à la main par l'utilisateur sur Android (APK après `cap sync`, suppression d'acte et de scène, restauration) et pour le catalogue ; les tests de base de données (`tests/gameCatalog.test.js`) ont tourné chez l'utilisateur seulement.
+
+- Journal de séance 1.11.0 : testé à la main par l'utilisateur sous Windows (02/11/2026) ; les tests purs ont tourné chez Claude, les tests de base de données seulement chez l'utilisateur ; non testé sous Android (fenêtre en tiroir, clavier virtuel).
 
 - Corbeille 1.10.0 : testée à la main par l'utilisateur sous Windows (02/11/2026) ; les tests (`tests/trash.test.js`) n'ont tourné que chez lui (Dexie absent de l'environnement de Claude) ; non testée sous Android ; effet sur de très grosses campagnes (copie de tout le contenu) non mesuré.
 

@@ -244,6 +244,16 @@ flowchart LR
 - Table `Trash` (`db.version(8)`), alimentée par `api/trashCapture.js` (`captureDeleted`, appelé par `entityFactory.delete` et `deleteMany`) : une ligne = un groupe de lignes supprimées par une même action (`withTrashGroup`). Service : `lib/services/trash.js` (liste, restauration en transaction, suppression, purge à 30 jours) ; hook `useTrash` ; écran `TrashPanel` dans Paramètres.
 - La corbeille est locale à l'appareil (`LOCAL_ONLY_TABLES`) : hors sauvegardes et sauvegarde automatique. PDF de campagne et sondages exclus.
 
+## Version 1.11.0 : journal de séance
+
+- Champ `journal` de `GameSession` (`{ summary, scene_ids, npc_ids, clue_ids, next }`), sans nouvelle table ni `db.version`. Règles pures : `lib/meta/sessionJournal.js` ; enregistrement : `lib/services/sessionJournal.js` (n'écrit que `journal`) ; chargement : `hooks/useSessionJournals.js`.
+- Interface : `SessionJournalDialog` et `SessionJournalList` (page Calendrier), bouton dans `SessionDialog`. Les séances sont aussi un groupe de la recherche globale.
+
+## Version 1.11.1 : correctifs
+
+- Le catalogue du système de jeu est alimenté à l'enregistrement d'un PNJ (`lib/services/gameCatalog.js`, appelé par `saveCodexEntry`), sans modifier les entrées existantes.
+- La liste mobile des actes et des scènes a ses menus « ⋯ » de suppression (`MobileSceneList`, `SwipeSceneRow`).
+
 ## Plateformes
 
 - **Electron 44.9.0 (Windows)** : `electron/main.cjs`, `preload.cjs` et `navigationPolicy.cjs` (`window.arcanesPdf`, `window.arcanesBackup`, sauvegardes dans `Documents\Arcanes Scenario`). La fenêtre est en `sandbox`, avec isolation de contexte ; les canaux IPC (`handle()`) n'acceptent que la page principale ; `window.open` n'autorise que `blob:` (liens `https:`/`http:`/`mailto:` envoyés au système, reste refusé) ; la fenêtre principale ne navigue que vers `file:`. Installateur via `npm run dist`.
