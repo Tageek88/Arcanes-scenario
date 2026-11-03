@@ -1,0 +1,39 @@
+name: Discord release notification
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  notify-discord:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send release notification
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          RELEASE_NAME: ${{ github.event.release.name }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_URL: ${{ github.event.release.html_url }}
+        run: |
+          node --input-type=module <<'NODE'
+          const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+          if (!webhookUrl) {
+            throw new Error("GitHub secret DISCORD_WEBHOOK_URL is missing.");
+          }
+
+          const title = process.env.RELEASE_NAME || process.env.RELEASE_TAG;
+          const content = `🎉 Nouvelle release d’Arcanes & Scénario : **${title}** (${process.env.RELEASE_TAG})\n${process.env.RELEASE_URL}`;
+          const response = await fetch(webhookUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ content }),
+          });
+
+          if (!response.ok) {
+            const details = await response.text();
+            throw new Error(`Discord returned HTTP ${response.status}: ${details}`);
+          }
+          NODE
