@@ -14,8 +14,13 @@ const VERSION_5_TABLES = [...VERSION_4_TABLES, "Quest"];
 // tables, pour que la liste n'ait jamais à charger les fichiers (jusqu'à 50 Mo chacun).
 const VERSION_6_TABLES = [...VERSION_5_TABLES, "CampaignDocument", "CampaignDocumentFile"];
 // Réglages de l'application (thème par défaut, accessibilité) : une seule ligne, sans campagne.
-export const TABLES = [...VERSION_6_TABLES, "AppSettings"];
-export const NON_CAMPAIGN_TABLES = ["Campaign", "AppSettings"];
+const VERSION_7_TABLES = [...VERSION_6_TABLES, "AppSettings"];
+// Corbeille : copie des éléments supprimés, gardés 30 jours (voir `trashCapture.js`).
+export const TABLES = [...VERSION_7_TABLES, "Trash"];
+// Tables dont le contenu n'est pas supprimé avec la campagne (la corbeille garde justement ce qu'elle a supprimé).
+export const NON_CAMPAIGN_TABLES = ["Campaign", "AppSettings", "Trash"];
+// Tables propres à cet appareil : ni dans les sauvegardes, ni dans la sauvegarde automatique, et une restauration les laisse intactes.
+export const LOCAL_ONLY_TABLES = ["Trash"];
 // Tables lourdes : exclues de la sauvegarde automatique, laissées intactes par une restauration qui ne les contient pas.
 export const FILE_TABLES = ["CampaignDocumentFile"];
 
@@ -27,7 +32,8 @@ db.version(3).stores(Object.fromEntries(VERSION_3_TABLES.map((t) => [t, "id, cam
 db.version(4).stores(Object.fromEntries(VERSION_4_TABLES.map((t) => [t, "id, campaign_id"])));
 db.version(5).stores(Object.fromEntries(VERSION_5_TABLES.map((t) => [t, "id, campaign_id"])));
 db.version(6).stores(Object.fromEntries(VERSION_6_TABLES.map((t) => [t, "id, campaign_id"])));
-db.version(7).stores(Object.fromEntries(TABLES.map((t) => [t, "id, campaign_id"])));
+db.version(7).stores(Object.fromEntries(VERSION_7_TABLES.map((t) => [t, "id, campaign_id"])));
+db.version(8).stores(Object.fromEntries(TABLES.map((t) => [t, "id, campaign_id"])));
 
 try {
   navigator.storage?.persist?.();

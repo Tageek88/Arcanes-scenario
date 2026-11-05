@@ -238,7 +238,7 @@ export default function Tables() {
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
             <AlertDialogDescription>
-              La table « {pendingDelete?.name} » et toutes ses entrées seront définitivement supprimées.
+              La table « {pendingDelete?.name} » et toutes ses entrées seront supprimées. Restaurable pendant 30 jours (Paramètres › Corbeille).
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

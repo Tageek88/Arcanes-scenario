@@ -1,5 +1,5 @@
 // === SECTION RECHERCHE GLOBALE ===
-// Cherche un texte dans une campagne : scènes, actes, PNJ, lieux, indices, notes et tables.
+// Cherche un texte dans une campagne : scènes, actes, PNJ, lieux, indices, notes, tables et séances (avec leur journal).
 // Fonctions pures, sans accès aux données : l'appelant fournit les listes déjà chargées.
 // Les mots tapés sont combinés par « et » ; accents et majuscules sont ignorés.
 
@@ -13,6 +13,7 @@ export const SEARCH_GROUPS = [
   { key: "clue", label: "Indices" },
   { key: "note", label: "Notes" },
   { key: "table", label: "Tables" },
+  { key: "session", label: "Séances" },
 ];
 
 const text = (value) => (typeof value === "string" ? value : "");
@@ -34,6 +35,10 @@ function candidates(data) {
   list(data?.tables).forEach((t) =>
     out.push({ kind: "table", id: t.id, title: text(t.name), detail: text(t.category), fields: [t.description, ...list(t.entries).map((e) => e?.text)] })
   );
+  list(data?.sessions).forEach((s) => {
+    const journal = s?.journal && typeof s.journal === "object" ? s.journal : {};
+    out.push({ kind: "session", id: s.id, title: text(s.title), detail: text(s.date).slice(0, 10), fields: [journal.summary, journal.next, s.notes] });
+  });
   return out;
 }
 
@@ -51,7 +56,7 @@ export function excerpt(source, token, radius = 36) {
 }
 
 /**
- * @param {{ scenes?: any[], acts?: any[], npcs?: any[], locations?: any[], clues?: any[], notes?: any[], tables?: any[] }} data
+ * @param {{ scenes?: any[], acts?: any[], npcs?: any[], locations?: any[], clues?: any[], notes?: any[], tables?: any[], sessions?: any[] }} data
  * @param {string} term
  * @param {{ limitPerGroup?: number }} [options]
  * @returns {{ key: string, label: string, total: number, items: { kind: string, id: string, title: string, detail: string, snippet: string }[] }[]}

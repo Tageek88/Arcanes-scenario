@@ -12,6 +12,7 @@ const data = {
   clues: [{ id: "c1", name: "Lettre", description: "signée par le dragon rouge" }],
   notes: [{ id: "x1", title: "Idées", content: "Penser au dragon" }],
   tables: [{ id: "t1", name: "Rencontres", category: "Monstres", description: "", entries: [{ text: "Un dragonnet" }] }],
+  sessions: [{ id: "g1", title: "Séance 3", date: "2026-10-30", notes: "", journal: { summary: "Les PJ affrontent le wyverne", next: "Retrouver la clé" } }],
 };
 
 describe("recherche globale", () => {
@@ -47,6 +48,14 @@ describe("recherche globale", () => {
     const [group] = searchAll(many, "scene", { limitPerGroup: 4 });
     expect(group.items).toHaveLength(4);
     expect(group.total).toBe(10);
+  });
+
+  it("cherche dans les séances et leur journal", () => {
+    const [group] = searchAll(data, "wyverne");
+    expect(group.key).toBe("session");
+    expect(group.items[0]).toMatchObject({ id: "g1", detail: "2026-10-30" });
+    expect(searchAll(data, "séance 3")[0].key).toBe("session");
+    expect(searchAll({ sessions: [{ id: "x", title: "S", journal: "n'importe quoi" }] }, "s")[0].items).toHaveLength(1);
   });
 
   it("supporte des données absentes ou malformées", () => {

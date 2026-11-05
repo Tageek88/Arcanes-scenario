@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "@/api/localClient";
 import { useToast } from "@/components/ui/use-toast";
 import { useDataRefresh } from "@/lib/context/RefreshContext";
-import { dispatchTutorialAction } from "@/utils/tutorialStorage";
 import { cleanTarget, describeTarget, isFreeNote, targetFields } from "@/lib/meta/postit";
 import { detachNote, loadTargetLookup } from "@/lib/services/notes";
 
@@ -100,7 +99,6 @@ export function useNotes(campaignId) {
         ? await api.entities.Note.update(form.id, payload)
         : await api.entities.Note.create(payload);
       if (saved?.id) applyNote({ ...optimistic, ...saved }, optimistic.id);
-      if (!form.id) dispatchTutorialAction("note-created");
       toast({ title: form.id ? "Note mise à jour" : "Note créée" });
     } catch {
       restore(previous);

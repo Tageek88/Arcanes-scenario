@@ -3,7 +3,6 @@ import { api } from "@/api/localClient";
 import { useToast } from "@/components/ui/use-toast";
 import { setSelectedCampaignId } from "@/lib/context/campaignStore";
 import { countCampaignContent, deleteCampaignCascade } from "@/lib/services/campaignDelete";
-import { dispatchTutorialAction } from "@/utils/tutorialStorage";
 
 /**
  * Création, modification et suppression (en cascade) des campagnes.
@@ -62,7 +61,6 @@ export function useCampaignActions({ campaigns, setCampaigns, setCampaignId, rel
       setCampaignId(created.id);
       setSelectedCampaignId(created.id);
       resetActiveScene();
-      dispatchTutorialAction("campaign-created");
       toast({ title: "Campagne créée" });
     } catch {
       setCampaigns(previous);

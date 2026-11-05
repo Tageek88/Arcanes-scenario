@@ -80,7 +80,7 @@ export async function createRelation(
         custom_label: type === CUSTOM_TYPE ? inverseLabel : "",
       });
     } catch (error) {
-      await table().delete(first.id).catch(() => { });
+      await table().delete(first.id, { noTrash: true }).catch(() => { });
       throw error;
     }
   });

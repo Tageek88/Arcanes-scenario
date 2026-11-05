@@ -417,7 +417,7 @@ export default function Codex() {
             <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
             <AlertDialogDescription asChild>
               <div className="stack-y-3 text-sm text-muted-foreground">
-                <p>« {pendingDelete?.entry?.name} » sera définitivement supprimé du codex.</p>
+                <p>« {pendingDelete?.entry?.name} » sera supprimé du codex. Restaurable pendant 30 jours (Paramètres › Corbeille).</p>
                 {hasChildren && (
                   <>
                     <p>

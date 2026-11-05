@@ -86,7 +86,7 @@ export default function PdfPanel({ campaignId }) {
           <p className="mt-3 text-sm text-muted-foreground">Aucun PDF pour cette campagne.</p>
         </div>
       ) : (
-        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {documents.map((document) => (
             <li key={document.id} className="glass-panel flex flex-col rounded-xl p-4">
               <button

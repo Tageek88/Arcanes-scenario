@@ -2,6 +2,7 @@
 import { db } from "./dbConfig";
 import { notifyDataChanged } from "@/lib/context/dataEvents";
 import { LOCAL_USER } from "./localUser";
+import { captureDeleted } from "./trashCapture";
 
 // === SECTION UTILS ===
 const uid = () =>
@@ -110,7 +111,12 @@ export const makeEntity = (name) => {
       return row;
     },
 
+    // `options.noTrash` : suppression sans copie dans la corbeille (retour arrière d'une création qui a échoué).
     async delete(id, options = {}) {
+      if (!options.noTrash) {
+        const existing = await table.get(id);
+        if (existing) await captureDeleted(name, [existing]);
+      }
       await table.delete(id);
       if (!options.silent) notifyDataChanged();
       return { success: true };
@@ -118,6 +124,7 @@ export const makeEntity = (name) => {
 
     async deleteMany(query = {}, options = {}) {
       const rows = await select(query);
+      if (!options.noTrash) await captureDeleted(name, rows);
       await table.bulkDelete(rows.map((r) => r.id));
       if (!options.silent) notifyDataChanged();
       return { deleted: rows.length };

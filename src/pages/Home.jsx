@@ -31,6 +31,7 @@ import { takePendingOpen } from "@/lib/context/searchStore";
 import { useCampaigns } from "@/hooks/useCampaigns";
 import { useCampaignContent } from "@/hooks/useCampaignContent";
 import { useCampaignActions } from "@/hooks/useCampaignActions";
+import useDemoAction from "@/hooks/useDemoAction";
 import GameCharacterEditor from "@/components/game/GameCharacterEditor";
 import { useGameSheet } from "@/hooks/useGameSheet";
 
@@ -214,6 +215,10 @@ export default function Home() {
     setCampaignOpen(true);
   };
 
+  // Visite guidée : la fenêtre « Nouvelle campagne » s'ouvre et se referme toute seule (voir config/tutorials.js).
+  useDemoAction("home.openCampaignDialog", openNewCampaign);
+  useDemoAction("home.closeCampaignDialog", () => setCampaignOpen(false));
+
   const openEditCampaign = () => {
     if (!campaign) return;
     setEditingCampaignId(campaign.id);
@@ -305,7 +310,7 @@ export default function Home() {
         </div>
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.9fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.9fr)_minmax(0,1fr)]">
         <section>
           {!campaignId ? (
             <div className="rounded-xl border border-dashed border-border p-10 text-center">
@@ -373,6 +378,8 @@ export default function Home() {
                   onCycleStatus={cycleStatus}
                   onAddScene={openNewScene}
                   onAddAct={addAct}
+                  onDeleteAct={(act) => setPendingDelete({ type: "act", item: act })}
+                  onDeleteScene={(scene) => setPendingDelete({ type: "scene", item: scene })}
                 />
               </div>
             </>
@@ -487,8 +494,8 @@ export default function Home() {
             <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
             <AlertDialogDescription>
               {pendingDelete?.type === "act"
-                ? `L'acte « ${pendingDelete?.item?.title} » et toutes ses scènes seront définitivement supprimés.`
-                : `La scène « ${pendingDelete?.item?.title} » sera définitivement supprimée.`}
+                ? `L'acte « ${pendingDelete?.item?.title} » et toutes ses scènes seront supprimés. Restaurable pendant 30 jours (Paramètres › Corbeille).`
+                : `La scène « ${pendingDelete?.item?.title} » sera supprimée. Restaurable pendant 30 jours (Paramètres › Corbeille).`}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -522,7 +529,7 @@ export default function Home() {
                   <p>Cette campagne est vide : seule la campagne sera supprimée.</p>
                 ) : (
                   <>
-                    <p>Seront définitivement supprimés :</p>
+                    <p>Seront supprimés :</p>
                     <ul className="list-disc pl-5">
                       {(pendingCampaignDelete?.counts ?? []).map((c) => (
                         <li key={c.entity}>{c.text}</li>
@@ -530,7 +537,7 @@ export default function Home() {
                     </ul>
                   </>
                 )}
-                <p className="font-medium text-destructive">Cette action est irréversible.</p>
+                <p className="font-medium">Restaurable pendant 30 jours (Paramètres › Corbeille). Les PDF de campagne et les sondages sont supprimés définitivement.</p>
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>

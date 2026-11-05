@@ -1,5 +1,11 @@
 import React from "react";
-import { Plus } from "lucide-react";
+import { MoreHorizontal, Plus, Trash2 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Accordion,
   AccordionItem,
@@ -21,6 +27,8 @@ export default function MobileSceneList({
   onCycleStatus,
   onAddScene,
   onAddAct,
+  onDeleteAct,
+  onDeleteScene,
 }) {
   const sorted = [...acts].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   const orphans = scenes.filter((s) => !s.act_id || !acts.some((a) => a.id === s.act_id));
@@ -71,17 +79,37 @@ export default function MobileSceneList({
                     onOpen={onOpenScene}
                     onSelect={onSelectScene}
                     onToggleStatus={onCycleStatus}
+                    onDelete={onDeleteScene}
                   />
                 ))}
-              <Button
-                data-tutorial="btn-new-scene"
-                variant="ghost"
-                size="sm"
-                onClick={() => onAddScene(group.id === "_none" ? null : group.id)}
-                className="justify-start text-muted-foreground hover:text-primary"
-              >
-                <Plus className="mr-2 h-4 w-4" /> Scène
-              </Button>
+              <div className="flex items-center justify-between">
+                <Button
+                  data-tutorial="btn-new-scene"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onAddScene(group.id === "_none" ? null : group.id)}
+                  className="justify-start text-muted-foreground hover:text-primary"
+                >
+                  <Plus className="mr-2 h-4 w-4" /> Scène
+                </Button>
+                {group.id !== "_none" && onDeleteAct && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-11 w-11" aria-label={`Actions de l'acte ${group.title}`}>
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        onClick={() => onDeleteAct(acts.find((act) => act.id === group.id))}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" /> Supprimer l'acte
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </div>
             </AccordionContent>
           </AccordionItem>
         ))}

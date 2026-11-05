@@ -5,6 +5,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useDataRefresh } from "@/lib/context/RefreshContext";
 import { CODEX_TABS, KIND_META } from "@/lib/meta/codex";
 import { deleteLocation } from "@/lib/services/locationTree";
+import { withTrashGroup } from "@/lib/services/trash";
 import { deleteNpcRelations, loadRelations } from "@/lib/services/npcRelations";
 
 /**
@@ -110,14 +111,19 @@ export function useCodex(campaignId, tab) {
    */
   const deleteEntry = async (pending, mode) => {
     try {
-      await withDataBatch(async () => {
-        if (pending.kind === "location") {
-          await deleteLocation(pending.entry, items, mode);
-        } else {
-          if (pending.kind === "npc") await deleteNpcRelations(pending.entry.campaign_id, pending.entry.id);
-          await api.entities[KIND_META[pending.kind].entity].delete(pending.entry.id);
-        }
-      });
+      const entity = KIND_META[pending.kind].entity;
+      const label = String(pending.entry.name || "").trim() || entity;
+      // Un seul groupe de corbeille : le lieu (et ses sous-lieux), le PNJ et ses relations se restaurent ensemble.
+      await withTrashGroup({ label, kind: entity, campaignId: pending.entry.campaign_id }, () =>
+        withDataBatch(async () => {
+          if (pending.kind === "location") {
+            await deleteLocation(pending.entry, items, mode);
+          } else {
+            if (pending.kind === "npc") await deleteNpcRelations(pending.entry.campaign_id, pending.entry.id);
+            await api.entities[entity].delete(pending.entry.id);
+          }
+        })
+      );
       refresh();
       toast({ title: "Élément supprimé" });
     } catch (error) {

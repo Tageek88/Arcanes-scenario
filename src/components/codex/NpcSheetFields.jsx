@@ -153,7 +153,7 @@ export default function NpcSheetFields({ form, set, generator, generation }) {
       {names.length > 0 && (
         <div className="stack-y-2">
           <FieldLabel label="Caractéristiques" locked={!!locks.characteristics} onToggle={() => toggleLock("characteristics")} />
-          <div className="grid gap-2 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {names.map((name) => {
               const range = rangeOf(name);
               const entry = characteristics[name] || {};

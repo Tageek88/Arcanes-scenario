@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { useNpcRelations } from "@/hooks/useNpcRelations";
-import { dispatchTutorialAction } from "@/utils/tutorialStorage";
 import {
   CUSTOM_TYPE,
   RELATION_OPTIONS,
@@ -127,7 +126,6 @@ export default function NpcRelations({ npc, campaignId }) {
       await reload();
       setEditor(null);
       toast({ title: row ? "Relation mise à jour" : "Relation ajoutée" });
-      dispatchTutorialAction("relation-saved");
     } catch (err) {
       console.error("Échec relation :", err);
       toast({ variant: "destructive", title: "Enregistrement impossible", description: "La relation n'a pas été enregistrée." });

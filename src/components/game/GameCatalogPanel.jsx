@@ -115,7 +115,7 @@ export default function GameCatalogPanel({ campaignId, kind, skillRollModifier =
           {items.length === 0 ? text.empty : "Aucun résultat."}
         </div>
       ) : (
-        <ul className="grid gap-3 md:grid-cols-2">
+        <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
           {shown.map((item) => {
             const names = item.field_names || (item.fields || []).map((field) => field.name);
             return (

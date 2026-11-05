@@ -1,5 +1,5 @@
 import React from "react";
-import { Trash2 } from "lucide-react";
+import { BookOpenText, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,7 +14,6 @@ import {
 import ResponsiveDialog from "@/components/common/ResponsiveDialog";
 import { SESSION_STATUS_ORDER, SESSION_STATUS } from "@/lib/meta/sessionMeta";
 import { NEW_CAMPAIGN } from "@/lib/meta/sessionCampaign";
-import { dispatchTutorialAction } from "@/utils/tutorialStorage";
 
 export default function SessionDialog({
   open,
@@ -26,6 +25,7 @@ export default function SessionDialog({
   onSave,
   isEditing,
   onDelete,
+  onOpenJournal,
   campaignName = "",
   campaigns = [],
   activeCampaignId = "",
@@ -38,7 +38,12 @@ export default function SessionDialog({
 
   const footer = (
     <div className="flex items-center justify-between gap-2">
-      <div>
+      <div className="flex flex-wrap items-center gap-1">
+        {isEditing && onOpenJournal && (
+          <Button variant="outline" onClick={onOpenJournal}>
+            <BookOpenText className="mr-2 h-4 w-4" /> Journal de séance
+          </Button>
+        )}
         {isEditing && onDelete && (
           <Button
             variant="ghost"
@@ -167,7 +172,6 @@ export default function SessionDialog({
             value={form.scene_id || "_none"}
             onValueChange={(value) => {
               setForm((f) => ({ ...f, scene_id: value === "_none" ? "" : value }));
-              if (value !== "_none") dispatchTutorialAction("session-scene-selected");
             }}
           >
             <SelectTrigger data-tutorial="calendar-scenario">

@@ -23,6 +23,9 @@ import "@fontsource/jetbrains-mono/400.css";
 import "@fontsource/jetbrains-mono/500.css";
 import { initAutosave } from '@/lib/save/autosave'
 initAutosave()
+import { purgeExpiredTrash } from '@/lib/services/trash'
+// Corbeille : les éléments supprimés depuis plus de 30 jours disparaissent au démarrage.
+purgeExpiredTrash().catch((error) => console.warn('Purge de la corbeille impossible :', error))
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <App />

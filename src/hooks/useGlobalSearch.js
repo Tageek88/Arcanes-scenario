@@ -3,7 +3,7 @@ import { api } from "@/api/localClient";
 import { useToast } from "@/components/ui/use-toast";
 import { getSelectedCampaignId } from "@/lib/context/campaignStore";
 
-const EMPTY = { scenes: [], acts: [], npcs: [], locations: [], clues: [], notes: [], tables: [] };
+const EMPTY = { scenes: [], acts: [], npcs: [], locations: [], clues: [], notes: [], tables: [], sessions: [] };
 const LIMIT = 1000;
 
 /**
@@ -28,9 +28,9 @@ export function useGlobalSearch(open) {
     let alive = true;
     setLoading(true);
     const load = (entity) => api.entities[entity].filter({ campaign_id: campaignId }, { limit: LIMIT }).then((res) => res.items);
-    Promise.all(["Scene", "Act", "NPC", "Location", "Clue", "Note", "RollTable"].map(load))
-      .then(([scenes, acts, npcs, locations, clues, notes, tables]) => {
-        if (alive) setData({ scenes, acts, npcs, locations, clues, notes, tables });
+    Promise.all(["Scene", "Act", "NPC", "Location", "Clue", "Note", "RollTable", "GameSession"].map(load))
+      .then(([scenes, acts, npcs, locations, clues, notes, tables, sessions]) => {
+        if (alive) setData({ scenes, acts, npcs, locations, clues, notes, tables, sessions });
       })
       .catch((error) => {
         console.error("Chargement de la recherche impossible :", error);

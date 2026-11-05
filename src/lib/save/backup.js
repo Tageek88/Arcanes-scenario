@@ -1,4 +1,4 @@
-import { db, TABLES, FILE_TABLES } from "@/api/localClient";
+import { db, TABLES, FILE_TABLES, LOCAL_ONLY_TABLES } from "@/api/localClient";
 import { isNativeApp, shareTextFile } from "@/lib/save/nativeShare";
 
 const APP_ID = "arcanes-scenario";
@@ -26,6 +26,7 @@ export function validateBackupPayload(parsed) {
 export async function buildBackupPayload({ light = false } = {}) {
   const data = {};
   for (const t of TABLES) {
+    if (LOCAL_ONLY_TABLES.includes(t)) continue;
     if (light && FILE_TABLES.includes(t)) continue;
     data[t] = await db.table(t).toArray();
   }
@@ -36,6 +37,8 @@ export async function restoreFromPayload(parsed) {
   validateBackupPayload(parsed);
   await db.transaction("rw", TABLES.map((t) => db.table(t)), async () => {
     for (const t of TABLES) {
+      // La corbeille est propre à cet appareil : une restauration ne la touche pas.
+      if (LOCAL_ONLY_TABLES.includes(t)) continue;
       // Une sauvegarde sans le contenu des PDF (sauvegarde automatique, ancienne version) ne les efface pas.
       if (FILE_TABLES.includes(t) && parsed.data[t] == null) continue;
       await db.table(t).clear();

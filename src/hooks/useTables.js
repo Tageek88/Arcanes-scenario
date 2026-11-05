@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { api } from "@/api/localClient";
 import { useToast } from "@/components/ui/use-toast";
 import { useDataRefresh } from "@/lib/context/RefreshContext";
-import { dispatchTutorialAction } from "@/utils/tutorialStorage";
 
 /**
  * @typedef {{ text?: string; weight?: number }} RollTableEntry
@@ -101,7 +100,6 @@ export function useTables(campaignId, category) {
       const saved = form.id
         ? await api.entities.RollTable.update(form.id, payload)
         : await api.entities.RollTable.create(payload);
-      if (!form.id) dispatchTutorialAction("table-created");
       if (saved?.id) {
         applyTable(saved, form.id);
       } else {

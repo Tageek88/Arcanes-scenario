@@ -1,10 +1,11 @@
 import { api, db } from "@/api/localClient";
 import { withDataBatch } from "@/lib/context/dataEvents";
+import { withTrashGroup } from "@/api/trashCapture";
 
 export const MAIN_QUEST_TITLE = "Quête principale";
 
 const LIMIT = 5000;
-const TABLES = ["Quest", "Act", "Scene"];
+const TABLES = ["Quest", "Act", "Scene", "Trash"];
 
 const byOrder = (a, b) => (a.order ?? 0) - (b.order ?? 0);
 const newGroupId = () => globalThis.crypto?.randomUUID?.() || `group-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
@@ -132,7 +133,9 @@ export async function renameQuest(questId, title) {
 
 /** Supprime la quête, ses actes et ses scènes (copies de scènes récurrentes comprises). Rien ne change dans les autres quêtes. */
 export async function deleteQuest(campaignId, questId) {
-  return withDataBatch(() =>
+  const quest = await db.table("Quest").get(questId);
+  const label = String(quest?.title || "").trim() || "Quête sans titre";
+  return withTrashGroup({ label, kind: "Quest", campaignId }, () => withDataBatch(() =>
     db.transaction("rw", TABLES, async () => {
       const [acts, scenes] = await Promise.all([listCampaign("Act", campaignId), listCampaign("Scene", campaignId)]);
       const actIds = new Set(acts.filter((a) => a.quest_id === questId).map((a) => a.id));
@@ -142,7 +145,7 @@ export async function deleteQuest(campaignId, questId) {
       await api.entities.Quest.delete(questId, { silent: true });
       return { scenes: sceneIds.length, acts: actIds.size };
     })
-  );
+  ));
 }
 
 /**

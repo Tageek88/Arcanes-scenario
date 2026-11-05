@@ -91,7 +91,7 @@ export default function InventoryPanel({ campaignId }) {
           </p>
         </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {shown.map((owner) => (
             <section key={`${owner.kind}-${owner.id}`} className="stack-y-3 rounded-xl border border-border bg-card/50 p-4">
               <div className="flex items-start justify-between gap-2">

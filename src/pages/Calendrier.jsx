@@ -18,6 +18,8 @@ import {
 import MonthGrid from "@/components/calendar/MonthGrid";
 import SessionDialog from "@/components/calendar/SessionDialog";
 import UpcomingSessions from "@/components/calendar/UpcomingSessions";
+import SessionJournalDialog from "@/components/calendar/SessionJournalDialog";
+import SessionJournalList from "@/components/calendar/SessionJournalList";
 import { dateKey, sessionStatusMeta } from "@/lib/meta/sessionMeta";
 import { NEW_CAMPAIGN } from "@/lib/meta/sessionCampaign";
 import PrintButton from "@/components/print/PrintButton";
@@ -32,6 +34,8 @@ import QuestSelect from "@/components/common/QuestSelect";
 import { useScenes } from "@/hooks/useScenes";
 import { useGameSessions } from "@/hooks/useGameSessions";
 import { useSessionPolls } from "@/hooks/useSessionPolls";
+import { useSessionJournals } from "@/hooks/useSessionJournals";
+import { takePendingOpen } from "@/lib/context/searchStore";
 
 
 const emptyForm = (date) => ({
@@ -72,6 +76,18 @@ export default function Calendrier() {
   const rawData = useGameSessions(campaignId, month, { allCampaigns: showAll });
   const { loading, saving, saveSession, deleteSession } = rawData;
   const { polls, deletingPollId, updatePollCard, deletePoll } = useSessionPolls(campaignId);
+
+  // Journal de séance : compte rendu d'une séance de la campagne sélectionnée.
+  const [journalSession, setJournalSession] = useState(null);
+  const journals = useSessionJournals(campaignId, { withRefs: !!journalSession });
+  const journalScenes = useScenes(journalSession?.campaign_id || "");
+  const openJournal = (session) => setJournalSession(session);
+  // Séance choisie dans la recherche globale : son journal s'ouvre dès que les séances sont chargées.
+  useEffect(() => {
+    const request = takePendingOpen(["session"], (id) => journals.all.some((session) => session.id === id));
+    const session = request && journals.all.find((item) => item.id === request.id);
+    if (session) setJournalSession(session);
+  }, [journals.all]);
 
   const campaignNames = useMemo(() => new Map(campaigns.map((item) => [item.id, item.name])), [campaigns]);
   const sessions = useMemo(() => withCampaignName(rawData.sessions, showAll, campaignNames), [rawData.sessions, showAll, campaignNames]);
@@ -179,7 +195,7 @@ export default function Calendrier() {
           />
           <QuestSelect quests={quests} value={questId} onValueChange={selectQuest} />
           {campaigns.length > 1 && (
-            <label className="flex min-h-10 cursor-pointer items-center gap-2 rounded-md border border-border px-3 text-sm text-foreground">
+            <label data-tutorial="calendar-all-campaigns" className="flex min-h-10 cursor-pointer items-center gap-2 rounded-md border border-border px-3 text-sm text-foreground">
               <Switch checked={showAll} onCheckedChange={(value) => { setShowAll(value); setSelectedDate(""); }} aria-label="Afficher toutes les campagnes" />
               Toutes les campagnes
             </label>
@@ -200,7 +216,7 @@ export default function Calendrier() {
         </div>
       ) : (
         <div
-          className="grid gap-6 lg:grid-cols-[minmax(0,2.2fr)_minmax(0,1fr)]"
+          className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,2.2fr)_minmax(0,1fr)]"
           onClick={() => setSelectedDate("")}
         >
           <section className="stack-y-4">
@@ -265,6 +281,8 @@ export default function Calendrier() {
             <div data-tutorial="calendar-upcoming">
               <UpcomingSessions sessions={upcoming} onOpen={openEdit} onAdd={() => openNew()} />
             </div>
+
+            <SessionJournalList entries={journals.entries} loading={journals.loading} onOpen={openJournal} />
 
             {sessions.length > 0 && (
               <div className="rounded-xl border border-border bg-card/50 p-4">
@@ -397,6 +415,28 @@ export default function Calendrier() {
           setDialogOpen(false);
           setPendingDelete(form);
         }}
+        // Le journal est celui de la campagne sélectionnée : pas de bouton pour la session d'une autre campagne (vue « toutes les campagnes »).
+        onOpenJournal={
+          (form.campaign_id || campaignId) === campaignId
+            ? () => {
+                const session = journals.all.find((item) => item.id === form.id);
+                if (!session) return;
+                setDialogOpen(false);
+                openJournal(session);
+              }
+            : undefined
+        }
+      />
+
+      <SessionJournalDialog
+        open={!!journalSession}
+        onOpenChange={(open) => !open && setJournalSession(null)}
+        session={journalSession}
+        scenes={journalScenes}
+        npcs={journals.npcs}
+        clues={journals.clues}
+        saving={journals.saving}
+        onSave={journals.saveJournal}
       />
 
       <SessionPollDialog
@@ -416,7 +456,7 @@ export default function Calendrier() {
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
             <AlertDialogDescription>
-              La session « {pendingDelete?.title} » sera définitivement supprimée.
+              La session « {pendingDelete?.title} » sera supprimée. Restaurable pendant 30 jours (Paramètres › Corbeille).
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

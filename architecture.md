@@ -154,7 +154,7 @@ flowchart LR
 - `useConfirm()` (`hooks/useConfirm.jsx`) remplace tous les `window.confirm` : `BackupPanel`, `AutosavePanel` (restauration) et `GameCharacterEditor` (×2). Il renvoie une promesse et fournit `confirmDialog` à afficher dans le JSX.
 - `deleteCampaignCascade` (`lib/services/campaignDelete.js`) s'exécute dans une seule transaction Dexie : en cas d'erreur, y compris la vérification finale, rien n'est supprimé.
 - Android : `lib/save/nativeShare.js` exporte la sauvegarde par la feuille de partage (plugins `@capacitor/filesystem` et `@capacitor/share`, chargés à la demande). Sans sauvegarde automatique (Android, navigateur), `BackupPanel` exporte l'état actuel avant tout import.
-- Plus d'avertissement de lint : `usePageFilter` destructure `setFilter` ; `TutorialOverlay` garde un `eslint-disable-next-line` justifié (mesure à chaque rendu, sans boucle).
+- Plus d'avertissement de lint : `usePageFilter` destructure `setFilter`.
 - Fins de ligne LF et UTF-8 sans BOM : `.gitattributes` et `.editorconfig` à la racine.
 - `useCodexList` échappe le terme de recherche avant de le passer à `$regex` (une recherche comme `a.c` ou `(` est traitée comme du texte).
 - Testés à la main par l'utilisateur le 17/10/2026, tout passe : export Android (feuille de partage), import avec export préalable, les confirmations `useConfirm` (dont celle de la fiche personnage sur mobile) et la suppression de campagne.
@@ -253,6 +253,13 @@ flowchart LR
 
 - Le catalogue du système de jeu est alimenté à l'enregistrement d'un PNJ (`lib/services/gameCatalog.js`, appelé par `saveCodexEntry`), sans modifier les entrées existantes.
 - La liste mobile des actes et des scènes a ses menus « ⋯ » de suppression (`MobileSceneList`, `SwipeSceneRow`).
+
+## Version 1.12.0 : tutoriel interactif
+
+- Trois visites guidées (`tour-1` application vide, `tour-2` et `tour-3` sur une campagne d'exemple), lancées depuis Paramètres › Tutoriel. Une visite ne fait rien utiliser : elle change d'onglet, ouvre et referme elle-même fiches et fenêtres, et affiche une bulle à côté de l'élément, sans assombrir l'écran.
+- `config/tutorials.js` (étapes), `components/Tutorial/` (`TutorialProvider`, `TutorialOverlay`, `TutorialCenter`), `lib/tutorial/placement.js` (placement de la bulle, pur) et `lib/tutorial/dom.js` (recherche d'éléments, actions génériques `dom.click` et `dom.closeDialog`), `lib/context/tutorialBridge.js` + `hooks/useDemoAction.js` (actions déclarées par une page).
+- Campagne d'exemple : `data/demoCampaign.json` (identifiants fixes), `lib/services/demoCampaign.js` (ajout en une transaction, suppression complète), `lib/services/demoTour.js` (entrée et sortie : la campagne de la personne est remise en place), `lib/meta/demoDates.js`, `hooks/useDemoCampaign.js`. Pas de nouvelle `db.version`.
+- Tests : `tests/tours.test.js` (cohérence des étapes avec le code et la campagne d'exemple), `tests/tutorialPlacement.test.js`, `tests/tutorialBridge.test.js`, `tests/demoCampaign.test.js`, `tests/demoTour.test.js`, `tests/demoDates.test.js`. Notes détaillées : `Docs/Tutoriel.md`.
 
 ## Plateformes
 

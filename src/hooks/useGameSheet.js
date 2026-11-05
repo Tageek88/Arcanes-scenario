@@ -3,7 +3,6 @@ import { api } from "@/api/localClient";
 import { withDataBatch } from "@/lib/context/dataEvents";
 import { useToast } from "@/components/ui/use-toast";
 import { useDataRefresh } from "@/lib/context/RefreshContext";
-import { dispatchTutorialAction } from "@/utils/tutorialStorage";
 import { characteristicNamesOf, renameScaleCharacteristics, sanitizeScale } from "@/lib/generators/npcScale";
 import { renamePcScaleCharacteristics, sanitizePcScale } from "@/lib/generators/pcScale";
 import { renameCharacteristicNotes } from "@/lib/services/notes";
@@ -153,7 +152,6 @@ export function useGameSheet(campaignId) {
       }
       setModel(readModel(saved));
       onSaved?.();
-      if (!modelId) dispatchTutorialAction("model-created");
       toast(valuesMigrated
         ? { title: "Modèle enregistré" }
         : { variant: "destructive", title: "Modèle enregistré, migration incomplète", description: "Certaines valeurs de caractéristiques des personnages n’ont pas pu être renommées." });
@@ -222,7 +220,6 @@ export function useGameSheet(campaignId) {
         saved,
       ].sort((a, b) => a.name.localeCompare(b.name, "fr", { numeric: true })));
       onSaved?.();
-      if (!draft.id) dispatchTutorialAction("character-created");
 
       try {
         const nextSkills = [...skillCatalog];

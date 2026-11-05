@@ -1,4 +1,4 @@
-# Passation - Arcanes & Scénario (état au 02/11/2026, version 1.11.0 publiée)
+# Passation - Arcanes & Scénario (état au 03/11/2026, version 1.11.3 publiée)
 
 À coller (ou joindre) au début d'une nouvelle conversation, avec `AGENTS.md`, `architecture.md` et, si possible, le zip du code (`audit-src.zip`).
 
@@ -77,7 +77,9 @@ Feuille de route décidée le 27/10/2026 (la 1.6.0 et la 1.7.0 d'origine sont fu
 | 1.9.0 | **Publiée** (02/11/2026). Recherche globale (Ctrl+K) dans la campagne sélectionnée : scènes, actes, PNJ, lieux, indices, notes, tables ; ouverture de l'élément sur sa page ; pas de nouvelle `db.version` |
 | 1.10.0 | **Publiée** (02/11/2026). Corbeille : copie avant suppression dans `Trash` (`db.version(8)`), 30 jours, Paramètres › Corbeille, campagnes entières restaurables, PDF et sondages exclus ; locale à l'appareil (hors sauvegardes) |
 | 1.11.0 | **Publiée** (03/11/2026). Journal de séance : champ `journal` de `GameSession` (résumé, scènes jouées avec proposition de les passer en « Joué », PNJ, indices, à retenir), carte « Journal de la campagne » du Calendrier, séances dans la recherche globale ; pas de nouvelle `db.version` ; pas d'impression ni de PDF du journal |
-| 1.11.1 | **Code validé** (03/11/2026), reste la release (`scripts/release-1111.mjs`, `Docs/releases/RELEASE-1.11.1.md`). Correctifs : suppression des actes et des scènes sur la liste mobile ; compétences et équipements d'un PNJ ajoutés au catalogue du système de jeu à l'enregistrement (entrées existantes jamais modifiées) |
+| 1.11.1 | **Publiée** (03/11/2026) (tag `v1.11.1`). Correctifs : suppression des actes et des scènes sur la liste mobile ; compétences et équipements d'un PNJ ajoutés au catalogue du système de jeu à l'enregistrement (entrées existantes jamais modifiées) |
+| 1.11.2 | **Publiée** (tag `v1.11.2`, ajout d'une notification Discord à la release ; détail non documenté ici, voir `git --no-pager log`). |
+| 1.11.3 | **Publiée** (03/11/2026). Mise à jour Android : bouton « Rechercher les mises à jour » (Paramètres › À propos, `AndroidUpdatePanel.jsx`, `lib/services/androidUpdate.js`), signature fixe par `android/keystore.properties` (clé de debug conservée, sans réinstallation), APK nommé `Arcanes-Scenario-X.Y.Z.apk`, `build.gradle` remis à jour (il était resté à 1.10.0). Testé de bout en bout par l'utilisateur : mise à jour Windows et Android fonctionnelles. Voir `AGENTS.md`, ANDROID UPDATE AND SIGNING. |
 | 1.12.0 (à décider) | Suivi d'initiative et de PV ; tutoriel sélectif ; échange d'icônes ; impression du journal |
 
 Inventaire (décisions, 1.6.3) : le propriétaire d'un objet est un personnage, un PNJ ou personne (réserve « Sans propriétaire » = `Campaign.inventory`) ; un objet a nom, quantité, notes, lien facultatif vers le catalogue d'équipement et champs facultatifs nommés ; le bouton des Tables ajoute le résultat du tirage ; les suggestions de noms viennent des inventaires déjà présents, pas du catalogue d'équipement ; l'équipement de la fiche reste une liste séparée ; pas de nouvelle `db.version`. Détails dans `AGENTS.md` (section INVENTORY) et `architecture.md`.

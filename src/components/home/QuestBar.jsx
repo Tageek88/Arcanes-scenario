@@ -32,7 +32,7 @@ export default function QuestBar({ quests, quest, actCount, sceneCount, onSelect
     const content = `${plural(actCount, "acte", "actes")} et ${plural(sceneCount, "scène", "scènes")}`;
     const accepted = await confirm({
       title: `Supprimer la quête « ${quest.title} » ?`,
-      description: `${content} de cette quête seront définitivement supprimés, y compris les copies de scènes récurrentes qu'elle contient. Les autres quêtes ne sont pas modifiées.`,
+      description: `${content} de cette quête seront supprimés (restaurable pendant 30 jours dans Paramètres › Corbeille), y compris les copies de scènes récurrentes qu'elle contient. Les autres quêtes ne sont pas modifiées.`,
       confirmLabel: "Supprimer",
     });
     if (accepted) onDelete(quest);

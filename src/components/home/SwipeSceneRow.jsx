@@ -1,9 +1,12 @@
 import React, { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { SCENE_STATUS } from "@/lib/meta/sceneMeta";
+import { MoreHorizontal, Trash2 } from "lucide-react";
 import PostItButton from "@/components/common/PostItButton";
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
-export default function SwipeSceneRow({ scene, active, npcs, locations, clues, onOpen, onSelect, onToggleStatus }) {
+export default function SwipeSceneRow({ scene, active, npcs, locations, clues, onOpen, onSelect, onToggleStatus, onDelete }) {
   const startX = useRef(null);
   const rowRef = useRef(null);
   const meta = SCENE_STATUS[scene.status] || SCENE_STATUS.brouillon;
@@ -87,7 +90,7 @@ export default function SwipeSceneRow({ scene, active, npcs, locations, clues, o
           </div>
         )}
       </button>
-      <div className="flex items-center gap-2 justify-end shrink-0">
+      <div className="flex flex-wrap items-center gap-2 justify-end shrink-0">
         <PostItButton target={{ kind: "scene", id: scene.id }} label={`la scène « ${scene.title || "Sans titre"} »`} />
         <button type="button" onClick={() => onToggleStatus(scene)} className={cn("tag border", meta.badge)}>
           {meta.label}
@@ -100,6 +103,20 @@ export default function SwipeSceneRow({ scene, active, npcs, locations, clues, o
         >
           Ouvrir
         </button>
+        {onDelete && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-11 w-11" aria-label={`Actions de la scène ${scene.title}`}>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => onDelete(scene)} className="text-destructive focus:text-destructive">
+                <Trash2 className="mr-2 h-4 w-4" /> Supprimer la scène
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
     </div>
   );

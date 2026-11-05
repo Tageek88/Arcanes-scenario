@@ -25,7 +25,6 @@ import {
   refreshSessionPoll,
   savePollServiceUrl,
 } from "@/lib/services/sessionPolls";
-import { dispatchTutorialAction } from "@/utils/tutorialStorage";
 
 /**
  * État et actions de la fenêtre « Sondages des joueurs » :
@@ -256,7 +255,6 @@ export function useSessionPollManager({ open, onOpenChange, campaignId, pollToEd
       });
       setPolls((current) => [saved, ...current]);
       onPollChange?.(saved);
-      dispatchTutorialAction("poll-created");
       resetForm();
       onOpenChange(false);
       toast({ title: "Sondage créé", description: "Le lien est prêt à être partagé avec les joueurs." });

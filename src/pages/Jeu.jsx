@@ -222,7 +222,7 @@ export default function Jeu() {
               </p>
             </div>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {visible.map((character) => (
                 <article
                   key={character.id}

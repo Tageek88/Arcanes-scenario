@@ -1,5 +1,6 @@
 import { api, db, FILE_TABLES } from "@/api/localClient";
 import { withDataBatch } from "@/lib/context/dataEvents";
+import { TRASH, withTrashGroup } from "@/api/trashCapture";
 
 // Enfants d'abord, la campagne en dernier.
 export const LINKED_ENTITIES = [
@@ -44,9 +45,14 @@ export async function countCampaignContent(campaignId) {
 // Supprime tout le contenu, vérifie qu'il ne reste rien, puis supprime la campagne.
 // Le tout dans une seule transaction Dexie : si une étape échoue (y compris la vérification),
 // rien n'est supprimé.
+// Le contenu est copié dans la corbeille avant d'être supprimé (sauf les PDF de campagne et les sondages) :
+// la campagne se restaure en bloc pendant 30 jours.
 export async function deleteCampaignCascade(campaignId) {
-  const tableNames = [...LINKED_ENTITIES.map(({ entity }) => entity), ...FILE_TABLES, "Campaign"];
-  await withDataBatch(() =>
+  const tableNames = [...LINKED_ENTITIES.map(({ entity }) => entity), ...FILE_TABLES, "Campaign", TRASH];
+  const campaign = await db.table("Campaign").get(campaignId);
+  const label = String(campaign?.name || "").trim() || "Campagne sans nom";
+  await withTrashGroup({ label, kind: "Campaign", campaignId }, () =>
+    withDataBatch(() =>
     db.transaction("rw", tableNames, async () => {
       // Contenu des fichiers : supprimé par clés, sans charger les fichiers en mémoire.
       for (const table of FILE_TABLES) {
@@ -62,5 +68,6 @@ export async function deleteCampaignCascade(campaignId) {
       }
       await api.entities.Campaign.delete(campaignId);
     })
+    )
   );
 }

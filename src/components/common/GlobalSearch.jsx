@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Dices, GitBranch, Layers, MapPin, Puzzle, Search, StickyNote, Users } from "lucide-react";
+import { CalendarDays, Dices, GitBranch, Layers, MapPin, Puzzle, Search, StickyNote, Users } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { useGlobalSearch } from "@/hooks/useGlobalSearch";
@@ -16,6 +16,7 @@ const KINDS = {
   clue: { to: "/codex", icon: Puzzle },
   note: { to: "/notes", icon: StickyNote },
   table: { to: "/tables", icon: Dices },
+  session: { to: "/calendrier", icon: CalendarDays },
 };
 
 /**
@@ -85,7 +86,7 @@ export default function GlobalSearch() {
       <DialogContent className="top-[12%] translate-y-0 gap-0 p-0 sm:max-w-xl">
         <DialogTitle className="sr-only">Recherche dans la campagne</DialogTitle>
         <DialogDescription className="sr-only">
-          Tapez pour chercher dans les scènes, actes, PNJ, lieux, indices, notes et tables. Flèches pour choisir, Entrée pour ouvrir.
+          Tapez pour chercher dans les scènes, actes, PNJ, lieux, indices, notes, tables et séances. Flèches pour choisir, Entrée pour ouvrir.
         </DialogDescription>
         <div className="flex items-center gap-2 border-b border-border px-4 py-3 pr-12">
           <Search className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
@@ -106,7 +107,7 @@ export default function GlobalSearch() {
           {!hasCampaign && <p className="px-3 py-6 text-center text-sm text-muted-foreground">Aucune campagne sélectionnée.</p>}
           {hasCampaign && !term.trim() && (
             <p className="px-3 py-6 text-center text-sm text-muted-foreground">
-              {loading ? "Chargement…" : "Scènes, actes, PNJ, lieux, indices, notes et tables de la campagne."}
+              {loading ? "Chargement…" : "Scènes, actes, PNJ, lieux, indices, notes, tables et séances (journal compris) de la campagne."}
             </p>
           )}
           {hasCampaign && term.trim() && flat.length === 0 && (

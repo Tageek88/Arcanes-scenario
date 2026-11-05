@@ -1,283 +1,184 @@
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { ChevronDown, ChevronUp, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { placeBubble } from "@/lib/tutorial/placement";
+import { findVisible, targetSpec } from "@/lib/tutorial/dom";
 
-const PADDING = 6;
-const GAP = 14;
-const TOOLTIP_WIDTH = 320;
-const EDGE = 12;
+const BUBBLE_WIDTH = 340;
+const MOBILE_BREAKPOINT = 768;
+const MOBILE_NAV_HEIGHT = 84;
+const RING_PADDING = 5;
+const SEARCH_GRACE_MS = 1200;
+// La page peut encore bouger après l'arrivée de l'élément (transition de page, données chargées, fenêtre qui s'ouvre) :
+// on vérifie pendant 2 s qu'il est bien dans la zone visible, sinon on le ramène.
+const REVEAL_RETRIES = 10;
 
-// Premier élément réellement visible portant data-tutorial="name" (la barre latérale existe en deux versions).
-function findTarget(name) {
-  if (!name) return null;
-  const candidates = document.querySelectorAll(`[data-tutorial="${name}"]`);
-  return (
-    Array.from(candidates).find((node) => {
-      const rect = node.getBoundingClientRect();
-      return rect.width > 0 && rect.height > 0;
-    }) || null
-  );
-}
+const toRect = ({ left, top, width, height }) => ({ left, top, width, height });
+const sameRect = (a, b) =>
+  a === b || (a && b && a.left === b.left && a.top === b.top && a.width === b.width && a.height === b.height);
 
-function findOpenDialog(exclude) {
-  const dialogs = Array.from(document.querySelectorAll('[role="dialog"]')).filter((node) => {
-    if (exclude && exclude.contains(node)) return false;
-    const rect = node.getBoundingClientRect();
-    return rect.width > 0 && rect.height > 0;
-  });
-  return dialogs[dialogs.length - 1] || null;
-}
-
-function computeTooltipStyle(rect, size, preferred = "bottom") {
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
-  const clamp = (value, min, max) => Math.max(min, Math.min(value, max));
-  if (!rect) {
-    return { left: (vw - size.width) / 2, top: (vh - size.height) / 2 };
+function scrollParent(node) {
+  let parent = node.parentElement;
+  while (parent && parent !== document.body) {
+    const overflow = getComputedStyle(parent).overflowY;
+    if ((overflow === "auto" || overflow === "scroll") && parent.scrollHeight > parent.clientHeight) return parent;
+    parent = parent.parentElement;
   }
-
-  const space = {
-    bottom: vh - rect.bottom,
-    top: rect.top,
-    right: vw - rect.right,
-    left: rect.left,
-  };
-  const need = { bottom: size.height, top: size.height, right: size.width, left: size.width };
-  const order = [preferred, "bottom", "top", "right", "left"];
-  const placement = order.find((side) => space[side] >= need[side] + GAP + EDGE) || "bottom";
-
-  let left;
-  let top;
-  if (placement === "bottom" || placement === "top") {
-    left = clamp(rect.left + rect.width / 2 - size.width / 2, EDGE, vw - size.width - EDGE);
-    top = placement === "bottom" ? rect.bottom + GAP : rect.top - size.height - GAP;
-  } else {
-    top = clamp(rect.top + rect.height / 2 - size.height / 2, EDGE, vh - size.height - EDGE);
-    left = placement === "right" ? rect.right + GAP : rect.left - size.width - GAP;
-  }
-  return { left: clamp(left, EDGE, vw - size.width - EDGE), top: clamp(top, EDGE, vh - size.height - EDGE) };
+  return document.scrollingElement;
 }
 
-export default function TutorialOverlay({
-  tutorial,
-  stepIndex,
-  canAdvance = true,
-  onNext,
-  onPrevious,
-  onClose,
-  onPause,
-}) {
-  const step = tutorial.steps[stepIndex];
-  const isFirst = stepIndex === 0;
-  const isLast = stepIndex === tutorial.steps.length - 1;
-  const isPhaseLast = step.phase && step.phaseStep === step.phaseTotal;
-  const isTour = tutorial.id === "welcome" || Boolean(step.noDim);
-  const tooltipRef = useRef(null);
-  const nextRef = useRef(null);
+// Amène l'élément dans la partie de l'écran que la bulle ne recouvre pas.
+function reveal(target, reservedBottom) {
+  const limit = window.innerHeight - reservedBottom - 12;
+  const rect = target.getBoundingClientRect();
+  if (rect.top >= 12 && rect.bottom <= limit) return;
+  target.scrollIntoView({ block: "center", inline: "nearest" });
+  const after = target.getBoundingClientRect();
+  if (after.bottom > limit) scrollParent(target)?.scrollBy({ top: after.bottom - limit + 12 });
+}
+
+/**
+ * Bulle d'explication d'une étape : placée à côté de l'élément (jamais dessus), sans voile sur l'écran.
+ * Un simple contour montre l'élément. Sur téléphone, la bulle est un bandeau au-dessus de la barre d'onglets.
+ */
+export default function TutorialOverlay({ tour, step, index, total, ready, collapsed, onToggleCollapsed, onNext, onPrevious, onClose }) {
+  const bubbleRef = useRef(null);
   const [rect, setRect] = useState(null);
-  const [size, setSize] = useState({ width: TOOLTIP_WIDTH, height: 180 });
-  const [visible, setVisible] = useState(false);
-  const [blockedLong, setBlockedLong] = useState(false);
-  const [showSolution, setShowSolution] = useState(false);
+  const [waited, setWaited] = useState(false);
+  const [size, setSize] = useState({ width: BUBBLE_WIDTH, height: 170 });
+  const [viewport, setViewport] = useState(() => ({ width: window.innerWidth, height: window.innerHeight }));
+  const mobile = viewport.width < MOBILE_BREAKPOINT;
+  const last = index === total - 1;
+  const reservedBottom = mobile ? size.height + MOBILE_NAV_HEIGHT : 0;
 
-  const measure = useCallback(() => {
-    // Pendant une saisie, on encadre tout le volet de création ouvert plutôt que le seul champ ou bouton.
-    const isFormStep = step.action?.type === "event" || step.action?.type === "input";
-    const target = (isFormStep && findOpenDialog(tooltipRef.current)) || findTarget(step.element);
-    if (!target) {
-      setRect((current) => (current ? null : current));
-      return;
-    }
-    const box = target.getBoundingClientRect();
-    const next = {
-      top: box.top - PADDING,
-      left: box.left - PADDING,
-      width: box.width + PADDING * 2,
-      height: box.height + PADDING * 2,
-      bottom: box.bottom + PADDING,
-      right: box.right + PADDING,
-    };
-    setRect((current) =>
-      current && current.top === next.top && current.left === next.left && current.width === next.width && current.height === next.height
-        ? current
-        : next
-    );
-  }, [step.element, step.action?.type]);
-
-  // Amène la cible dans la vue au changement d'étape.
+  // Mesure de la bulle (sa hauteur change avec le texte et le mode réduit).
   useEffect(() => {
-    const timer = setTimeout(() => {
-      findTarget(step.element)?.scrollIntoView({ block: "center", behavior: "smooth" });
-    }, 50);
-    return () => clearTimeout(timer);
-  }, [step.element]);
+    const node = bubbleRef.current;
+    if (!node || typeof ResizeObserver !== "function") return undefined;
+    const observer = new ResizeObserver(() => {
+      const box = node.getBoundingClientRect();
+      setSize((previous) => (previous.width === box.width && previous.height === box.height ? previous : { width: box.width, height: box.height }));
+    });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [ready]);
 
-  // Suit la cible : la page peut charger après coup (chargement paresseux) ou défiler.
+  // Suivi de l'élément montré : position, défilement, redimensionnement, changements de mise en page.
   useEffect(() => {
-    measure();
-    const interval = setInterval(measure, 200);
-    window.addEventListener("resize", measure);
-    return () => {
-      clearInterval(interval);
-      window.removeEventListener("resize", measure);
-    };
-  }, [measure]);
-
-  // Mesure l'infobulle à chaque rendu ; setSize ne change l'état que si la taille a vraiment changé (pas de boucle).
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useLayoutEffect(() => {
-    const node = tooltipRef.current;
-    if (!node) return;
-    const { width, height } = node.getBoundingClientRect();
-    setSize((current) => (current.width === width && current.height === height ? current : { width, height }));
-  });
-  
-  useEffect(() => {
-    const frame = requestAnimationFrame(() => setVisible(true));
-    return () => cancelAnimationFrame(frame);
-  }, []);
-
-  useEffect(() => {
-    nextRef.current?.focus();
-  }, [stepIndex]);
-
-  useEffect(() => {
-    setBlockedLong(false);
-    setShowSolution(false);
-    if (canAdvance) return undefined;
-    const timer = setTimeout(() => setBlockedLong(true), 30000);
-    return () => clearTimeout(timer);
-  }, [canAdvance, stepIndex]);
-
-  useEffect(() => {
-    const onKeyDown = (event) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        onClose();
-      } else if (event.key === "ArrowRight") {
-        event.preventDefault();
-        onNext();
-      } else if (event.key === "ArrowLeft" && !isFirst) {
-        event.preventDefault();
-        onPrevious();
-      } else if (event.key === "Tab" && tooltipRef.current) {
-        const focusable = tooltipRef.current.querySelectorAll("button:not([disabled])");
-        if (focusable.length === 0) return;
-        const first = focusable[0];
-        const last = focusable[focusable.length - 1];
-        if (event.shiftKey && document.activeElement === first) {
-          event.preventDefault();
-          last.focus();
-        } else if (!event.shiftKey && document.activeElement === last) {
-          event.preventDefault();
-          first.focus();
-        }
+    if (!ready) return undefined;
+    let alive = true;
+    let target = null;
+    let revealTries = 0;
+    const spec = targetSpec(step);
+    const measure = () => {
+      if (!alive) return;
+      if (!target || !target.isConnected) target = findVisible(spec);
+      const next = target ? toRect(target.getBoundingClientRect()) : null;
+      setRect((previous) => (sameRect(previous, next) ? previous : next));
+      setViewport((previous) =>
+        previous.width === window.innerWidth && previous.height === window.innerHeight
+          ? previous
+          : { width: window.innerWidth, height: window.innerHeight }
+      );
+      if (target && revealTries < REVEAL_RETRIES) {
+        revealTries += 1;
+        reveal(target, reservedBottom);
       }
     };
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [isFirst, onClose, onNext, onPrevious]);
+    const first = requestAnimationFrame(measure);
+    const timer = setInterval(measure, 200);
+    const grace = setTimeout(() => alive && setWaited(true), SEARCH_GRACE_MS);
+    window.addEventListener("resize", measure);
+    window.addEventListener("scroll", measure, true);
+    return () => {
+      alive = false;
+      cancelAnimationFrame(first);
+      clearInterval(timer);
+      clearTimeout(grace);
+      window.removeEventListener("resize", measure);
+      window.removeEventListener("scroll", measure, true);
+    };
+  }, [ready, step, reservedBottom]);
 
-  const tooltipStyle = computeTooltipStyle(rect, size, step.position);
-  const titleId = "tutorial-title";
-  const introId = "tutorial-intro";
+  // Flèches du clavier (sauf pendant une saisie). Échap n'est volontairement pas utilisé : il fermerait la fenêtre ouverte dessous.
+  useEffect(() => {
+    const onKey = (event) => {
+      if (event.altKey || event.ctrlKey || event.metaKey) return;
+      const tag = event.target?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || event.target?.isContentEditable) return;
+      if (event.key === "ArrowRight") onNext();
+      else if (event.key === "ArrowLeft" && index > 0) onPrevious();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [index, onNext, onPrevious]);
+
+  const visible = ready && (!targetSpec(step) || rect || waited);
+  const placement = mobile
+    ? null
+    : placeBubble({ target: rect, size, viewport, prefer: step.side });
+
+  // La bulle est rendue hors de l'application : une fenêtre ouverte dessous (Radix) la verrait comme « extérieure »
+  // et se fermerait au clic. On arrête donc la propagation du clic et du focus avant qu'ils n'atteignent le document.
+  const shield = (event) => event.stopPropagation();
 
   return createPortal(
-    <div className="pointer-events-none fixed inset-0 z-9999">
-      {rect ? (
+    <>
+      {visible && rect && (
         <div
           aria-hidden="true"
-          className={`pointer-events-none fixed rounded-lg ring-2 ring-primary/50 ${isTour ? "" : "shadow-[0_0_0_9999px_rgba(0,0,0,0.7)]"} transition-all duration-300 motion-reduce:transition-none`}
-          style={{ top: rect.top, left: rect.left, width: rect.width, height: rect.height }}
+          className="pointer-events-none fixed z-[70] rounded-lg border-2 border-primary shadow-[0_0_0_4px_hsl(var(--primary)/0.2)] transition-[left,top,width,height] duration-200 motion-reduce:transition-none"
+          style={{
+            left: rect.left - RING_PADDING,
+            top: rect.top - RING_PADDING,
+            width: rect.width + RING_PADDING * 2,
+            height: rect.height + RING_PADDING * 2,
+          }}
         />
-      ) : (
-        !isTour && <div aria-hidden="true" className="pointer-events-none fixed inset-0 bg-black/70" />
       )}
-
       <div
-        ref={tooltipRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        aria-describedby={introId}
-        className={`pointer-events-auto fixed rounded-lg border border-border bg-popover p-4 text-popover-foreground shadow-xl transition-all duration-300 motion-reduce:transition-none ${
-          visible ? "opacity-100" : "opacity-0"
-        }`}
-        style={{ ...tooltipStyle, width: `min(${TOOLTIP_WIDTH}px, calc(100vw - ${EDGE * 2}px))` }}
+        ref={bubbleRef}
+        role="region"
+        aria-label="Visite guidée"
+        aria-live="polite"
+        onPointerDown={shield}
+        onFocus={shield}
+        className={cn(
+          "fixed z-[70] rounded-xl border border-border bg-card p-4 text-card-foreground shadow-xl",
+          mobile && "inset-x-2 bottom-[calc(5rem+env(safe-area-inset-bottom))]",
+          !visible && "invisible"
+        )}
+        style={{ pointerEvents: "auto", ...(mobile ? {} : { width: BUBBLE_WIDTH, left: placement.left, top: placement.top }) }}
       >
-        <p className="text-xs text-muted-foreground">
-          {step.phase ? `Phase ${step.phase}/3 · ` : ""}{step.title ? `${tutorial.name} · ` : ""}
-          Étape {step.phaseStep || stepIndex + 1} / {step.phaseTotal || tutorial.steps.length}
-        </p>
-        <h2 id={titleId} className="mt-1 text-base font-semibold">
-          {step.title}
-        </h2>
-        <p id={introId} className="mt-2 whitespace-pre-line text-sm leading-relaxed text-foreground">
-          {step.intro}
-        </p>
-        {(isLast || isPhaseLast) && (
-          <p className="mt-2 text-sm font-medium text-played">
-            {isLast
-              ? tutorial.summary || `Bravo, le tutoriel « ${tutorial.name} » est terminé.`
-              : "Bravo, cette phase est terminée."}
-          </p>
-        )}
-        {step.hint && !canAdvance && (
-          <p className="mt-2 text-xs text-warning">{step.hint}</p>
-        )}
-        {blockedLong && (
-          <div className="mt-2">
-            <p className="text-xs text-warning">Besoin d'aide ? Vous pouvez afficher une solution ou terminer le tutoriel.</p>
-            {step.solution && (
-              <button
-                type="button"
-                onClick={() => setShowSolution((shown) => !shown)}
-                className="mt-1 text-xs text-primary underline focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                {showSolution ? "Masquer la solution" : "Voir la solution"}
-              </button>
-            )}
-            {showSolution && <p className="mt-1 text-xs text-foreground">{step.solution}</p>}
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <p className="font-mono text-[11px] uppercase tracking-wide text-muted-foreground">
+              {tour.name} · {index + 1}/{total}
+            </p>
+            <h2 className="mt-1 font-display text-base font-semibold text-foreground">{step.title}</h2>
           </div>
-        )}
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
-          <div className="flex shrink-0 gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-lg px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              Ignorer ce tuto
-            </button>
-            <button
-              type="button"
-              onClick={onPause}
-              className="rounded-lg px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              Pause
-            </button>
-          </div>
-          <div className="ml-auto flex shrink-0 gap-2">
-            {!isFirst && (
-              <button
-                type="button"
-                onClick={onPrevious}
-                className="rounded-lg bg-secondary px-3 py-1.5 text-sm text-secondary-foreground transition-colors hover:bg-secondary/80 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                Précédent
-              </button>
-            )}
-            <button
-              ref={nextRef}
-              type="button"
-              onClick={onNext}
-              className="rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              {isLast ? "Terminer" : "Suivant"}
-            </button>
+          <div className="flex shrink-0 gap-1">
+            <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={onToggleCollapsed} aria-label={collapsed ? "Agrandir la bulle" : "Réduire la bulle"}>
+              {collapsed ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </Button>
+            <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={onClose} aria-label="Quitter la visite">
+              <X className="h-4 w-4" />
+            </Button>
           </div>
         </div>
+        {!collapsed && <p className="mt-2 text-sm text-foreground">{step.text}</p>}
+        <div className="mt-3 flex items-center justify-between gap-2">
+          <Button type="button" variant="outline" size="sm" onClick={onPrevious} disabled={index === 0}>
+            Précédent
+          </Button>
+          <Button type="button" size="sm" onClick={onNext}>
+            {last ? "Terminer" : "Suivant"}
+          </Button>
+        </div>
       </div>
-    </div>,
+    </>,
     document.body
   );
 }

@@ -13,7 +13,7 @@ import {
   renameQuest as renameQuestRow,
   stopRecurring,
 } from "@/lib/services/quests";
-import { dispatchTutorialAction } from "@/utils/tutorialStorage";
+import { withTrashGroup } from "@/lib/services/trash";
 
 /**
  * @param {{ status: string }[]} list
@@ -214,7 +214,6 @@ export function useCampaignContent(campaignId, { activeSceneId, setActiveSceneId
             saved = created;
             setScenes((prev) => prev.map((s) => (s.id === optimistic.id ? created : s)));
             setActiveSceneId(created.id);
-            dispatchTutorialAction("scene-created");
           }
         }
       } catch (error) {
@@ -298,7 +297,6 @@ export function useCampaignContent(campaignId, { activeSceneId, setActiveSceneId
     try {
       const created = await api.entities.Act.create({ campaign_id: campaignId, quest_id: target.id, title, order });
       setActs((prev) => prev.map((a) => (a.id === optimistic.id ? created : a)));
-      dispatchTutorialAction("act-created");
       toast({ title: "Acte ajouté", description: "Cliquez sur son titre pour le renommer." });
     } catch {
       setActs(previous);
@@ -353,8 +351,11 @@ export function useCampaignContent(campaignId, { activeSceneId, setActiveSceneId
     setScenes(remaining);
     setProgress(buildProgress(remaining));
     try {
-      await api.entities.Scene.deleteMany({ act_id: pending.item.id });
-      await api.entities.Act.delete(pending.item.id);
+      const label = `${String(pending.item.title || "").trim() || "Acte sans titre"} (et ses scènes)`;
+      await withTrashGroup({ label, kind: "Act", campaignId: pending.item.campaign_id }, async () => {
+        await api.entities.Scene.deleteMany({ act_id: pending.item.id });
+        await api.entities.Act.delete(pending.item.id);
+      });
       toast({ title: "Acte supprimé" });
     } catch {
       setActs(previous.acts);

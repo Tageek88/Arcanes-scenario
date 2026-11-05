@@ -1,0 +1,2873 @@
+{
+ "Campaign": [
+  {
+   "id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Manger ou être mangé (exemple)",
+   "system": "Système maison (exemple)",
+   "universe_type": "wasteland_nucleaire",
+   "summary": "La dernière poule de Petatchniki (ressource d'élevage inestimable) a été retrouvée morte de manière inexplicable. Il s'agit en réalité d'un sabotage économique perpétré par un fermier local poussé par la détresse, sous le contrôle d'un marchand véreux d'une station rivale.",
+   "generator_data": {
+    "male": {
+     "mode": "add",
+     "items": []
+    },
+    "female": {
+     "mode": "add",
+     "items": []
+    },
+    "neutral": {
+     "mode": "add",
+     "items": []
+    },
+    "family": {
+     "mode": "add",
+     "items": []
+    },
+    "roles": {
+     "mode": "add",
+     "items": []
+    },
+    "traits": {
+     "mode": "add",
+     "items": []
+    },
+    "motivations": {
+     "mode": "add",
+     "items": []
+    },
+    "appearances": {
+     "mode": "add",
+     "items": []
+    }
+   },
+   "inventory": [
+    {
+     "id": "9ade1cc9-790b-56dd-8f72-f802c1512791",
+     "name": "Boîte de pénicilline d'avant-guerre",
+     "quantity": 1,
+     "notes": "Trouvée dans la tente de Piotr",
+     "catalog_id": "",
+     "fields": []
+    },
+    {
+     "id": "53204500-3977-5883-aa43-61507ade23ce",
+     "name": "Carte des tunnels",
+     "quantity": 1,
+     "notes": "Incomplète",
+     "catalog_id": "",
+     "fields": []
+    }
+   ],
+   "is_demo": true,
+   "theme": {
+    "version": 1,
+    "presetId": "dark-fantasy",
+    "appearance": "dark",
+    "palette": {
+     "mode": "preset"
+    },
+    "overrides": {},
+    "titleFont": "im-fell-english",
+    "radius": "large",
+    "iconStroke": 2,
+    "pattern": "none",
+    "iconColor": "text"
+   },
+   "acts_as_rows": false,
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  }
+ ],
+ "Quest": [
+  {
+   "id": "820308e2-4834-5fe3-89c7-5dec9bc7503b",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "title": "Quête principale",
+   "order": 1,
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "id": "cc5aa69b-0409-5db6-8574-783c422c7e52",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "title": "Sous-intrigue : la Ligue marchande",
+   "order": 2,
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  }
+ ],
+ "Act": [
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "title": "La dernière poule",
+   "order": 1,
+   "id": "e3c113bd-6f2d-5ee1-b0b6-0b29cbf1b42c",
+   "created_date": "2026-10-19T10:40:10.213Z",
+   "updated_date": "2026-10-27T06:48:41.537Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes",
+   "quest_id": "820308e2-4834-5fe3-89c7-5dec9bc7503b"
+  },
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "title": "Payer ses dettes",
+   "order": 3,
+   "id": "8830f780-b8e3-568e-ac15-1723b2929b12",
+   "created_date": "2026-10-19T17:50:35.346Z",
+   "updated_date": "2026-10-27T06:48:41.538Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes",
+   "quest_id": "820308e2-4834-5fe3-89c7-5dec9bc7503b"
+  },
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "title": "Faire face a ses peurs",
+   "order": 2,
+   "id": "52e16b33-3529-54b0-9a56-dde8962b25ef",
+   "created_date": "2026-10-19T17:50:22.326Z",
+   "updated_date": "2026-10-27T06:48:41.539Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes",
+   "quest_id": "820308e2-4834-5fe3-89c7-5dec9bc7503b"
+  },
+  {
+   "id": "b54b5847-b106-551a-97ef-6c8d06fd4726",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "title": "Les livraisons de la Ligue",
+   "order": 1,
+   "quest_id": "cc5aa69b-0409-5db6-8574-783c422c7e52",
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  }
+ ],
+ "Scene": [
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "act_id": "52e16b33-3529-54b0-9a56-dde8962b25ef",
+   "title": "Chasse à l'homme (Poulailler)",
+   "summary": "Le poulailler est pour l'heure encore vide, Piotr n'est pas venu ici apparemment... ",
+   "gm_notes": "",
+   "status": "brouillon",
+   "order": 3,
+   "next_scene_ids": [],
+   "npc_ids": [
+    "0fb9d5f7-bc70-5ce9-856b-a8e02a175ae2"
+   ],
+   "location_ids": [
+    "abce5f5c-4329-582f-95e5-df0ad95cf0cf"
+   ],
+   "clue_ids": [],
+   "id": "ece00c8a-0c4d-5640-ba97-aa2cc209c205",
+   "created_date": "2026-10-19T18:05:34.557Z",
+   "updated_date": "2026-10-27T06:48:41.540Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes",
+   "quest_id": "820308e2-4834-5fe3-89c7-5dec9bc7503b"
+  },
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "act_id": "52e16b33-3529-54b0-9a56-dde8962b25ef",
+   "title": "Chasse à l'homme (Tente de Piotr)",
+   "summary": "Si les PJs commencent a assembler les pièce du puzzle ils essaieront peut-être d'aller tirer les vers du nez de Piotr, mais ce dernier ne sera pas dans sa tente auprès de sa fille. ",
+   "gm_notes": "",
+   "status": "brouillon",
+   "order": 2,
+   "next_scene_ids": [],
+   "npc_ids": [
+    "194b7901-1c86-50c8-977e-1da6de12671f"
+   ],
+   "location_ids": [
+    "009df578-42e8-588c-be83-7f76c5f406ad"
+   ],
+   "clue_ids": [
+    "04527c19-7e85-5b02-bfce-c324bd636b66"
+   ],
+   "id": "da942e02-2905-544a-bf5a-ad12e05d6ab8",
+   "created_date": "2026-10-19T18:04:44.650Z",
+   "updated_date": "2026-10-27T06:48:41.541Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes",
+   "quest_id": "820308e2-4834-5fe3-89c7-5dec9bc7503b"
+  },
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "act_id": "8830f780-b8e3-568e-ac15-1723b2929b12",
+   "title": "Dernier rencard",
+   "summary": "Les PJ surprennent Piotr et Igor en pleine discussion alors que Igor annonce qu'il va finir de payer Piotr maintenant que la dernière poule est morte. ",
+   "gm_notes": "Scène clé : les PJ surprennent le marché. Igor n'est pas armé de façon visible mais ses hommes sont proches.",
+   "status": "clef",
+   "order": 1,
+   "next_scene_ids": [
+    "bb5dc17d-849e-50d6-84ad-76773ff0f569",
+    "f5a91972-a997-5a73-85a6-1fe2372bf969",
+    "43fa0f25-4a0b-5a29-88ab-abe7f30802c5"
+   ],
+   "npc_ids": [
+    "e3f29873-b5c4-5157-b0a2-11c95766d699",
+    "585aa9a0-6b81-51c3-a5ec-4d43098f0e4d"
+   ],
+   "location_ids": [
+    "bbe75992-be4e-55a9-bb8b-8bfce6331861"
+   ],
+   "clue_ids": [
+    "44bb1cd9-7ed0-5b4e-a79b-4c0648d47a9a",
+    "b33afe03-ed07-53a7-81b4-76a27a69eadd"
+   ],
+   "id": "4f4587c6-b87a-5c50-a61a-a8ec57ad86d1",
+   "created_date": "2026-10-19T17:58:32.099Z",
+   "updated_date": "2026-10-27T06:48:41.542Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes",
+   "quest_id": "820308e2-4834-5fe3-89c7-5dec9bc7503b"
+  },
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "act_id": "8830f780-b8e3-568e-ac15-1723b2929b12",
+   "title": "Un choix cornélien (Capturé Igor)",
+   "summary": "Capture d'Igor : Piéger le marchand pour récupérer les munitions et contrecarrer les plans de la Ligue marchande.",
+   "gm_notes": "",
+   "status": "brouillon",
+   "order": 4,
+   "next_scene_ids": [],
+   "npc_ids": [
+    "585aa9a0-6b81-51c3-a5ec-4d43098f0e4d",
+    "e3f29873-b5c4-5157-b0a2-11c95766d699"
+   ],
+   "location_ids": [
+    "bbe75992-be4e-55a9-bb8b-8bfce6331861"
+   ],
+   "clue_ids": [
+    "44bb1cd9-7ed0-5b4e-a79b-4c0648d47a9a",
+    "04527c19-7e85-5b02-bfce-c324bd636b66"
+   ],
+   "id": "bb5dc17d-849e-50d6-84ad-76773ff0f569",
+   "created_date": "2026-10-19T18:10:24.225Z",
+   "updated_date": "2026-10-27T06:48:41.542Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes",
+   "quest_id": "820308e2-4834-5fe3-89c7-5dec9bc7503b"
+  },
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "act_id": "e3c113bd-6f2d-5ee1-b0b6-0b29cbf1b42c",
+   "title": "Le poulailler",
+   "summary": "La dernière poule de Petatchniki a été retrouvé morte par les fermiers ce matin, un désastre pour la station qui vient de perdre une ressource inestimable. ",
+   "gm_notes": "Laisser les joueurs examiner la poule avant que Piotr n'intervienne. Misha est nerveux : il en sait plus qu'il ne dit.",
+   "status": "joue",
+   "order": 1,
+   "next_scene_ids": [],
+   "npc_ids": [
+    "585aa9a0-6b81-51c3-a5ec-4d43098f0e4d",
+    "0fb9d5f7-bc70-5ce9-856b-a8e02a175ae2"
+   ],
+   "location_ids": [
+    "abce5f5c-4329-582f-95e5-df0ad95cf0cf"
+   ],
+   "clue_ids": [
+    "18e5c001-8edf-53aa-a435-5d653a0d7749",
+    "192d05d5-ca64-5e31-b975-674bdbe74dc7"
+   ],
+   "id": "d37dbee8-c6e2-52b0-90b8-7e6b5743d50d",
+   "created_date": "2026-10-19T10:40:28.253Z",
+   "updated_date": "2026-10-27T06:48:41.542Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes",
+   "quest_id": "820308e2-4834-5fe3-89c7-5dec9bc7503b"
+  },
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "act_id": "e3c113bd-6f2d-5ee1-b0b6-0b29cbf1b42c",
+   "title": "Médecine douce",
+   "summary": "Si les joueurs demande a Rate si elle peux éxaminer la poule elle part dans un monologue alétoire et marmone tout un tas d'information incohérente. Mais elle pointe quand meme du doigt la trace de piqure sous l'aile de la poule. Toutefois il lui faudra 1 quart pour trouver quel produit a été injecté. ",
+   "gm_notes": "Rate part dans des monologues décousus. Cacher les vrais indices au milieu : la trace de piqûre n'arrive qu'à la troisième question.",
+   "status": "joue",
+   "order": 2,
+   "next_scene_ids": [],
+   "npc_ids": [
+    "a49ba478-0558-5c6d-8b2e-84b5ddb5923c"
+   ],
+   "location_ids": [
+    "f8fe15dd-ffcd-5074-a780-15c1f71f60f7"
+   ],
+   "clue_ids": [
+    "c7afd994-f7ad-59d7-802c-4ecf84b577c7",
+    "abd483dc-054c-5278-9af8-5aaac1adc8b7",
+    "dce811b5-b51d-5eda-b594-9461e8fb351f"
+   ],
+   "id": "187ae7e3-1772-57b6-b06f-57f05461d7a5",
+   "created_date": "2026-10-19T10:40:54.443Z",
+   "updated_date": "2026-10-27T06:48:41.543Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes",
+   "quest_id": "820308e2-4834-5fe3-89c7-5dec9bc7503b"
+  },
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "act_id": "e3c113bd-6f2d-5ee1-b0b6-0b29cbf1b42c",
+   "title": "Rumeur douteuse",
+   "summary": "Si les PJ se renseigne auprès du poste de garde, les deux soldat de service pourrait leur révélé que Piotr et Igor on été apercu discutant près du poulailler. ",
+   "gm_notes": "",
+   "status": "brouillon",
+   "order": 4,
+   "next_scene_ids": [],
+   "npc_ids": [
+    "585aa9a0-6b81-51c3-a5ec-4d43098f0e4d",
+    "e3f29873-b5c4-5157-b0a2-11c95766d699",
+    "2d6ce6fb-707e-570a-bbd7-0983b1ef2694",
+    "56b55b31-afa3-55ec-b445-2065257eb6c3"
+   ],
+   "location_ids": [
+    "544fa2d0-dcf5-55a8-abf6-1a240f440521"
+   ],
+   "clue_ids": [
+    "04527c19-7e85-5b02-bfce-c324bd636b66"
+   ],
+   "id": "69c2348b-72c4-53e3-a1d5-909e29e334ac",
+   "created_date": "2026-10-19T17:55:41.538Z",
+   "updated_date": "2026-10-27T06:48:41.543Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes",
+   "quest_id": "820308e2-4834-5fe3-89c7-5dec9bc7503b"
+  },
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "act_id": "52e16b33-3529-54b0-9a56-dde8962b25ef",
+   "title": "Chasse à l'homme (Poste de garde)",
+   "summary": "Piotr n'a pas été vu des garde près du poste, il n'a pas quitté la station. ",
+   "gm_notes": "",
+   "status": "brouillon",
+   "order": 4,
+   "next_scene_ids": [],
+   "npc_ids": [
+    "2d6ce6fb-707e-570a-bbd7-0983b1ef2694",
+    "56b55b31-afa3-55ec-b445-2065257eb6c3"
+   ],
+   "location_ids": [
+    "544fa2d0-dcf5-55a8-abf6-1a240f440521"
+   ],
+   "clue_ids": [],
+   "id": "257ffb76-d940-500d-a916-169cd78d5188",
+   "created_date": "2026-10-19T18:06:33.934Z",
+   "updated_date": "2026-10-27T06:48:41.544Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes",
+   "quest_id": "820308e2-4834-5fe3-89c7-5dec9bc7503b"
+  },
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "act_id": "52e16b33-3529-54b0-9a56-dde8962b25ef",
+   "title": "Le chignon vert",
+   "summary": "Après un quart, Rate peux affirmé que la poule a été piqué par une aiguille imbibé de chignon vert, un champignon toxique que l'on trouve dans les tunnels du métro et qui cause une paralysie respiratoire mortel. ",
+   "gm_notes": "Scène clé : le poison est identifié. Si les joueurs sont perdus, Rate peut tout révéler d'un coup, sans s'en rendre compte.",
+   "status": "clef",
+   "order": 1,
+   "next_scene_ids": [
+    "da942e02-2905-544a-bf5a-ad12e05d6ab8",
+    "ece00c8a-0c4d-5640-ba97-aa2cc209c205",
+    "257ffb76-d940-500d-a916-169cd78d5188"
+   ],
+   "npc_ids": [
+    "a49ba478-0558-5c6d-8b2e-84b5ddb5923c"
+   ],
+   "location_ids": [
+    "f8fe15dd-ffcd-5074-a780-15c1f71f60f7"
+   ],
+   "clue_ids": [
+    "11ac2a02-3dbc-5d1e-bda3-e3a00444949a",
+    "c7afd994-f7ad-59d7-802c-4ecf84b577c7",
+    "abd483dc-054c-5278-9af8-5aaac1adc8b7"
+   ],
+   "id": "9ea3d913-2efc-58dd-b050-3749cbff63e7",
+   "created_date": "2026-10-19T17:51:53.159Z",
+   "updated_date": "2026-10-27T06:48:41.544Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes",
+   "quest_id": "820308e2-4834-5fe3-89c7-5dec9bc7503b"
+  },
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "act_id": "e3c113bd-6f2d-5ee1-b0b6-0b29cbf1b42c",
+   "title": "La maladie des tunnels",
+   "summary": "En discutant avec Piotr celui ci a parlé de sa fille malade, Katia, qui a attrapé la maladie des tunnels, une infection pulmonaire causé par l'humidité des tunnels. ",
+   "gm_notes": "Ne pas dire d'emblée que Katia est mourante : laisser les joueurs le comprendre par la toux et la pénicilline.",
+   "status": "joue",
+   "order": 3,
+   "next_scene_ids": [],
+   "npc_ids": [
+    "194b7901-1c86-50c8-977e-1da6de12671f",
+    "585aa9a0-6b81-51c3-a5ec-4d43098f0e4d"
+   ],
+   "location_ids": [
+    "009df578-42e8-588c-be83-7f76c5f406ad"
+   ],
+   "clue_ids": [
+    "a506927c-6ac9-5912-b173-13378408a453",
+    "557f51d6-70a4-5c42-a58e-3657b998a594",
+    "d0867a5e-2c75-514d-9d8d-fe702637e23c"
+   ],
+   "id": "5e6bf73b-1cda-5217-b885-2c60fbf24c28",
+   "created_date": "2026-10-19T17:50:18.838Z",
+   "updated_date": "2026-10-27T06:48:41.544Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes",
+   "quest_id": "820308e2-4834-5fe3-89c7-5dec9bc7503b"
+  },
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "act_id": "8830f780-b8e3-568e-ac15-1723b2929b12",
+   "title": "Un choix cornélien (couvrir Piotr)",
+   "summary": "Couvrir Piotr, rejeter la faute entièrement sur Igor ou prétexter une anomalie pour sauver la petite.",
+   "gm_notes": "",
+   "status": "brouillon",
+   "order": 3,
+   "next_scene_ids": [],
+   "npc_ids": [
+    "e3f29873-b5c4-5157-b0a2-11c95766d699",
+    "585aa9a0-6b81-51c3-a5ec-4d43098f0e4d"
+   ],
+   "location_ids": [
+    "bbe75992-be4e-55a9-bb8b-8bfce6331861"
+   ],
+   "clue_ids": [
+    "04527c19-7e85-5b02-bfce-c324bd636b66",
+    "44bb1cd9-7ed0-5b4e-a79b-4c0648d47a9a"
+   ],
+   "id": "f5a91972-a997-5a73-85a6-1fe2372bf969",
+   "created_date": "2026-10-19T18:09:25.454Z",
+   "updated_date": "2026-10-27T06:48:41.545Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes",
+   "quest_id": "820308e2-4834-5fe3-89c7-5dec9bc7503b"
+  },
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "act_id": "8830f780-b8e3-568e-ac15-1723b2929b12",
+   "title": "Un choix cornélien (Piotr accusé)",
+   "summary": "Livrer Piotr au Triumvirat (Piotr sera /banni, Katia mourra sans soins).",
+   "gm_notes": "",
+   "status": "brouillon",
+   "order": 2,
+   "next_scene_ids": [],
+   "npc_ids": [
+    "585aa9a0-6b81-51c3-a5ec-4d43098f0e4d",
+    "e3f29873-b5c4-5157-b0a2-11c95766d699",
+    "194b7901-1c86-50c8-977e-1da6de12671f",
+    "507df532-0cd2-5c80-bbf2-f246c8e289ac"
+   ],
+   "location_ids": [
+    "bbe75992-be4e-55a9-bb8b-8bfce6331861"
+   ],
+   "clue_ids": [
+    "04527c19-7e85-5b02-bfce-c324bd636b66",
+    "44bb1cd9-7ed0-5b4e-a79b-4c0648d47a9a"
+   ],
+   "id": "43fa0f25-4a0b-5a29-88ab-abe7f30802c5",
+   "created_date": "2026-10-19T18:08:32.562Z",
+   "updated_date": "2026-10-27T06:48:41.545Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes",
+   "quest_id": "820308e2-4834-5fe3-89c7-5dec9bc7503b"
+  },
+  {
+   "id": "6fe6448d-0a00-5842-9ca7-4da444e8c27a",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "act_id": "e3c113bd-6f2d-5ee1-b0b6-0b29cbf1b42c",
+   "quest_id": "820308e2-4834-5fe3-89c7-5dec9bc7503b",
+   "title": "Rumeurs de la station",
+   "summary": "À chaque passage, un habitant glisse une rumeur aux personnages : utile pour relancer l'intrigue ou ouvrir une piste.",
+   "gm_notes": "Tirer une rumeur dans la table « Rumeurs » ou en inventer une.",
+   "status": "brouillon",
+   "order": 5,
+   "next_scene_ids": [],
+   "npc_ids": [],
+   "location_ids": [
+    "5fc07d28-4348-5cb6-bff7-e8ea4d4a08af"
+   ],
+   "clue_ids": [],
+   "recurring_group": "rumeurs-station",
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "id": "da6633b3-5af7-58d8-a19c-4e0d255dacd1",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "act_id": "b54b5847-b106-551a-97ef-6c8d06fd4726",
+   "quest_id": "cc5aa69b-0409-5db6-8574-783c422c7e52",
+   "title": "Le convoi de la Ligue",
+   "summary": "Un convoi de la Ligue marchande arrive sur le quai de chargement. Sonia propose aux personnages de l'escorter jusqu'à la prochaine station.",
+   "gm_notes": "Le convoi est un prétexte pour montrer aux joueurs d'où vient la pression économique sur Petatchniki.",
+   "status": "brouillon",
+   "order": 1,
+   "next_scene_ids": [
+    "f036a9c5-4068-59a9-9525-654673663578"
+   ],
+   "npc_ids": [
+    "ecfda2ec-7b42-5507-b12a-0e887cc98d32",
+    "e3f29873-b5c4-5157-b0a2-11c95766d699"
+   ],
+   "location_ids": [
+    "09084d08-8cda-5faa-8338-83ae854b8538"
+   ],
+   "clue_ids": [],
+   "recurring_group": "",
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "id": "f036a9c5-4068-59a9-9525-654673663578",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "act_id": "b54b5847-b106-551a-97ef-6c8d06fd4726",
+   "quest_id": "cc5aa69b-0409-5db6-8574-783c422c7e52",
+   "title": "Rumeurs de la station",
+   "summary": "À chaque passage, un habitant glisse une rumeur aux personnages : utile pour relancer l'intrigue ou ouvrir une piste.",
+   "gm_notes": "Tirer une rumeur dans la table « Rumeurs » ou en inventer une.",
+   "status": "brouillon",
+   "order": 2,
+   "next_scene_ids": [],
+   "npc_ids": [],
+   "location_ids": [
+    "5fc07d28-4348-5cb6-bff7-e8ea4d4a08af"
+   ],
+   "clue_ids": [],
+   "recurring_group": "rumeurs-station",
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  }
+ ],
+ "NPC": [
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Piotr",
+   "comment": "Fermier de Petatchniki",
+   "attachments": [],
+   "role": "Fermier",
+   "description": "",
+   "attitude": "allie",
+   "location_id": "5fc07d28-4348-5cb6-bff7-e8ea4d4a08af",
+   "id": "585aa9a0-6b81-51c3-a5ec-4d43098f0e4d",
+   "created_date": "2026-10-19T17:29:05.921Z",
+   "updated_date": "2026-10-21T13:40:32.403Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes",
+   "gender": "male",
+   "level": "Standard",
+   "traits": [
+    "Désespéré",
+    "Protecteur"
+   ],
+   "motivation": "Sauver sa fille malade, quitte à trahir sa station.",
+   "appearance": "Mains abîmées par le travail, regard fuyant.",
+   "characteristics": {
+    "Vigueur": {
+     "value": "3",
+     "fields": [
+      {
+       "name": "Max",
+       "value": "3"
+      }
+     ]
+    },
+    "Agilité": {
+     "value": "2",
+     "fields": [
+      {
+       "name": "Max",
+       "value": "2"
+      }
+     ]
+    },
+    "Endurance": {
+     "value": "3",
+     "fields": []
+    },
+    "Perception": {
+     "value": "2",
+     "fields": []
+    },
+    "Débrouillardise": {
+     "value": "3",
+     "fields": []
+    },
+    "Sang-froid": {
+     "value": "2",
+     "fields": []
+    },
+    "Empathie": {
+     "value": "4",
+     "fields": []
+    },
+    "Savoir": {
+     "value": "2",
+     "fields": []
+    }
+   },
+   "skills": [
+    {
+     "name": "Bricolage de fortune",
+     "roll_modifier": "+1",
+     "fields": []
+    }
+   ],
+   "equipment": [],
+   "inventory": [
+    {
+     "id": "9875d140-4283-5748-87a4-c8565d0ddf14",
+     "name": "Cartouches militaires",
+     "quantity": 20,
+     "notes": "Premier acompte d'Igor",
+     "catalog_id": "",
+     "fields": []
+    },
+    {
+     "id": "c52ea42e-9bbb-5845-8d16-ebcf9fa9c5c4",
+     "name": "Seringue artisanale",
+     "quantity": 1,
+     "notes": "Cachée sous le matelas de Katia",
+     "catalog_id": "",
+     "fields": []
+    }
+   ]
+  },
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Igor (le rat) Zotov",
+   "comment": "",
+   "attachments": [],
+   "role": "Marchand",
+   "description": "",
+   "attitude": "hostile",
+   "location_id": "5fc07d28-4348-5cb6-bff7-e8ea4d4a08af",
+   "id": "e3f29873-b5c4-5157-b0a2-11c95766d699",
+   "created_date": "2026-10-19T17:30:36.115Z",
+   "updated_date": "2026-10-21T13:40:21.325Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes",
+   "gender": "male",
+   "level": "Élite",
+   "traits": [
+    "Calculateur",
+    "Sans scrupules"
+   ],
+   "motivation": "Ruiner l'élevage de Petatchniki pour que sa station devienne l'unique fournisseur d'œufs.",
+   "appearance": "Manteau trop propre pour les tunnels, un rat tatoué sur la main.",
+   "characteristics": {
+    "Vigueur": {
+     "value": "4",
+     "fields": [
+      {
+       "name": "Max",
+       "value": "4"
+      }
+     ]
+    },
+    "Agilité": {
+     "value": "4",
+     "fields": [
+      {
+       "name": "Max",
+       "value": "4"
+      }
+     ]
+    },
+    "Endurance": {
+     "value": "4",
+     "fields": []
+    },
+    "Perception": {
+     "value": "5",
+     "fields": []
+    },
+    "Débrouillardise": {
+     "value": "5",
+     "fields": []
+    },
+    "Sang-froid": {
+     "value": "5",
+     "fields": []
+    },
+    "Empathie": {
+     "value": "2",
+     "fields": []
+    },
+    "Savoir": {
+     "value": "4",
+     "fields": []
+    }
+   },
+   "skills": [
+    {
+     "name": "Marchandage",
+     "roll_modifier": "+1",
+     "fields": [],
+     "id": "2dbf86d0-645c-56a3-a797-5ffe57360362"
+    },
+    {
+     "name": "Beau parleur",
+     "roll_modifier": "",
+     "fields": [],
+     "id": "0fb64800-b9a4-5a78-bf27-e7c6f0d464f6"
+    }
+   ],
+   "equipment": [
+    {
+     "name": "Revolver rafistolé",
+     "type": "Armes à feu",
+     "fields": [
+      {
+       "name": "Dégâts",
+       "value": "2"
+      },
+      {
+       "name": "Portée",
+       "value": "Courte"
+      }
+     ]
+    }
+   ],
+   "inventory": [
+    {
+     "id": "bcfd23f1-e6a9-5117-a30c-e6e72a219a47",
+     "name": "Cartouches militaires",
+     "quantity": 20,
+     "notes": "Le solde promis à Piotr",
+     "catalog_id": "",
+     "fields": []
+    },
+    {
+     "id": "456d4980-a727-54c7-95ef-54782dba9500",
+     "name": "Boîte de pénicilline",
+     "quantity": 1,
+     "notes": "Appât pour Piotr",
+     "catalog_id": "",
+     "fields": []
+    }
+   ]
+  },
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Rate",
+   "comment": "Medecin de Petatchniki",
+   "attachments": [],
+   "role": "Medecin",
+   "description": "",
+   "attitude": "allie",
+   "location_id": "f8fe15dd-ffcd-5074-a780-15c1f71f60f7",
+   "id": "a49ba478-0558-5c6d-8b2e-84b5ddb5923c",
+   "created_date": "2026-10-19T10:41:29.554Z",
+   "updated_date": "2026-10-21T13:39:22.972Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes",
+   "gender": "female",
+   "level": "Faible",
+   "traits": [
+    "Lunatique",
+    "Géniale par éclairs"
+   ],
+   "motivation": "Rester utile à la station malgré ses absences.",
+   "appearance": "Cheveux gris en broussaille, tablier taché de plantes.",
+   "characteristics": {
+    "Vigueur": {
+     "value": "1",
+     "fields": [
+      {
+       "name": "Max",
+       "value": "1"
+      }
+     ]
+    },
+    "Agilité": {
+     "value": "2",
+     "fields": [
+      {
+       "name": "Max",
+       "value": "2"
+      }
+     ]
+    },
+    "Endurance": {
+     "value": "2",
+     "fields": []
+    },
+    "Perception": {
+     "value": "3",
+     "fields": []
+    },
+    "Débrouillardise": {
+     "value": "2",
+     "fields": []
+    },
+    "Sang-froid": {
+     "value": "1",
+     "fields": []
+    },
+    "Empathie": {
+     "value": "3",
+     "fields": []
+    },
+    "Savoir": {
+     "value": "3",
+     "fields": []
+    }
+   },
+   "skills": [
+    {
+     "name": "Premiers soins",
+     "roll_modifier": "+1",
+     "fields": []
+    }
+   ],
+   "equipment": [],
+   "inventory": [
+    {
+     "id": "5269a23b-0e64-51ec-8176-a125497a9eaf",
+     "name": "Trousse de soins",
+     "quantity": 1,
+     "notes": "",
+     "catalog_id": "",
+     "fields": []
+    }
+   ],
+   "generation_locks": {
+    "name": true,
+    "role": true
+   }
+  },
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Katia",
+   "comment": "Fille de Piotr, atteinte de la maladie des tunnels",
+   "attachments": [],
+   "role": "Enfant",
+   "description": "",
+   "attitude": "allie",
+   "location_id": "009df578-42e8-588c-be83-7f76c5f406ad",
+   "id": "194b7901-1c86-50c8-977e-1da6de12671f",
+   "created_date": "2026-10-19T17:29:33.258Z",
+   "updated_date": "2026-10-29T18:19:29.491Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes",
+   "gender": "female",
+   "level": "Faible",
+   "traits": [
+    "Courageuse"
+   ],
+   "motivation": "Guérir et revoir le soleil.",
+   "appearance": "Pâle, toux sèche.",
+   "characteristics": {},
+   "skills": [],
+   "inventory": [],
+   "equipment": []
+  },
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Dimitri Emski",
+   "comment": "",
+   "attachments": [],
+   "role": "Garde",
+   "description": "Garde\nCaractère : Jovial·e, Maladroit·e.\nMotivation : Retrouver un proche disparu.\nSigne distinctif : Ongles rongés.",
+   "attitude": "allie",
+   "location_id": "544fa2d0-dcf5-55a8-abf6-1a240f440521",
+   "id": "2d6ce6fb-707e-570a-bbd7-0983b1ef2694",
+   "created_date": "2026-10-19T18:15:10.054Z",
+   "updated_date": "2026-10-21T13:38:51.785Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes",
+   "gender": "male",
+   "level": "Standard",
+   "traits": [
+    "Rigide"
+   ],
+   "motivation": "Faire respecter l'ordre de la station.",
+   "appearance": "Ongles rongés",
+   "characteristics": {
+    "Vigueur": {
+     "value": "4",
+     "fields": [
+      {
+       "name": "Max",
+       "value": "4"
+      }
+     ]
+    },
+    "Agilité": {
+     "value": "3",
+     "fields": [
+      {
+       "name": "Max",
+       "value": "3"
+      }
+     ]
+    },
+    "Endurance": {
+     "value": "3",
+     "fields": []
+    },
+    "Perception": {
+     "value": "3",
+     "fields": []
+    },
+    "Débrouillardise": {
+     "value": "2",
+     "fields": []
+    },
+    "Sang-froid": {
+     "value": "3",
+     "fields": []
+    },
+    "Empathie": {
+     "value": "2",
+     "fields": []
+    },
+    "Savoir": {
+     "value": "2",
+     "fields": []
+    }
+   },
+   "skills": [
+    {
+     "name": "Costaud",
+     "roll_modifier": "",
+     "fields": []
+    }
+   ],
+   "equipment": [
+    {
+     "name": "Fusil de chasse",
+     "type": "Armes à feu",
+     "fields": [
+      {
+       "name": "Dégâts",
+       "value": "3"
+      },
+      {
+       "name": "Portée",
+       "value": "Moyenne"
+      }
+     ]
+    }
+   ],
+   "inventory": []
+  },
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Nadejda Balakina",
+   "comment": "",
+   "attachments": [],
+   "role": "Garde",
+   "description": "Garde\nCaractère : Cynique, Idéaliste.\nMotivation : Venger un proche.\nSigne distinctif : Cheveux prématurément blanchis.",
+   "attitude": "allie",
+   "location_id": "544fa2d0-dcf5-55a8-abf6-1a240f440521",
+   "id": "56b55b31-afa3-55ec-b445-2065257eb6c3",
+   "created_date": "2026-10-19T18:15:17.577Z",
+   "updated_date": "2026-10-21T13:37:48.351Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes",
+   "gender": "female",
+   "level": "Standard",
+   "traits": [
+    "Attentive"
+   ],
+   "motivation": "Protéger les habitants sans faire de vagues.",
+   "appearance": "Cheveux prématurément blanchis",
+   "characteristics": {
+    "Vigueur": {
+     "value": "3",
+     "fields": [
+      {
+       "name": "Max",
+       "value": "3"
+      }
+     ]
+    },
+    "Agilité": {
+     "value": "4",
+     "fields": [
+      {
+       "name": "Max",
+       "value": "4"
+      }
+     ]
+    },
+    "Endurance": {
+     "value": "3",
+     "fields": []
+    },
+    "Perception": {
+     "value": "4",
+     "fields": []
+    },
+    "Débrouillardise": {
+     "value": "2",
+     "fields": []
+    },
+    "Sang-froid": {
+     "value": "3",
+     "fields": []
+    },
+    "Empathie": {
+     "value": "3",
+     "fields": []
+    },
+    "Savoir": {
+     "value": "2",
+     "fields": []
+    }
+   },
+   "skills": [
+    {
+     "name": "Oreille fine",
+     "roll_modifier": "",
+     "fields": []
+    }
+   ],
+   "equipment": [
+    {
+     "name": "Couteau de survie",
+     "type": "Corps à corps",
+     "fields": [
+      {
+       "name": "Dégâts",
+       "value": "1"
+      }
+     ]
+    }
+   ],
+   "inventory": []
+  },
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Misha Drougov",
+   "comment": "",
+   "attachments": [],
+   "role": "Fermier",
+   "description": "",
+   "attitude": "neutre",
+   "location_id": "abce5f5c-4329-582f-95e5-df0ad95cf0cf",
+   "id": "0fb9d5f7-bc70-5ce9-856b-a8e02a175ae2",
+   "created_date": "2026-10-19T18:15:00.154Z",
+   "updated_date": "2026-10-21T12:49:56.446Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes",
+   "gender": "",
+   "level": "Faible",
+   "traits": [
+    "Nerveux"
+   ],
+   "motivation": "Garder son travail au poulailler.",
+   "appearance": "Toujours en train de se frotter les mains.",
+   "characteristics": {},
+   "skills": [],
+   "equipment": [],
+   "inventory": []
+  },
+  {
+   "id": "ecfda2ec-7b42-5507-b12a-0e887cc98d32",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Sonia la colporteuse",
+   "comment": "Convoyeuse de la Ligue marchande",
+   "attachments": [],
+   "role": "Colporteuse",
+   "description": "",
+   "attitude": "neutre",
+   "location_id": "09084d08-8cda-5faa-8338-83ae854b8538",
+   "gender": "female",
+   "level": "Standard",
+   "traits": [
+    "Pragmatique",
+    "Bavarde"
+   ],
+   "motivation": "Vendre sa marchandise sans se mêler des affaires des autres.",
+   "appearance": "Sacs à dos empilés sur les épaules.",
+   "characteristics": {
+    "Vigueur": {
+     "value": "3",
+     "fields": [
+      {
+       "name": "Max",
+       "value": "3"
+      }
+     ]
+    },
+    "Agilité": {
+     "value": "3",
+     "fields": [
+      {
+       "name": "Max",
+       "value": "3"
+      }
+     ]
+    },
+    "Endurance": {
+     "value": "4",
+     "fields": []
+    },
+    "Perception": {
+     "value": "3",
+     "fields": []
+    },
+    "Débrouillardise": {
+     "value": "4",
+     "fields": []
+    },
+    "Sang-froid": {
+     "value": "3",
+     "fields": []
+    },
+    "Empathie": {
+     "value": "3",
+     "fields": []
+    },
+    "Savoir": {
+     "value": "3",
+     "fields": []
+    }
+   },
+   "skills": [
+    {
+     "name": "Marchandage",
+     "roll_modifier": "+1",
+     "fields": [],
+     "id": "264f33fb-3edc-57ad-83ac-9a68903d065c"
+    },
+    {
+     "name": "Orientation",
+     "roll_modifier": "",
+     "fields": []
+    }
+   ],
+   "equipment": [
+    {
+     "name": "Lampe dynamo",
+     "type": "Outils",
+     "fields": []
+    }
+   ],
+   "inventory": [
+    {
+     "id": "51390396-1aba-578e-b790-69fcc8aaa2c8",
+     "name": "Lampe dynamo",
+     "quantity": 2,
+     "notes": "À vendre",
+     "catalog_id": "",
+     "fields": []
+    }
+   ],
+   "generation_locks": {},
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "id": "507df532-0cd2-5c80-bbf2-f246c8e289ac",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Gleb Marachev",
+   "comment": "Doyen du Triumvirat",
+   "attachments": [],
+   "role": "Doyen",
+   "description": "",
+   "attitude": "neutre",
+   "location_id": "5fc07d28-4348-5cb6-bff7-e8ea4d4a08af",
+   "gender": "male",
+   "level": "Standard",
+   "traits": [
+    "Sage",
+    "Intransigeant"
+   ],
+   "motivation": "Préserver la station, quitte à sacrifier un de ses habitants.",
+   "appearance": "Barbe blanche, canne en tuyau d'acier.",
+   "characteristics": {},
+   "skills": [],
+   "equipment": [],
+   "inventory": [],
+   "generation_locks": {},
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  }
+ ],
+ "Location": [
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Tente de Piotr",
+   "comment": "",
+   "attachments": [],
+   "type": "Habitation",
+   "description": "",
+   "parent_id": "5fc07d28-4348-5cb6-bff7-e8ea4d4a08af",
+   "id": "009df578-42e8-588c-be83-7f76c5f406ad",
+   "created_date": "2026-10-19T17:43:24.874Z",
+   "updated_date": "2026-10-19T17:43:24.874Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Poulailler",
+   "comment": "",
+   "attachments": [],
+   "type": "Bâtiment",
+   "description": "Enclos couvert où vivaient les dernières poules de la station.",
+   "parent_id": "5fc07d28-4348-5cb6-bff7-e8ea4d4a08af",
+   "id": "abce5f5c-4329-582f-95e5-df0ad95cf0cf",
+   "created_date": "2026-10-19T10:42:08.245Z",
+   "updated_date": "2026-10-19T10:42:08.245Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Poste de garde",
+   "comment": "",
+   "attachments": [],
+   "type": "Bâtiment",
+   "description": "",
+   "parent_id": "5fc07d28-4348-5cb6-bff7-e8ea4d4a08af",
+   "id": "544fa2d0-dcf5-55a8-abf6-1a240f440521",
+   "created_date": "2026-10-19T17:44:29.069Z",
+   "updated_date": "2026-10-19T17:44:29.069Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Chez Rate",
+   "comment": "",
+   "attachments": [],
+   "type": "Habitation",
+   "description": "Une alcôve encombrée de bocaux, de bandages lavés et de plantes séchées.",
+   "parent_id": "5fc07d28-4348-5cb6-bff7-e8ea4d4a08af",
+   "id": "f8fe15dd-ffcd-5074-a780-15c1f71f60f7",
+   "created_date": "2026-10-19T17:48:18.505Z",
+   "updated_date": "2026-10-19T17:48:18.505Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Fosse a ordure",
+   "comment": "",
+   "attachments": [],
+   "type": "Zone",
+   "description": "C'est la que les habitants de la station jette toutes les ordures dont ils ne peuvent plus se servirent",
+   "parent_id": "5fc07d28-4348-5cb6-bff7-e8ea4d4a08af",
+   "id": "bbe75992-be4e-55a9-bb8b-8bfce6331861",
+   "created_date": "2026-10-19T18:02:35.123Z",
+   "updated_date": "2026-10-19T18:02:35.123Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Petatchniki",
+   "comment": "Station d'origine des joueurs",
+   "attachments": [
+    {
+     "name": "Plan de la station.png",
+     "url": "data:image/png;base64,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",
+     "type": "image/png"
+    },
+    {
+     "name": "Croquis du poulailler.png",
+     "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZAAAAC0CAIAAAA1l+0PAAAJZklEQVR42u3da1BU1wHA8XPv7sIKiCJGZbLrY82A8Y0PogKWxEeixNpkbGrVMe3EamNn1IwkJNZkjK0WHduJGV9Ra6P1QdU4SSeaUEJBUUGRR5SHgAuk7IK0FvABQXf33n5Yu9nsAooSA+H/+7TePcs997D758AyKIWa+gsA6AxklgAAwQIAggWAYAEAwQIAggWAYAEAwQIAggWAYAEAwQIAggWAYOF+TAjvp9U8uvXUauSnRvdl2UGw2iDpw1mb3456b3XUljXRQwYH3eejju+O9T440NB99tRBHgOaHfm9cJ+et6AevlMnGewO5QEu/MHYHcq0SGNQD1+exOg6tA/7srEry393WghhMgbGLxmzZHXaA3+oCsvNCsvNDrtSrU8vNmZAZt7VRzylc3k1M2MGHPikhOcxCFbblFXeCOnj16unPn5xeDe99usm+4adubX1Tcd3x8YuOu7aX7huO/cscYtGB/j5HE+rOHLC7D3Apbu/btkvRgb30Gu18vYD+UXmOufg9AvVpRXXP/rc7P2QHt194haFBwbobHZl3dbsuhu3XeNTM63uk1RV9fVfhXf311lrGqLHhTgn0Oy0nTdefNY0M2aAqoqdiQVZF//tHBMxqu8ftmcLIdzvLSmv95iDEGLRz4aOCAsO9NftOVqUnlXd0qWdyqoe9WRw4qdXRoT1Gh4afCzJfOSE2WPFCq7UPj9lDMECwWqzMcMfu1Jxfen84SkZln+kV06PNr46f9i6rdmtPOTF6aadiYUVlpt/2fiMM1gt+fX84ceSyoqu1PXt3W39ygmvvJUqhNDp5JSzFlcyPCxdMCLtnDXlrGXGj/r/cs6QP+350jV+9W/GuU9SqCI1w5p8pjJqXMiUiYZ7XunCF8LmrUju3avbgtmhrrMbQwJq/vu1x71TI43ec7h+8/bytenGkIA/ropMz6pu9tJ8dJq/p5R/+FFR4uZnl75zcvffiratnXzkhNljxWquNRr7+fMkBsG678dr5c1vRwlJami0bdyVu2XN5A07c4QQqZnWxXOHeQyWZMn9nzsOFjwzyTAxvJ9/N13rZ4kY2cfQ9+4rU6/XyrKkKKqiiOxL/3GNeeWlJ0eGBR/93JyeVS2EGDvssU27coUQSemVp7KqhRCu8aOH9nafpKqqG3flCiEycq86FNX77B7TzsyrWbV07MfJ5eu3f5NjjUZSFNXj3qNbnvOYgySkz9L+JYSorL7l76dr8dJUtbisXlFUu10pLqtXVFXvo/FeMYdD1Wp52wQEq+0/w7r72pZafLUH+Ol0334T7d0VESfPVx1LKps9bVDrZ9HI0usJGXdsDlmSRoT1cqbB4VAU9Zu+/PlwkftDZFkISQghFEVtaLS5j/eYpOs1L0uS665Wpp2wI2fUkOA5M56YGmlI2JHjPHjj1h0/vbaxye5+r/ccbA7lVqPt7gdS1ZYuzW5XnDfu2Bzu1+ixYv7dtDdu3eFJjK6jnb8+5xZci4l4XAgRE/F4XuE1IURDo22gobsQYlqUURXf2r+EmXqmZlp9dLLuXtuE/JLa6PEhQoiI0X3nzw69n5kUmeujxoYIIWKfHrB47tBWJllQUuscGT0+xBWslqbt76fb/E50QWndum0X3H+roLC0bpAx0ONe7zmoXju4Nl2ax4oNNAQWltbxJAY7rAe042D+G4vDZ00Z2HTbvuGDXCHE+3svrlkeUX/9dpG5zma7+66/5WrD/NmhHyeXb313svmr67cabTqd7LrXNeDAJyXOG1v+eilu0egfTx3kcCibduXdz0y27r8Uvzj8J9NNDY229duyW5mkj05+69WxL0w35ZfWuubQ7LSdIcvIubpt7WRZlvYdK3Yd/+KsZfzIPgWlte73nvuypqU5uLTp0jxWLGJUn+QzlTyJ0XVI/K857lp6m/Le6yiJ3y4dl7Aj556/itVuX2o0cvyS8HXbsvmsgR0W2kZVxe+3XniUZ7Q7FGoFdlgA0EHxpjgAggUABAsAwQIAggUABAsAwQIAggUABAsAwQIAggUABAsAwQIAggUABAvAD1Kn/AN++xKi+MwBD2/hm6fZYQEAwQLAt4RsaIEupfP+UIUdFgCCBQAECwDBAgCCBQAECwDBAgCCBQAECwDBAgCCBQAECwDBAgCCBQAECwDBAgCCBQAECwDBAgCCBQAECwDBAgCCBQAECwDBAgCCBQD/p+1qF7wiblk7frT3Nr3P2Tl7Bz87OywAYIf1qDz816iH+ZrJ2Tl7R/j+gB0WABAsACBYAAgWABAsAAQLAAgWABAsAAQLAAgWABAsAAQLAAgWABAsAAQLAAgWABAsAAQLAAgWABAsAAQLAAgWABAsAAQLAAgWABAsAAQLAAgWABAsAAQLAAgWABAsAAQLAAgWAIIFAAQLANqLtmte9oq4ZZyds3eps7PDAoBHSgo19e90k96XEOW8sfDN03wKga7zCmKHBYBgAQDBAkCwAIBgAQDBAkCwAIBgAQDBAkCwAIBgAQDBAkCwAIBgAQDBAkCwAIBgAQDBAkCwAIBgAQDBAkCwAIBgAQDBAkCwAIBgAQDBAkCwAIBgASBYLAEAggUABAsAwQIAggUABAsAwQKAjknbqWe/LyGKTyHADgsACBYAPCgp1NSfVQDADgsACBYAggUABAsACBaArkTLEnQKb6yKq7JWOW+XFl85l3m+2WETIydknMlkuUCw8H1yOBz79x6857BJURMJFggWOpyV8a9lZ+UYjAa93jf95OniyyWTY6J9fHx+vmDuof2JK+NfK75cUlNdc+li/vQZ0wIC/DUaTUryP6us1Xq93uMIiwmChe+WRqNpbGzcv/dAz6CeC16eV3y55FRa+vinxh3an+i8tzC/sMxcHjtrxoXz2VXWqsAegS/NnbP7gz1Tpj3tcYTFBMFCO+dpwcvznLdTU05aLVZJki7mXRJC1NfV+/r6eoxXVbW8rEIIYRpsCuoV5Dyo0+kkSfI+oqoqKwyChXbj/TMsh8PR1NTU0nhFUZwZkmU58cBhu90uSZKxv0FVVe8jLC86C36tobNqNjSSJEmS5H6kstISNiRUCDH4CdOkyInNHgHYYeG7+pbQaqlKTUlrdljlV5U/nTvn8KEjriNfJKXMfP658LHhiqKc+PSzZo8AnQV/rQEA3xICAMECQLAAgGABAMECQLAAgGABAMECQLAAgGABAMECQLAAgGABAMEC8IP0PxoU/sGK9LjSAAAAAElFTkSuQmCC",
+     "type": "image/png"
+    }
+   ],
+   "type": "Station de métro",
+   "description": "Station fermière du métro : élevage de poules, champignonnières et un poste de garde. Environ 80 habitants.",
+   "parent_id": "ed05de0e-57a6-54dc-af24-c0515f4cff82",
+   "id": "5fc07d28-4348-5cb6-bff7-e8ea4d4a08af",
+   "created_date": "2026-10-19T10:41:54.686Z",
+   "updated_date": "2026-10-19T17:36:16.180Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Le métro",
+   "comment": "",
+   "attachments": [],
+   "type": "Région",
+   "description": "Le réseau de tunnels et de stations où survivent les habitants.",
+   "parent_id": "",
+   "id": "ed05de0e-57a6-54dc-af24-c0515f4cff82",
+   "created_date": "2026-10-19T17:36:09.997Z",
+   "updated_date": "2026-10-19T17:36:09.997Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "id": "09084d08-8cda-5faa-8338-83ae854b8538",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Quai de chargement",
+   "comment": "",
+   "attachments": [],
+   "type": "Zone",
+   "description": "Le quai où la Ligue marchande décharge ses convois, à l'autre bout de la station.",
+   "parent_id": "5fc07d28-4348-5cb6-bff7-e8ea4d4a08af",
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  }
+ ],
+ "Clue": [
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Aiguille tachée",
+   "comment": "",
+   "attachments": [],
+   "description": "Une aiguille taché avec un produit vert.",
+   "clue_type": "indice",
+   "discovered": true,
+   "known": false,
+   "used": false,
+   "location_id": "009df578-42e8-588c-be83-7f76c5f406ad",
+   "id": "a506927c-6ac9-5912-b173-13378408a453",
+   "created_date": "2026-10-19T17:43:10.054Z",
+   "updated_date": "2026-10-19T17:43:35.280Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Le chignon vert",
+   "comment": "",
+   "attachments": [],
+   "description": "Paralysie cardiaque et respiratoire immédiate (5 à 10 secondes). Mort propre, sans cris, ni spasmes, ni dégât physique visible de l'extérieur.\nValeur marchande : 15 à 20 cartouches militaires la dose.",
+   "clue_type": "indice",
+   "discovered": false,
+   "known": false,
+   "used": false,
+   "location_id": "",
+   "id": "11ac2a02-3dbc-5d1e-bda3-e3a00444949a",
+   "created_date": "2026-10-19T17:31:28.249Z",
+   "updated_date": "2026-10-19T17:31:28.249Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Cartouches militaire",
+   "comment": "",
+   "attachments": [],
+   "description": "40 cartouches militaire, c'est le solde que Igor doit payer a Piotr une fois que la poule sera morte. ",
+   "clue_type": "indice",
+   "discovered": false,
+   "known": false,
+   "used": false,
+   "location_id": "",
+   "id": "44bb1cd9-7ed0-5b4e-a79b-4c0648d47a9a",
+   "created_date": "2026-10-19T17:40:06.761Z",
+   "updated_date": "2026-10-19T17:40:06.761Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Petit eclat de cire noir",
+   "comment": "",
+   "attachments": [],
+   "description": "Un petit éclat de cire noir généralement utilisé dans les tunnel pour fermer les flacon de produits. ",
+   "clue_type": "indice",
+   "discovered": true,
+   "known": false,
+   "used": false,
+   "location_id": "abce5f5c-4329-582f-95e5-df0ad95cf0cf",
+   "id": "192d05d5-ca64-5e31-b975-674bdbe74dc7",
+   "created_date": "2026-10-19T17:42:10.385Z",
+   "updated_date": "2026-10-19T17:43:56.025Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Le deal",
+   "comment": "",
+   "attachments": [],
+   "description": "Piotr est payé par Igor pour empoisonner les poules de Petatchniki pour déstabiliser la station et les forcer a commercer avec la Ligue marchande. ",
+   "clue_type": "info",
+   "discovered": false,
+   "known": false,
+   "used": false,
+   "location_id": "",
+   "id": "b33afe03-ed07-53a7-81b4-76a27a69eadd",
+   "created_date": "2026-10-19T17:37:41.925Z",
+   "updated_date": "2026-10-19T17:37:41.925Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Poule morte",
+   "comment": "",
+   "attachments": [],
+   "description": "Une des poules morte n'a pas encore été retiré de l'enclos ",
+   "clue_type": "indice",
+   "discovered": true,
+   "known": false,
+   "used": false,
+   "location_id": "abce5f5c-4329-582f-95e5-df0ad95cf0cf",
+   "id": "18e5c001-8edf-53aa-a435-5d653a0d7749",
+   "created_date": "2026-10-19T10:43:34.869Z",
+   "updated_date": "2026-10-19T10:43:34.869Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Piotr et Igor",
+   "comment": "",
+   "attachments": [],
+   "description": "Igor a été vu en train de discuter discrètement avec Piotr près des serres deux jours plus tôt.",
+   "clue_type": "info",
+   "discovered": false,
+   "known": false,
+   "used": false,
+   "location_id": "544fa2d0-dcf5-55a8-abf6-1a240f440521",
+   "id": "04527c19-7e85-5b02-bfce-c324bd636b66",
+   "created_date": "2026-10-19T17:44:59.173Z",
+   "updated_date": "2026-10-19T17:44:59.173Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Poule morte",
+   "comment": "",
+   "attachments": [],
+   "description": "La mort de la poule n'est pas naturel, elle a subit une injection chignon vert sous son aile qui a causé une paralysie respiratoire et causé sa mort. La trace d'injection ne peut être trouvé que par un jet de médecine ou par l'analyse de Rate. ",
+   "clue_type": "info",
+   "discovered": false,
+   "known": true,
+   "used": true,
+   "location_id": "",
+   "id": "abd483dc-054c-5278-9af8-5aaac1adc8b7",
+   "created_date": "2026-10-19T10:44:05.519Z",
+   "updated_date": "2026-10-19T17:33:37.042Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "La maladie des tunnels",
+   "comment": "",
+   "attachments": [],
+   "description": "Infection pulmonaire du a la moisissure ambiante des tunnels. ",
+   "clue_type": "info",
+   "discovered": false,
+   "known": true,
+   "used": false,
+   "location_id": "",
+   "id": "d0867a5e-2c75-514d-9d8d-fe702637e23c",
+   "created_date": "2026-10-19T17:36:00.360Z",
+   "updated_date": "2026-10-19T17:36:00.360Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Piqure violacé",
+   "comment": "Test médecine ou analyse par Rate",
+   "attachments": [],
+   "description": "Une trace de piqure violacé retrouvé sous l'aile gauche de la poule",
+   "clue_type": "indice",
+   "discovered": true,
+   "known": false,
+   "used": false,
+   "location_id": "",
+   "id": "c7afd994-f7ad-59d7-802c-4ecf84b577c7",
+   "created_date": "2026-10-19T17:41:28.849Z",
+   "updated_date": "2026-10-19T17:41:28.849Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Injection",
+   "comment": "",
+   "attachments": [],
+   "description": "Une trace de seringue est retrouvé sous l'aile de la poule",
+   "clue_type": "indice",
+   "discovered": true,
+   "known": false,
+   "used": false,
+   "location_id": "",
+   "id": "dce811b5-b51d-5eda-b594-9461e8fb351f",
+   "created_date": "2026-10-19T17:32:10.249Z",
+   "updated_date": "2026-10-19T17:32:10.249Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Boite de Pénicilline",
+   "comment": "",
+   "attachments": [],
+   "description": "Une boite neuve de pénicilline d'avant guerre encore neuve que Igor a \"offert\" a Piotr pour le soudoyer. ",
+   "clue_type": "indice",
+   "discovered": false,
+   "known": false,
+   "used": false,
+   "location_id": "009df578-42e8-588c-be83-7f76c5f406ad",
+   "id": "557f51d6-70a4-5c42-a58e-3657b998a594",
+   "created_date": "2026-10-19T17:39:15.573Z",
+   "updated_date": "2026-10-19T17:43:44.985Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  }
+ ],
+ "NPCRelation": [
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "pair_id": "e60e3611-7910-5589-9f86-50d34994a48d",
+   "notes": "",
+   "from_id": "194b7901-1c86-50c8-977e-1da6de12671f",
+   "to_id": "585aa9a0-6b81-51c3-a5ec-4d43098f0e4d",
+   "type": "enfant_de",
+   "custom_label": "",
+   "id": "9fe8257e-2e73-5b59-9c3d-8e6016c315dc",
+   "created_date": "2026-10-19T17:29:46.424Z",
+   "updated_date": "2026-10-19T17:29:46.424Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "pair_id": "1c43e09e-b371-5d28-9eb3-d7c731410c89",
+   "notes": "",
+   "from_id": "585aa9a0-6b81-51c3-a5ec-4d43098f0e4d",
+   "to_id": "e3f29873-b5c4-5157-b0a2-11c95766d699",
+   "type": "sous_ordres_de",
+   "custom_label": "",
+   "id": "508d784e-f6c8-5ba5-9903-5d9976ec8292",
+   "created_date": "2026-10-21T13:18:39.342Z",
+   "updated_date": "2026-10-21T13:18:39.342Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "pair_id": "e60e3611-7910-5589-9f86-50d34994a48d",
+   "notes": "",
+   "from_id": "585aa9a0-6b81-51c3-a5ec-4d43098f0e4d",
+   "to_id": "194b7901-1c86-50c8-977e-1da6de12671f",
+   "type": "parent_de",
+   "custom_label": "",
+   "id": "5f2a4138-7754-51b1-b4dc-644eb47c07fe",
+   "created_date": "2026-10-19T17:29:46.421Z",
+   "updated_date": "2026-10-19T17:29:46.421Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "pair_id": "1c43e09e-b371-5d28-9eb3-d7c731410c89",
+   "notes": "",
+   "from_id": "e3f29873-b5c4-5157-b0a2-11c95766d699",
+   "to_id": "585aa9a0-6b81-51c3-a5ec-4d43098f0e4d",
+   "type": "dirige",
+   "custom_label": "",
+   "id": "bcf775a0-69e6-5a34-9f65-0ab946d36797",
+   "created_date": "2026-10-21T13:18:39.346Z",
+   "updated_date": "2026-10-21T13:18:39.346Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "id": "0bda2f76-0a6c-52cd-9726-749de31e7e28",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "pair_id": "ad79497a-e99c-560f-b027-f8b43c288525",
+   "notes": "",
+   "from_id": "2d6ce6fb-707e-570a-bbd7-0983b1ef2694",
+   "to_id": "56b55b31-afa3-55ec-b445-2065257eb6c3",
+   "type": "allie",
+   "custom_label": "",
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "id": "c92b8eee-a685-5463-9742-be56b8397f18",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "pair_id": "ad79497a-e99c-560f-b027-f8b43c288525",
+   "notes": "",
+   "from_id": "56b55b31-afa3-55ec-b445-2065257eb6c3",
+   "to_id": "2d6ce6fb-707e-570a-bbd7-0983b1ef2694",
+   "type": "allie",
+   "custom_label": "",
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "id": "c81219bf-a4d1-5536-ae2d-46f60ffedb3c",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "pair_id": "7bc2b205-f720-5204-ac7d-f71cf40c39ac",
+   "notes": "",
+   "from_id": "ecfda2ec-7b42-5507-b12a-0e887cc98d32",
+   "to_id": "e3f29873-b5c4-5157-b0a2-11c95766d699",
+   "type": "sous_ordres_de",
+   "custom_label": "",
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "id": "720f135b-ec12-5a44-b43d-7d3efb6c9a2c",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "pair_id": "7bc2b205-f720-5204-ac7d-f71cf40c39ac",
+   "notes": "",
+   "from_id": "e3f29873-b5c4-5157-b0a2-11c95766d699",
+   "to_id": "ecfda2ec-7b42-5507-b12a-0e887cc98d32",
+   "type": "dirige",
+   "custom_label": "",
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  }
+ ],
+ "RollTable": [
+  {
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Noms de personnages",
+   "category": "noms",
+   "description": "",
+   "entries": [
+    {
+     "text": "Miroslav Abramovitch",
+     "weight": 1
+    },
+    {
+     "text": "Mikhail Babykine",
+     "weight": 1
+    },
+    {
+     "text": "Pavel Grettchenko",
+     "weight": 1
+    },
+    {
+     "text": "Ivanna Antonova",
+     "weight": 1
+    },
+    {
+     "text": "Alyona Vodoleïeva",
+     "weight": 1
+    },
+    {
+     "text": "Darya Zakharina",
+     "weight": 1
+    },
+    {
+     "text": "Stepan Aksarov",
+     "weight": 1
+    },
+    {
+     "text": "Youri Charapov",
+     "weight": 1
+    },
+    {
+     "text": "Vadim Pavlenko",
+     "weight": 1
+    },
+    {
+     "text": "Nadejda Balakina",
+     "weight": 1
+    },
+    {
+     "text": "Nikita Khorkova",
+     "weight": 1
+    },
+    {
+     "text": "Raïssa Sorokina",
+     "weight": 1
+    },
+    {
+     "text": "Aleksandr Balakhnov",
+     "weight": 1
+    },
+    {
+     "text": "Fiodor Golovine",
+     "weight": 1
+    },
+    {
+     "text": "Andreï Vasnev",
+     "weight": 1
+    },
+    {
+     "text": "Sofia Domacheva",
+     "weight": 1
+    },
+    {
+     "text": "Véra Kachkanova",
+     "weight": 1
+    },
+    {
+     "text": "Ksénia Zabolotnia",
+     "weight": 1
+    },
+    {
+     "text": "Dimitri Emski",
+     "weight": 1
+    },
+    {
+     "text": "Bogdan Tchoudinov",
+     "weight": 1
+    },
+    {
+     "text": "Anatoli Yasneïev",
+     "weight": 1
+    },
+    {
+     "text": "Irina Chichkina",
+     "weight": 1
+    },
+    {
+     "text": "Lioudmila Khabalova",
+     "weight": 1
+    },
+    {
+     "text": "Oksana Soukharnikova",
+     "weight": 1
+    },
+    {
+     "text": "Alekseï Lebedinski",
+     "weight": 1
+    },
+    {
+     "text": "Stanislav Nikitine",
+     "weight": 1
+    },
+    {
+     "text": "Vladimir Oborine",
+     "weight": 1
+    },
+    {
+     "text": "Anastasia Mineïeva",
+     "weight": 1
+    },
+    {
+     "text": "Ekaterina Netchaïeva",
+     "weight": 1
+    },
+    {
+     "text": "Svetlana Pozdniakova",
+     "weight": 1
+    },
+    {
+     "text": "Lioubov Balakine",
+     "weight": 1
+    },
+    {
+     "text": "Misha Drougov",
+     "weight": 1
+    },
+    {
+     "text": "Artiom Vassiliev",
+     "weight": 1
+    },
+    {
+     "text": "Zinaïda Alekseïeva",
+     "weight": 1
+    },
+    {
+     "text": "Natalia Golovtchenko",
+     "weight": 1
+    },
+    {
+     "text": "Larissa Ivankova",
+     "weight": 1
+    },
+    {
+     "text": "Arkadi Blatov",
+     "weight": 1
+    },
+    {
+     "text": "Nikolaï Oulianov",
+     "weight": 1
+    },
+    {
+     "text": "Vassili Tokarev",
+     "weight": 1
+    },
+    {
+     "text": "Yelena Chvernikova",
+     "weight": 1
+    },
+    {
+     "text": "Yevguenia Emski",
+     "weight": 1
+    },
+    {
+     "text": "Galina Tchernikova",
+     "weight": 1
+    },
+    {
+     "text": "Denis Andreïev",
+     "weight": 1
+    },
+    {
+     "text": "Vladislav Fedine",
+     "weight": 1
+    },
+    {
+     "text": "Yuri Oussenko",
+     "weight": 1
+    },
+    {
+     "text": "Tatiana Cherkova",
+     "weight": 1
+    },
+    {
+     "text": "Anya Petrova",
+     "weight": 1
+    },
+    {
+     "text": "Olga Toporova",
+     "weight": 1
+    }
+   ],
+   "id": "e15130f0-cde7-5c44-9351-dfecbc7873fd",
+   "created_date": "2026-10-21T12:39:11.032Z",
+   "updated_date": "2026-10-21T12:39:11.032Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "id": "ea178b68-5299-5989-aeae-2bc849fc31d0",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Objets trouvés",
+   "category": "objets",
+   "description": "Ce que l'on trouve en fouillant les tunnels.",
+   "entries": [
+    {
+     "text": "Lampe dynamo à la manivelle grippée",
+     "weight": 3
+    },
+    {
+     "text": "Bocal de champignons séchés",
+     "weight": 4
+    },
+    {
+     "text": "Boîte de conserve sans étiquette",
+     "weight": 5
+    },
+    {
+     "text": "Rouleau de fil de fer",
+     "weight": 3
+    },
+    {
+     "text": "Cartouches militaires (1d6)",
+     "weight": 2
+    },
+    {
+     "text": "Carte griffonnée d'une station voisine",
+     "weight": 1
+    }
+   ],
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "id": "0c01a1aa-b370-5378-a3ac-df7858519161",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Rencontres dans les tunnels",
+   "category": "rencontres",
+   "description": "À tirer quand les personnages quittent la station.",
+   "entries": [
+    {
+     "text": "Un convoi de colporteurs pressés",
+     "weight": 4
+    },
+    {
+     "text": "Deux rôdeurs qui réclament un péage",
+     "weight": 3
+    },
+    {
+     "text": "Un tunnel effondré, détour obligatoire",
+     "weight": 3
+    },
+    {
+     "text": "Un éclaireur blessé qui demande de l'aide",
+     "weight": 2
+    },
+    {
+     "text": "Silence total, puis un bruit de pas derrière eux",
+     "weight": 1
+    }
+   ],
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "id": "af9134df-fdba-51a1-a9cc-190c8f532307",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Rumeurs",
+   "category": "rumeurs",
+   "description": "Rumeurs entendues dans la station (pour la scène « Rumeurs de la station »).",
+   "entries": [
+    {
+     "text": "On dit que la Ligue marchande a doublé ses prix sur les œufs.",
+     "weight": 3
+    },
+    {
+     "text": "Un garde a entendu des pas près de la fosse à ordures, la nuit.",
+     "weight": 2
+    },
+    {
+     "text": "La petite Katia tousse de plus en plus ; son père ne dort plus.",
+     "weight": 2
+    },
+    {
+     "text": "Igor serait revenu avec un manteau neuf. Étrange pour un marchand sans clients.",
+     "weight": 1
+    }
+   ],
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  }
+ ],
+ "GameSheetModel": [
+  {
+   "id": "28483f40-2d3b-5a32-8aaa-6238ddcbf9ee",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "characteristics": [
+    {
+     "name": "Vigueur",
+     "modifier": false,
+     "test": false,
+     "max": true,
+     "field_names": [
+      "Max"
+     ]
+    },
+    {
+     "name": "Agilité",
+     "modifier": false,
+     "test": false,
+     "max": true,
+     "field_names": [
+      "Max"
+     ]
+    },
+    {
+     "name": "Endurance",
+     "modifier": false,
+     "test": false,
+     "max": false,
+     "field_names": []
+    },
+    {
+     "name": "Perception",
+     "modifier": false,
+     "test": false,
+     "max": false,
+     "field_names": []
+    },
+    {
+     "name": "Débrouillardise",
+     "modifier": false,
+     "test": false,
+     "max": false,
+     "field_names": []
+    },
+    {
+     "name": "Sang-froid",
+     "modifier": false,
+     "test": false,
+     "max": false,
+     "field_names": []
+    },
+    {
+     "name": "Empathie",
+     "modifier": false,
+     "test": false,
+     "max": false,
+     "field_names": []
+    },
+    {
+     "name": "Savoir",
+     "modifier": false,
+     "test": false,
+     "max": false,
+     "field_names": []
+    }
+   ],
+   "skillRollModifier": false,
+   "scale": {
+    "levels": [
+     {
+      "name": "Faible",
+      "ranges": {
+       "Vigueur": {
+        "min": 1,
+        "max": 3
+       },
+       "Agilité": {
+        "min": 1,
+        "max": 3
+       },
+       "Endurance": {
+        "min": 1,
+        "max": 3
+       },
+       "Perception": {
+        "min": 1,
+        "max": 3
+       },
+       "Débrouillardise": {
+        "min": 1,
+        "max": 3
+       },
+       "Sang-froid": {
+        "min": 1,
+        "max": 3
+       },
+       "Empathie": {
+        "min": 1,
+        "max": 3
+       },
+       "Savoir": {
+        "min": 1,
+        "max": 3
+       }
+      },
+      "skills": {
+       "min": 0,
+       "max": 1
+      }
+     },
+     {
+      "name": "Standard",
+      "ranges": {
+       "Vigueur": {
+        "min": 2,
+        "max": 4
+       },
+       "Agilité": {
+        "min": 2,
+        "max": 4
+       },
+       "Endurance": {
+        "min": 2,
+        "max": 4
+       },
+       "Perception": {
+        "min": 2,
+        "max": 4
+       },
+       "Débrouillardise": {
+        "min": 2,
+        "max": 4
+       },
+       "Sang-froid": {
+        "min": 2,
+        "max": 4
+       },
+       "Empathie": {
+        "min": 2,
+        "max": 4
+       },
+       "Savoir": {
+        "min": 2,
+        "max": 4
+       }
+      },
+      "skills": {
+       "min": 1,
+       "max": 2
+      }
+     },
+     {
+      "name": "Élite",
+      "ranges": {
+       "Vigueur": {
+        "min": 4,
+        "max": 6
+       },
+       "Agilité": {
+        "min": 4,
+        "max": 6
+       },
+       "Endurance": {
+        "min": 4,
+        "max": 6
+       },
+       "Perception": {
+        "min": 4,
+        "max": 6
+       },
+       "Débrouillardise": {
+        "min": 4,
+        "max": 6
+       },
+       "Sang-froid": {
+        "min": 4,
+        "max": 6
+       },
+       "Empathie": {
+        "min": 4,
+        "max": 6
+       },
+       "Savoir": {
+        "min": 4,
+        "max": 6
+       }
+      },
+      "skills": {
+       "min": 2,
+       "max": 3
+      }
+     }
+    ]
+   },
+   "pc_scale": {
+    "ranges": {
+     "Vigueur": {
+      "min": 3,
+      "max": 5
+     },
+     "Agilité": {
+      "min": 3,
+      "max": 5
+     },
+     "Endurance": {
+      "min": 3,
+      "max": 5
+     },
+     "Perception": {
+      "min": 3,
+      "max": 5
+     },
+     "Débrouillardise": {
+      "min": 3,
+      "max": 5
+     },
+     "Sang-froid": {
+      "min": 3,
+      "max": 5
+     },
+     "Empathie": {
+      "min": 3,
+      "max": 5
+     },
+     "Savoir": {
+      "min": 3,
+      "max": 5
+     }
+    },
+    "skills": {
+     "min": 2,
+     "max": 3
+    },
+    "equipment": {
+     "min": 2,
+     "max": 3
+    }
+   },
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  }
+ ],
+ "GameCharacter": [
+  {
+   "id": "7ac6d3be-3e88-5425-aaf1-9e284ae4dc81",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Buldov",
+   "notes": "Le costaud du groupe : ancien porteur, fait peur sans le vouloir.",
+   "characteristics": {
+    "Vigueur": {
+     "value": "5",
+     "fields": [
+      {
+       "name": "Max",
+       "value": "5"
+      }
+     ]
+    },
+    "Agilité": {
+     "value": "3",
+     "fields": [
+      {
+       "name": "Max",
+       "value": "3"
+      }
+     ]
+    },
+    "Endurance": {
+     "value": "5",
+     "fields": []
+    },
+    "Perception": {
+     "value": "3",
+     "fields": []
+    },
+    "Débrouillardise": {
+     "value": "3",
+     "fields": []
+    },
+    "Sang-froid": {
+     "value": "4",
+     "fields": []
+    },
+    "Empathie": {
+     "value": "3",
+     "fields": []
+    },
+    "Savoir": {
+     "value": "3",
+     "fields": []
+    }
+   },
+   "skills": [
+    {
+     "name": "Costaud",
+     "roll_modifier": "",
+     "fields": []
+    },
+    {
+     "name": "Sang-froid",
+     "roll_modifier": "+1",
+     "fields": []
+    }
+   ],
+   "equipment": [
+    {
+     "name": "Barre de fer",
+     "type": "Corps à corps",
+     "fields": [
+      {
+       "name": "Dégâts",
+       "value": "2"
+      }
+     ]
+    },
+    {
+     "name": "Veste matelassée",
+     "type": "Armure",
+     "fields": [
+      {
+       "name": "Protection",
+       "value": "1"
+      }
+     ]
+    }
+   ],
+   "inventory": [
+    {
+     "id": "70dc5912-a174-5707-bfe0-98e388af18b1",
+     "name": "Ration de survie",
+     "quantity": 3,
+     "notes": "",
+     "catalog_id": "",
+     "fields": []
+    }
+   ],
+   "generation_locks": {},
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "id": "7cad6213-c940-5b50-9b72-dc2333edc59f",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Baronov",
+   "notes": "Le débrouillard : répare tout, sait où trouver ce qui manque.",
+   "characteristics": {
+    "Vigueur": {
+     "value": "2",
+     "fields": [
+      {
+       "name": "Max",
+       "value": "2"
+      }
+     ]
+    },
+    "Agilité": {
+     "value": "4",
+     "fields": [
+      {
+       "name": "Max",
+       "value": "4"
+      }
+     ]
+    },
+    "Endurance": {
+     "value": "3",
+     "fields": []
+    },
+    "Perception": {
+     "value": "4",
+     "fields": []
+    },
+    "Débrouillardise": {
+     "value": "5",
+     "fields": []
+    },
+    "Sang-froid": {
+     "value": "3",
+     "fields": []
+    },
+    "Empathie": {
+     "value": "4",
+     "fields": []
+    },
+    "Savoir": {
+     "value": "5",
+     "fields": []
+    }
+   },
+   "skills": [
+    {
+     "name": "Bricolage de fortune",
+     "roll_modifier": "+1",
+     "fields": []
+    },
+    {
+     "name": "Marchandage",
+     "roll_modifier": "+1",
+     "fields": [],
+     "id": "5757f94b-d87e-5c32-97b8-4691f30e64ed"
+    }
+   ],
+   "equipment": [
+    {
+     "name": "Lampe dynamo",
+     "type": "Outils",
+     "fields": []
+    },
+    {
+     "name": "Trousse de soins",
+     "type": "Outils",
+     "fields": []
+    }
+   ],
+   "inventory": [
+    {
+     "id": "32f38c7d-7b06-5bea-a7e9-3460b1250f47",
+     "name": "Fil de fer",
+     "quantity": 5,
+     "notes": "",
+     "catalog_id": "",
+     "fields": []
+    },
+    {
+     "id": "d78dc9de-f072-56db-8fbb-796c05e80a53",
+     "name": "Ration de survie",
+     "quantity": 2,
+     "notes": "",
+     "catalog_id": "",
+     "fields": []
+    }
+   ],
+   "generation_locks": {},
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "id": "3afc962d-fe2b-5fb5-b0d7-ab5ae543b16f",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Shadrov",
+   "notes": "L'éclaireur : se déplace sans bruit et connaît les tunnels voisins.",
+   "characteristics": {
+    "Vigueur": {
+     "value": "3",
+     "fields": [
+      {
+       "name": "Max",
+       "value": "3"
+      }
+     ]
+    },
+    "Agilité": {
+     "value": "5",
+     "fields": [
+      {
+       "name": "Max",
+       "value": "5"
+      }
+     ]
+    },
+    "Endurance": {
+     "value": "4",
+     "fields": []
+    },
+    "Perception": {
+     "value": "5",
+     "fields": []
+    },
+    "Débrouillardise": {
+     "value": "3",
+     "fields": []
+    },
+    "Sang-froid": {
+     "value": "4",
+     "fields": []
+    },
+    "Empathie": {
+     "value": "3",
+     "fields": []
+    },
+    "Savoir": {
+     "value": "3",
+     "fields": []
+    }
+   },
+   "skills": [
+    {
+     "name": "Discrétion",
+     "roll_modifier": "",
+     "fields": []
+    },
+    {
+     "name": "Pisteur",
+     "roll_modifier": "",
+     "fields": []
+    }
+   ],
+   "equipment": [
+    {
+     "name": "Couteau de survie",
+     "type": "Corps à corps",
+     "fields": [
+      {
+       "name": "Dégâts",
+       "value": "1"
+      }
+     ]
+    },
+    {
+     "name": "Revolver rafistolé",
+     "type": "Armes à feu",
+     "fields": [
+      {
+       "name": "Dégâts",
+       "value": "2"
+      },
+      {
+       "name": "Portée",
+       "value": "Courte"
+      }
+     ]
+    }
+   ],
+   "inventory": [
+    {
+     "id": "c130c782-6ff0-5fd4-be16-89b6c4f5cf46",
+     "name": "Cire noire",
+     "quantity": 3,
+     "notes": "Pour sceller les passages",
+     "catalog_id": "",
+     "fields": []
+    }
+   ],
+   "generation_locks": {},
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  }
+ ],
+ "SkillCatalog": [
+  {
+   "id": "bed5b3a1-a297-5a65-b962-ca647b075c80",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Bricolage de fortune",
+   "roll_modifier": "+1",
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "id": "4838f054-0b7f-53fb-9af2-1a6884be93c2",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Oreille fine",
+   "roll_modifier": "",
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "id": "46c5b2bd-5b42-5f21-a721-6b4fbecd188d",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Premiers soins",
+   "roll_modifier": "+1",
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "id": "3d6dbe84-7a4b-56da-b73c-f01cc7b0ba4b",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Beau parleur",
+   "roll_modifier": "",
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "id": "a0bbeacf-b76e-575f-9a95-8d43b72430c2",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Pisteur",
+   "roll_modifier": "",
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "id": "98acb3c5-c121-566e-a721-f0be286f4f0f",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Sang-froid",
+   "roll_modifier": "+1",
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "id": "22dc93f8-6b17-5514-9afb-8b927196a7a0",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Costaud",
+   "roll_modifier": "",
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "id": "aa237571-0ebc-551e-8892-25fa799a585c",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Discrétion",
+   "roll_modifier": "",
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "id": "e8923212-be4c-520b-b930-62f7214dca3f",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Marchandage",
+   "roll_modifier": "+1",
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "id": "2fdb17b5-2a00-54e4-bef9-aef2aa47d4b5",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Orientation",
+   "roll_modifier": "",
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  }
+ ],
+ "EquipmentCatalog": [
+  {
+   "id": "fec1809b-ecb9-5947-812c-52fcf8dc5b2c",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Couteau de survie",
+   "type": "Corps à corps",
+   "fields": [
+    {
+     "name": "Dégâts",
+     "value": ""
+    }
+   ],
+   "field_names": [
+    "Dégâts"
+   ],
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "id": "70fee023-5d63-5016-891f-67d98d79e090",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Barre de fer",
+   "type": "Corps à corps",
+   "fields": [
+    {
+     "name": "Dégâts",
+     "value": ""
+    }
+   ],
+   "field_names": [
+    "Dégâts"
+   ],
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "id": "fe49470c-48a1-50d1-bc30-37e8144ca44e",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Revolver rafistolé",
+   "type": "Armes à feu",
+   "fields": [
+    {
+     "name": "Dégâts",
+     "value": ""
+    },
+    {
+     "name": "Portée",
+     "value": ""
+    }
+   ],
+   "field_names": [
+    "Dégâts",
+    "Portée"
+   ],
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "id": "2e09406d-7a1f-5e41-b251-262cf91c220d",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Fusil de chasse",
+   "type": "Armes à feu",
+   "fields": [
+    {
+     "name": "Dégâts",
+     "value": ""
+    },
+    {
+     "name": "Portée",
+     "value": ""
+    }
+   ],
+   "field_names": [
+    "Dégâts",
+    "Portée"
+   ],
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "id": "2215b2ff-7c66-5be8-bcc0-de9a6a777d51",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Veste matelassée",
+   "type": "Armure",
+   "fields": [
+    {
+     "name": "Protection",
+     "value": ""
+    }
+   ],
+   "field_names": [
+    "Protection"
+   ],
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "id": "5bc977a9-4ba4-5f52-8732-4940efac4ffb",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Lampe dynamo",
+   "type": "Outils",
+   "fields": [],
+   "field_names": [],
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "id": "8f3f9e58-a4e5-5e9a-9296-5e5e9eb7f3ea",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Trousse de soins",
+   "type": "Outils",
+   "fields": [],
+   "field_names": [],
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  }
+ ],
+ "GameSession": [
+  {
+   "id": "bbe458d2-f925-557f-af33-d570f7bc2bd4",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "title": "Séance 1 · La dernière poule",
+   "date": "2026-10-24",
+   "time": "20:30",
+   "location": "Chez le MJ",
+   "status": "jouee",
+   "notes": "",
+   "scene_id": "d37dbee8-c6e2-52b0-90b8-7e6b5743d50d",
+   "journal": {
+    "summary": "Les personnages ont examiné la poule, interrogé Rate et découvert la maladie de Katia. Ils soupçonnent déjà Piotr, mais n'ont pas de preuve.",
+    "scene_ids": [
+     "d37dbee8-c6e2-52b0-90b8-7e6b5743d50d",
+     "187ae7e3-1772-57b6-b06f-57f05461d7a5",
+     "5e6bf73b-1cda-5217-b885-2c60fbf24c28"
+    ],
+    "npc_ids": [
+     "585aa9a0-6b81-51c3-a5ec-4d43098f0e4d",
+     "a49ba478-0558-5c6d-8b2e-84b5ddb5923c",
+     "194b7901-1c86-50c8-977e-1da6de12671f",
+     "0fb9d5f7-bc70-5ce9-856b-a8e02a175ae2"
+    ],
+    "clue_ids": [
+     "a506927c-6ac9-5912-b173-13378408a453",
+     "c7afd994-f7ad-59d7-802c-4ecf84b577c7",
+     "dce811b5-b51d-5eda-b594-9461e8fb351f"
+    ],
+    "next": "Interroger les gardes. Retrouver Piotr avant la nuit. Rate peut identifier le poison."
+   },
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "id": "979df05e-34e3-522a-a7d9-094db7d9f16c",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "title": "Séance 2 · Chasse à l'homme",
+   "date": "2026-11-14",
+   "time": "20:30",
+   "location": "Chez le MJ",
+   "status": "planifiee",
+   "notes": "Prévoir la table des rumeurs.",
+   "scene_id": "9ea3d913-2efc-58dd-b050-3749cbff63e7",
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  }
+ ],
+ "Note": [
+  {
+   "id": "5fe359ea-a4a4-5df5-bd16-6771953177c6",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "title": "Rappel de séance",
+   "content": "Imprimer les 3 fiches de personnages et le plan de la station. Prévoir des dés et des jetons de munitions.",
+   "pinned": true,
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "id": "87bf0400-3f87-5817-8685-ee99bcb19667",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "title": "Idées pour la suite",
+   "content": "Et si Igor avait un complice parmi les gardes ? Et si Katia avait vu quelque chose ?",
+   "pinned": false,
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "id": "da7ec5ec-ba0f-5f0d-bff8-c2eaa9c2f12a",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "title": "Poison",
+   "content": "Laisser les joueurs deviner le poison avant de le nommer.",
+   "pinned": false,
+   "target_kind": "scene",
+   "target_id": "9ea3d913-2efc-58dd-b050-3749cbff63e7",
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "id": "9ce415e9-cb4e-5d22-ae38-00dd6eca6a3a",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "title": "Ton de Piotr",
+   "content": "Jamais agressif : il est dépassé, pas méchant.",
+   "pinned": false,
+   "target_kind": "npc",
+   "target_id": "585aa9a0-6b81-51c3-a5ec-4d43098f0e4d",
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  },
+  {
+   "id": "66fc19c9-b937-52a1-9f90-19e64dae3af4",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "title": "Négociation",
+   "content": "Il lâche une information gratuite pour mieux en cacher une autre.",
+   "pinned": false,
+   "target_kind": "npc",
+   "target_id": "e3f29873-b5c4-5157-b0a2-11c95766d699",
+   "part_kind": "skill",
+   "part_id": "0fb64800-b9a4-5a78-bf27-e7c6f0d464f6",
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  }
+ ],
+ "CampaignDocument": [
+  {
+   "id": "705a6931-901a-59e6-90a5-1d58e3c2e93e",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "name": "Aide de jeu - La station",
+   "comment": "À relire avant la séance 2",
+   "file_name": "aide-de-jeu-station.pdf",
+   "type": "application/pdf",
+   "size": 1852,
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes"
+  }
+ ],
+ "CampaignDocumentFile": [
+  {
+   "id": "705a6931-901a-59e6-90a5-1d58e3c2e93e",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "url": "data:application/pdf;base64,JVBERi0xLjMKJZOMi54gUmVwb3J0TGFiIEdlbmVyYXRlZCBQREYgZG9jdW1lbnQgKG9wZW5zb3VyY2UpCjEgMCBvYmoKPDwKL0YxIDIgMCBSIC9GMiAzIDAgUgo+PgplbmRvYmoKMiAwIG9iago8PAovQmFzZUZvbnQgL0hlbHZldGljYSAvRW5jb2RpbmcgL1dpbkFuc2lFbmNvZGluZyAvTmFtZSAvRjEgL1N1YnR5cGUgL1R5cGUxIC9UeXBlIC9Gb250Cj4+CmVuZG9iagozIDAgb2JqCjw8Ci9CYXNlRm9udCAvSGVsdmV0aWNhLUJvbGQgL0VuY29kaW5nIC9XaW5BbnNpRW5jb2RpbmcgL05hbWUgL0YyIC9TdWJ0eXBlIC9UeXBlMSAvVHlwZSAvRm9udAo+PgplbmRvYmoKNCAwIG9iago8PAovQ29udGVudHMgOCAwIFIgL01lZGlhQm94IFsgMCAwIDU5NS4yNzU2IDg0MS44ODk4IF0gL1BhcmVudCA3IDAgUiAvUmVzb3VyY2VzIDw8Ci9Gb250IDEgMCBSIC9Qcm9jU2V0IFsgL1BERiAvVGV4dCAvSW1hZ2VCIC9JbWFnZUMgL0ltYWdlSSBdCj4+IC9Sb3RhdGUgMCAvVHJhbnMgPDwKCj4+IAogIC9UeXBlIC9QYWdlCj4+CmVuZG9iago1IDAgb2JqCjw8Ci9QYWdlTW9kZSAvVXNlTm9uZSAvUGFnZXMgNyAwIFIgL1R5cGUgL0NhdGFsb2cKPj4KZW5kb2JqCjYgMCBvYmoKPDwKL0F1dGhvciAoYW5vbnltb3VzKSAvQ3JlYXRpb25EYXRlIChEOjIwMjYxMTA0MDczODMwKzAxJzAwJykgL0NyZWF0b3IgKGFub255bW91cykgL0tleXdvcmRzICgpIC9Nb2REYXRlIChEOjIwMjYxMTA0MDczODMwKzAxJzAwJykgL1Byb2R1Y2VyIChSZXBvcnRMYWIgUERGIExpYnJhcnkgLSBcKG9wZW5zb3VyY2VcKSkgCiAgL1N1YmplY3QgKHVuc3BlY2lmaWVkKSAvVGl0bGUgKHVudGl0bGVkKSAvVHJhcHBlZCAvRmFsc2UKPj4KZW5kb2JqCjcgMCBvYmoKPDwKL0NvdW50IDEgL0tpZHMgWyA0IDAgUiBdIC9UeXBlIC9QYWdlcwo+PgplbmRvYmoKOCAwIG9iago8PAovRmlsdGVyIFsgL0FTQ0lJODVEZWNvZGUgL0ZsYXRlRGVjb2RlIF0gL0xlbmd0aCA0NTkKPj4Kc3RyZWFtCkdhczJFOWknTS8mO0taT01ZQDxTMWxYa2sxcWg6N0g6XUVZcVQqNlAtZEtOcVhMMCxeclYlPGMjakB0RS9eJkhBcWBPPzYyT043SmU4T04kRF80MC8xaFtZPEdBKjtLLS8nciJabVJfPFROVGZtMUwlTlJibVJ1PGE4M3QhWGlLK1tvRi0nZ1xEU1U/S1Rtb1ljbWNTPHFzWDUuTylnOVMhVVlZRF4zUTNqXlxmMSdxNzYnR15ZajhUXWw1ZjBKYGUhVF40USMjZEZQREFUJ2RuZ2smXldJSSVbMSEpRkpMXDs3QG87YitNJUNAXGhcbEZsJG1NbGAuWGEtaio3MW8vSzJZVjBLPURgbmY8RGE3bz90T2gqW3QwJG9BPFhFV2h0VF8kRGFQXVlpPjBvQy0wUCswZiQ6UUJhaHFCazl0YXRCKUxGTjdbWEhuPFBKLSZJI25aLl8lYkBDOW9UbThLUko7T1dXP0hGPlJDMlZbZ2FTImdAOyNcKUBdWkg7TDRDZj5VR0BTYF9nTnIlPW5lYkBtV0xUWW1RRCM3WzJKJyhSUjdvcUElcEErdTVSTW4+ZyksPWxjU1RPTnNobTc9bihSR2ZRPVR+PmVuZHN0cmVhbQplbmRvYmoKeHJlZgowIDkKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDYxIDAwMDAwIG4gCjAwMDAwMDAxMDIgMDAwMDAgbiAKMDAwMDAwMDIwOSAwMDAwMCBuIAowMDAwMDAwMzIxIDAwMDAwIG4gCjAwMDAwMDA1MjQgMDAwMDAgbiAKMDAwMDAwMDU5MiAwMDAwMCBuIAowMDAwMDAwODUzIDAwMDAwIG4gCjAwMDAwMDA5MTIgMDAwMDAgbiAKdHJhaWxlcgo8PAovSUQgCls8YzViMGJiZDk0OGExMGNlYjM4YzUyNjNjODk1NTlmMjE+PGM1YjBiYmQ5NDhhMTBjZWIzOGM1MjYzYzg5NTU5ZjIxPl0KJSBSZXBvcnRMYWIgZ2VuZXJhdGVkIFBERiBkb2N1bWVudCAtLSBkaWdlc3QgKG9wZW5zb3VyY2UpCgovSW5mbyA2IDAgUgovUm9vdCA1IDAgUgovU2l6ZSA5Cj4+CnN0YXJ0eHJlZgoxNDYxCiUlRU9GCg=="
+  }
+ ]
+}

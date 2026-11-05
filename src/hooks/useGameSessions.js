@@ -5,7 +5,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { useDataRefresh } from "@/lib/context/RefreshContext";
 import { withDataBatch } from "@/lib/context/dataEvents";
 import { NEW_CAMPAIGN } from "@/lib/meta/sessionCampaign";
-import { dispatchTutorialAction } from "@/utils/tutorialStorage";
 
 /**
  * Sessions de jeu d'une campagne : celles du mois affiché et les 6 prochaines.
@@ -130,7 +129,6 @@ export function useGameSessions(campaignId, month, { allCampaigns = false } = {}
           : await api.entities.GameSession.create(payload);
       });
       if (shown && saved?.id) applySession(saved, optimistic.id);
-      if (!form.id) dispatchTutorialAction("session-created");
       const where = createdCampaign ? newName : campaignName;
       toast(
         createdCampaign
@@ -146,7 +144,7 @@ export function useGameSessions(campaignId, month, { allCampaigns = false } = {}
         setUpcoming(previous.upcoming);
       }
       // Pas de campagne vide laissée derrière si la session n'a pas pu être enregistrée.
-      if (createdCampaign) await api.entities.Campaign.delete(createdCampaign.id).catch(() => {});
+      if (createdCampaign) await api.entities.Campaign.delete(createdCampaign.id, { noTrash: true }).catch(() => {});
       toast({
         variant: "destructive",
         title: "Enregistrement impossible",

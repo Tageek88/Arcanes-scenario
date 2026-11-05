@@ -23,7 +23,7 @@ export default function ThemePreview({ theme }) {
       style={style}
       className={`${resolved.appearance === "dark" ? "dark " : ""}stack-y-3 rounded-xl border border-border p-3`}
     >
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="rounded-xl border border-border bg-card p-3 text-card-foreground shadow-xs">
           <h3 className="font-display text-lg font-semibold">La Crypte oubliée</h3>
           <p className="mt-1 text-sm text-muted-foreground">Acte I · Scène 3. Les aventuriers découvrent une porte scellée.</p>

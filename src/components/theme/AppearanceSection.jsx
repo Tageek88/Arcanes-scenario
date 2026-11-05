@@ -120,7 +120,7 @@ export default function AppearanceSection() {
         )}
       </div>
 
-      <div className="flex items-center justify-between gap-3 rounded-lg border border-border p-3">
+      <div data-tutorial="game-table-mode" className="flex items-center justify-between gap-3 rounded-lg border border-border p-3">
         <div>
           <label htmlFor="game-table-mode" className="text-sm font-medium text-foreground">Mode table de jeu</label>
           <p className="text-xs text-muted-foreground">

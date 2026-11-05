@@ -208,3 +208,8 @@ Les données de la version navigateur et de l'application installée sont distin
 IMPRESSION
 
 Plusieurs pages proposent l'impression de leur contenu. Pour une fiche de personnage, le document présente les caractéristiques, les compétences, l'équipement et les notes dans une mise en page adaptée à l'impression. Pour un PNJ, l'impression reprend sa fiche complète : genre, niveau, traits, motivation, signe distinctif, caractéristiques, compétences, équipement et relations. La boîte de dialogue du système permet d'imprimer sur papier ou d'enregistrer en PDF.
+
+## Tutoriel
+
+**Paramètres › Tutoriel** propose trois visites guidées : le tour de l'application (sept onglets, sur une application vide), les fonctions secondaires et les fonctions avancées (sur une campagne d'exemple). La visite change d'onglet et ouvre elle-même les fiches : vous regardez, elle agit. La campagne d'exemple s'ajoute à vos données au lancement des deux dernières phases et se supprime d'un clic.
+

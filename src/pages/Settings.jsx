@@ -20,6 +20,7 @@ import AutosavePanel from "@/components/AutosavePanel";
 import CampaignSelect from "@/components/common/CampaignSelect";
 import ReleaseNotesDialog from "@/components/common/ReleaseNotesDialog";
 import UpdatePanel from "@/components/common/UpdatePanel";
+import TrashPanel from "@/components/common/TrashPanel";
 import AppearanceSection from "@/components/theme/AppearanceSection";
 import TutorialCenter from "@/components/Tutorial/TutorialCenter";
 import { useCampaigns } from "@/hooks/useCampaigns";
@@ -90,7 +91,7 @@ export default function Settings() {
             <p className="text-sm text-muted-foreground">
               Cette action supprime définitivement toutes les données de ce navigateur : campagnes,
               actes, scènes, PNJ, lieux, indices, personnages, modèles et catalogues de jeu,
-              tables aléatoires, sessions et notes.
+              tables aléatoires, sessions et notes, ainsi que le contenu de la corbeille.
             </p>
             <Button
               variant="destructive"
@@ -120,6 +121,8 @@ export default function Settings() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <TrashPanel campaigns={campaigns} />
 
       <section className="rounded-xl border border-border bg-card/50 p-4">
         <h2 className="font-display text-base font-semibold text-foreground">À propos</h2>

@@ -58,7 +58,6 @@ import { copyLocationSubtree, descendantIds, parentOptions } from "@/lib/service
 import { copyNpcRelations, loadRelations } from "@/lib/services/npcRelations";
 
 // Tutorial storage utility for dispatching tutorial actions.
-import { dispatchTutorialAction } from "@/utils/tutorialStorage";
 
 // Icon component for dice, used in name generation UI.
 import { AlertCircle, Dices } from "lucide-react";
@@ -274,7 +273,6 @@ export default function CodexEntryDialog({
 
       // Close the dialog and trigger any necessary callbacks after saving.
       onOpenChange(false);
-      if (created) dispatchTutorialAction(`${kind}-created`);
       await onSaved(created);
     } catch (error) {
       console.error("Échec enregistrement :", error);

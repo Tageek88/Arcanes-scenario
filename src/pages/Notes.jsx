@@ -225,7 +225,7 @@ export default function Notes() {
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
             <AlertDialogDescription>
-              La note « {pendingDelete?.title} » sera définitivement supprimée.
+              La note « {pendingDelete?.title} » sera supprimée. Restaurable pendant 30 jours (Paramètres › Corbeille).
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

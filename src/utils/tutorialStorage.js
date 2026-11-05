@@ -68,9 +68,3 @@ export function setTutorialProgress(progress) {
     /* la session peut continuer sans reprise persistée */
   }
 }
-
-export function dispatchTutorialAction(action, payload = {}) {
-  window.dispatchEvent(new CustomEvent("arcanes:tutorial-action", {
-    detail: { action, payload },
-  }));
-}
