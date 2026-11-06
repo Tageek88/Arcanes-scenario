@@ -176,6 +176,7 @@ export default function CodexSidebar({
         {(activeScene || linkedOnly) && (
           <button
             type="button"
+            data-tutorial="codex-linked-filter"
             aria-label={linkedOnly ? "Afficher tout le codex" : "N'afficher que les éléments liés à la scène"}
             onClick={() => setLinkedOnly((v) => !v)}
             className={cn(

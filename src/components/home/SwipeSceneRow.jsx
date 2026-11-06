@@ -92,7 +92,7 @@ export default function SwipeSceneRow({ scene, active, npcs, locations, clues, o
       </button>
       <div className="flex flex-wrap items-center gap-2 justify-end shrink-0">
         <PostItButton target={{ kind: "scene", id: scene.id }} label={`la scène « ${scene.title || "Sans titre"} »`} />
-        <button type="button" onClick={() => onToggleStatus(scene)} className={cn("tag border", meta.badge)}>
+        <button type="button" title="Changer le statut" onClick={() => onToggleStatus(scene)} className={cn("tag border", meta.badge)}>
           {meta.label}
         </button>
         <button

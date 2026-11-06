@@ -10,10 +10,10 @@ const BUBBLE_WIDTH = 340;
 const MOBILE_BREAKPOINT = 768;
 const MOBILE_NAV_HEIGHT = 84;
 const RING_PADDING = 5;
-const SEARCH_GRACE_MS = 1200;
+const SEARCH_GRACE_MS = 600;
 // La page peut encore bouger après l'arrivée de l'élément (transition de page, données chargées, fenêtre qui s'ouvre) :
-// on vérifie pendant 2 s qu'il est bien dans la zone visible, sinon on le ramène.
-const REVEAL_RETRIES = 10;
+// on vérifie pendant 2 s (20 contrôles) qu'il est bien dans la zone visible, sinon on le ramène.
+const REVEAL_RETRIES = 20;
 
 const toRect = ({ left, top, width, height }) => ({ left, top, width, height });
 const sameRect = (a, b) =>
@@ -88,7 +88,7 @@ export default function TutorialOverlay({ tour, step, index, total, ready, colla
       }
     };
     const first = requestAnimationFrame(measure);
-    const timer = setInterval(measure, 200);
+    const timer = setInterval(measure, 100);
     const grace = setTimeout(() => alive && setWaited(true), SEARCH_GRACE_MS);
     window.addEventListener("resize", measure);
     window.addEventListener("scroll", measure, true);

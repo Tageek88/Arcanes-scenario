@@ -72,6 +72,7 @@ export default function MobileSceneList({
           <AccordionItem
             key={group.id}
             value={group.id}
+            data-tutorial="act-column"
             className="rounded-xl border border-border bg-card/50 px-4"
           >
             <AccordionTrigger className="font-display text-sm hover:no-underline">

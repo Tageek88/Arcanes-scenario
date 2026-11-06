@@ -81,7 +81,7 @@ export default function ActColumn({
   }, [expanded, activeSceneId]);
 
   return (
-    <div ref={columnRef} className={cn(
+    <div ref={columnRef} data-tutorial="act-column" className={cn(
       "flex shrink-0 flex-col rounded-xl border border-border bg-card/50 p-4 transition-[width] duration-200",
       expanded ? "w-[380px]" : activeSceneId ? "w-[250px]" : "w-[290px]"
     )}>

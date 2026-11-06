@@ -510,3 +510,9 @@ html[data-turn]::view-transition-group(roll) {
     animation-duration: 600ms;
   }
 }
+
+/* Visite guidée : halo autour de la fenêtre de dialogue ouverte (repère posé sur <html> par TutorialProvider). */
+html[data-tutorial-tour] [role="dialog"][data-state="open"],
+html[data-tutorial-tour] [role="alertdialog"][data-state="open"] {
+  box-shadow: 0 0 0 3px hsl(var(--warning)), 0 0 28px 8px hsl(var(--warning) / 0.55);
+}

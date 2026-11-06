@@ -54,7 +54,7 @@ export const TOURS = [
       {
         id: "acts-scenes",
         route: "/",
-        target: "home-title",
+        target: "act-column",
         title: "Actes et scènes",
         text: "Une campagne se découpe en actes, eux-mêmes découpés en scènes. Une scène a un résumé, un état (brouillon, jouée, clé) et se relie aux PNJ, lieux et indices qu'elle fait intervenir.",
       },
@@ -184,14 +184,14 @@ const SECOND_TOUR = {
       id: "scene-status-mobile",
       only: "mobile",
       route: "/",
-      selector: SCENE,
+      selector: `${SCENE} button[title="Changer le statut"]`,
       title: "État d'une scène",
       text: "Chaque scène a un état : brouillon, jouée ou clé. Sur téléphone, faites glisser la ligne vers la droite pour le changer ; cela aide à suivre l'avancement de la campagne.",
     },
     {
       id: "scene-open",
       route: "/",
-      selector: SCENE,
+      target: "codex-linked-filter",
       title: "Une scène ouverte",
       text: "Une scène se relie aux PNJ, lieux et indices qu'elle fait intervenir, et garde vos notes de préparation.",
       run: [{ demo: "dom.click", args: { selectors: [`${SCENE} > button`, SCENE], skipIf: '[aria-expanded="true"]' } }],
@@ -292,7 +292,7 @@ const SECOND_TOUR = {
     {
       id: "print",
       route: "/",
-      selector: 'button[title^="Imprimer"]',
+      target: "home-print",
       title: "Impression d'une page",
       text: "Chaque page imprime son contenu, ou l'exporte en PDF modifiable.",
     },
@@ -345,11 +345,9 @@ const THIRD_TOUR = {
     {
       id: "global-search",
       route: "/",
-      selector: 'input[placeholder^="Chercher dans la campagne"]',
+      selector: 'button[aria-label="Rechercher dans la campagne"]',
       title: "Recherche globale",
       text: "La recherche globale retrouve une scène, un PNJ, un lieu, un indice ou une note dans toute la campagne.",
-      run: [{ demo: "dom.click", args: { selector: 'button[aria-label="Rechercher dans la campagne"]', blur: true } }],
-      undo: CLOSE_DIALOG,
     },
     {
       id: "npc-generator",

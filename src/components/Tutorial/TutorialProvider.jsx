@@ -46,6 +46,14 @@ export default function TutorialProvider({ children }) {
   const steps = useMemo(() => stepsFor(tour, mobile), [tour, mobile]);
   const step = steps[index] ?? null;
 
+  // Pendant une visite, <html> porte un repère : index.css entoure d'un halo les fenêtres de dialogue ouvertes.
+  useEffect(() => {
+    if (!tourId) return undefined;
+    const html = document.documentElement;
+    html.setAttribute("data-tutorial-tour", tourId);
+    return () => html.removeAttribute("data-tutorial-tour");
+  }, [tourId]);
+
   const markCompleted = useCallback((id) => {
     setCompleted((current) => {
       if (current.includes(id)) return current;

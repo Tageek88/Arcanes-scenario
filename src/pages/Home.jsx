@@ -296,7 +296,9 @@ export default function Home() {
             onValueChange={selectCampaign}
             allowCreate
           />
-          <PrintButton campaignId={campaignId} preset="scenes" />
+          <span data-tutorial="home-print" className="inline-flex">
+            <PrintButton campaignId={campaignId} preset="scenes" />
+          </span>
           {campaignId && (
             <Button variant="outline" onClick={openEditCampaign}>
               <Pencil className="mr-2 h-4 w-4" /> Modifier la campagne
