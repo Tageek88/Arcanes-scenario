@@ -46,7 +46,7 @@ flowchart LR
     H_GAME["useGameSheet, useGameCatalog,<br/>useInventory, usePcFormGeneration"]
     H_NOTES["useNotes"]
     H_TABLES["useTables"]
-    H_UI["useConfirm<br/>(confirmations, sans données)"]
+    H_UI["useConfirm, usePendingOpenTick<br/>(sans données)"]
   end
 
   subgraph LIB["lib/"]
@@ -249,17 +249,13 @@ flowchart LR
 - Champ `journal` de `GameSession` (`{ summary, scene_ids, npc_ids, clue_ids, next }`), sans nouvelle table ni `db.version`. Règles pures : `lib/meta/sessionJournal.js` ; enregistrement : `lib/services/sessionJournal.js` (n'écrit que `journal`) ; chargement : `hooks/useSessionJournals.js`.
 - Interface : `SessionJournalDialog` et `SessionJournalList` (page Calendrier), bouton dans `SessionDialog`. Les séances sont aussi un groupe de la recherche globale.
 
-## Version 1.11.1 : correctifs
-
-- Le catalogue du système de jeu est alimenté à l'enregistrement d'un PNJ (`lib/services/gameCatalog.js`, appelé par `saveCodexEntry`), sans modifier les entrées existantes.
-- La liste mobile des actes et des scènes a ses menus « ⋯ » de suppression (`MobileSceneList`, `SwipeSceneRow`).
-
 ## Version 1.12.0 : tutoriel interactif
 
 - Trois visites guidées (`tour-1` application vide, `tour-2` et `tour-3` sur une campagne d'exemple), lancées depuis Paramètres › Tutoriel. Une visite ne fait rien utiliser : elle change d'onglet, ouvre et referme elle-même fiches et fenêtres, et affiche une bulle à côté de l'élément, sans assombrir l'écran.
 - `config/tutorials.js` (étapes), `components/Tutorial/` (`TutorialProvider`, `TutorialOverlay`, `TutorialCenter`), `lib/tutorial/placement.js` (placement de la bulle, pur) et `lib/tutorial/dom.js` (recherche d'éléments, actions génériques `dom.click` et `dom.closeDialog`), `lib/context/tutorialBridge.js` + `hooks/useDemoAction.js` (actions déclarées par une page).
 - Campagne d'exemple : `data/demoCampaign.json` (identifiants fixes), `lib/services/demoCampaign.js` (ajout en une transaction, suppression complète), `lib/services/demoTour.js` (entrée et sortie : la campagne de la personne est remise en place), `lib/meta/demoDates.js`, `hooks/useDemoCampaign.js`. Pas de nouvelle `db.version`.
-- Tests : `tests/tours.test.js` (cohérence des étapes avec le code et la campagne d'exemple), `tests/tutorialPlacement.test.js`, `tests/tutorialBridge.test.js`, `tests/demoCampaign.test.js`, `tests/demoTour.test.js`, `tests/demoDates.test.js`. Notes détaillées : `Docs/Tutoriel.md`.
+- Tests : `tests/tours.test.js` (cohérence des étapes avec le code et la campagne d'exemple), `tutorialPlacement`, `tutorialBridge`, `demoCampaign`, `demoTour`, `demoDates`. Notes détaillées : `Docs/Tutoriel.md`.
+- Mise en page mobile : les grilles à une colonne sur téléphone portent `grid-cols-1` (sinon la page s'élargit au contenu le plus large).
 
 ## Plateformes
 

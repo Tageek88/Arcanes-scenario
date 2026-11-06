@@ -20,6 +20,7 @@ import PrintButton from "@/components/print/PrintButton";
 import CampaignSelect from "@/components/common/CampaignSelect";
 import { usePageFilter } from "@/lib/context/PageFilterContext";
 import { peekPendingOpen, takePendingOpen } from "@/lib/context/searchStore";
+import { usePendingOpenTick } from "@/hooks/usePendingOpenTick";
 import DiceRoller from "@/components/tables/DiceRoller";
 import { useCampaigns } from "@/hooks/useCampaigns";
 import { useQuests } from "@/hooks/useQuests";
@@ -76,6 +77,7 @@ export default function Tables() {
   };
 
   // Table choisie dans la recherche globale : on l'ouvre dès qu'elle est chargée (le filtre de catégorie est levé si besoin).
+  const pendingTick = usePendingOpenTick();
   useEffect(() => {
     if (loading) return;
     const request = peekPendingOpen(["table"]);
@@ -88,7 +90,7 @@ export default function Tables() {
       setCategory("all");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, tables, category]);
+  }, [loading, tables, category, pendingTick]);
 
   const save = async (override = {}) => {
     if (!form.name.trim() || !campaignId) return;

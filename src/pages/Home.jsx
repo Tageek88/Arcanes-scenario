@@ -28,6 +28,7 @@ import CampaignSelect from "@/components/common/CampaignSelect";
 import { useExpandedCardState } from "@/lib/context/ExpandedCardContext";
 import { usePageFilter } from "@/lib/context/PageFilterContext";
 import { takePendingOpen } from "@/lib/context/searchStore";
+import { usePendingOpenTick } from "@/hooks/usePendingOpenTick";
 import { useCampaigns } from "@/hooks/useCampaigns";
 import { useCampaignContent } from "@/hooks/useCampaignContent";
 import { useCampaignActions } from "@/hooks/useCampaignActions";
@@ -175,6 +176,7 @@ export default function Home() {
   };
 
   // Scène ou acte choisi dans la recherche globale : on affiche sa quête, puis on déplie la scène.
+  const pendingTick = usePendingOpenTick();
   useEffect(() => {
     const request = takePendingOpen(["scene", "act"], (id) => allScenes.some((s) => s.id === id) || allActs.some((a) => a.id === id));
     if (!request) return;
@@ -182,7 +184,7 @@ export default function Home() {
     if (target?.quest_id && target.quest_id !== quest?.id) setPreferredQuestId(target.quest_id);
     if (request.kind === "scene") setActiveSceneId(request.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allScenes, allActs]);
+  }, [allScenes, allActs, pendingTick]);
 
   const setSceneField = (key, value) => setSceneForm((f) => ({ ...f, [key]: value }));
 

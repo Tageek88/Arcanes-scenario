@@ -25,6 +25,7 @@ import PdfPanel from "@/components/notes/PdfPanel";
 import { cn } from "@/lib/utils";
 import { noteTarget } from "@/lib/meta/postit";
 import { takePendingOpen } from "@/lib/context/searchStore";
+import { usePendingOpenTick } from "@/hooks/usePendingOpenTick";
 
 const EMPTY = { title: "", content: "", pinned: false };
 
@@ -57,12 +58,13 @@ export default function Notes() {
   };
 
   // Note choisie dans la recherche globale : on l'ouvre dès qu'elle est chargée.
+  const pendingTick = usePendingOpenTick();
   useEffect(() => {
     const all = [...allPinned, ...allNotes];
     const request = takePendingOpen(["note"], (id) => all.some((note) => note.id === id));
     const note = request && all.find((item) => item.id === request.id);
     if (note) openEdit(note);
-  }, [allPinned, allNotes]);
+  }, [allPinned, allNotes, pendingTick]);
 
   const save = () => {
     if (!form.title.trim() || !campaignId) return;

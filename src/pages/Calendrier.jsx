@@ -36,6 +36,7 @@ import { useGameSessions } from "@/hooks/useGameSessions";
 import { useSessionPolls } from "@/hooks/useSessionPolls";
 import { useSessionJournals } from "@/hooks/useSessionJournals";
 import { takePendingOpen } from "@/lib/context/searchStore";
+import { usePendingOpenTick } from "@/hooks/usePendingOpenTick";
 
 
 const emptyForm = (date) => ({
@@ -83,11 +84,12 @@ export default function Calendrier() {
   const journalScenes = useScenes(journalSession?.campaign_id || "");
   const openJournal = (session) => setJournalSession(session);
   // Séance choisie dans la recherche globale : son journal s'ouvre dès que les séances sont chargées.
+  const pendingTick = usePendingOpenTick();
   useEffect(() => {
     const request = takePendingOpen(["session"], (id) => journals.all.some((session) => session.id === id));
     const session = request && journals.all.find((item) => item.id === request.id);
     if (session) setJournalSession(session);
-  }, [journals.all]);
+  }, [journals.all, pendingTick]);
 
   const campaignNames = useMemo(() => new Map(campaigns.map((item) => [item.id, item.name])), [campaigns]);
   const sessions = useMemo(() => withCampaignName(rawData.sessions, showAll, campaignNames), [rawData.sessions, showAll, campaignNames]);

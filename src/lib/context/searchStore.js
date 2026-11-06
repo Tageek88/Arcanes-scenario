@@ -17,8 +17,22 @@ export const requestSearch = () => listeners.forEach((listener) => listener());
 const PENDING_LIFETIME_MS = 5000;
 let pending = null;
 
+// Compteur incrémenté à chaque nouvelle demande : une page déjà affichée (ou gardée en mémoire par la pile
+// d'onglets) peut ainsi relancer son effet même si ses données n'ont pas changé.
+let pendingVersion = 0;
+const pendingListeners = new Set();
+
+export const subscribePendingOpen = (listener) => {
+  pendingListeners.add(listener);
+  return () => pendingListeners.delete(listener);
+};
+
+export const getPendingVersion = () => pendingVersion;
+
 export const setPendingOpen = (kind, id) => {
   pending = { kind, id, at: Date.now() };
+  pendingVersion += 1;
+  pendingListeners.forEach((listener) => listener());
 };
 
 /** Regarde l'élément à ouvrir, sans le prendre, s'il est d'un des types demandés et récent. Sinon `null`. */

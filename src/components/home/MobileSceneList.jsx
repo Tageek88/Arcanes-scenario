@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { MoreHorizontal, Plus, Trash2 } from "lucide-react";
 import {
   DropdownMenu,
@@ -37,6 +37,18 @@ export default function MobileSceneList({
     ...(orphans.length ? [{ id: "_none", title: "Sans acte", scenes: orphans }] : []),
   ];
 
+  // Actes repliés par la personne : tout est déplié par défaut.
+  const [closedGroups, setClosedGroups] = useState([]);
+  const openGroups = groups.map((g) => g.id).filter((id) => !closedGroups.includes(id));
+
+  // Une scène sélectionnée (par exemple depuis la recherche) rouvre son acte s'il était replié.
+  useEffect(() => {
+    if (!activeSceneId) return;
+    const group = groups.find((g) => g.scenes.some((s) => s.id === activeSceneId));
+    if (group) setClosedGroups((current) => (current.includes(group.id) ? current.filter((id) => id !== group.id) : current));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeSceneId]);
+
   if (groups.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-border p-8 text-center">
@@ -50,7 +62,12 @@ export default function MobileSceneList({
 
   return (
     <div className="stack-y-3">
-      <Accordion type="multiple" defaultValue={groups.map((g) => g.id)} className="stack-y-3">
+      <Accordion
+        type="multiple"
+        value={openGroups}
+        onValueChange={(next) => setClosedGroups(groups.map((g) => g.id).filter((id) => !next.includes(id)))}
+        className="stack-y-3"
+      >
         {groups.map((group) => (
           <AccordionItem
             key={group.id}
