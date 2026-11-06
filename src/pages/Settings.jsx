@@ -24,6 +24,34 @@ import TrashPanel from "@/components/common/TrashPanel";
 import AppearanceSection from "@/components/theme/AppearanceSection";
 import TutorialCenter from "@/components/Tutorial/TutorialCenter";
 import { useCampaigns } from "@/hooks/useCampaigns";
+import { usePageFilter } from "@/lib/context/PageFilterContext";
+
+const SETTINGS_TABS = [
+  { id: "appearance", label: "Apparence" },
+  { id: "backup", label: "Sauvegarde" },
+  { id: "print", label: "Impression" },
+  { id: "tutorial", label: "Tutoriel" },
+];
+
+/** Barre d'onglets des Paramètres (même style que celle de la page Jeu). */
+function SettingsTabBar({ value, onChange }) {
+  return (
+    <div role="tablist" aria-label="Rubriques des paramètres" className="flex flex-wrap gap-2">
+      {SETTINGS_TABS.map((item) => (
+        <button
+          key={item.id}
+          type="button"
+          role="tab"
+          aria-selected={value === item.id}
+          onClick={() => onChange(item.id)}
+          className={`tag min-touch border transition-colors ${value === item.id ? "border-primary/50 bg-primary/15 text-primary" : "border-border text-muted-foreground hover:text-foreground"}`}
+        >
+          {item.label}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 export default function Settings() {
   const { toast } = useToast();
@@ -31,6 +59,9 @@ export default function Settings() {
   const [open, setOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
+  // Onglet mémorisé ; une valeur inconnue retombe sur Apparence.
+  const [storedTab, setTab] = usePageFilter("settings.tab", "appearance");
+  const tab = SETTINGS_TABS.some((item) => item.id === storedTab) ? storedTab : "appearance";
 
   const confirmDelete = async () => {
     setDeleting(true);
@@ -59,51 +90,63 @@ export default function Settings() {
           Sauvegardez vos données de jeu ou repartez de zéro. Tout est stocké dans ce navigateur.
         </p>
       </header>
-      <AppearanceSection />
-      <div data-tutorial="section-auto-save"><AutosavePanel /></div>
-      <div data-tutorial="section-export-import"><BackupPanel /></div>
 
-      <section data-tutorial="section-print" className="stack-y-3 rounded-xl border border-border bg-card/50 p-4">
-        <h2 className="font-display text-base font-semibold text-foreground">Impression</h2>
-        <CampaignSelect
-          campaigns={campaigns}
-          value={campaignId}
-          onValueChange={selectCampaign}
-        />
-        <p className="text-sm text-muted-foreground">
-          Imprimez ou exportez en PDF éditable les scènes, indices, lieux, PNJ, notes, tables, sessions et fiches de personnages de la campagne sélectionnée.
-        </p>
-        <PrintButton
-          campaignId={campaignId}
-          preset="all"
-          label="Choisir les éléments"
-          allowPdfExport
-        />
-      </section>
+      <SettingsTabBar value={tab} onChange={setTab} />
 
-      <div data-tutorial="section-help"><TutorialCenter /></div>
+      {tab === "appearance" && <AppearanceSection />}
 
-      <section data-tutorial="section-clear-data" className="rounded-xl border border-destructive/40 bg-destructive/6 p-5">
-        <div className="flex items-start gap-3">
-          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
-          <div className="stack-y-1">
-            <h2 className="font-display text-lg font-semibold text-foreground">Effacer toutes les données</h2>
-            <p className="text-sm text-muted-foreground">
-              Cette action supprime définitivement toutes les données de ce navigateur : campagnes,
-              actes, scènes, PNJ, lieux, indices, personnages, modèles et catalogues de jeu,
-              tables aléatoires, sessions et notes, ainsi que le contenu de la corbeille.
-            </p>
-            <Button
-              variant="destructive"
-              className="mt-3"
-              onClick={() => setOpen(true)}
-              disabled={deleting}
-            >
-              {deleting ? "Effacement..." : "Effacer toutes les données"}
-            </Button>
-          </div>
-        </div>
-      </section>
+      {tab === "backup" && (
+        <>
+          <div data-tutorial="section-auto-save"><AutosavePanel /></div>
+          <div data-tutorial="section-export-import"><BackupPanel /></div>
+
+          <section data-tutorial="section-clear-data" className="rounded-xl border border-destructive/40 bg-destructive/6 p-5">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
+              <div className="stack-y-1">
+                <h2 className="font-display text-lg font-semibold text-foreground">Effacer toutes les données</h2>
+                <p className="text-sm text-muted-foreground">
+                  Cette action supprime définitivement toutes les données de ce navigateur : campagnes,
+                  actes, scènes, PNJ, lieux, indices, personnages, modèles et catalogues de jeu,
+                  tables aléatoires, sessions et notes, ainsi que le contenu de la corbeille.
+                </p>
+                <Button
+                  variant="destructive"
+                  className="mt-3"
+                  onClick={() => setOpen(true)}
+                  disabled={deleting}
+                >
+                  {deleting ? "Effacement..." : "Effacer toutes les données"}
+                </Button>
+              </div>
+            </div>
+          </section>
+
+          <TrashPanel campaigns={campaigns} />
+        </>
+      )}
+
+      {tab === "print" && (
+        <section data-tutorial="section-print" className="stack-y-3 rounded-xl border border-border bg-card/50 p-4">
+          <h2 className="font-display text-base font-semibold text-foreground">Impression</h2>
+          <CampaignSelect
+            campaigns={campaigns}
+            value={campaignId}
+            onValueChange={selectCampaign}
+          />
+          <p className="text-sm text-muted-foreground">
+            Imprimez ou exportez en PDF éditable les scènes, indices, lieux, PNJ, notes, tables, sessions et fiches de personnages de la campagne sélectionnée.
+          </p>
+          <PrintButton
+            campaignId={campaignId}
+            preset="all"
+            label="Choisir les éléments"
+            allowPdfExport
+          />
+        </section>
+      )}
+
+      {tab === "tutorial" && <div data-tutorial="section-help"><TutorialCenter /></div>}
 
       <AlertDialog open={open} onOpenChange={setOpen}>
         <AlertDialogContent>
@@ -121,8 +164,6 @@ export default function Settings() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      <TrashPanel campaigns={campaigns} />
 
       <section className="rounded-xl border border-border bg-card/50 p-4">
         <h2 className="font-display text-base font-semibold text-foreground">À propos</h2>

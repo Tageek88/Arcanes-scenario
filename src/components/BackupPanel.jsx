@@ -72,10 +72,10 @@ export default function BackupPanel() {
       </p>
       <div className="flex flex-wrap gap-2">
         <Button type="button" variant="outline" onClick={handleExport}>
-          <Download className="mr-2 h-4 w-4" /> Exporter
+          <Upload className="mr-2 h-4 w-4" /> Exporter
         </Button>
         <Button type="button" variant="outline" onClick={() => inputRef.current?.click()}>
-          <Upload className="mr-2 h-4 w-4" /> Importer
+          <Download className="mr-2 h-4 w-4" /> Importer
         </Button>
         <input ref={inputRef} type="file" accept="application/json,.json" className="hidden" onChange={handleImport} />
       </div>
