@@ -164,4 +164,27 @@ describe("visites guidées : cohérence des définitions", () => {
       expect(anchors.has(match[1]) ? match[1] : `repère introuvable : ${match[1]}`).toBe(match[1]);
     }
   });
+
+  it("les étapes qui montrent une section des Paramètres ouvrent d'abord son onglet", () => {
+    const TAB_OF = {
+      "section-appearance": "Apparence",
+      "campaign-layout": "Apparence",
+      "game-table-mode": "Apparence",
+      "section-auto-save": "Sauvegarde",
+      "section-export-import": "Sauvegarde",
+      "section-clear-data": "Sauvegarde",
+      "section-print": "Impression",
+      "section-help": "Tutoriel",
+    };
+    for (const tour of TOURS) {
+      for (const step of tour.steps) {
+        const expected = TAB_OF[step.target] || (step.selectorText === "Les éléments supprimés restent" ? "Sauvegarde" : null);
+        if (!expected) continue;
+        const opens = (step.run || []).some(
+          (action) => action.demo === "dom.click" && action.args?.selector === '[role="tab"]' && action.args?.text === expected
+        );
+        expect(opens ? step.id : `${tour.id}/${step.id} n'ouvre pas l'onglet ${expected}`).toBe(step.id);
+      }
+    }
+  });
 });
