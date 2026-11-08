@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Search, Plus, Link2, Link2Off, Pencil, ChevronDown, ChevronUp, X } from "lucide-react";
+import { Search, Plus, Link2, Link2Off, Pencil, ChevronDown, ChevronUp, Swords, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -15,8 +15,12 @@ import { relationsByNpc } from "@/lib/services/npcRelations";
 import { buildLocationIndex, buildSearchEntry, filterToken, matchesSearch, parseSearch, toggleFilter } from "@/lib/services/codexSearch";
 import { CodexLinksContext } from "@/lib/context/CodexLinksContext";
 import CodexEntryDetails, { FilterChip } from "@/components/codex/CodexEntryDetails";
+import EncounterDialog from "@/components/codex/EncounterDialog";
 
 const NO_IDS = [];
+
+// La fenêtre de rencontre est affichée ailleurs dans la page, mais ses clics remontent dans l'arbre React (comme pour la visionneuse).
+const stopBubbling = (event) => event.stopPropagation();
 
 export default function CodexSidebar({
   campaignId,
@@ -31,6 +35,7 @@ export default function CodexSidebar({
   const [term, setTerm] = usePageFilter("home.codex.term", "");
   const [linkedOnly, setLinkedOnly] = usePageFilter("home.codex.linkedOnly", false);
   const [expandedId, setExpandedId] = useState(null);
+  const [encounterOpen, setEncounterOpen] = useState(false);
 
   const kind = CODEX_TABS.find((t) => t.key === tab) || CODEX_TABS[0];
   const linkedIds = activeScene ? activeScene[kind.linkKey] || [] : [];
@@ -121,7 +126,21 @@ export default function CodexSidebar({
     >
       <div className="border-b border-border p-4">
         <div className="flex items-center justify-between">
-          <h2 className="font-display text-sm font-semibold text-foreground">Codex du MJ</h2>
+          <div className="flex min-w-0 items-center gap-1">
+            <h2 className="font-display text-sm font-semibold text-foreground">Codex du MJ</h2>
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              onClick={() => setEncounterOpen(true)}
+              disabled={!campaignId}
+              aria-label="Ouvrir le suivi de rencontre"
+              title="Rencontre : initiative et PV"
+              className="h-8 w-8 min-touch text-muted-foreground hover:text-primary"
+            >
+              <Swords />
+            </Button>
+          </div>
           <Button
             size="sm"
             variant="ghost"
@@ -343,6 +362,9 @@ export default function CodexSidebar({
         </div>
       </ScrollArea>
       {attachmentViewer.viewer}
+      <div onClick={stopBubbling} onPointerDown={stopBubbling} onMouseDown={stopBubbling} onKeyDown={stopBubbling}>
+        <EncounterDialog open={encounterOpen} onOpenChange={setEncounterOpen} campaignId={campaignId} />
+      </div>
     </aside>
     </CodexLinksContext.Provider>
   );

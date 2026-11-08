@@ -1,6 +1,6 @@
 // === SECTION MISE À JOUR ANDROID ===
 // Recherche d'une nouvelle version sur les releases GitHub, à la demande de l'utilisateur seulement (aucune donnée de jeu envoyée).
-// L'APK n'est pas installé par l'application : il est téléchargé par le navigateur du téléphone, et l'utilisateur l'ouvre lui-même.
+// Le téléchargement et l'installation de l'APK sont faits par le plugin natif ApkUpdate (voir apkUpdate.js) ; sans lui, l'APK est téléchargé par le navigateur.
 // Pour qu'Android accepte l'installation par-dessus la version en place, l'APK doit être signé avec la même clé (voir AGENTS.md, ANDROID SIGNING).
 
 export const GITHUB_REPO = "Tageek88/Arcanes-scenario";

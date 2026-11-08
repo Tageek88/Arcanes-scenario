@@ -19,6 +19,7 @@ export const LINKED_ENTITIES = [
   { entity: "Note", label: "note", plural: "notes" },
   { entity: "RollTable", label: "table aléatoire", plural: "tables aléatoires" },
   { entity: "GameSession", label: "session de jeu", plural: "sessions de jeu" },
+  { entity: "Encounter", label: "rencontre", plural: "rencontres" },
   { entity: "Quest", label: "quête", plural: "quêtes" },
 ];
 

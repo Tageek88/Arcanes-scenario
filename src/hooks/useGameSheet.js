@@ -5,9 +5,10 @@ import { useToast } from "@/components/ui/use-toast";
 import { useDataRefresh } from "@/lib/context/RefreshContext";
 import { characteristicNamesOf, renameScaleCharacteristics, sanitizeScale } from "@/lib/generators/npcScale";
 import { renamePcScaleCharacteristics, sanitizePcScale } from "@/lib/generators/pcScale";
+import { cleanDiceConfig, renameDiceCharacteristic } from "@/lib/meta/dice";
 import { renameCharacteristicNotes } from "@/lib/services/notes";
 
-const EMPTY_MODEL = { characteristics: [], skillRollModifier: false, scale: { levels: [] }, pcScale: sanitizePcScale(null) };
+const EMPTY_MODEL = { characteristics: [], skillRollModifier: false, scale: { levels: [] }, pcScale: sanitizePcScale(null), dice: null };
 
 // Modèle tel que l'interface l'utilise, à partir de la ligne enregistrée (le barème est optionnel).
 const readModel = (row) => {
@@ -17,6 +18,8 @@ const readModel = (row) => {
     skillRollModifier: !!row?.skillRollModifier,
     scale: sanitizeScale(row?.scale, characteristicNamesOf(characteristics)),
     pcScale: sanitizePcScale(row?.pc_scale, characteristicNamesOf(characteristics)),
+    // Réglage du lancer de dés (null = pas de bouton de lancer).
+    dice: cleanDiceConfig(row?.dice),
   };
 };
 const normalize = (value) => String(value || "").trim().toLocaleLowerCase("fr");
@@ -100,12 +103,17 @@ export function useGameSheet(campaignId) {
         characteristicNamesOf(nextModel.characteristics)
       );
       // Barème des personnages joueurs (champ `pc_scale`) : même règle, avec les renommages appliqués.
-      const { pcScale: nextPcScale, ...modelFields } = nextModel;
+      const { pcScale: nextPcScale, dice: nextDice, ...modelFields } = nextModel;
       const pcScale = sanitizePcScale(
         renamePcScaleCharacteristics(nextPcScale ?? model.pcScale, updatedNames),
         characteristicNamesOf(nextModel.characteristics)
       );
-      const payload = { campaign_id: campaignId, ...modelFields, scale, pc_scale: pcScale };
+      // Réglage des dés : celui de l'éditeur (null = jamais configuré), sinon l'actuel, avec les renommages appliqués.
+      let dice = nextDice === undefined ? model.dice : nextDice;
+      updatedNames.forEach((newName, previousName) => {
+        dice = renameDiceCharacteristic(dice, previousName, newName);
+      });
+      const payload = { campaign_id: campaignId, ...modelFields, scale, pc_scale: pcScale, dice };
       let saved;
       if (modelId) {
         saved = await api.entities.GameSheetModel.update(modelId, payload);
@@ -148,6 +156,19 @@ export function useGameSheet(campaignId) {
           await renameCharacteristicNotes(campaignId, updatedNames);
         } catch (error) {
           console.error("Renommage des post-it de caractéristiques impossible :", error);
+        }
+      }
+      if (updatedNames.size > 0) {
+        // Les compétences du catalogue liées à une caractéristique renommée suivent son nouveau nom.
+        try {
+          const linked = skillCatalog.filter((skill) => updatedNames.has(skill.characteristic));
+          if (linked.length > 0) {
+            const renamed = await Promise.all(linked.map((skill) =>
+              api.entities.SkillCatalog.update(skill.id, { characteristic: updatedNames.get(skill.characteristic) })));
+            setSkillCatalog((current) => current.map((skill) => renamed.find((item) => item.id === skill.id) || skill));
+          }
+        } catch (error) {
+          console.error("Renommage des caractéristiques liées du catalogue impossible :", error);
         }
       }
       setModel(readModel(saved));

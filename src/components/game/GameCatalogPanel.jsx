@@ -28,7 +28,7 @@ const LABELS = {
   equipment: { one: "équipement", many: "équipements", empty: "Aucun équipement dans le catalogue.", add: "Ajouter un équipement" },
 };
 
-const blank = () => ({ id: undefined, name: "", roll_modifier: "", type: "", field_names: [] });
+const blank = () => ({ id: undefined, name: "", roll_modifier: "", characteristic: "", type: "", field_names: [] });
 const searchable = (text) => String(text || "").toLocaleLowerCase("fr");
 
 /** Barre d'onglets de la page Jeu. */
@@ -54,7 +54,7 @@ export function GameTabBar({ value, onChange }) {
 /** Catalogue des compétences ou des équipements de la campagne : consulter, ajouter, modifier, supprimer. */
 export default function GameCatalogPanel({ campaignId, kind, skillRollModifier = false }) {
   const text = LABELS[kind];
-  const { items, loading, saving, saveItem, removeItem } = useGameCatalog(campaignId, kind);
+  const { items, characteristics, loading, saving, saveItem, removeItem } = useGameCatalog(campaignId, kind);
   const [query, setQuery] = useState("");
   const [draft, setDraft] = useState(null);
   const [pendingDelete, setPendingDelete] = useState(null);
@@ -63,7 +63,7 @@ export default function GameCatalogPanel({ campaignId, kind, skillRollModifier =
     const needle = searchable(query).trim();
     if (!needle) return items;
     return items.filter((item) => searchable([
-      item.name, item.roll_modifier, item.type, ...(item.field_names || (item.fields || []).map((field) => field.name)),
+      item.name, item.roll_modifier, item.characteristic, item.type, ...(item.field_names || (item.fields || []).map((field) => field.name)),
     ].join(" ")).includes(needle));
   }, [items, query]);
 
@@ -71,6 +71,7 @@ export default function GameCatalogPanel({ campaignId, kind, skillRollModifier =
     id: item.id,
     name: item.name || "",
     roll_modifier: item.roll_modifier || "",
+    characteristic: item.characteristic || "",
     type: item.type || "",
     field_names: [...(item.field_names || (item.fields || []).map((field) => field.name))],
   });
@@ -125,6 +126,9 @@ export default function GameCatalogPanel({ campaignId, kind, skillRollModifier =
                     <h3 className="wrap-break-word font-display text-base font-semibold text-foreground">{item.name}</h3>
                     {kind === "skills" && item.roll_modifier && (
                       <p className="mt-1 text-xs text-muted-foreground">Modificateur de lancer : {item.roll_modifier}</p>
+                    )}
+                    {kind === "skills" && item.characteristic && (
+                      <p className="mt-1 text-xs text-muted-foreground">Caractéristique : {item.characteristic}</p>
                     )}
                     {kind === "equipment" && item.type && (
                       <p className="mt-1 font-mono text-xs uppercase tracking-wider text-muted-foreground">{item.type}</p>
@@ -184,6 +188,29 @@ export default function GameCatalogPanel({ campaignId, kind, skillRollModifier =
                   onChange={(event) => setDraft({ ...draft, roll_modifier: event.target.value })}
                   maxLength={60}
                 />
+              </div>
+            )}
+            {kind === "skills" && (
+              <div className="stack-y-2">
+                <Label htmlFor="catalog-characteristic">Caractéristique liée</Label>
+                <select
+                  id="catalog-characteristic"
+                  value={draft.characteristic}
+                  onChange={(event) => setDraft({ ...draft, characteristic: event.target.value })}
+                  className="h-9 w-full rounded-md border border-border bg-background px-3 text-sm"
+                >
+                  <option value="">Aucune</option>
+                  {characteristics.map((name) => (
+                    <option key={name} value={name}>{name}</option>
+                  ))}
+                  {draft.characteristic && !characteristics.includes(draft.characteristic) && (
+                    <option value={draft.characteristic}>{draft.characteristic} (absente du modèle)</option>
+                  )}
+                </select>
+                <p className="text-xs text-muted-foreground">
+                  Sert au lancer de dés : la valeur de cette caractéristique entre dans le lancer de la compétence.
+                  {characteristics.length === 0 ? " Ajoutez d'abord des caractéristiques au modèle de fiche." : ""}
+                </p>
               </div>
             )}
             {kind === "equipment" && (

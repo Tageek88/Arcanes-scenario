@@ -3,6 +3,7 @@ import { api } from "@/api/localClient";
 import { withDataBatch } from "@/lib/context/dataEvents";
 import { useDataRefresh } from "@/lib/context/RefreshContext";
 import { useToast } from "@/components/ui/use-toast";
+import { characteristicNamesOf } from "@/lib/generators/npcScale";
 
 const ENTITY = { skills: "SkillCatalog", equipment: "EquipmentCatalog" };
 const normalize = (value) => String(value || "").trim().toLocaleLowerCase("fr");
@@ -19,6 +20,8 @@ export function useGameCatalog(campaignId, kind) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  // Caractéristiques du modèle de fiche (catalogue des compétences seulement) : une compétence peut y être liée.
+  const [characteristics, setCharacteristics] = useState([]);
 
   useEffect(() => {
     if (!campaignId || !entity) {
@@ -51,7 +54,11 @@ export function useGameCatalog(campaignId, kind) {
     const current = draft.id ? items.find((item) => item.id === draft.id) : null;
     let payload;
     if (kind === "skills") {
-      payload = { name, roll_modifier: String(draft.roll_modifier || "").trim() };
+      payload = {
+        name,
+        roll_modifier: String(draft.roll_modifier || "").trim(),
+        characteristic: String(draft.characteristic || "").trim(),
+      };
     } else {
       const fieldNames = cleanNames(draft.field_names);
       const known = new Map((current?.fields || []).map((field) => [field.name, field.value]));
@@ -95,5 +102,21 @@ export function useGameCatalog(campaignId, kind) {
     }
   }, [entity, toast]);
 
-  return { items, loading, saving, saveItem, removeItem };
+  useEffect(() => {
+    if (!campaignId || kind !== "skills") {
+      setCharacteristics([]);
+      return undefined;
+    }
+    let alive = true;
+    api.entities.GameSheetModel
+      .filter({ campaign_id: campaignId }, { limit: 1 })
+      .then((result) => { if (alive) setCharacteristics(characteristicNamesOf(result.items[0]?.characteristics || [])); })
+      .catch((error) => {
+        console.error("Chargement des caractéristiques impossible :", error);
+        if (alive) toast({ variant: "destructive", title: "Caractéristiques indisponibles", description: "Impossible de charger les caractéristiques du modèle de fiche." });
+      });
+    return () => { alive = false; };
+  }, [campaignId, kind, refreshKey, toast]);
+
+  return { items, characteristics, loading, saving, saveItem, removeItem };
 }

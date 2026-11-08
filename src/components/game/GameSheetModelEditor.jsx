@@ -7,9 +7,73 @@ import { useToast } from "@/components/ui/use-toast";
 import { DEFAULT_LEVEL_NAMES, MAX_LEVELS, MAX_LEVEL_NAME_LENGTH, deriveScale, exportScale, parseScaleJson, sanitizeScale } from "@/lib/generators/npcScale";
 import { MAX_EQUIPMENT_PER_PC, sanitizePcScale } from "@/lib/generators/pcScale";
 import { draftToPcScale, draftToScale, levelNameProblems, pcScaleToDraft, scaleToDraft } from "@/lib/generators/scaleDraft";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { DICE_MODES, DICE_MODE_LABELS, DICE_OUTCOMES, DICE_OUTCOME_LABELS, DICE_PRESETS, DICE_RULES, DICE_RULE_LABELS } from "@/lib/meta/dice";
+import { applyPresetToDraft, diceToDraft, draftToDice, updateDiceDraft, updateSingleDie, updateStatDie } from "@/lib/meta/diceDraft";
 
 const EMPTY_COUNT = { min: "", max: "" };
-const EMPTY_MODEL = { characteristics: [], skillRollModifier: false, levels: [], pc: { ranges: {}, skills: EMPTY_COUNT, equipment: EMPTY_COUNT } };
+const EMPTY_MODEL = { characteristics: [], skillRollModifier: false, levels: [], pc: { ranges: {}, skills: EMPTY_COUNT, equipment: EMPTY_COUNT }, dice: diceToDraft(null) };
+
+const RULE_HELP = {
+  add: "Le total des dés, plus la valeur de la caractéristique et le bonus du moment, est comparé à la difficulté.",
+  pool: "La valeur de la caractéristique donne le nombre de dés. Chaque dé qui atteint le seuil est une réussite.",
+  under: "Le jet doit rester inférieur ou égal à la valeur de la caractéristique (le bonus du moment s'ajoute à cette valeur).",
+};
+const CRIT_LABELS = {
+  add: { critSuccess: "Réussite critique : dés ≥", critFailure: "Échec critique : dés ≤" },
+  under: { critSuccess: "Réussite critique : jet ≤", critFailure: "Échec critique : jet ≥" },
+};
+
+/** Choix unique parmi quelques options (boutons radio stylés comme les onglets de la page Jeu). */
+function ChoiceGroup({ label, value, options, onChange }) {
+  return (
+    <div className="stack-y-1.5">
+      <p className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">{label}</p>
+      <div role="radiogroup" aria-label={label} className="flex flex-wrap gap-2">
+        {options.map(([id, text]) => (
+          <button
+            key={id}
+            type="button"
+            role="radio"
+            aria-checked={value === id}
+            onClick={() => onChange(id)}
+            className={`tag min-touch border transition-colors ${value === id ? "border-primary/50 bg-primary/15 text-primary" : "border-border text-muted-foreground hover:text-foreground"}`}
+          >
+            {text}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Une ligne « nom, nombre de dés, faces ». Dans une réserve, le nombre de dés vient de la valeur. */
+function DieRow({ label, die, countHidden, onChange }) {
+  return (
+    <div className="grid grid-cols-[minmax(0,1fr)_5rem_5rem] items-center gap-2">
+      <span className="truncate text-sm">{label}</span>
+      {countHidden ? (
+        <span className="text-center text-xs text-muted-foreground">selon la valeur</span>
+      ) : (
+        <Input
+          inputMode="numeric"
+          aria-label={`${label} : nombre de dés`}
+          placeholder="Nb"
+          value={die?.count ?? ""}
+          onChange={(event) => onChange("count", event.target.value)}
+        />
+      )}
+      <Input
+        inputMode="numeric"
+        aria-label={`${label} : faces du dé`}
+        placeholder="Faces"
+        value={die?.sides ?? ""}
+        onChange={(event) => onChange("sides", event.target.value)}
+      />
+    </div>
+  );
+}
 
 const IMPORT_ERRORS = {
   too_large: "Le fichier est trop volumineux.",
@@ -38,6 +102,8 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
   const [form, setForm] = useState(EMPTY_MODEL);
   const [scaleReport, setScaleReport] = useState("");
   const [pcReport, setPcReport] = useState("");
+  // Section « Lancer de dés » ouverte : décidée à l'ouverture de la fenêtre, pas à chaque changement de l'interrupteur.
+  const [diceOpen, setDiceOpen] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -47,9 +113,11 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
         skillRollModifier: !!model?.skillRollModifier,
         levels: scaleToDraft(model?.scale, characteristics),
         pc: pcScaleToDraft(model?.pcScale, characteristics),
+        dice: diceToDraft(model?.dice, characteristics),
       });
       setScaleReport("");
       setPcReport("");
+      setDiceOpen(diceToDraft(model?.dice, characteristics).enabled);
     }
   }, [open, model]);
 
@@ -139,6 +207,8 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
         characteristics.map((item) => item.name)
       ),
       pcScale: sanitizePcScale(draftToPcScale(form.pc, form.characteristics), characteristics.map((item) => item.name)),
+      // Rien de configuré et rien touché : on n'envoie rien, le réglage déjà enregistré est conservé.
+      dice: draftToDice(form.dice, form.characteristics) ?? undefined,
     });
   };
 
@@ -192,6 +262,13 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
     const missing = report.withoutData.length ? ` Sans valeur numérique exploitable : ${report.withoutData.join(", ")}.` : "";
     setPcReport(`Plages des personnages joueurs calculées à partir de ${report.characters} fiche${report.characters === 1 ? "" : "s"} : à vérifier et à ajuster.${missing}`);
   };
+
+  const dice = form.dice;
+  const isPool = dice.rule === "pool";
+  const setDice = (patch) => setForm((current) => ({ ...current, dice: updateDiceDraft(current.dice, patch) }));
+  const setSingleDie = (side, value) => setForm((current) => ({ ...current, dice: updateSingleDie(current.dice, side, value) }));
+  const setStatDie = (key, side, value) => setForm((current) => ({ ...current, dice: updateStatDie(current.dice, key, side, value) }));
+  const pickPreset = (presetId) => setForm((current) => ({ ...current, dice: applyPresetToDraft(current.dice, presetId) }));
 
   const applyScale = (scale) =>
     setForm((current) => ({ ...current, levels: scaleToDraft(scale, current.characteristics) }));
@@ -472,6 +549,104 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
               </div>
             ))}
             <p className="text-xs text-muted-foreground">Compétences : 20 au plus ; équipements : {MAX_EQUIPMENT_PER_PC} au plus.</p>
+          </div>
+        </details>
+
+        <details className="stack-y-3 rounded-lg border border-border p-3" open={diceOpen} onToggle={(event) => setDiceOpen(event.currentTarget.open)}>
+          <summary className="cursor-pointer font-display font-semibold">Lancer de dés</summary>
+          <div className="mt-3 stack-y-3">
+            <p className="text-xs text-muted-foreground">
+              Réglez les dés une fois ici : les fiches de personnage et de PNJ affichent alors un bouton de lancer sur leurs compétences. Une fiche peut changer le dé d'une caractéristique sans toucher au modèle. Désactiver le lancer ne supprime aucun réglage.
+            </p>
+            <div className="flex items-center gap-3">
+              <Switch id="dice-enabled" checked={dice.enabled} onCheckedChange={(checked) => setDice({ enabled: checked })} />
+              <Label htmlFor="dice-enabled">Activer le lancer de dés</Label>
+            </div>
+
+            <div className="stack-y-1.5">
+              <p className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">Préréglages</p>
+              <div className="flex flex-wrap gap-2">
+                {DICE_PRESETS.map((preset) => (
+                  <Button key={preset.id} type="button" variant="outline" size="sm" title={preset.description} onClick={() => pickPreset(preset.id)}>
+                    {preset.label}
+                  </Button>
+                ))}
+              </div>
+              <p className="text-xs text-muted-foreground">Un préréglage remplit les réglages ci-dessous (sauf le dé de chaque caractéristique) et active le lancer : vous pouvez ensuite tout ajuster.</p>
+            </div>
+
+            <ChoiceGroup
+              label="Comment la valeur entre dans le lancer"
+              value={dice.rule}
+              options={DICE_RULES.map((id) => [id, DICE_RULE_LABELS[id]])}
+              onChange={(rule) => setDice({ rule })}
+            />
+            <p className="text-xs text-muted-foreground">{RULE_HELP[dice.rule]}</p>
+
+            <ChoiceGroup
+              label="Dés utilisés"
+              value={dice.mode}
+              options={DICE_MODES.map((id) => [id, DICE_MODE_LABELS[id]])}
+              onChange={(mode) => setDice({ mode })}
+            />
+            {dice.mode === "single" ? (
+              <DieRow label="Dé du système" die={dice.single} countHidden={isPool} onChange={setSingleDie} />
+            ) : (
+              <div className="stack-y-2">
+                {namedItems.length === 0 && <p className="text-xs text-muted-foreground">Ajoutez des caractéristiques au modèle pour choisir leur dé.</p>}
+                {namedItems.map((item) => (
+                  <DieRow
+                    key={item._key}
+                    label={item.name}
+                    die={dice.perStat[item._key]}
+                    countHidden={isPool}
+                    onChange={(side, value) => setStatDie(item._key, side, value)}
+                  />
+                ))}
+                <p className="text-xs text-muted-foreground">Une caractéristique sans dé réglé utilise un d20. Le choix du mode se change à tout moment : les dés déjà saisis sont conservés.</p>
+              </div>
+            )}
+
+            {!isPool && (
+              <div className="stack-y-2">
+                <p className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">Réussites et échecs critiques (facultatif)</p>
+                {["critSuccess", "critFailure"].map((key) => (
+                  <div key={key} className="grid grid-cols-[minmax(0,1fr)_5rem] items-center gap-2">
+                    <span className="text-sm text-muted-foreground">{CRIT_LABELS[dice.rule][key]}</span>
+                    <Input
+                      inputMode="numeric"
+                      aria-label={CRIT_LABELS[dice.rule][key]}
+                      placeholder="Aucun"
+                      value={dice[key]}
+                      onChange={(event) => setDice({ [key]: event.target.value })}
+                    />
+                  </div>
+                ))}
+                <p className="text-xs text-muted-foreground">Jugés sur les dés seuls, sans la valeur ni le bonus.</p>
+              </div>
+            )}
+
+            <ChoiceGroup
+              label="Résultat affiché"
+              value={dice.outcome}
+              options={DICE_OUTCOMES.map((id) => [id, DICE_OUTCOME_LABELS[id]])}
+              onChange={(outcome) => setDice({ outcome })}
+            />
+            {dice.rule !== "under" && (
+              <div className="stack-y-1.5">
+                <div className="grid grid-cols-[minmax(0,1fr)_5rem] items-center gap-2">
+                  <span className="text-sm text-muted-foreground">{isPool ? "Un dé réussit à partir de" : "Difficulté par défaut (total à atteindre)"}</span>
+                  <Input
+                    inputMode="numeric"
+                    aria-label={isPool ? "Un dé réussit à partir de" : "Difficulté par défaut"}
+                    placeholder={isPool ? "Max" : "Aucune"}
+                    value={dice.difficulty}
+                    onChange={(event) => setDice({ difficulty: event.target.value })}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">Modifiable au moment du lancer, sans toucher au modèle.</p>
+              </div>
+            )}
           </div>
         </details>
       </div>

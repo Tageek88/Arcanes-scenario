@@ -21,6 +21,20 @@
     "skillRollModifier": {
       "type": "boolean",
       "default": false
+    },
+    "dice": {
+      "type": "object",
+      "description": "Lancer de dés (absent ou null = pas de bouton de lancer). Réglé une fois pour le système ; une fiche peut surcharger le dé d'une caractéristique.",
+      "properties": {
+        "enabled": { "type": "boolean", "default": true, "description": "false : bouton masqué, réglages conservés." },
+        "mode": { "enum": ["single", "per_stat"], "description": "Un dé pour tout le système, ou un dé par caractéristique." },
+        "rule": { "enum": ["add", "pool", "under"], "description": "add : dé + valeur ; pool : la valeur donne le nombre de dés ; under : le jet doit rester sous la valeur." },
+        "single": { "type": "object", "properties": { "count": { "type": "integer" }, "sides": { "type": "integer" } } },
+        "perStat": { "type": "object", "description": "{ nom de caractéristique: { count, sides } }" },
+        "crit": { "type": "object", "properties": { "success": { "type": ["integer", "null"] }, "failure": { "type": ["integer", "null"] } } },
+        "outcome": { "enum": ["total", "success", "both"] },
+        "difficulty": { "type": ["integer", "null"], "description": "add : total à atteindre ; pool : valeur à partir de laquelle un dé réussit." }
+      }
     }
   },
   "required": ["campaign_id"]

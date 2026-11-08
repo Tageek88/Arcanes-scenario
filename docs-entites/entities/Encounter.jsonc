@@ -1,0 +1,58 @@
+{
+  "name": "Encounter",
+  "label": "rencontre",
+  "plural": "rencontres",
+  "description": "Suivi d'une rencontre (initiative, points de vie, tour de jeu, round), ouvert par le bouton aux deux épées du panneau Codex. Plusieurs rencontres par campagne. Règles : src/lib/meta/encounter.js.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "string",
+      "description": "Identifiant unique de la rencontre."
+    },
+    {
+      "name": "campaign_id",
+      "type": "string",
+      "description": "Identifiant de la campagne à laquelle cette rencontre appartient."
+    },
+    {
+      "name": "title",
+      "type": "string",
+      "description": "Nom de la rencontre (« Rencontre » s'il est vide, 80 caractères au plus)."
+    },
+    {
+      "name": "round",
+      "type": "number",
+      "description": "Round en cours (1 au départ ; il augmente quand le tour revient au premier de l'ordre de jeu)."
+    },
+    {
+      "name": "active_id",
+      "type": "string|null",
+      "description": "Identifiant du combattant dont c'est le tour ; null tant que personne n'a la main."
+    },
+    {
+      "name": "combatants",
+      "type": "array",
+      "description": "Combattants (60 au plus) : { id, name, initiative, hp, hp_max }. initiative : nombre saisi à la main, null s'il manque (le combattant passe alors en dernier). hp_max : null quand les PV ne sont pas suivis (hp vaut alors null). Un combattant à 0 PV est grisé mais garde son tour. L'ordre de jeu est calculé (initiative décroissante, égalités dans l'ordre d'ajout), il n'est pas stocké."
+    },
+    {
+      "name": "created_date",
+      "type": "string",
+      "description": "Date de création de la rencontre."
+    },
+    {
+      "name": "updated_date",
+      "type": "string",
+      "description": "Date de dernière modification."
+    },
+    {
+      "name": "created_by_id",
+      "type": "string",
+      "description": "Identifiant de l'utilisateur qui a créé la rencontre."
+    },
+    {
+      "name": "created_by",
+      "type": "string",
+      "description": "Email de l'utilisateur qui a créé la rencontre."
+    }
+  ]
+}

@@ -29,7 +29,7 @@ flowchart LR
     direction TB
     F_HOME["home : SceneBoard, ActColumn,<br/>SceneEditor, MobileSceneList,<br/>CampaignDialog, QuestBar"]
     F_CAL["calendar : MonthGrid, SessionDialog,<br/>UpcomingSessions, SessionPollDialog<br/>poll/ : PollForm, PollCard,<br/>PollResultsTable, PollServiceUrlField,<br/>PollRemovalDialog"]
-    F_CODEX["codex : CodexCard, CodexEntryDetails,<br/>CodexEntryDialog, LocationTree,<br/>CodexSidebar, NpcRelations,<br/>NpcSheetFields, NpcGeneratorPanel,<br/>AttachmentsField"]
+    F_CODEX["codex : CodexCard, CodexEntryDetails,<br/>CodexEntryDialog, LocationTree,<br/>CodexSidebar, EncounterDialog, NpcRelations,<br/>NpcSheetFields, NpcGeneratorPanel,<br/>AttachmentsField"]
     F_GAME["game : GameSheetModelEditor,<br/>GameCharacterEditor, GameCatalogPanel,<br/>InventoryPanel, GiveItemDialog,<br/>PcGeneratorPanel<br/>print : PrintSheet"]
     F_NOTES["notes : NoteCard, NoteEditor"]
     F_TABLES["tables : TableCard, TableEditor,<br/>DiceRoller<br/>home/GeneratorTablesDialog"]
@@ -42,7 +42,7 @@ flowchart LR
     H_CAMP["useCampaigns, useQuests"]
     H_HOME["useCampaignContent<br/>useCampaignActions"]
     H_CAL["useScenes, useGameSessions,<br/>useSessionPolls,<br/>useSessionPollManager"]
-    H_CODEX["useCodex, useCodexList,<br/>useCodexEntryData,<br/>useNpcRelations, useNpcGenerator,<br/>useNpcFormGeneration"]
+    H_CODEX["useCodex, useCodexList,<br/>useCodexEntryData,<br/>useNpcRelations, useNpcGenerator,<br/>useNpcFormGeneration, useEncounters"]
     H_GAME["useGameSheet, useGameCatalog,<br/>useInventory, usePcFormGeneration"]
     H_NOTES["useNotes"]
     H_TABLES["useTables"]
@@ -51,9 +51,9 @@ flowchart LR
 
   subgraph LIB["lib/"]
     direction TB
-    META["meta/<br/>codex, inventory, sceneMeta,<br/>sessionMeta, sessionCampaign, tableMeta,<br/>relationMeta, universeMeta"]
+    META["meta/<br/>codex, inventory, encounter, sceneMeta,<br/>sessionMeta, sessionCampaign, tableMeta,<br/>relationMeta, universeMeta"]
     CTX["context/<br/>campaignStore, questStore, RefreshContext,<br/>PageFilterContext, ExpandedCardContext,<br/>CodexLinksContext, TabStackContext, dataEvents, AuthContext"]
-    SERV["services/<br/>campaignDelete, quests, inventory,<br/>locationTree, npcRelations, attachments,<br/>codexEntries, codexSearch,<br/>npcGeneration, openAttachment,<br/>appSettings, themeFile"]
+    SERV["services/<br/>campaignDelete, quests, inventory, encounters,<br/>locationTree, npcRelations, attachments,<br/>codexEntries, codexSearch,<br/>npcGeneration, openAttachment,<br/>appSettings, themeFile"]
     POLLS["services/polls<br/>config, client (fetch), remote,<br/>votes, sync, pollDates, pollForm,<br/>store (façade : sessionPolls.js)"]
     PRINT["print/<br/>printModel, editablePdf,<br/>loadPrintData"]
     GEN["generators/<br/>nameGenerator, nameData, random,<br/>npcData, generatorTables, npcGenerator,<br/>npcScale, scaleDraft, npcRequest,<br/>pcScale, pcGenerator, pcRequest"]
@@ -256,6 +256,12 @@ flowchart LR
 - Campagne d'exemple : `data/demoCampaign.json` (identifiants fixes), `lib/services/demoCampaign.js` (ajout en une transaction, suppression complète), `lib/services/demoTour.js` (entrée et sortie : la campagne de la personne est remise en place), `lib/meta/demoDates.js`, `hooks/useDemoCampaign.js`. Pas de nouvelle `db.version`.
 - Tests : `tests/tours.test.js` (cohérence des étapes avec le code et la campagne d'exemple), `tutorialPlacement`, `tutorialBridge`, `demoCampaign`, `demoTour`, `demoDates`. Notes détaillées : `Docs/Tutoriel.md`.
 - Mise en page mobile : les grilles à une colonne sur téléphone portent `grid-cols-1` (sinon la page s'élargit au contenu le plus large).
+
+## Suivi de rencontre (1.13.0)
+
+- Table `Encounter` (`db.version(9)`) : une ligne par rencontre d'une campagne (`title`, `round`, `active_id`, `combatants` : `{ id, name, initiative, hp, hp_max }`). Elle est dans `LINKED_ENTITIES` (suppression de la campagne) et dans la corbeille. La version 8 de `dbConfig.js` garde ses tables d'origine (`VERSION_8_TABLES`) : sans cela, Dexie ne créerait pas la nouvelle table chez quelqu'un qui a déjà des données.
+- Règles pures : `lib/meta/encounter.js` (ordre d'initiative, PV bornés, tour suivant, retrait du combattant qui joue). Enregistrement : `lib/services/encounters.js` (une transaction qui relit la ligne ; écritures silencieuses pour ne pas recharger tous les écrans à chaque point de vie). Hook : `hooks/useEncounters.js` (mise à jour de l'écran d'abord, puis écriture, relecture en cas d'échec).
+- Interface : bouton aux deux épées à côté de « Codex du MJ » dans `CodexSidebar`, qui ouvre `EncounterDialog`. Un combattant à 0 PV est grisé mais garde son tour. Initiative saisie à la main (tirage de dés prévu plus tard). Pas d'impression ni de recherche globale pour l'instant.
 
 ## Plateformes
 

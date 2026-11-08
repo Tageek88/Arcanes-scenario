@@ -27,6 +27,7 @@ export const TRASH_KINDS = {
   RollTable: ["table aléatoire", "tables aléatoires"],
   GameCharacter: ["personnage", "personnages"],
   GameSession: ["session", "sessions"],
+  Encounter: ["rencontre", "rencontres"],
   GameSheetModel: ["modèle de fiche", "modèles de fiche"],
   SkillCatalog: ["compétence", "compétences"],
   EquipmentCatalog: ["équipement", "équipements"],

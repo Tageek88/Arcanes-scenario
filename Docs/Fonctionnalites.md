@@ -11,7 +11,8 @@ La page d'accueil rassemble les campagnes, les actes et les scènes sous forme d
 - détailler les scènes avec leur contenu, leurs notes et leurs suites possibles ;
 - agrandir les cartes pour consulter leur contenu, puis les réduire en sélectionnant une autre carte ;
 - faire défiler la liste des actes à la molette de la souris ;
-- retrouver, dans le panneau Codex, les éléments associés à la scène sélectionnée : PNJ, lieux, indices et informations, et personnages joueurs.
+- retrouver, dans le panneau Codex, les éléments associés à la scène sélectionnée : PNJ, lieux, indices et informations, et personnages joueurs ;
+- suivre une rencontre (initiative, points de vie, tour de jeu) avec le bouton aux deux épées du panneau Codex.
 
 RECHERCHE GLOBALE
 
@@ -103,6 +104,18 @@ Dans l'éditeur d'un personnage, le bouton « Générer la fiche » compose un p
 - Le barème des personnages joueurs peut se calculer à partir des personnages existants. Le barème des PNJ se calcule désormais à partir des fiches de PNJ.
 - Dans l'éditeur du modèle, les sections Caractéristiques, Barème des PNJ et Barème des personnages joueurs se replient ; le réglage « Modificateur de lancer des compétences » n'est plus proposé.
 
+RENCONTRES — INITIATIVE ET POINTS DE VIE
+
+Le bouton aux deux épées, à côté de « Codex du MJ » sur la page d'accueil, ouvre le suivi de rencontre de la campagne sélectionnée.
+
+- Plusieurs rencontres par campagne : un menu permet de passer de l'une à l'autre, d'en créer une nouvelle ou de supprimer celle qui est affichée (elle va dans la corbeille). Le nom se modifie directement.
+- Chaque combattant a un nom, une initiative saisie à la main et, si on le souhaite, des points de vie avec un maximum. Les combattants sont rangés par initiative décroissante ; ceux sans initiative passent en dernier, et les égalités gardent l'ordre d'ajout.
+- Les points de vie se changent avec les boutons − et + ou en tapant la valeur ; ils restent entre 0 et le maximum. Sans PV max, les points de vie ne sont pas suivis.
+- « Tour suivant » donne la main au combattant suivant ; le round augmente quand l'ordre revient au premier. Un clic sur un nom donne la main à ce combattant. « Round 1 » remet le compteur à zéro, sans toucher aux combattants.
+- Un combattant à 0 PV est grisé et marqué « À terre », mais il garde son tour. Retirer le combattant dont c'est le tour donne la main au suivant.
+- Une rencontre compte 60 combattants au plus.
+- Les rencontres sont incluses dans les sauvegardes, passent par la corbeille et sont supprimées avec leur campagne. Elles ne figurent pas encore à l'impression ni dans la recherche globale.
+
 NOTES DE MJ EN POST-IT
 
 Une note peut être collée comme un post-it sur un élément : une scène, une fiche du Codex (PNJ, lieu, indice), un personnage, et, dans une fiche de PNJ ou de personnage, une caractéristique, une compétence, un équipement ou un objet d'inventaire. Une note sans élément reste une note libre.
@@ -188,7 +201,7 @@ CORBEILLE
 
 Ce que l'on supprime est gardé 30 jours dans Paramètres › Corbeille, puis disparaît.
 
-- Sont concernés : scènes, actes (avec leurs scènes), quêtes, PNJ (avec leurs relations), lieux, indices, notes, tables aléatoires, personnages, sessions de jeu, éléments des catalogues de jeu et campagnes entières avec tout leur contenu.
+- Sont concernés : scènes, actes (avec leurs scènes), quêtes, PNJ (avec leurs relations), lieux, indices, notes, tables aléatoires, personnages, sessions de jeu, rencontres, éléments des catalogues de jeu et campagnes entières avec tout leur contenu.
 - Chaque entrée indique son type, sa campagne, ce qu'elle contient et les jours restants. « Restaurer » remet l'élément et son contenu à leur place ; « Supprimer définitivement » et « Vider » les effacent pour de bon, après confirmation.
 - Restaurer un élément dont la campagne est supprimée est refusé : restaurez d'abord la campagne.
 - La restauration remet les éléments supprimés, pas les liens qui les citaient ailleurs (un lieu retiré d'une scène ne revient pas dans cette scène).

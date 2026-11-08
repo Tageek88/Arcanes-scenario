@@ -4,7 +4,8 @@
   "properties": {
     "campaign_id": { "type": "string" },
     "name": { "type": "string" },
-    "roll_modifier": { "type": "string" }
+    "roll_modifier": { "type": "string" },
+    "characteristic": { "type": "string", "description": "Nom de la caractéristique liée (lancer de dés) ; vide = aucune." }
   },
   "required": ["campaign_id", "name"]
 }
