@@ -7,6 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { FieldLabel } from "@/components/codex/NpcGeneratorPanel";
 import InventoryField from "@/components/common/InventoryField";
 import { rangesForLevel } from "@/lib/generators/npcScale";
+import DiceOverrideField, { SkillLinkSelect } from "@/components/game/DiceOverrideField";
+import { useRollSetup } from "@/hooks/useRollSetup";
+import { linkedCharacteristic } from "@/lib/meta/diceLinks";
 
 const normalize = (value) => String(value || "").trim().toLocaleLowerCase("fr");
 
@@ -75,9 +78,9 @@ function ListInput({ value, onChange, placeholder, id }) {
  * Rubriques détaillées d'un PNJ : niveau, traits, motivation, signe distinctif, caractéristiques, compétences,
  * équipement, et contrôle d'équilibrage avec le barème de la campagne. Caractéristiques, compétences et équipement
  * ont la même forme que sur les fiches de personnage (champs facultatifs compris).
- * @param {{ form: Record<string, any>, set: (key: string, value: unknown) => void, generator: any, generation: any }} props
+ * @param {{ form: Record<string, any>, set: (key: string, value: unknown) => void, generator: any, generation: any, campaignId?: string }} props
  */
-export default function NpcSheetFields({ form, set, generator, generation }) {
+export default function NpcSheetFields({ form, set, generator, generation, campaignId = "" }) {
   const { locks, toggleLock } = generation;
   const traits = form.traits || [];
   const skills = form.skills || [];
@@ -88,6 +91,8 @@ export default function NpcSheetFields({ form, set, generator, generation }) {
   const equipmentPool = generator.context?.equipmentPool || [];
   const fieldSuggestions = generator.context?.characteristicFields || {};
   const showRollModifier = !!generator.context?.skillRollModifier;
+  // Réglage du lancer de dés de la campagne : sans lui, aucune option de dé ni de lien n'est proposée.
+  const roll = useRollSetup(campaignId || generator.context?.campaignId || form.campaign_id || "");
   const ranges = generator.context ? rangesForLevel(generator.context.scale, form.level, names) : [];
   const rangeOf = (name) => ranges.find((range) => range.name === name);
   const report = generator.hasScale
@@ -99,6 +104,12 @@ export default function NpcSheetFields({ form, set, generator, generation }) {
   const setCharacteristic = (name, patch) =>
     set("characteristics", { ...characteristics, [name]: { value: "", fields: [], ...characteristics[name], ...patch } });
   const setSkill = (index, patch) => set("skills", skills.map((skill, i) => (i === index ? { ...skill, ...patch } : skill)));
+  // Compétence déjà liée à une caractéristique dans le catalogue : le lien est repris tant que la fiche n'en a pas.
+  const fillSkillLink = (index) => {
+    const skill = skills[index];
+    const linked = linkedCharacteristic(skill?.name, roll.links);
+    if (linked && !skill.characteristic) setSkill(index, { characteristic: linked });
+  };
   const setEquipment = (index, patch) => set("equipment", equipment.map((item, i) => (i === index ? { ...item, ...patch } : item)));
   const equipmentTypes = [...new Set(equipmentPool.map((item) => item.type).filter(Boolean))];
   const fieldNamesForType = (type) => [...new Set(
@@ -174,6 +185,12 @@ export default function NpcSheetFields({ form, set, generator, generation }) {
                     suggested={fieldSuggestions[name] || []}
                     onChange={(fields) => setCharacteristic(name, { fields })}
                   />
+                  <DiceOverrideField
+                    characteristic={name}
+                    config={roll.dice}
+                    override={form.dice_override}
+                    onChange={(next) => set("dice_override", next)}
+                  />
                 </div>
               );
             })}
@@ -192,6 +209,7 @@ export default function NpcSheetFields({ form, set, generator, generation }) {
                 value={skill.name || ""}
                 placeholder="Compétence"
                 onChange={(event) => setSkill(index, { name: event.target.value })}
+                onBlur={() => fillSkillLink(index)}
               />
               {showRollModifier && (
                 <Input
@@ -206,6 +224,14 @@ export default function NpcSheetFields({ form, set, generator, generation }) {
                 <X className="h-4 w-4" />
               </Button>
             </div>
+            {roll.dice?.enabled && names.length > 0 && (
+              <SkillLinkSelect
+                label={`Caractéristique liée à la compétence ${skill.name || index + 1}`}
+                value={skill.characteristic}
+                names={names}
+                onChange={(value) => setSkill(index, { characteristic: value })}
+              />
+            )}
             <OptionalFields subject={`la compétence ${skill.name || index + 1}`} fields={skill.fields || []} onChange={(fields) => setSkill(index, { fields })} />
           </div>
         ))}

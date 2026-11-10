@@ -5,7 +5,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { useDataRefresh } from "@/lib/context/RefreshContext";
 import { characteristicNamesOf, renameScaleCharacteristics, sanitizeScale } from "@/lib/generators/npcScale";
 import { renamePcScaleCharacteristics, sanitizePcScale } from "@/lib/generators/pcScale";
-import { cleanDiceConfig, renameDiceCharacteristic } from "@/lib/meta/dice";
+import { cleanDiceConfig, cleanDiceOverride, renameDiceCharacteristic } from "@/lib/meta/dice";
+import { renameSheetLinks } from "@/lib/meta/diceLinks";
 import { renameCharacteristicNotes } from "@/lib/services/notes";
 
 const EMPTY_MODEL = { characteristics: [], skillRollModifier: false, scale: { levels: [] }, pcScale: sanitizePcScale(null), dice: null };
@@ -134,7 +135,8 @@ export function useGameSheet(campaignId) {
                 }
                 delete characteristics[previousName];
               });
-              return api.entities.GameCharacter.update(character.id, { characteristics });
+              // Le dé personnalisé de la fiche et ses compétences liées suivent aussi le renommage.
+              return api.entities.GameCharacter.update(character.id, { characteristics, ...renameSheetLinks(character, updatedNames) });
             }));
             setCharacters((current) => current.map((character) => {
               const characteristics = { ...(character.characteristics || {}) };
@@ -142,7 +144,7 @@ export function useGameSheet(campaignId) {
                 if (characteristics[previousName] && !characteristics[newName]) characteristics[newName] = characteristics[previousName];
                 delete characteristics[previousName];
               });
-              return { ...character, characteristics };
+              return { ...character, characteristics, ...renameSheetLinks(character, updatedNames) };
             }));
           } catch (error) {
             valuesMigrated = false;
@@ -231,6 +233,8 @@ export function useGameSheet(campaignId) {
       inventory: draft.inventory || [],
       // Verrous de la génération (cadenas) : absents du brouillon, la valeur enregistrée est conservée.
       ...(draft.generation_locks ? { generation_locks: draft.generation_locks } : {}),
+      // Dé personnalisé par caractéristique : absent du brouillon, la valeur enregistrée est conservée.
+      ...(draft.dice_override ? { dice_override: cleanDiceOverride(draft.dice_override) } : {}),
     };
     try {
       const saved = draft.id
@@ -250,6 +254,7 @@ export function useGameSheet(campaignId) {
             const catalogItem = await saveCatalogItem("SkillCatalog", nextSkills, {
               name: skill.name,
               roll_modifier: skill.roll_modifier || "",
+              ...(skill.characteristic ? { characteristic: skill.characteristic } : {}),
             });
             const existingIndex = nextSkills.findIndex((item) => item.id === catalogItem.id);
             if (existingIndex >= 0) nextSkills[existingIndex] = catalogItem;

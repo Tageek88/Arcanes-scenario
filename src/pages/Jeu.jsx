@@ -18,6 +18,8 @@ import GameSheetModelEditor from "@/components/game/GameSheetModelEditor";
 import GameCharacterEditor from "@/components/game/GameCharacterEditor";
 import GameCatalogPanel, { GameTabBar } from "@/components/game/GameCatalogPanel";
 import InventoryPanel from "@/components/game/InventoryPanel";
+import RollButton from "@/components/game/RollButton";
+import { skillLinkMap } from "@/lib/meta/diceLinks";
 import CampaignSelect from "@/components/common/CampaignSelect";
 import PrintButton from "@/components/print/PrintButton";
 import PostItButton, { PartPostItButton } from "@/components/common/PostItButton";
@@ -53,6 +55,8 @@ export default function Jeu() {
     saveCharacter,
     deleteCharacter: removeCharacter,
   } = useGameSheet(campaignId);
+  // Réglage du lancer de dés : déjà chargé avec le modèle, donc toujours à jour après une modification.
+  const rollSetup = useMemo(() => ({ dice: model.dice, links: skillLinkMap(skillCatalog) }), [model.dice, skillCatalog]);
 
   const [modelOpen, setModelOpen] = useState(false);
   const [characterOpen, setCharacterOpen] = useState(false);
@@ -273,7 +277,10 @@ export default function Jeu() {
                           <div key={item.name} className="group relative rounded-md bg-secondary/50 px-3 py-2">
                             <PartPostItButton owner={{ kind: "character", id: character.id }} partKind="characteristic" part={{ name: item.name }} label={`la caractéristique ${item.name}`} className="absolute right-1 top-1" />
                             <dt className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{item.name}</dt>
-                            <dd className="mt-1 text-sm font-semibold">{values.value || "—"}</dd>
+                            <dd className="mt-1 flex items-center justify-between gap-1 text-sm font-semibold">
+                              <span>{values.value || "—"}</span>
+                              <RollButton setup={rollSetup} sheet={character} characteristic={item.name} />
+                            </dd>
                             {fields.map((field, fieldIndex) => (
                               <dd key={fieldIndex} className="mt-0.5 text-xs text-muted-foreground">
                                 <span>{field.name}</span>{field.value && <span> : {field.value}</span>}
@@ -295,6 +302,7 @@ export default function Jeu() {
                             {model.skillRollModifier && skill.roll_modifier ? ` · ${skill.roll_modifier}` : ""}
                             {(skill.fields || []).filter((field) => field.value).map((field) => ` · ${field.name} : ${field.value}`).join("")}
                             </span>
+                            <RollButton setup={rollSetup} sheet={character} skill={skill} />
                             <PartPostItButton owner={{ kind: "character", id: character.id }} partKind="skill" part={skill} index={index} label={`la compétence ${skill.name}`} />
                           </li>
                         ))}

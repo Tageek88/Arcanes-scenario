@@ -1,4 +1,5 @@
 import { cleanInventory, newItemId } from "@/lib/meta/inventory";
+import { cleanDiceOverride } from "@/lib/meta/dice";
 
 export const KIND_META = {
   npc: { entity: "NPC", title: "PNJ", singular: "PNJ", nameLabel: "Nom du PNJ" },
@@ -109,10 +110,19 @@ export function npcSheetPayload(form) {
     characteristics,
     skills: (Array.isArray(form?.skills) ? form.skills : [])
       .filter((skill) => text(skill?.name))
-      .map((skill) => ({ ...(text(skill.id) ? { id: text(skill.id) } : {}), name: text(skill.name), roll_modifier: text(skill.roll_modifier), fields: cleanFields(skill.fields) })),
+      .map((skill) => ({
+        ...(text(skill.id) ? { id: text(skill.id) } : {}),
+        name: text(skill.name),
+        roll_modifier: text(skill.roll_modifier),
+        // Caractéristique liée (lancer de dés) : seulement si elle est renseignée.
+        ...(text(skill.characteristic) ? { characteristic: text(skill.characteristic) } : {}),
+        fields: cleanFields(skill.fields),
+      })),
     equipment: (Array.isArray(form?.equipment) ? form.equipment : [])
       .filter((item) => text(item?.name))
       .map((item) => ({ ...(text(item.id) ? { id: text(item.id) } : {}), name: text(item.name), type: text(item.type), fields: cleanFields(item.fields) })),
     inventory: cleanInventory(form?.inventory),
+    // Dé personnalisé par caractéristique : absent du formulaire, la valeur enregistrée est conservée.
+    ...(form && "dice_override" in form ? { dice_override: cleanDiceOverride(form.dice_override) } : {}),
   };
 }

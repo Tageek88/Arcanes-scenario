@@ -97,3 +97,26 @@ export function applyPresetToDraft(draft, presetId) {
   const fromPreset = diceToDraft(dice, []);
   return { ...fromPreset, perStat: draft.perStat || {}, enabled: true, used: true };
 }
+
+// Die override of a sheet ({ characteristic: { count, sides } }): kept as typed text while editing,
+// cleaned with `cleanDiceOverride` (lib/meta/dice.js) when the sheet is saved.
+const overrideBase = (override) => (override && typeof override === "object" ? override : {});
+
+/** Starts a custom die for one characteristic, from a die (the model's one) shown as text inputs. */
+export function startOverride(override, characteristic, die) {
+  return { ...overrideBase(override), [characteristic]: dieDraft(die || DEFAULT_DIE) };
+}
+
+/** Changes `count` or `sides` of the custom die of one characteristic. */
+export function updateOverrideDie(override, characteristic, side, value) {
+  const base = overrideBase(override);
+  const current = base[characteristic] || { count: "", sides: "" };
+  return { ...base, [characteristic]: { ...current, [side]: value } };
+}
+
+/** Back to the model's die for one characteristic. */
+export function clearOverride(override, characteristic) {
+  const next = { ...overrideBase(override) };
+  delete next[characteristic];
+  return next;
+}

@@ -6,6 +6,8 @@ import { hasFilter } from "@/lib/services/codexSearch";
 import { useCodexLinks } from "@/lib/context/CodexLinksContext";
 import { cleanInventory, inventoryLabel } from "@/lib/meta/inventory";
 import { PartPostItButton } from "@/components/common/PostItButton";
+import RollButton from "@/components/game/RollButton";
+import { useRollSetup } from "@/hooks/useRollSetup";
 
 const stop = (action) => (event) => {
   event.stopPropagation();
@@ -73,7 +75,7 @@ function Section({ title, children }) {
   );
 }
 
-function Characteristics({ characteristics, owner }) {
+function Characteristics({ characteristics, owner, sheet, setup }) {
   const entries = Object.entries(characteristics && typeof characteristics === "object" ? characteristics : {});
   if (entries.length === 0) return null;
   return (
@@ -84,6 +86,7 @@ function Characteristics({ characteristics, owner }) {
             <PartPostItButton owner={owner} partKind="characteristic" part={{ name }} label={`la caractéristique ${name}`} className="absolute right-0.5 top-0.5" />
             <span className="uppercase text-muted-foreground">{name} : </span>
             <span className="font-semibold text-foreground">{entry?.value || "—"}</span>
+            <RollButton setup={setup} sheet={sheet} characteristic={name} className="ml-1 align-middle" />
             {list(entry?.fields).filter((field) => field?.name || field?.value).map((field, index) => (
               <div key={index} className="wrap-break-word text-muted-foreground">
                 {field.name}{field.value ? `${field.name ? " : " : ""}${field.value}` : ""}
@@ -96,7 +99,7 @@ function Characteristics({ characteristics, owner }) {
   );
 }
 
-function Skills({ skills, owner }) {
+function Skills({ skills, owner, sheet, setup }) {
   const rows = list(skills).map((skill, rawIndex) => ({ skill, rawIndex })).filter(({ skill }) => skill?.name);
   if (rows.length === 0) return null;
   return (
@@ -108,6 +111,7 @@ function Skills({ skills, owner }) {
             <li key={rawIndex} className="group flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px]">
               <FilterChip filterKey="competence" value={skill.name} className="px-1.5 py-0.5 text-[11px]" />
               {extra && <span className="wrap-break-word text-muted-foreground">{extra}</span>}
+              <RollButton setup={setup} sheet={sheet} skill={skill} />
               <PartPostItButton owner={owner} partKind="skill" part={skill} index={rawIndex} label={`la compétence ${skill.name}`} />
             </li>
           );
@@ -172,6 +176,8 @@ export default function CodexEntryDetails({ kind, entry, locationLabel = "", rel
   const gender = NPC_GENDER_OPTIONS.find((option) => option.id === entry.gender)?.label;
   const traits = list(entry.traits).filter(Boolean);
   const owner = { kind: kind === "npc" ? "npc" : "character", id: entry.id };
+  // Réglage du lancer de dés de la campagne de la fiche (lu une seule fois pour toutes les fiches affichées).
+  const setup = useRollSetup(kind === "npc" || kind === "character" ? entry.campaign_id || "" : "");
 
   return (
     <div className="stack-y-2 text-xs">
@@ -212,8 +218,8 @@ export default function CodexEntryDetails({ kind, entry, locationLabel = "", rel
               {entry.appearance}
             </p>
           )}
-          <Characteristics characteristics={entry.characteristics} owner={owner} />
-          <Skills skills={entry.skills} owner={owner} />
+          <Characteristics characteristics={entry.characteristics} owner={owner} sheet={entry} setup={setup} />
+          <Skills skills={entry.skills} owner={owner} sheet={entry} setup={setup} />
           <Equipment equipment={entry.equipment} owner={owner} />
           <Inventory inventory={entry.inventory} owner={owner} />
           {relations.length > 0 && (
@@ -236,8 +242,8 @@ export default function CodexEntryDetails({ kind, entry, locationLabel = "", rel
 
       {kind === "character" && (
         <>
-          <Characteristics characteristics={entry.characteristics} owner={owner} />
-          <Skills skills={entry.skills} owner={owner} />
+          <Characteristics characteristics={entry.characteristics} owner={owner} sheet={entry} setup={setup} />
+          <Skills skills={entry.skills} owner={owner} sheet={entry} setup={setup} />
           <Equipment equipment={entry.equipment} owner={owner} />
           <Inventory inventory={entry.inventory} owner={owner} />
           {entry.notes && <p className="whitespace-pre-wrap text-sm text-muted-foreground">{entry.notes}</p>}

@@ -476,7 +476,7 @@ export default function CodexEntryDialog({
               </p>
             </div>
 
-            <NpcSheetFields form={form} set={set} generator={generator} generation={generation} />
+            <NpcSheetFields form={form} set={set} generator={generator} generation={generation} campaignId={campaignId} />
           </>
         )}
 

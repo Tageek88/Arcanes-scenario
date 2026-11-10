@@ -13,6 +13,8 @@ import PcGeneratorPanel, { LockedHeading } from "@/components/game/PcGeneratorPa
 import { useNpcGenerator } from "@/hooks/useNpcGenerator";
 import { usePcFormGeneration } from "@/hooks/usePcFormGeneration";
 import { PC_LOCKABLE_FIELDS } from "@/lib/generators/pcGenerator";
+import DiceOverrideField, { SkillLinkSelect } from "@/components/game/DiceOverrideField";
+import { cleanDiceOverride } from "@/lib/meta/dice";
 
 const EMPTY = { name: "", notes: "", characteristics: {}, skills: [], equipment: [], inventory: [] };
 const normalize = (value) => String(value || "").trim().toLocaleLowerCase("fr");
@@ -81,6 +83,7 @@ export default function GameCharacterEditor({
     });
   }, [open, character, model, dismiss]);
 
+  const characteristicNames = (model?.characteristics || []).map((item) => item.name).filter(Boolean);
   const skillNames = useMemo(
     () => [...new Set(skillCatalog.map((item) => item.name).filter(Boolean))],
     [skillCatalog]
@@ -196,6 +199,8 @@ export default function GameCharacterEditor({
   const fillKnownSkill = async (index) => {
     const skill = form.skills[index];
     const known = findKnownSkill(skill?.name);
+    // Compétence déjà liée à une caractéristique dans le catalogue : le lien est repris tant que la fiche n'en a pas.
+    if (known?.characteristic && !skill.characteristic) setSkill(index, "characteristic", known.characteristic);
     if (known && String(skill.roll_modifier || "") === String(known.roll_modifier || "")) return;
     if (!known) return;
     const accepted = await confirm({
@@ -309,6 +314,7 @@ export default function GameCharacterEditor({
           })),
         })),
         inventory: cleanInventory(form.inventory),
+        dice_override: cleanDiceOverride(form.dice_override),
         generation_locks: Object.fromEntries(PC_LOCKABLE_FIELDS.filter((key) => generation.locks[key]).map((key) => [key, true])),
       });
       if (!saved) setSaveError("La fiche n’a pas été enregistrée.");
@@ -401,6 +407,12 @@ export default function GameCharacterEditor({
                         <Plus className="h-4 w-4" /> Champ facultatif
                       </Button>
                     </div>
+                    <DiceOverrideField
+                      characteristic={item.name}
+                      config={model.dice}
+                      override={form.dice_override}
+                      onChange={(next) => setForm((current) => ({ ...current, dice_override: next }))}
+                    />
                   </div>
                 );
               })}
@@ -446,6 +458,15 @@ export default function GameCharacterEditor({
                   <Trash2 className="h-4 w-4 text-muted-foreground" />
                 </Button>
               </div>
+
+              {model.dice?.enabled && characteristicNames.length > 0 && (
+                <SkillLinkSelect
+                  label={`Caractéristique liée à la compétence ${skill.name || index + 1}`}
+                  value={skill.characteristic}
+                  names={characteristicNames}
+                  onChange={(value) => setSkill(index, "characteristic", value)}
+                />
+              )}
 
               <div className="stack-y-2">
                 {(skill.fields || []).map((field, fieldIndex) => (
