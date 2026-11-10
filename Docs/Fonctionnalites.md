@@ -197,6 +197,21 @@ Le système de jeu permet de définir un modèle de fiche pour chaque campagne, 
 - Une fiche peut être modifiée, dupliquée, supprimée ou imprimée. La duplication conserve les valeurs saisies.
 - Une barre de recherche retrouve un personnage par son nom, ses notes, ses compétences ou son équipement.
 
+LANCER DE DÉS
+
+Chaque caractéristique et chaque compétence d'une fiche de personnage ou de PNJ peut avoir un bouton de lancer (icône de dés). Le MJ règle le système une seule fois, dans le modèle de fiche, et n'a plus à y toucher ensuite.
+
+- Réglage : section « Lancer de dés » du modèle de fiche (Système de jeu), avec un interrupteur. Tant que le lancer n'est pas réglé ou qu'il est désactivé, aucun bouton ni aucune option de dé n'apparaît ; désactiver garde toutes les valeurs saisies.
+- Dés : un seul dé pour tout le système, ou un dé par caractéristique, avec le nombre de dés et le nombre de faces. Des préréglages (d20, d100, 2d6, réserve de d6, 3d6) remplissent le réglage en un clic. Le mode se change plus tard sans perdre les valeurs.
+- Règle, choisie une fois pour le modèle : somme (dé + valeur de la caractéristique + bonus), réserve (la valeur donne le nombre de dés, chaque dé qui atteint la difficulté est une réussite) ou sous la valeur (le jet doit rester inférieur ou égal à la valeur).
+- Résultat : le total, la réussite ou l'échec, ou les deux, au choix du modèle. La difficulté par défaut est dans le modèle et se modifie dans la fenêtre de lancer. Les seuils de réussite et d'échec critiques sont définis une fois.
+- Compétences : chaque compétence est liée à une caractéristique, dans le catalogue et sur la fiche (celle de la fiche prime). Une compétence sans lien lance un dé par défaut (d20, valeur 0) avec un petit message d'avertissement. Le modificateur de lancer de la compétence, s'il est numérique (+2, -1), est repris comme bonus de départ ; celui de la fiche prime sur celui du catalogue.
+- Dé personnalisé : sur une fiche de personnage ou de PNJ, « Personnaliser » donne un dé propre à une caractéristique, « Revenir au dé du modèle » le retire. Une fiche sans dé personnalisé suit le modèle, même s'il change plus tard.
+- Fenêtre de lancer : bonus ou malus et difficulté du moment (rien n'est enregistré), dés obtenus, total et verdict. Seul le dernier résultat reste affiché.
+- Les boutons sont sur les cartes de personnage du Système de jeu et sur les fiches de PNJ et de personnages du Codex.
+- Renommer une caractéristique du modèle met à jour le réglage, les liens des compétences et les dés personnalisés des fiches.
+- Pas d'historique des lancers, et le lancer ne figure pas dans l'impression ni dans le PDF.
+
 CORBEILLE
 
 Ce que l'on supprime est gardé 30 jours dans Paramètres › Corbeille, puis disparaît.
