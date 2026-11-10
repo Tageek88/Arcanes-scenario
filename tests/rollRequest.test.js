@@ -126,6 +126,29 @@ describe("buildRollRequest", () => {
   });
 });
 
+describe("catalog modifier", () => {
+  const links = { escalade: "Force" };
+  const modifiers = { escalade: "+1", libre: "-2" };
+  const setup = { dice: perStat, links, modifiers };
+
+  it("applies the modifier of the catalog when the sheet has none", () => {
+    const request = buildRollRequest({ setup, sheet, skill: { name: "Escalade", roll_modifier: "" } });
+    expect(request.bonus).toBe(1);
+    expect(request.notes).toEqual(["Modificateur de la compétence : +1 (repris dans le bonus)."]);
+    expect(buildRollRequest({ setup, sheet, skill: { name: " ESCALADE " } }).bonus).toBe(1);
+  });
+  it("the modifier of the sheet wins, even 0", () => {
+    expect(buildRollRequest({ setup, sheet, skill: { name: "Escalade", roll_modifier: "3" } }).bonus).toBe(3);
+    expect(buildRollRequest({ setup, sheet, skill: { name: "Escalade", roll_modifier: "0" } }).bonus).toBe(0);
+  });
+  it("a non numeric catalog modifier warns, and a setup without modifiers still works", () => {
+    const odd = buildRollRequest({ setup: { dice: perStat, links, modifiers: { escalade: "d4" } }, sheet, skill: { name: "Escalade" } });
+    expect(odd.bonus).toBe(0);
+    expect(odd.warnings).toEqual(["Modificateur « d4 » non numérique : ignoré."]);
+    expect(buildRollRequest({ setup: { dice: perStat, links }, sheet, skill: { name: "Escalade" } }).bonus).toBe(0);
+  });
+});
+
 describe("formatRoll", () => {
   it("is null without result", () => {
     expect(formatRoll(null)).toBeNull();
