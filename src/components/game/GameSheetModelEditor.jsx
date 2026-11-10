@@ -552,7 +552,7 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
           </div>
         </details>
 
-        <details className="stack-y-3 rounded-lg border border-border p-3" open={diceOpen} onToggle={(event) => setDiceOpen(event.currentTarget.open)}>
+        <details data-tutorial="game-model-dice" className="stack-y-3 rounded-lg border border-border p-3" open={diceOpen} onToggle={(event) => setDiceOpen(event.currentTarget.open)}>
           <summary className="cursor-pointer font-display font-semibold">Lancer de dés</summary>
           <div className="mt-3 stack-y-3">
             <p className="text-xs text-muted-foreground">

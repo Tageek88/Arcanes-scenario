@@ -149,13 +149,25 @@ describe("visites guidées : cohérence des définitions", () => {
     for (const match of text.matchAll(/Séance \d/g)) expect(demo.GameSession.some((row) => row.title.includes(match[0]))).toBe(true);
   });
 
-  it("la phase 3 existe, utilise la campagne d'exemple et a ses 19 étapes", () => {
+  it("la phase 3 existe, utilise la campagne d'exemple et a ses 21 étapes", () => {
     const tour = getTour(THIRD_TOUR_ID);
     expect(tour.needsDemo).toBe(true);
-    expect(stepsFor(tour, false)).toHaveLength(19);
-    expect(stepsFor(tour, true)).toHaveLength(19);
+    expect(stepsFor(tour, false)).toHaveLength(21);
+    expect(stepsFor(tour, true)).toHaveLength(21);
     expect(tour.steps[0].id).toBe("intro");
     expect(tour.steps[tour.steps.length - 1].id).toBe("end");
+  });
+
+  it("la campagne d'exemple a un réglage de dés et chaque compétence du catalogue est liée à une caractéristique", () => {
+    const model = demo.GameSheetModel[0];
+    expect(model.dice.enabled).toBe(true);
+    const names = new Set(model.characteristics.map((item) => item.name));
+    expect(demo.SkillCatalog.length > 0).toBe(true);
+    for (const skill of demo.SkillCatalog) {
+      expect(names.has(skill.characteristic) ? skill.name : `compétence sans caractéristique valide : ${skill.name}`).toBe(skill.name);
+    }
+    const text = JSON.stringify(TOURS);
+    expect(text.includes('button[aria-label^=\\"Lancer \\"]')).toBe(true);
   });
 
   it("les repères data-tutorial cités dans les sélecteurs et les actions existent", () => {

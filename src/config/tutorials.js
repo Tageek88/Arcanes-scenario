@@ -393,6 +393,15 @@ const THIRD_TOUR = {
       undo: CLOSE_DIALOG,
     },
     {
+      id: "dice-model",
+      route: "/jeu",
+      target: "game-model-dice",
+      title: "Lancer de dés",
+      text: "Le lancer se règle une seule fois, dans le modèle de fiche : un dé pour tout le système ou un dé par caractéristique, la règle du lancer, les critiques et la difficulté. Les fiches suivent ce réglage.",
+      run: OPEN_MODEL,
+      undo: CLOSE_DIALOG,
+    },
+    {
       id: "pc-generator",
       route: "/jeu",
       target: "pc-generator",
@@ -400,6 +409,14 @@ const THIRD_TOUR = {
       text: "Le générateur de personnages joueurs tire des valeurs dans le barème, avec les mêmes verrous que pour les PNJ.",
       run: [{ demo: "dom.click", args: { selector: '[data-tutorial="game-new"]', blur: true } }],
       undo: CLOSE_DIALOG,
+    },
+    {
+      id: "dice-roll",
+      route: "/jeu",
+      selector: `${CHARACTER} button[aria-label^="Lancer "]`,
+      title: "Lancer un dé",
+      text: "Chaque caractéristique et chaque compétence d'un personnage a un bouton dé. Il ouvre une fenêtre où l'on peut ajouter un bonus ou fixer une difficulté pour ce lancer, puis lancer. Le type de dé et la règle se règlent une seule fois, dans le modèle de fiche.",
+      run: [openTab("Personnages"), { demo: "dom.click", args: { selector: CHARACTER, skipIf: '[aria-expanded="true"]' } }],
     },
     {
       id: "roll-to-inventory",
