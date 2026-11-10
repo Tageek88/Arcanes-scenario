@@ -1,7 +1,7 @@
 // Pure helpers of the roll dialog (no React, no Dexie): what a roll is made of, and how its result is shown.
 
-import { evaluateRoll, resolveRollSpec, statValue } from "@/lib/meta/dice.js";
-import { skillCharacteristic } from "@/lib/meta/diceLinks.js";
+import { resolveRollSpec, statValue } from "@/lib/meta/dice.js";
+import { linkedModifier, skillCharacteristic } from "@/lib/meta/diceLinks.js";
 
 const NUMBER = /^[+-]?\d+(\.\d+)?$/;
 
@@ -44,7 +44,8 @@ export function buildRollRequest({ setup, sheet, characteristic = "", skill = nu
 
   let bonus = 0;
   if (skill) {
-    const text = String(skill.roll_modifier ?? "").trim();
+    // The modifier of the sheet wins; when it is empty, the one of the catalog applies.
+    const text = String(skill.roll_modifier ?? "").trim() || linkedModifier(skill.name, setup?.modifiers);
     const parsed = readNumber(text);
     if (parsed !== null) {
       bonus = parsed;

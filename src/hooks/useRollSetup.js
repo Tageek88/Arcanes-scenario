@@ -3,9 +3,9 @@ import { api } from "@/api/localClient";
 import { useDataRefresh } from "@/lib/context/RefreshContext";
 import { useToast } from "@/components/ui/use-toast";
 import { cleanDiceConfig } from "@/lib/meta/dice";
-import { skillLinkMap } from "@/lib/meta/diceLinks";
+import { skillLinkMap, skillModifierMap } from "@/lib/meta/diceLinks";
 
-const EMPTY = { dice: null, links: {} };
+const EMPTY = { dice: null, links: {}, modifiers: {} };
 
 // Une liste du Codex affiche beaucoup de fiches d'un coup : elles partagent la même lecture de la campagne.
 // Une lecture n'est partagée que quelques secondes, pour qu'un réglage modifié ailleurs soit relu à la visite suivante.
@@ -20,7 +20,7 @@ function loadSetup(campaignId, refreshKey) {
   const promise = Promise.all([
     api.entities.GameSheetModel.filter({ campaign_id: campaignId }, { limit: 1 }),
     api.entities.SkillCatalog.filter({ campaign_id: campaignId }, { limit: 1000 }),
-  ]).then(([models, skills]) => ({ dice: cleanDiceConfig(models.items[0]?.dice), links: skillLinkMap(skills.items) }));
+  ]).then(([models, skills]) => ({ dice: cleanDiceConfig(models.items[0]?.dice), links: skillLinkMap(skills.items), modifiers: skillModifierMap(skills.items) }));
   shared.set(key, { at: Date.now(), promise });
   // Une lecture en échec n'est jamais réutilisée.
   promise.catch(() => {

@@ -15,6 +15,23 @@ export function skillLinkMap(items) {
   return links;
 }
 
+/** { normalized skill name: roll modifier text } for the catalog entries that have a modifier. */
+export function skillModifierMap(items) {
+  const modifiers = Object.create(null);
+  for (const item of Array.isArray(items) ? items : []) {
+    const text = String(item?.roll_modifier ?? "").trim();
+    const key = normalize(item?.name);
+    if (key && text) modifiers[key] = text;
+  }
+  return modifiers;
+}
+
+/** Roll modifier of a skill name in the catalog, or "". */
+export function linkedModifier(name, modifiers) {
+  const key = normalize(name);
+  return key && modifiers && Object.hasOwn(modifiers, key) ? modifiers[key] : "";
+}
+
 /** Characteristic linked to a skill name in the catalog, or "". */
 export function linkedCharacteristic(name, links) {
   const key = normalize(name);

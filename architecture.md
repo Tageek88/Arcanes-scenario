@@ -30,7 +30,7 @@ flowchart LR
     F_HOME["home : SceneBoard, ActColumn,<br/>SceneEditor, MobileSceneList,<br/>CampaignDialog, QuestBar"]
     F_CAL["calendar : MonthGrid, SessionDialog,<br/>UpcomingSessions, SessionPollDialog<br/>poll/ : PollForm, PollCard,<br/>PollResultsTable, PollServiceUrlField,<br/>PollRemovalDialog"]
     F_CODEX["codex : CodexCard, CodexEntryDetails,<br/>CodexEntryDialog, LocationTree,<br/>CodexSidebar, EncounterDialog, NpcRelations,<br/>NpcSheetFields, NpcGeneratorPanel,<br/>AttachmentsField"]
-    F_GAME["game : GameSheetModelEditor,<br/>GameCharacterEditor, GameCatalogPanel,<br/>InventoryPanel, GiveItemDialog,<br/>PcGeneratorPanel<br/>print : PrintSheet"]
+    F_GAME["game : GameSheetModelEditor,<br/>GameCharacterEditor, GameCatalogPanel,<br/>InventoryPanel, GiveItemDialog,<br/>PcGeneratorPanel,<br/>RollButton, RollDialog,<br/>DiceOverrideField<br/>print : PrintSheet"]
     F_NOTES["notes : NoteCard, NoteEditor"]
     F_TABLES["tables : TableCard, TableEditor,<br/>DiceRoller<br/>home/GeneratorTablesDialog"]
     F_SET["BackupPanel, AutosavePanel,<br/>Tutorial/TutorialCenter"]
@@ -43,7 +43,7 @@ flowchart LR
     H_HOME["useCampaignContent<br/>useCampaignActions"]
     H_CAL["useScenes, useGameSessions,<br/>useSessionPolls,<br/>useSessionPollManager"]
     H_CODEX["useCodex, useCodexList,<br/>useCodexEntryData,<br/>useNpcRelations, useNpcGenerator,<br/>useNpcFormGeneration, useEncounters"]
-    H_GAME["useGameSheet, useGameCatalog,<br/>useInventory, usePcFormGeneration"]
+    H_GAME["useGameSheet, useGameCatalog,<br/>useInventory, usePcFormGeneration,<br/>useRollSetup"]
     H_NOTES["useNotes"]
     H_TABLES["useTables"]
     H_UI["useConfirm, usePendingOpenTick<br/>(sans données)"]
@@ -51,7 +51,7 @@ flowchart LR
 
   subgraph LIB["lib/"]
     direction TB
-    META["meta/<br/>codex, inventory, encounter, sceneMeta,<br/>sessionMeta, sessionCampaign, tableMeta,<br/>relationMeta, universeMeta"]
+    META["meta/<br/>codex, inventory, encounter, dice, diceDraft,<br/>diceLinks, rollRequest, sceneMeta,<br/>sessionMeta, sessionCampaign, tableMeta,<br/>relationMeta, universeMeta"]
     CTX["context/<br/>campaignStore, questStore, RefreshContext,<br/>PageFilterContext, ExpandedCardContext,<br/>CodexLinksContext, TabStackContext, dataEvents, AuthContext"]
     SERV["services/<br/>campaignDelete, quests, inventory, encounters,<br/>locationTree, npcRelations, attachments,<br/>codexEntries, codexSearch,<br/>npcGeneration, openAttachment,<br/>appSettings, themeFile"]
     POLLS["services/polls<br/>config, client (fetch), remote,<br/>votes, sync, pollDates, pollForm,<br/>store (façade : sessionPolls.js)"]
@@ -262,6 +262,16 @@ flowchart LR
 - Table `Encounter` (`db.version(9)`) : une ligne par rencontre d'une campagne (`title`, `round`, `active_id`, `combatants` : `{ id, name, initiative, hp, hp_max }`). Elle est dans `LINKED_ENTITIES` (suppression de la campagne) et dans la corbeille. La version 8 de `dbConfig.js` garde ses tables d'origine (`VERSION_8_TABLES`) : sans cela, Dexie ne créerait pas la nouvelle table chez quelqu'un qui a déjà des données.
 - Règles pures : `lib/meta/encounter.js` (ordre d'initiative, PV bornés, tour suivant, retrait du combattant qui joue). Enregistrement : `lib/services/encounters.js` (une transaction qui relit la ligne ; écritures silencieuses pour ne pas recharger tous les écrans à chaque point de vie). Hook : `hooks/useEncounters.js` (mise à jour de l'écran d'abord, puis écriture, relecture en cas d'échec).
 - Interface : bouton aux deux épées à côté de « Codex du MJ » dans `CodexSidebar`, qui ouvre `EncounterDialog`. Un combattant à 0 PV est grisé mais garde son tour. Initiative saisie à la main (tirage de dés prévu plus tard). Pas d'impression ni de recherche globale pour l'instant.
+
+## Lancer de dés par compétence
+
+- **Données.** Réglage dans `GameSheetModel.dice` (mode, règle, dés, critiques, affichage, difficulté, `enabled`), lien compétence → caractéristique dans `SkillCatalog.characteristic` et `skills[].characteristic` des fiches, dé personnalisé `dice_override` sur `GameCharacter` et `NPC` (seules les surcharges sont enregistrées : une fiche hérite du modèle). Pas de nouvelle table ni de nouvelle `db.version` ; sauvegarde, sauvegarde automatique et suppression de campagne le couvrent déjà.
+- **Règles pures** (sans React ni Dexie) dans `lib/meta/` : `dice.js` (nettoyage, `resolveRollSpec`, `evaluateRoll` avec un générateur injectable), `diceDraft.js` (brouillon de l'éditeur), `diceLinks.js` (liens et modificateur du catalogue), `rollRequest.js` (ce que lance un bouton, ce que la fenêtre affiche).
+- **Écrans.** Section « Lancer de dés » de `GameSheetModelEditor`, lien et dé personnalisé dans `GameCharacterEditor` et `NpcSheetFields` (`DiceOverrideField`, `SkillLinkSelect`), boutons `RollButton` et fenêtre `RollDialog` dans `Jeu.jsx` et `CodexEntryDetails.jsx`. Sans réglage, ou lancer désactivé, aucun bouton ni option n'apparaît.
+- **Chargement.** Jeu construit le réglage avec ce que `useGameSheet` a déjà chargé ; le Codex et les formulaires utilisent `hooks/useRollSetup.js` (lecture partagée quelques secondes entre les fiches d'une liste). Le renommage d'une caractéristique suit partout (réglage, catalogue, fiches) dans `useGameSheet`.
+- **Limites.** Pas d'historique (seul le dernier résultat reste dans la fenêtre), pas de lancer dans l'impression ni le PDF, les générateurs ne tirent pas de caractéristique liée.
+- Tests : `tests/dice.test.js`, `diceDraft.test.js`, `diceLinks.test.js`, `diceSheet.test.js`, `rollRequest.test.js`.
+
 
 ## Plateformes
 

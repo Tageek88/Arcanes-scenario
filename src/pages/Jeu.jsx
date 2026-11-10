@@ -19,7 +19,7 @@ import GameCharacterEditor from "@/components/game/GameCharacterEditor";
 import GameCatalogPanel, { GameTabBar } from "@/components/game/GameCatalogPanel";
 import InventoryPanel from "@/components/game/InventoryPanel";
 import RollButton from "@/components/game/RollButton";
-import { skillLinkMap } from "@/lib/meta/diceLinks";
+import { skillLinkMap, skillModifierMap } from "@/lib/meta/diceLinks";
 import CampaignSelect from "@/components/common/CampaignSelect";
 import PrintButton from "@/components/print/PrintButton";
 import PostItButton, { PartPostItButton } from "@/components/common/PostItButton";
@@ -56,7 +56,10 @@ export default function Jeu() {
     deleteCharacter: removeCharacter,
   } = useGameSheet(campaignId);
   // Réglage du lancer de dés : déjà chargé avec le modèle, donc toujours à jour après une modification.
-  const rollSetup = useMemo(() => ({ dice: model.dice, links: skillLinkMap(skillCatalog) }), [model.dice, skillCatalog]);
+  const rollSetup = useMemo(
+    () => ({ dice: model.dice, links: skillLinkMap(skillCatalog), modifiers: skillModifierMap(skillCatalog) }),
+    [model.dice, skillCatalog]
+  );
 
   const [modelOpen, setModelOpen] = useState(false);
   const [characterOpen, setCharacterOpen] = useState(false);
