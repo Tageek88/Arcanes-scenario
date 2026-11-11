@@ -286,6 +286,15 @@ export default function Calendrier() {
 
             <SessionJournalList entries={journals.entries} loading={journals.loading} onOpen={openJournal} />
 
+            <PrintButton
+              campaignId={campaignId}
+              preset="journal"
+              label="Imprimer le journal"
+              size="sm"
+              className="w-full"
+              allowPdfExport
+            />
+
             {sessions.length > 0 && (
               <div className="rounded-xl border border-border bg-card/50 p-4">
                 <h2 className="font-display text-sm font-semibold text-foreground">

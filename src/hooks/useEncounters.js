@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { useDataRefresh } from "@/lib/context/RefreshContext";
-import { addCombatant, cleanEncounter, sortCombatants } from "@/lib/meta/encounter";
+import { addCombatant, addFromSources, cleanEncounter, sortCombatants } from "@/lib/meta/encounter";
 import { createEncounter, deleteEncounter, listEncounters, updateEncounter } from "@/lib/services/encounters";
 
 const uid = () =>
@@ -125,5 +125,17 @@ export function useEncounters(campaignId, { enabled = true } = {}) {
     [apply]
   );
 
-  return { encounters, encounter, order, loading, select: setSelectedId, create, remove, apply, addFighter };
+  /** Ajoute des combattants venus de fiches ([{ kind, id, name, hpMax, count }]) ; les identifiants sont créés ici, une seule fois. */
+  const addFromSheets = useCallback(
+    (entries) => {
+      const withIds = entries.map((entry) => ({
+        ...entry,
+        ids: Array.from({ length: Math.min(20, Math.max(1, Math.trunc(Number(entry.count)) || 1)) }, uid),
+      }));
+      return apply((current) => addFromSources(current, withIds));
+    },
+    [apply]
+  );
+
+  return { encounters, encounter, order, loading, select: setSelectedId, create, remove, apply, addFighter, addFromSheets };
 }

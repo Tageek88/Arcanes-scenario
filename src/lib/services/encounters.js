@@ -49,3 +49,25 @@ export function updateEncounter(id, change) {
 export async function deleteEncounter(id) {
   await api.entities[ENTITY].delete(id, { silent: true });
 }
+
+/**
+ * PNJ et personnages d'une campagne (allégés : identifiant, nom, caractéristiques) et noms des caractéristiques du modèle
+ * de fiche, pour ajouter des combattants depuis les fiches.
+ */
+export async function loadEncounterSources(campaignId) {
+  if (!campaignId) return { npcs: [], characters: [], characteristics: [] };
+  const [npcs, characters, models] = await Promise.all([
+    api.entities.NPC.filter({ campaign_id: campaignId }, { sort: "name", limit: LIMIT }),
+    api.entities.GameCharacter.filter({ campaign_id: campaignId }, { sort: "name", limit: LIMIT }),
+    api.entities.GameSheetModel.filter({ campaign_id: campaignId }, { limit: 1 }),
+  ]);
+  const light = (row) => ({
+    id: row.id,
+    name: row.name || "",
+    characteristics: row.characteristics && typeof row.characteristics === "object" ? row.characteristics : {},
+  });
+  const names = (models.items[0]?.characteristics || [])
+    .map((definition) => definition?.name)
+    .filter((name) => typeof name === "string" && name);
+  return { npcs: npcs.items.map(light), characters: characters.items.map(light), characteristics: [...new Set(names)] };
+}

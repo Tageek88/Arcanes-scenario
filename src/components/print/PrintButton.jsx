@@ -25,6 +25,7 @@ const PRESETS = {
     notes: "notes",
     tables: "tables",
     sessions: "sessions",
+    journal: "journals",
     characters: "characters",
     inventory: "inventories",
 };

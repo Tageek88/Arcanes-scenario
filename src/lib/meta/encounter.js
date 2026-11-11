@@ -31,6 +31,15 @@ const toInt = (value, min, max) => {
 
 const text = (value, max) => (typeof value === "string" ? value.trim().slice(0, max) : "");
 
+const SOURCE_KINDS = ["npc", "character"];
+
+/** Lien d'un combattant avec la fiche dont il vient ({ kind: "npc" | "character", id }), ou null. */
+export function cleanSource(raw) {
+  const source = raw && typeof raw === "object" ? raw : {};
+  if (!SOURCE_KINDS.includes(source.kind) || typeof source.id !== "string" || !source.id) return null;
+  return { kind: source.kind, id: source.id.slice(0, 100) };
+}
+
 /** Titre propre : borné, « Rencontre » s'il est vide. */
 export const cleanTitle = (value) => text(value, ENCOUNTER_LIMITS.title) || DEFAULT_ENCOUNTER_TITLE;
 
@@ -44,12 +53,14 @@ export function cleanCombatant(raw) {
   let hpMax = toInt(source.hp_max, 0, ENCOUNTER_LIMITS.hp);
   if (hpMax === 0) hpMax = null;
   const hp = hpMax === null ? null : (toInt(source.hp, 0, hpMax) ?? hpMax);
+  const link = cleanSource(source.source);
   return {
     id: source.id,
     name: text(source.name, ENCOUNTER_LIMITS.name) || DEFAULT_COMBATANT_NAME,
     initiative: toInt(source.initiative, MIN_INITIATIVE, ENCOUNTER_LIMITS.initiative),
     hp,
     hp_max: hpMax,
+    ...(link ? { source: link } : {}),
   };
 }
 
@@ -168,3 +179,64 @@ export function nextTurn(encounter) {
 export const resetEncounter = (encounter) => ({ ...encounter, round: 1, active_id: null });
 
 export const renameEncounter = (encounter, title) => ({ ...encounter, title: cleanTitle(title) });
+
+// --- Combattants venus des fiches (PNJ et personnages) ---
+
+/**
+ * Valeur d'une caractéristique d'une fiche (premier nombre du texte, par exemple « 15 » ou « 15/20 »), ou null.
+ * Sert de PV max à un combattant ; 0, vide ou texte sans nombre = PV non suivis.
+ */
+export function hpFromCharacteristic(sheet, name) {
+  if (!name) return null;
+  const characteristics = sheet && typeof sheet === "object" ? sheet.characteristics : null;
+  if (!characteristics || typeof characteristics !== "object") return null;
+  const match = /-?\d+/.exec(String(characteristics[name]?.value ?? ""));
+  if (!match) return null;
+  const value = toInt(match[0], 0, ENCOUNTER_LIMITS.hp);
+  return value && value > 0 ? value : null;
+}
+
+/**
+ * Noms à donner à `count` combattants qui portent le même nom de base. Un seul et aucun autre du même nom : le nom tel quel ;
+ * sinon ils sont numérotés à la suite de ceux déjà présents (« Garde 1 », « Garde 2 »…). Un « Garde » seul compte pour le numéro 1.
+ */
+export function numberedNames(encounter, baseName, count) {
+  const base = text(baseName, ENCOUNTER_LIMITS.name) || DEFAULT_COMBATANT_NAME;
+  const taken = [];
+  for (const combatant of encounter.combatants) {
+    const name = combatant.name;
+    if (name === base) taken.push(1);
+    else if (name.startsWith(base + " ") && /^\d+$/.test(name.slice(base.length + 1))) taken.push(Number(name.slice(base.length + 1)));
+  }
+  const total = Math.max(1, Math.trunc(Number(count)) || 1);
+  if (taken.length === 0 && total === 1) return [base];
+  const start = taken.length === 0 ? 1 : Math.max(...taken) + 1;
+  return Array.from({ length: total }, (_, index) => {
+    const suffix = " " + (start + index);
+    return base.slice(0, ENCOUNTER_LIMITS.name - suffix.length).trimEnd() + suffix;
+  });
+}
+
+/**
+ * Ajoute des combattants venus de fiches. `entries` : [{ kind, id, name, hpMax, ids }] ; `ids` donne un identifiant par
+ * exemplaire (créés par l'appelant, une seule fois : la fonction doit rester pure). Initiative à saisir ensuite ;
+ * la limite de 60 combattants est respectée.
+ */
+export function addFromSources(encounter, entries) {
+  let current = encounter;
+  for (const entry of Array.isArray(entries) ? entries : []) {
+    const ids = Array.isArray(entry?.ids) ? entry.ids : [];
+    if (ids.length === 0) continue;
+    const names = numberedNames(current, entry.name, ids.length);
+    ids.forEach((id, index) => {
+      current = addCombatant(current, {
+        id,
+        name: names[index],
+        initiative: null,
+        hp_max: entry.hpMax ?? null,
+        source: { kind: entry.kind, id: entry.id },
+      });
+    });
+  }
+  return current;
+}

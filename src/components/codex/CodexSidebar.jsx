@@ -16,6 +16,7 @@ import { buildLocationIndex, buildSearchEntry, filterToken, matchesSearch, parse
 import { CodexLinksContext } from "@/lib/context/CodexLinksContext";
 import CodexEntryDetails, { FilterChip } from "@/components/codex/CodexEntryDetails";
 import EncounterDialog from "@/components/codex/EncounterDialog";
+import PostItButton from "@/components/common/PostItButton";
 
 const NO_IDS = [];
 
@@ -39,8 +40,10 @@ export default function CodexSidebar({
 
   const kind = CODEX_TABS.find((t) => t.key === tab) || CODEX_TABS[0];
   const linkedIds = activeScene ? activeScene[kind.linkKey] || [] : [];
+  // Les personnages ne se filtrent pas par scène : le filtre cacherait les fiches des joueurs.
+  const linkedFilterOn = linkedOnly && tab !== "character";
   // La liste est chargée sans recherche : le filtrage se fait ici, sur toute la fiche (voir lib/services/codexSearch.js).
-  const { items: allItems, setItems, loading } = useCodexList(campaignId, kind.entity, { term: "", linkedOnly, linkedIds, refreshKey, limit: 1000 });
+  const { items: allItems, setItems, loading } = useCodexList(campaignId, kind.entity, { term: "", linkedOnly: linkedFilterOn, linkedIds, refreshKey, limit: 1000 });
   const { items: locationItems } = useCodexList(campaignId, "Location", { term: "", linkedOnly: false, linkedIds: NO_IDS, refreshKey, limit: 1000 });
   // Tous les PNJ de la campagne (même hors recherche ou hors scène) : les relations en citent d'autres que ceux affichés.
   const { items: npcDirectory } = useCodexList(campaignId, "NPC", { term: "", linkedOnly: false, linkedIds: NO_IDS, refreshKey, limit: 1000 });
@@ -192,7 +195,7 @@ export default function CodexSidebar({
           )}
         </div>
 
-        {(activeScene || linkedOnly) && (
+        {tab !== "character" && (activeScene || linkedOnly) && (
           <button
             type="button"
             data-tutorial="codex-linked-filter"
@@ -225,7 +228,7 @@ export default function CodexSidebar({
             <p className="p-4 text-center text-sm text-muted-foreground">
               {tokens.length > 0
                 ? "Aucun élément ne correspond à la recherche."
-                : linkedOnly ? "Aucun élément lié à cette scène." : "Aucun élément pour l'instant."}
+                : linkedFilterOn ? "Aucun élément lié à cette scène." : "Aucun élément pour l'instant."}
             </p>
           )}
           {items.map((item) => {
@@ -268,6 +271,7 @@ export default function CodexSidebar({
                       {tab === "character" && "Personnage"}
                     </div>
                   </button>
+                  <PostItButton variant="icon" target={{ kind: tab, id: item.id }} label={item.name || "cette fiche"} />
                 </div>
 
                 {expandedId === item.id && (
@@ -363,7 +367,7 @@ export default function CodexSidebar({
       </ScrollArea>
       {attachmentViewer.viewer}
       <div onClick={stopBubbling} onPointerDown={stopBubbling} onMouseDown={stopBubbling} onKeyDown={stopBubbling}>
-        <EncounterDialog open={encounterOpen} onOpenChange={setEncounterOpen} campaignId={campaignId} />
+        <EncounterDialog open={encounterOpen} onOpenChange={setEncounterOpen} campaignId={campaignId} sceneNpcIds={activeScene?.npc_ids || NO_IDS} />
       </div>
     </aside>
     </CodexLinksContext.Provider>

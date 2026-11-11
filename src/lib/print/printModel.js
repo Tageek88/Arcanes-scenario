@@ -5,6 +5,7 @@ import { sessionStatusMeta } from "@/lib/meta/sessionMeta";
 import { NPC_GENDER_OPTIONS } from "@/lib/meta/codex";
 import { describeTarget } from "@/lib/meta/postit";
 import { cleanInventory, inventoryOwners, inventoryPrintLine } from "@/lib/meta/inventory";
+import { cleanJournal, journalEntries } from "@/lib/meta/sessionJournal";
 
 export const SECTIONS = [
     { key: "scenes", title: "Scènes et actes", hint: "Chaque scène est imprimée avec ses indices liés." },
@@ -14,6 +15,7 @@ export const SECTIONS = [
     { key: "notes", title: "Notes du MJ", hint: "Épinglées en premier." },
     { key: "tables", title: "Tables aléatoires", hint: "Entrées et poids de tirage." },
     { key: "sessions", title: "Sessions", hint: "Dates, heures, lieux et notes." },
+    { key: "journals", title: "Journal de séance", hint: "Comptes rendus des séances jouées ou commencées, de la plus récente à la plus ancienne." },
     { key: "characters", title: "Fiches de personnages", hint: "Caractéristiques, compétences, équipements, inventaire et notes." },
     { key: "inventories", title: "Inventaires", hint: "Objets sans propriétaire, des personnages et des PNJ." },
 ];
@@ -94,6 +96,7 @@ export function scopeToQuests(data, questIds) {
         acts: slices.flatMap((slice) => slice.acts),
         scenes: slices.flatMap((slice) => slice.scenes),
         slices,
+        allScenes: data.allScenes || data.scenes,
         showQuests: all.length > 1,
     };
 }
@@ -172,6 +175,9 @@ export function buildTrees({ campaign, acts, scenes, slices, npcs, locations, cl
         sessions: [...sessions]
             .sort((a, b) => txt(a.date).localeCompare(txt(b.date)) || txt(a.time).localeCompare(txt(b.time)))
             .map((session) => leaf(session.id, session.title || "Session", `${session.date || ""} ${session.time || ""}`.trim())),
+        journals: journalEntries(sessions).map((session) =>
+            leaf(session.id, session.title || "Session", [session.date, session.time].filter(Boolean).join(" "))
+        ),
         characters: [...characters].sort(byName).map((character) =>
             leaf(character.id, character.name || "Personnage")
         ),
@@ -393,6 +399,28 @@ export function buildPrintModel(data, sel, opts) {
             notes: session.notes || "",
         }));
     if (sessionItems.length) blocks.push({ kind: "sessions", sessions: sessionItems });
+
+    // 7 bis. Journal de séance. Les scènes sont cherchées dans toutes les quêtes : un compte rendu peut citer une scène d'une autre quête.
+    const journalIds = sel.journals || new Set();
+    const journalSceneById = new Map((data.allScenes || scenes).map((s) => [s.id, s]));
+    const journalItems = journalEntries(sessions)
+        .filter((session) => journalIds.has(session.id))
+        .map((session) => {
+            const journal = cleanJournal(session.journal);
+            return {
+                id: session.id,
+                title: session.title || "Session",
+                date: session.date || "",
+                time: session.time || "",
+                status: sessionStatusMeta(session.status).label,
+                summary: journal.summary,
+                scenes: journal.scene_ids.map((id) => journalSceneById.get(id)).filter(Boolean).map((s) => s.title || "Sans titre"),
+                npcs: journal.npc_ids.map((id) => npcById.get(id)).filter(Boolean).map((p) => p.name || "PNJ"),
+                clues: journal.clue_ids.map((id) => clueById.get(id)).filter(Boolean).map((c) => c.name || (c.clue_type === "info" ? "Info" : "Indice")),
+                next: journal.next,
+            };
+        });
+    if (journalItems.length) blocks.push({ kind: "journals", journals: journalItems });
 
     // 8. Fiches de personnages
     const characterIds = sel.characters || new Set();

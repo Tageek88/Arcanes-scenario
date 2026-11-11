@@ -247,7 +247,7 @@ flowchart LR
 ## Version 1.11.0 : journal de séance
 
 - Champ `journal` de `GameSession` (`{ summary, scene_ids, npc_ids, clue_ids, next }`), sans nouvelle table ni `db.version`. Règles pures : `lib/meta/sessionJournal.js` ; enregistrement : `lib/services/sessionJournal.js` (n'écrit que `journal`) ; chargement : `hooks/useSessionJournals.js`.
-- Interface : `SessionJournalDialog` et `SessionJournalList` (page Calendrier), bouton dans `SessionDialog`. Les séances sont aussi un groupe de la recherche globale.
+- Interface : `SessionJournalDialog` et `SessionJournalList` (page Calendrier), bouton dans `SessionDialog`. Les séances sont aussi un groupe de la recherche globale. Impression et PDF : section « Journal de séance » de `printModel` (bloc `journals`, scènes retrouvées dans toutes les quêtes grâce à `allScenes`), `PrintSheet` et `editablePdf` ; préréglage `journal` de `PrintButton` et bouton « Imprimer le journal » du Calendrier ; tests : `tests/journalPrint.test.js`.
 
 ## Version 1.12.0 : tutoriel interactif
 

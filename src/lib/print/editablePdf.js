@@ -391,6 +391,21 @@ export async function createEditablePdf(model) {
                     if (session.notes) drawField("Notes", session.notes, { multiline: true, height: 72 });
                 }
                 break;
+            case "journals":
+                drawHeading("Journal de séance");
+                for (const entry of block.journals) {
+                    drawHeading(entry.title, 3);
+                    drawText([entry.date, entry.time, entry.status].filter(Boolean).join(" · "), { size: 8, color: MUTED_COLOR });
+                    if (entry.summary) drawText(entry.summary);
+                    if (entry.scenes.length) drawText("Scènes jouées : " + entry.scenes.join(", "));
+                    if (entry.npcs.length) drawText("PNJ : " + entry.npcs.join(", "));
+                    if (entry.clues.length) drawText("Indices et infos : " + entry.clues.join(", "));
+                    if (entry.next) {
+                        drawText("À retenir pour la suite :", { font: bold });
+                        drawText(entry.next);
+                    }
+                }
+                break;
             case "inventories":
                 drawHeading("Inventaires");
                 for (const owner of block.owners) {

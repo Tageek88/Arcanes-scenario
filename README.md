@@ -2,7 +2,7 @@
 
 **Un atelier de préparation pour maîtres du jeu : organisez votre scénario en actes et scènes, et gardez PNJ, lieux, indices, tables aléatoires, notes et sessions sous la main, avec vos campagnes conservées hors ligne sur votre ordinateur.**
 
-![Version](https://img.shields.io/badge/version-1.14.1-d4a63c)
+![Version](https://img.shields.io/badge/version-1.14.3-d4a63c)
 ![Node](https://img.shields.io/badge/node-%3E%3D20.19-339933?logo=node.js&logoColor=white)
 ![React](https://img.shields.io/badge/React-18-61dafb?logo=react&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-8-646cff?logo=vite&logoColor=white)
@@ -39,7 +39,7 @@ Retrouvez le descriptif complet de l'application, onglet par onglet, dans le fic
 - **Cartes et visuels** : images et PDF joints aux lieux, PNJ, indices et informations.
 - **Tables aléatoires** : rencontres, noms, événements, objets, rumeurs, avec tirage pondéré.
 - **Calendrier** : planification des sessions liées à une scène et sondages de disponibilités partagés par lien.
-- **Cartes, campagnes et impression** : développez les cartes de contenu au clic, choisissez la campagne depuis chaque onglet et imprimez le contenu associé, y compris les tables, sessions et fiches de personnages.
+- **Cartes, campagnes et impression** : développez les cartes de contenu au clic, choisissez la campagne depuis chaque onglet et imprimez le contenu associé, y compris les tables, sessions, journal de séance et fiches de personnages.
 - **Notes du MJ** : bloc-notes avec épinglage.
 - **Mises à jour** (Windows) : Paramètres › À propos › « Vérifier les mises à jour », avec confirmation avant le téléchargement depuis GitHub.
 - **Sauvegarde** : export et import JSON depuis les Paramètres (sur Android, l'export passe par la feuille de partage ; sans sauvegarde automatique, l'import commence par exporter vos données actuelles).

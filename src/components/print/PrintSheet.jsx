@@ -209,6 +209,28 @@ function Block({ block }) {
                     ))}
                 </section>
             );
+        case "journals":
+            return (
+                <section className="prt-section">
+                    <h2>Journal de séance</h2>
+                    {block.journals.map((entry) => (
+                        <article key={entry.id} className="prt-item">
+                            <div className="prt-title">{entry.title}</div>
+                            <div className="prt-meta">{[entry.date, entry.time, entry.status].filter(Boolean).join(" · ")}</div>
+                            {entry.summary && <p className="prt-text">{entry.summary}</p>}
+                            <Lines label="Scènes jouées" items={entry.scenes} />
+                            <Lines label="PNJ" items={entry.npcs} />
+                            <Lines label="Indices et infos" items={entry.clues} />
+                            {entry.next && (
+                                <>
+                                    <div className="prt-label">À retenir pour la suite</div>
+                                    <p className="prt-text">{entry.next}</p>
+                                </>
+                            )}
+                        </article>
+                    ))}
+                </section>
+            );
         default:
             return null;
     }

@@ -68,6 +68,14 @@ CALENDRIER
 
 Le calendrier sert à organiser les sessions de jeu et à les relier, lorsque c'est utile, à une scène de la campagne. Il permet de retrouver les rendez-vous et les informations associées aux séances. L'interrupteur « Toutes les campagnes » affiche dans un même calendrier les sessions de toutes les campagnes, avec le nom de la campagne sur chacune ; chaque session reste rattachée à sa campagne. À la création d'une session, on choisit sa campagne, ou « Nouvelle campagne… » avec un nom pour créer une campagne vierge en même temps.
 
+JOURNAL DE SÉANCE
+
+Chaque séance peut avoir un compte rendu, pour garder une trace de ce qui s'est passé et préparer la suite. Le bouton « Journal de séance » de la fenêtre d'une session l'ouvre (pour une session de la campagne sélectionnée).
+
+- Le compte rendu contient un résumé, les scènes jouées, les PNJ rencontrés, les indices en jeu et un texte « à retenir pour la suite ». À l'enregistrement, l'application propose de passer en « Joué » les scènes cochées qui sont encore en brouillon ; refuser n'empêche pas d'enregistrer le journal.
+- La carte « Journal de la campagne » du Calendrier liste les séances jouées ou déjà commencées, la plus récente d'abord, avec un extrait du résumé. Les séances sont aussi retrouvées par la recherche globale.
+- Impression : le bouton « Imprimer le journal », sous cette carte, ouvre la fenêtre d'impression sur la section « Journal de séance » (on y coche les séances voulues). Le document reprend, pour chaque séance, la date, le résumé, les scènes jouées, les PNJ, les indices et la suite. Les scènes d'une autre quête sont nommées normalement ; un élément supprimé depuis n'est pas repris. Le même contenu figure dans l'export PDF, sous forme de texte qui se répartit sur plusieurs pages.
+
 TABLES ALÉATOIRES
 
 Les tables permettent de préparer des listes de résultats pour improviser pendant la partie : rencontres, noms, événements, objets ou autres idées. Les entrées peuvent être pondérées afin que certains résultats apparaissent plus souvent lors d'un tirage. Le bouton « Tables du générateur » ouvre les listes qui alimentent la génération des noms et des PNJ.
@@ -120,7 +128,7 @@ NOTES DE MJ EN POST-IT
 
 Une note peut être collée comme un post-it sur un élément : une scène, une fiche du Codex (PNJ, lieu, indice), un personnage, et, dans une fiche de PNJ ou de personnage, une caractéristique, une compétence, un équipement ou un objet d'inventaire. Une note sans élément reste une note libre.
 
-- Un bouton « Post-it » sur chaque élément ouvre la liste de ses post-it : lire, ajouter, modifier, supprimer. Une pastille indique le nombre de post-it de l'élément.
+- Un bouton « Post-it » sur chaque élément ouvre la liste de ses post-it : lire, ajouter, modifier, supprimer. Une pastille indique le nombre de post-it de l'élément ; elle figure aussi sur chaque ligne du panneau Codex de l'arborescence.
 - La page « Notes de MJ » affiche toutes les notes et tous les post-it, avec l'élément sur lequel chacun est collé. Un filtre sépare les notes libres, les post-it collés et les post-it orphelins, et permet de ne voir que ceux d'un élément.
 - Le bouton « Rattacher » d'une note choisit un élément (et une partie de sa fiche) ; il sert aussi à changer l'élément d'un post-it. Le bouton « Détacher » en fait une note libre.
 - Si l'élément est supprimé, le post-it est conservé et signalé en rouge (orphelin) : on peut le rattacher ailleurs, le détacher ou le supprimer.
@@ -235,7 +243,7 @@ Les données de la version navigateur et de l'application installée sont distin
 
 IMPRESSION
 
-Plusieurs pages proposent l'impression de leur contenu. Pour une fiche de personnage, le document présente les caractéristiques, les compétences, l'équipement et les notes dans une mise en page adaptée à l'impression. Pour un PNJ, l'impression reprend sa fiche complète : genre, niveau, traits, motivation, signe distinctif, caractéristiques, compétences, équipement et relations. La boîte de dialogue du système permet d'imprimer sur papier ou d'enregistrer en PDF.
+Plusieurs pages proposent l'impression de leur contenu. Pour une fiche de personnage, le document présente les caractéristiques, les compétences, l'équipement et les notes dans une mise en page adaptée à l'impression. Pour un PNJ, l'impression reprend sa fiche complète : genre, niveau, traits, motivation, signe distinctif, caractéristiques, compétences, équipement et relations. La boîte de dialogue du système permet d'imprimer sur papier ou d'enregistrer en PDF. Le journal de séance s'imprime depuis le Calendrier (voir JOURNAL DE SÉANCE) ; la section « Journal de séance » est aussi proposée par les autres boutons d'impression.
 
 ## Tutoriel
 
