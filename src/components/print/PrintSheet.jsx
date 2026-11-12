@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import { cleanInventory, inventoryPrintLine } from "@/lib/meta/inventory";
 import { useAppTheme } from "@/lib/context/ThemeContext";
 import { generatePrintCSS } from "@/lib/print/printStyles";
+import { trackRows } from "@/lib/meta/tracks";
 
 const Lines = ({ label, items }) =>
     items?.length > 0 ? (
@@ -55,13 +56,14 @@ function Block({ block }) {
             return (
                 <section className="prt-section">
                     <h2>Fiches de personnages</h2>
-                    {block.characters.map(({ character, characteristics, skillRollModifier }) => (
+                    {block.characters.map(({ character, characteristics, skillRollModifier, tracks }) => (
                         <article className="prt-character" key={character.id}>
                             <h3 className="prt-group">{character.name}</h3>
                             <CharacterContent
                                 character={character}
                                 characteristics={characteristics}
                                 skillRollModifier={skillRollModifier}
+                                tracks={tracks}
                             />
                         </article>
                     ))}
@@ -236,7 +238,8 @@ function Block({ block }) {
     }
 }
 
-function CharacterContent({ character, characteristics, skillRollModifier }) {
+function CharacterContent({ character, characteristics, skillRollModifier, tracks = [] }) {
+    const trackLines = trackRows(tracks, character.checks);
     const stats = characteristics.map((definition) => {
         const values = character.characteristics?.[definition.name] || {};
         const fields = (values.fields || []).filter((f) => f.name || f.value);
@@ -265,6 +268,17 @@ function CharacterContent({ character, characteristics, skillRollModifier }) {
                             </article>
                         ))}
                     </div>
+                </section>
+            )}
+            {trackLines.length > 0 && (
+                <section className="prt-section">
+                    <h2>Cases à cocher</h2>
+                    {trackLines.map((track) => (
+                        <div className="prt-character-item" key={track.id}>
+                            <span className="prt-title">{track.name}</span>{" "}
+                            {Array.from({ length: track.count }, (_, index) => (index < track.checked ? "☑" : "☐")).join(" ")}
+                        </div>
+                    ))}
                 </section>
             )}
             {(character.skills || []).length > 0 && (
@@ -318,7 +332,7 @@ export default function PrintSheet({ model }) {
     const css = useMemo(() => generatePrintCSS(resolved.tokens), [resolved.tokens]);
 
     if (model.character) {
-        const { character, campaignName, characteristics, skillRollModifier } = model;
+        const { character, campaignName, characteristics, skillRollModifier, tracks } = model;
         return (
             <div className="print-root">
                 <style>{css}</style>
@@ -330,6 +344,7 @@ export default function PrintSheet({ model }) {
                     character={character}
                     characteristics={characteristics}
                     skillRollModifier={skillRollModifier}
+                    tracks={tracks}
                 />
             </div>
         );

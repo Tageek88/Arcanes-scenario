@@ -8,8 +8,9 @@ import { renamePcScaleCharacteristics, sanitizePcScale } from "@/lib/generators/
 import { cleanDiceConfig, cleanDiceOverride, renameDiceCharacteristic } from "@/lib/meta/dice";
 import { renameSheetLinks } from "@/lib/meta/diceLinks";
 import { renameCharacteristicNotes } from "@/lib/services/notes";
+import { cleanChecks, cleanTracks } from "@/lib/meta/tracks";
 
-const EMPTY_MODEL = { characteristics: [], skillRollModifier: false, scale: { levels: [] }, pcScale: sanitizePcScale(null), dice: null };
+const EMPTY_MODEL = { characteristics: [], skillRollModifier: false, scale: { levels: [] }, pcScale: sanitizePcScale(null), dice: null, tracks: [] };
 
 // Modèle tel que l'interface l'utilise, à partir de la ligne enregistrée (le barème est optionnel).
 const readModel = (row) => {
@@ -21,6 +22,8 @@ const readModel = (row) => {
     pcScale: sanitizePcScale(row?.pc_scale, characteristicNamesOf(characteristics)),
     // Réglage du lancer de dés (null = pas de bouton de lancer).
     dice: cleanDiceConfig(row?.dice),
+    // Pistes de cases à cocher (stress, radiations…) ; aucune par défaut.
+    tracks: cleanTracks(row?.tracks),
   };
 };
 const normalize = (value) => String(value || "").trim().toLocaleLowerCase("fr");
@@ -114,7 +117,7 @@ export function useGameSheet(campaignId) {
       updatedNames.forEach((newName, previousName) => {
         dice = renameDiceCharacteristic(dice, previousName, newName);
       });
-      const payload = { campaign_id: campaignId, ...modelFields, scale, pc_scale: pcScale, dice };
+      const payload = { campaign_id: campaignId, ...modelFields, scale, pc_scale: pcScale, dice, tracks: cleanTracks(nextModel.tracks ?? model.tracks) };
       let saved;
       if (modelId) {
         saved = await api.entities.GameSheetModel.update(modelId, payload);
@@ -235,6 +238,8 @@ export function useGameSheet(campaignId) {
       ...(draft.generation_locks ? { generation_locks: draft.generation_locks } : {}),
       // Dé personnalisé par caractéristique : absent du brouillon, la valeur enregistrée est conservée.
       ...(draft.dice_override ? { dice_override: cleanDiceOverride(draft.dice_override) } : {}),
+      // Cases cochées par piste : absentes du brouillon, la valeur enregistrée est conservée.
+      ...(draft.checks ? { checks: cleanChecks(draft.checks, model.tracks) } : {}),
     };
     try {
       const saved = draft.id
@@ -302,6 +307,20 @@ export function useGameSheet(campaignId) {
 
   const saveCharacter = (draft, onSaved) => withDataBatch(() => saveCharacterUnbatched(draft, onSaved));
 
+  // Coche ou décoche des cases directement depuis la carte du personnage, sans ouvrir la fiche.
+  const saveChecks = async (character, checks) => {
+    const next = cleanChecks(checks, model.tracks);
+    const previous = character.checks;
+    setCharacters((current) => current.map((item) => (item.id === character.id ? { ...item, checks: next } : item)));
+    try {
+      await api.entities.GameCharacter.update(character.id, { checks: next });
+    } catch (error) {
+      console.error("Enregistrement des cases cochées impossible :", error);
+      setCharacters((current) => current.map((item) => (item.id === character.id ? { ...item, checks: previous } : item)));
+      toast({ variant: "destructive", title: "Cases non enregistrées", description: "Les cases cochées n’ont pas été enregistrées." });
+    }
+  };
+
   const deleteCharacter = async (character) => {
     try {
       await api.entities.GameCharacter.delete(character.id);
@@ -326,6 +345,7 @@ export function useGameSheet(campaignId) {
     saveModel,
     saveScale,
     saveCharacter,
+    saveChecks,
     deleteCharacter,
   };
 }

@@ -11,7 +11,7 @@ La page d'accueil rassemble les campagnes, les actes et les scènes sous forme d
 - détailler les scènes avec leur contenu, leurs notes et leurs suites possibles ;
 - agrandir les cartes pour consulter leur contenu, puis les réduire en sélectionnant une autre carte ;
 - faire défiler la liste des actes à la molette de la souris ;
-- retrouver, dans le panneau Codex, les éléments associés à la scène sélectionnée : PNJ, lieux, indices et informations, et personnages joueurs ;
+- retrouver, dans le panneau Codex, les éléments associés à la scène sélectionnée : PNJ, lieux, indices et informations, et personnages joueurs (l'onglet Personnages montre toujours toutes les fiches : il n'a pas de filtre par scène) ;
 - suivre une rencontre (initiative, points de vie, tour de jeu) avec le bouton aux deux épées du panneau Codex.
 
 RECHERCHE GLOBALE
@@ -122,6 +122,8 @@ Le bouton aux deux épées, à côté de « Codex du MJ » sur la page d'accueil
 - « Tour suivant » donne la main au combattant suivant ; le round augmente quand l'ordre revient au premier. Un clic sur un nom donne la main à ce combattant. « Round 1 » remet le compteur à zéro, sans toucher aux combattants.
 - Un combattant à 0 PV est grisé et marqué « À terre », mais il garde son tour. Retirer le combattant dont c'est le tour donne la main au suivant.
 - Une rencontre compte 60 combattants au plus.
+- Ajout depuis les fiches : le bloc « Ajouter depuis les PNJ et les personnages » ajoute un PNJ ou un personnage d'un clic (recherche par nom), autant de fois que le champ « Nombre » ; s'il y en a plusieurs, ils sont numérotés (« Garde 1 », « Garde 2 »…) à la suite de ceux déjà présents. Le bouton « PNJ de la scène » ajoute d'un coup les PNJ de la scène sélectionnée.
+- Les PV max viennent de la caractéristique choisie dans « Caractéristique des PV » (le premier nombre de sa valeur ; ce choix est retenu par campagne sur l'appareil) ; l'initiative reste à saisir. Une pastille « PNJ » ou « PJ » indique l'origine du combattant ; renommer ou supprimer la fiche ne modifie pas la rencontre.
 - Les rencontres sont incluses dans les sauvegardes, passent par la corbeille et sont supprimées avec leur campagne. Elles ne figurent pas encore à l'impression ni dans la recherche globale.
 
 NOTES DE MJ EN POST-IT

@@ -19,6 +19,8 @@ import GameCharacterEditor from "@/components/game/GameCharacterEditor";
 import GameCatalogPanel, { GameTabBar } from "@/components/game/GameCatalogPanel";
 import InventoryPanel from "@/components/game/InventoryPanel";
 import RollButton from "@/components/game/RollButton";
+import TrackBoxes from "@/components/game/TrackBoxes";
+import { setChecked } from "@/lib/meta/tracks";
 import { skillLinkMap, skillModifierMap } from "@/lib/meta/diceLinks";
 import CampaignSelect from "@/components/common/CampaignSelect";
 import PrintButton from "@/components/print/PrintButton";
@@ -53,6 +55,7 @@ export default function Jeu() {
     savingCharacter,
     saveModel,
     saveCharacter,
+    saveChecks,
     deleteCharacter: removeCharacter,
   } = useGameSheet(campaignId);
   // Réglage du lancer de dés : déjà chargé avec le modèle, donc toujours à jour après une modification.
@@ -294,6 +297,18 @@ export default function Jeu() {
                       })}
                     </dl>
                   )}
+                  {model.tracks?.length > 0 && (
+                    <div className="mt-3 stack-y-1.5">
+                      {model.tracks.map((track) => (
+                        <TrackBoxes
+                          key={track.id}
+                          track={track}
+                          value={character.checks?.[track.id]}
+                          onChange={(next) => saveChecks(character, setChecked(character.checks, track.id, next))}
+                        />
+                      ))}
+                    </div>
+                  )}
                   {(character.skills || []).length > 0 && (
                     <div className="mt-3">
                       <h3 className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Compétences</h3>
@@ -376,6 +391,7 @@ export default function Jeu() {
             campaignName: campaign?.name || "",
             characteristics: model.characteristics,
             skillRollModifier: model.skillRollModifier,
+            tracks: model.tracks,
           }}
         />,
         document.body

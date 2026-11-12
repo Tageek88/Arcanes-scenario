@@ -273,6 +273,11 @@ flowchart LR
 - Tests : `tests/dice.test.js`, `diceDraft.test.js`, `diceLinks.test.js`, `diceSheet.test.js`, `rollRequest.test.js`.
 
 
+## Version 1.14.4 : combattants depuis les fiches
+
+- Un combattant peut garder un lien (`source`) avec le PNJ ou le personnage dont il vient ; règles pures dans `lib/meta/encounter.js` (`cleanSource`, `hpFromCharacteristic`, `numberedNames`, `addFromSources`). Chargement : `loadEncounterSources` (`lib/services/encounters.js`) et `hooks/useEncounterSources.js` ; ajout : `useEncounters.addFromSheets`. Interface : bloc repliable `AddFromSheets` de `EncounterDialog`, raccourci « PNJ de la scène » alimenté par `CodexSidebar`. Pas de nouvelle `db.version`.
+- Panneau Codex de l'arborescence : plus de filtre « Liées à la scène » sur l'onglet Personnages. Tests : `tests/encounterSources.test.js`.
+
 ## Plateformes
 
 - **Electron 44.9.0 (Windows)** : `electron/main.cjs`, `preload.cjs` et `navigationPolicy.cjs` (`window.arcanesPdf`, `window.arcanesBackup`, sauvegardes dans `Documents\Arcanes Scenario`). La fenêtre est en `sandbox`, avec isolation de contexte ; les canaux IPC (`handle()`) n'acceptent que la page principale ; `window.open` n'autorise que `blob:` (liens `https:`/`http:`/`mailto:` envoyés au système, reste refusé) ; la fenêtre principale ne navigue que vers `file:`. Installateur via `npm run dist`.

@@ -1,5 +1,6 @@
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import { cleanInventory, inventoryPrintLine } from "@/lib/meta/inventory";
+import { trackRows } from "@/lib/meta/tracks";
 
 const PAGE_WIDTH = 595.28;
 const PAGE_HEIGHT = 841.89;
@@ -262,6 +263,35 @@ export async function createEditablePdf(model) {
         }
     };
 
+    // Pistes de cases : une ligne de cases par piste (cochées pleines, vides en cadre), à la ligne si elles dépassent la page.
+    const drawTracks = (items) => {
+        const box = 11;
+        const gap = 4;
+        for (const item of items) {
+            ensureSpace(9 * 1.4 + box + 8);
+            drawText(item.name, { size: 9, font: bold });
+            let x = MARGIN;
+            for (let index = 0; index < item.count; index += 1) {
+                if (x + box > PAGE_WIDTH - MARGIN) {
+                    x = MARGIN;
+                    cursorY -= box + gap;
+                    ensureSpace(box + 6);
+                }
+                page.drawRectangle({
+                    x,
+                    y: cursorY - box,
+                    width: box,
+                    height: box,
+                    borderWidth: 0.75,
+                    borderColor: FIELD_BORDER,
+                    ...(index < item.checked ? { color: BODY_COLOR } : {}),
+                });
+                x += box + gap;
+            }
+            cursorY -= box + 8;
+        }
+    };
+
     const drawImages = async (images = []) => {
         for (const image of images) {
             let embedded = imageCache.get(image.url);
@@ -416,7 +446,7 @@ export async function createEditablePdf(model) {
                 break;
             case "characters":
                 drawHeading("Fiches de personnages");
-                for (const [characterIndex, { character, characteristics, skillRollModifier }] of block.characters.entries()) {
+                for (const [characterIndex, { character, characteristics, skillRollModifier, tracks = [] }] of block.characters.entries()) {
                     if (characterIndex > 0) addPage();
                     drawHeading(character.name, 2);
                     drawHeading("Caractéristiques", 3);
@@ -430,6 +460,11 @@ export async function createEditablePdf(model) {
                             return { name: definition.name, rows };
                         })
                     );
+                    const trackLines = trackRows(tracks, character.checks);
+                    if (trackLines.length) {
+                        drawHeading("Cases à cocher", 3);
+                        drawTracks(trackLines);
+                    }
                     drawHeading("Compétences", 3);
                     for (const skill of character.skills || []) {
                         const modifier = skillRollModifier && skill.roll_modifier !== null && skill.roll_modifier !== undefined && skill.roll_modifier !== ""

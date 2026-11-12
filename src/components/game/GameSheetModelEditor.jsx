@@ -11,9 +11,10 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { DICE_MODES, DICE_MODE_LABELS, DICE_OUTCOMES, DICE_OUTCOME_LABELS, DICE_PRESETS, DICE_RULES, DICE_RULE_LABELS } from "@/lib/meta/dice";
 import { applyPresetToDraft, diceToDraft, draftToDice, updateDiceDraft, updateSingleDie, updateStatDie } from "@/lib/meta/diceDraft";
+import { MAX_TRACKS, MAX_TRACK_BOXES, draftToTracks, newTrackId, tracksToDraft } from "@/lib/meta/tracks";
 
 const EMPTY_COUNT = { min: "", max: "" };
-const EMPTY_MODEL = { characteristics: [], skillRollModifier: false, levels: [], pc: { ranges: {}, skills: EMPTY_COUNT, equipment: EMPTY_COUNT }, dice: diceToDraft(null) };
+const EMPTY_MODEL = { characteristics: [], skillRollModifier: false, levels: [], pc: { ranges: {}, skills: EMPTY_COUNT, equipment: EMPTY_COUNT }, dice: diceToDraft(null), tracks: [] };
 
 const RULE_HELP = {
   add: "Le total des dés, plus la valeur de la caractéristique et le bonus du moment, est comparé à la difficulté.",
@@ -114,6 +115,7 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
         levels: scaleToDraft(model?.scale, characteristics),
         pc: pcScaleToDraft(model?.pcScale, characteristics),
         dice: diceToDraft(model?.dice, characteristics),
+        tracks: tracksToDraft(model?.tracks),
       });
       setScaleReport("");
       setPcReport("");
@@ -209,6 +211,7 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
       pcScale: sanitizePcScale(draftToPcScale(form.pc, form.characteristics), characteristics.map((item) => item.name)),
       // Rien de configuré et rien touché : on n'envoie rien, le réglage déjà enregistré est conservé.
       dice: draftToDice(form.dice, form.characteristics) ?? undefined,
+      tracks: draftToTracks(form.tracks),
     });
   };
 
@@ -262,6 +265,11 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
     const missing = report.withoutData.length ? ` Sans valeur numérique exploitable : ${report.withoutData.join(", ")}.` : "";
     setPcReport(`Plages des personnages joueurs calculées à partir de ${report.characters} fiche${report.characters === 1 ? "" : "s"} : à vérifier et à ajuster.${missing}`);
   };
+
+  const updateTrack = (index, patch) =>
+    setForm((current) => ({ ...current, tracks: current.tracks.map((track, i) => (i === index ? { ...track, ...patch } : track)) }));
+  const addTrack = () => setForm((current) => ({ ...current, tracks: [...current.tracks, { id: newTrackId(), name: "", count: "" }] }));
+  const removeTrack = (index) => setForm((current) => ({ ...current, tracks: current.tracks.filter((_, i) => i !== index) }));
 
   const dice = form.dice;
   const isPool = dice.rule === "pool";
@@ -388,6 +396,39 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
           >
             <Plus className="h-4 w-4" /> Ajouter une caractéristique
           </Button>
+          </div>
+        </details>
+
+        <details className="rounded-lg border border-border p-3" open={form.tracks.length > 0}>
+          <summary className="cursor-pointer font-display font-semibold">Cases à cocher</summary>
+          <div className="mt-3 stack-y-3">
+            <p className="text-xs text-muted-foreground">
+              Définissez des pistes de cases (stress, radiations, consommables…). Chaque fiche coche ses propres cases. Renommer une piste ne fait perdre aucune case cochée.
+            </p>
+            {form.tracks.map((track, index) => (
+              <div key={track.id} className="grid grid-cols-[minmax(0,1fr)_5rem_2.5rem] items-center gap-2">
+                <Input
+                  aria-label={`Nom de la piste ${index + 1}`}
+                  value={track.name}
+                  placeholder="Ex. Stress"
+                  onChange={(event) => updateTrack(index, { name: event.target.value })}
+                />
+                <Input
+                  inputMode="numeric"
+                  aria-label={`Nombre de cases de ${track.name || `la piste ${index + 1}`}`}
+                  placeholder="Cases"
+                  value={track.count}
+                  onChange={(event) => updateTrack(index, { count: event.target.value })}
+                />
+                <Button type="button" variant="ghost" size="icon" aria-label={`Supprimer la piste ${track.name || index + 1}`} onClick={() => removeTrack(index)}>
+                  <Trash2 className="h-4 w-4 text-muted-foreground" />
+                </Button>
+              </div>
+            ))}
+            <Button type="button" variant="outline" size="sm" onClick={addTrack} disabled={form.tracks.length >= MAX_TRACKS}>
+              <Plus className="h-4 w-4" /> Ajouter une piste
+            </Button>
+            <p className="text-xs text-muted-foreground">Une piste sans nom, ou sans nombre de cases (de 1 à {MAX_TRACK_BOXES}), n'est pas enregistrée.</p>
           </div>
         </details>
 

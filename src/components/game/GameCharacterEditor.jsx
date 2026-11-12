@@ -15,8 +15,10 @@ import { usePcFormGeneration } from "@/hooks/usePcFormGeneration";
 import { PC_LOCKABLE_FIELDS } from "@/lib/generators/pcGenerator";
 import DiceOverrideField, { SkillLinkSelect } from "@/components/game/DiceOverrideField";
 import { cleanDiceOverride } from "@/lib/meta/dice";
+import TrackBoxes from "@/components/game/TrackBoxes";
+import { cleanChecks, setChecked } from "@/lib/meta/tracks";
 
-const EMPTY = { name: "", notes: "", characteristics: {}, skills: [], equipment: [], inventory: [] };
+const EMPTY = { name: "", notes: "", characteristics: {}, skills: [], equipment: [], inventory: [], checks: {} };
 const normalize = (value) => String(value || "").trim().toLocaleLowerCase("fr");
 
 const blankCharacteristic = () => ({ value: "", modifier: "", test: "", max: "" });
@@ -77,6 +79,7 @@ export default function GameCharacterEditor({
       skills: structuredClone(character.skills || []),
       equipment: structuredClone(character.equipment || []),
       inventory: structuredClone(character.inventory || []),
+      checks: structuredClone(character.checks || {}),
     } : {
       ...EMPTY,
       characteristics: initialCharacteristics,
@@ -315,6 +318,7 @@ export default function GameCharacterEditor({
         })),
         inventory: cleanInventory(form.inventory),
         dice_override: cleanDiceOverride(form.dice_override),
+        checks: cleanChecks(form.checks, model.tracks),
         generation_locks: Object.fromEntries(PC_LOCKABLE_FIELDS.filter((key) => generation.locks[key]).map((key) => [key, true])),
       });
       if (!saved) setSaveError("La fiche n’a pas été enregistrée.");
@@ -417,6 +421,20 @@ export default function GameCharacterEditor({
                 );
               })}
             </div>
+          </section>
+        )}
+
+        {model.tracks?.length > 0 && (
+          <section className="stack-y-3">
+            <h3 className="font-display font-semibold">Cases à cocher</h3>
+            {model.tracks.map((track) => (
+              <TrackBoxes
+                key={track.id}
+                track={track}
+                value={form.checks?.[track.id]}
+                onChange={(next) => setForm((current) => ({ ...current, checks: setChecked(current.checks, track.id, next) }))}
+              />
+            ))}
           </section>
         )}
 

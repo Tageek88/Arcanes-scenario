@@ -2,7 +2,7 @@
 
 **Un atelier de préparation pour maîtres du jeu : organisez votre scénario en actes et scènes, et gardez PNJ, lieux, indices, tables aléatoires, notes et sessions sous la main, avec vos campagnes conservées hors ligne sur votre ordinateur.**
 
-![Version](https://img.shields.io/badge/version-1.14.3-d4a63c)
+![Version](https://img.shields.io/badge/version-1.14.4-d4a63c)
 ![Node](https://img.shields.io/badge/node-%3E%3D20.19-339933?logo=node.js&logoColor=white)
 ![React](https://img.shields.io/badge/React-18-61dafb?logo=react&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-8-646cff?logo=vite&logoColor=white)
@@ -33,7 +33,7 @@ Retrouvez le descriptif complet de l'application, onglet par onglet, dans le fic
 
 - **Arborescence** : campagnes, actes et scènes avec statut d'avancement (brouillon, prête, jouée…).
 - **Codex** : fiches de PNJ, lieux, indices et informations, liables aux scènes. Les indices peuvent être marqués découverts ; les informations, connues des joueurs et utilisées en jeu.
-- **Rencontres** : suivi d'initiative et de points de vie depuis le panneau Codex (bouton aux deux épées), avec tour de jeu et round.
+- **Rencontres** : suivi d'initiative et de points de vie depuis le panneau Codex (bouton aux deux épées), avec tour de jeu et round ; les combattants s'ajoutent à la main ou depuis les PNJ et les personnages.
 - **Système de jeu** : modèle de fiche par campagne, fiches de personnages, caractéristiques, compétences et équipements. Les seuils de test sont saisis manuellement ; compétences et équipements sont retenus dans un catalogue local.
 - **Lancer de dés** : bouton de lancer sur chaque caractéristique et chaque compétence des fiches, réglé une fois dans le modèle de fiche (un dé ou un dé par caractéristique, trois règles, critiques, difficulté), avec un dé personnalisable par fiche.
 - **Cartes et visuels** : images et PDF joints aux lieux, PNJ, indices et informations.
