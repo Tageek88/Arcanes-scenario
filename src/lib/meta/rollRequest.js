@@ -35,7 +35,7 @@ export function buildRollRequest({ setup, sheet, characteristic = "", skill = nu
 
   const characteristics = sheet?.characteristics && typeof sheet.characteristics === "object" ? sheet.characteristics : {};
   const hasValue = stat ? Object.hasOwn(characteristics, stat) : false;
-  const value = hasValue ? statValue(characteristics[stat]) : 0;
+  let value = hasValue ? statValue(characteristics[stat]) : 0;
 
   const warnings = [];
   const notes = [];
@@ -44,6 +44,18 @@ export function buildRollRequest({ setup, sheet, characteristic = "", skill = nu
 
   let bonus = 0;
   if (skill) {
+    // A skill has a value of its own (skill.value): it is added to the one of its linked characteristic,
+    // so a secondary stat rolls its own value plus the one of its main stat (e.g. 2 + 3 = 5 dice in a pool).
+    const own = readNumber(skill.value);
+    if (own !== null) {
+      if (own !== 0) {
+        const name = String(skill.name || "").trim();
+        notes.push(stat ? `Valeur : ${stat} ${value} + ${name} ${own} = ${value + own}.` : `Valeur de la compétence : ${own}.`);
+        value += own;
+      }
+    } else if (String(skill.value ?? "").trim()) {
+      warnings.push(`Valeur « ${String(skill.value).trim()} » de la compétence non numérique : ignorée.`);
+    }
     // The modifier of the sheet wins; when it is empty, the one of the catalog applies.
     const text = String(skill.roll_modifier ?? "").trim() || linkedModifier(skill.name, setup?.modifiers);
     const parsed = readNumber(text);

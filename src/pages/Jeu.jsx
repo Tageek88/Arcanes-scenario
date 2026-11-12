@@ -317,6 +317,7 @@ export default function Jeu() {
                           <li key={`${skill.name}-${index}`} className="group inline-flex items-center gap-1 rounded-md bg-secondary/50 px-2 py-1">
                             <span>
                             <span className="font-medium text-foreground">{skill.name}</span>
+                            {String(skill.value ?? "").trim() ? ` · ${skill.value}` : ""}
                             {model.skillRollModifier && skill.roll_modifier ? ` · ${skill.roll_modifier}` : ""}
                             {(skill.fields || []).filter((field) => field.value).map((field) => ` · ${field.name} : ${field.value}`).join("")}
                             </span>

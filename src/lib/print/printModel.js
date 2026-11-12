@@ -6,6 +6,7 @@ import { NPC_GENDER_OPTIONS } from "@/lib/meta/codex";
 import { describeTarget } from "@/lib/meta/postit";
 import { cleanInventory, inventoryOwners, inventoryPrintLine } from "@/lib/meta/inventory";
 import { cleanJournal, journalEntries } from "@/lib/meta/sessionJournal";
+import { trackRows } from "@/lib/meta/tracks";
 
 export const SECTIONS = [
     { key: "scenes", title: "Scènes et actes", hint: "Chaque scène est imprimée avec ses indices liés." },
@@ -61,7 +62,8 @@ export function npcSheet(npc, gameSheetModel) {
         .filter((skill) => hasText(skill?.name))
         .map((skill) => {
             const modifier = gameSheetModel?.skillRollModifier && hasText(skill.roll_modifier) ? [skill.roll_modifier.trim()] : [];
-            const detail = [...modifier, ...optionalFields(skill.fields)].join(" · ");
+            const own = hasText(skill.value) ? [`valeur ${skill.value.trim()}`] : [];
+            const detail = [...own, ...modifier, ...optionalFields(skill.fields)].join(" · ");
             return detail ? `${skill.name} (${detail})` : skill.name;
         });
     const equipment = (Array.isArray(npc.equipment) ? npc.equipment : [])
@@ -71,6 +73,10 @@ export function npcSheet(npc, gameSheetModel) {
             return detail ? `${item.name} (${detail})` : item.name;
         });
     const inventory = cleanInventory(npc.inventory).map(inventoryPrintLine);
+    // Cases cochées (stress, radiations…) : seules les pistes entamées sont imprimées, sous la forme « Stress : 2/5 ».
+    trackRows(gameSheetModel?.tracks, npc.checks)
+        .filter((track) => track.checked > 0)
+        .forEach((track) => lines.push(`${track.name} : ${track.checked}/${track.count}`));
     return { lines, stats, skills, equipment, inventory };
 }
 
@@ -431,6 +437,8 @@ export function buildPrintModel(data, sel, opts) {
             character,
             characteristics: gameSheetModel?.characteristics || [],
             skillRollModifier: !!gameSheetModel?.skillRollModifier,
+            // Pistes de cases à cocher du modèle, pour imprimer les cases cochées de chaque fiche.
+            ...(gameSheetModel?.tracks?.length ? { tracks: gameSheetModel.tracks } : {}),
         }));
     if (selectedCharacters.length) {
         blocks.push({ kind: "characters", characters: selectedCharacters });

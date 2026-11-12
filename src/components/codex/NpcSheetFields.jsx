@@ -10,6 +10,8 @@ import { rangesForLevel } from "@/lib/generators/npcScale";
 import DiceOverrideField, { SkillLinkSelect } from "@/components/game/DiceOverrideField";
 import { useRollSetup } from "@/hooks/useRollSetup";
 import { linkedCharacteristic } from "@/lib/meta/diceLinks";
+import TrackBoxes from "@/components/game/TrackBoxes";
+import { setChecked } from "@/lib/meta/tracks";
 
 const normalize = (value) => String(value || "").trim().toLocaleLowerCase("fr");
 
@@ -198,6 +200,20 @@ export default function NpcSheetFields({ form, set, generator, generation, campa
         </div>
       )}
 
+      {roll.tracks?.length > 0 && (
+        <div className="stack-y-2">
+          <Label className="block">Cases à cocher</Label>
+          {roll.tracks.map((track) => (
+            <TrackBoxes
+              key={track.id}
+              track={track}
+              value={form.checks?.[track.id]}
+              onChange={(next) => set("checks", setChecked(form.checks, track.id, next))}
+            />
+          ))}
+        </div>
+      )}
+
       <div className="stack-y-2">
         <FieldLabel label="Compétences" locked={!!locks.skills} onToggle={() => toggleLock("skills")} />
         {skills.map((skill, index) => (
@@ -211,6 +227,17 @@ export default function NpcSheetFields({ form, set, generator, generation, campa
                 onChange={(event) => setSkill(index, { name: event.target.value })}
                 onBlur={() => fillSkillLink(index)}
               />
+              {roll.dice?.enabled && (
+                <Input
+                  className="w-20 shrink-0"
+                  inputMode="numeric"
+                  aria-label={`Valeur de la compétence ${index + 1} (s'ajoute à celle de la caractéristique liée)`}
+                  title="S'ajoute à la valeur de la caractéristique liée"
+                  value={skill.value || ""}
+                  placeholder="Valeur"
+                  onChange={(event) => setSkill(index, { value: event.target.value })}
+                />
+              )}
               {showRollModifier && (
                 <Input
                   className="w-24 shrink-0"

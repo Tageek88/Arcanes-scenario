@@ -486,6 +486,19 @@ export default function GameCharacterEditor({
                 />
               )}
 
+              {model.dice?.enabled && (
+                <label className="stack-y-1 text-xs text-muted-foreground">
+                  Valeur de la compétence (s'ajoute à celle de la caractéristique liée)
+                  <Input
+                    inputMode="numeric"
+                    aria-label={`Valeur de la compétence ${skill.name || index + 1}`}
+                    value={skill.value ?? ""}
+                    onChange={(event) => setSkill(index, "value", event.target.value)}
+                    placeholder="Ex. 2"
+                  />
+                </label>
+              )}
+
               <div className="stack-y-2">
                 {(skill.fields || []).map((field, fieldIndex) => (
                   <div key={fieldIndex} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_2.5rem] items-center gap-2">

@@ -117,6 +117,8 @@ export function npcSheetPayload(form) {
         roll_modifier: text(skill.roll_modifier),
         // Caractéristique liée (lancer de dés) : seulement si elle est renseignée.
         ...(text(skill.characteristic) ? { characteristic: text(skill.characteristic) } : {}),
+        // Valeur propre de la compétence (s'ajoute à celle de sa caractéristique liée au lancer) : seulement si elle est renseignée.
+        ...(text(skill.value) ? { value: text(skill.value) } : {}),
         fields: cleanFields(skill.fields),
       })),
     equipment: (Array.isArray(form?.equipment) ? form.equipment : [])

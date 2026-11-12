@@ -7,6 +7,7 @@ import { useCodexLinks } from "@/lib/context/CodexLinksContext";
 import { cleanInventory, inventoryLabel } from "@/lib/meta/inventory";
 import { PartPostItButton } from "@/components/common/PostItButton";
 import RollButton from "@/components/game/RollButton";
+import TrackBoxes from "@/components/game/TrackBoxes";
 import { useRollSetup } from "@/hooks/useRollSetup";
 
 const stop = (action) => (event) => {
@@ -99,6 +100,21 @@ function Characteristics({ characteristics, owner, sheet, setup }) {
   );
 }
 
+/** Cases à cocher du modèle de la campagne, avec celles cochées sur la fiche (lecture seule). */
+function Tracks({ tracks, checks }) {
+  const rows = list(tracks);
+  if (rows.length === 0) return null;
+  return (
+    <Section title="Cases à cocher :">
+      <div className="stack-y-1">
+        {rows.map((track) => (
+          <TrackBoxes key={track.id} track={track} value={checks?.[track.id]} />
+        ))}
+      </div>
+    </Section>
+  );
+}
+
 function Skills({ skills, owner, sheet, setup }) {
   const rows = list(skills).map((skill, rawIndex) => ({ skill, rawIndex })).filter(({ skill }) => skill?.name);
   if (rows.length === 0) return null;
@@ -106,7 +122,7 @@ function Skills({ skills, owner, sheet, setup }) {
     <Section title="Compétences :">
       <ul className="stack-y-1">
         {rows.map(({ skill, rawIndex }) => {
-          const extra = [skill.roll_modifier ? `modif. ${skill.roll_modifier}` : "", fieldsLine(skill.fields)].filter(Boolean).join(" · ");
+          const extra = [skill.value ? `valeur ${skill.value}` : "", skill.roll_modifier ? `modif. ${skill.roll_modifier}` : "", fieldsLine(skill.fields)].filter(Boolean).join(" · ");
           return (
             <li key={rawIndex} className="group flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px]">
               <FilterChip filterKey="competence" value={skill.name} className="px-1.5 py-0.5 text-[11px]" />
@@ -219,6 +235,7 @@ export default function CodexEntryDetails({ kind, entry, locationLabel = "", rel
             </p>
           )}
           <Characteristics characteristics={entry.characteristics} owner={owner} sheet={entry} setup={setup} />
+          <Tracks tracks={setup.tracks} checks={entry.checks} />
           <Skills skills={entry.skills} owner={owner} sheet={entry} setup={setup} />
           <Equipment equipment={entry.equipment} owner={owner} />
           <Inventory inventory={entry.inventory} owner={owner} />
@@ -243,6 +260,7 @@ export default function CodexEntryDetails({ kind, entry, locationLabel = "", rel
       {kind === "character" && (
         <>
           <Characteristics characteristics={entry.characteristics} owner={owner} sheet={entry} setup={setup} />
+          <Tracks tracks={setup.tracks} checks={entry.checks} />
           <Skills skills={entry.skills} owner={owner} sheet={entry} setup={setup} />
           <Equipment equipment={entry.equipment} owner={owner} />
           <Inventory inventory={entry.inventory} owner={owner} />
