@@ -22,6 +22,7 @@ import RollButton from "@/components/game/RollButton";
 import TrackBoxes from "@/components/game/TrackBoxes";
 import { setChecked } from "@/lib/meta/tracks";
 import { skillLinkMap, skillModifierMap } from "@/lib/meta/diceLinks";
+import { statParentMap } from "@/lib/meta/statLinks";
 import CampaignSelect from "@/components/common/CampaignSelect";
 import PrintButton from "@/components/print/PrintButton";
 import PostItButton, { PartPostItButton } from "@/components/common/PostItButton";
@@ -60,8 +61,8 @@ export default function Jeu() {
   } = useGameSheet(campaignId);
   // Réglage du lancer de dés : déjà chargé avec le modèle, donc toujours à jour après une modification.
   const rollSetup = useMemo(
-    () => ({ dice: model.dice, links: skillLinkMap(skillCatalog), modifiers: skillModifierMap(skillCatalog) }),
-    [model.dice, skillCatalog]
+    () => ({ dice: model.dice, links: skillLinkMap(skillCatalog), modifiers: skillModifierMap(skillCatalog), parents: statParentMap(model.characteristics) }),
+    [model.dice, model.characteristics, skillCatalog]
   );
 
   const [modelOpen, setModelOpen] = useState(false);
@@ -283,6 +284,7 @@ export default function Jeu() {
                           <div key={item.name} className="group relative rounded-md bg-secondary/50 px-3 py-2">
                             <PartPostItButton owner={{ kind: "character", id: character.id }} partKind="characteristic" part={{ name: item.name }} label={`la caractéristique ${item.name}`} className="absolute right-1 top-1" />
                             <dt className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{item.name}</dt>
+                            {item.parent && <dd className="text-[10px] text-muted-foreground">+ {item.parent}</dd>}
                             <dd className="mt-1 flex items-center justify-between gap-1 text-sm font-semibold">
                               <span>{values.value || "—"}</span>
                               <RollButton setup={rollSetup} sheet={character} characteristic={item.name} />
@@ -317,7 +319,6 @@ export default function Jeu() {
                           <li key={`${skill.name}-${index}`} className="group inline-flex items-center gap-1 rounded-md bg-secondary/50 px-2 py-1">
                             <span>
                             <span className="font-medium text-foreground">{skill.name}</span>
-                            {String(skill.value ?? "").trim() ? ` · ${skill.value}` : ""}
                             {model.skillRollModifier && skill.roll_modifier ? ` · ${skill.roll_modifier}` : ""}
                             {(skill.fields || []).filter((field) => field.value).map((field) => ` · ${field.name} : ${field.value}`).join("")}
                             </span>

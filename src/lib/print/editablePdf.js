@@ -474,8 +474,7 @@ export async function createEditablePdf(model) {
                             .filter((f) => f.name || f.value)
                             .map((f) => `${f.name}${f.value ? ` : ${f.value}` : ""}`)
                             .join(" · ");
-                        const ownValue = skill.value !== null && skill.value !== undefined && String(skill.value).trim() !== "" ? ` : ${skill.value}` : "";
-                        drawText(`${skill.name}${ownValue}${modifier}${extraFields ? ` (${extraFields})` : ""}`);
+                        drawText(`${skill.name}${modifier}${extraFields ? ` (${extraFields})` : ""}`);
                     }
 
                     drawHeading("Équipement", 3);

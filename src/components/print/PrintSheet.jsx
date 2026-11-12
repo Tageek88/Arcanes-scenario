@@ -287,7 +287,6 @@ function CharacterContent({ character, characteristics, skillRollModifier, track
                     {character.skills.map((skill, index) => (
                         <div className="prt-character-item" key={`${skill.name}-${index}`}>
                             <span className="prt-title">{skill.name}</span>
-                            {hasValue(skill.value) && <span> · Valeur : {skill.value}</span>}
                             {skillRollModifier && hasValue(skill.roll_modifier) && <span> · Modificateur de lancer : {skill.roll_modifier}</span>}
                             {(skill.fields || []).filter((field) => field.name || field.value).map((field, fieldIndex) => (
                                 <p key={`${field.name}-${fieldIndex}`}><strong>{field.name}</strong>{hasValue(field.value) && ` : ${field.value}`}</p>

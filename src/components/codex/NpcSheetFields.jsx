@@ -227,17 +227,6 @@ export default function NpcSheetFields({ form, set, generator, generation, campa
                 onChange={(event) => setSkill(index, { name: event.target.value })}
                 onBlur={() => fillSkillLink(index)}
               />
-              {roll.dice?.enabled && (
-                <Input
-                  className="w-20 shrink-0"
-                  inputMode="numeric"
-                  aria-label={`Valeur de la compétence ${index + 1} (s'ajoute à celle de la caractéristique liée)`}
-                  title="S'ajoute à la valeur de la caractéristique liée"
-                  value={skill.value || ""}
-                  placeholder="Valeur"
-                  onChange={(event) => setSkill(index, { value: event.target.value })}
-                />
-              )}
               {showRollModifier && (
                 <Input
                   className="w-24 shrink-0"

@@ -363,7 +363,10 @@ export default function GameCharacterEditor({
                 const fields = values.fields || [];
                 return (
                   <div key={item.name} className="stack-y-2 rounded-lg border border-border p-3">
-                    <Label className="font-medium text-foreground">{item.name}</Label>
+                    <Label className="font-medium text-foreground">
+                      {item.name}
+                      {item.parent && <span className="ml-2 text-xs font-normal text-muted-foreground">+ {item.parent}</span>}
+                    </Label>
                     <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                       <label className="stack-y-1 text-xs text-muted-foreground">
                         Valeur
@@ -484,19 +487,6 @@ export default function GameCharacterEditor({
                   names={characteristicNames}
                   onChange={(value) => setSkill(index, "characteristic", value)}
                 />
-              )}
-
-              {model.dice?.enabled && (
-                <label className="stack-y-1 text-xs text-muted-foreground">
-                  Valeur de la compétence (s'ajoute à celle de la caractéristique liée)
-                  <Input
-                    inputMode="numeric"
-                    aria-label={`Valeur de la compétence ${skill.name || index + 1}`}
-                    value={skill.value ?? ""}
-                    onChange={(event) => setSkill(index, "value", event.target.value)}
-                    placeholder="Ex. 2"
-                  />
-                </label>
               )}
 
               <div className="stack-y-2">

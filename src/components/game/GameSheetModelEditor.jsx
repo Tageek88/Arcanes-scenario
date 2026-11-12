@@ -12,6 +12,8 @@ import { Switch } from "@/components/ui/switch";
 import { DICE_MODES, DICE_MODE_LABELS, DICE_OUTCOMES, DICE_OUTCOME_LABELS, DICE_PRESETS, DICE_RULES, DICE_RULE_LABELS } from "@/lib/meta/dice";
 import { applyPresetToDraft, diceToDraft, draftToDice, updateDiceDraft, updateSingleDie, updateStatDie } from "@/lib/meta/diceDraft";
 import { MAX_TRACKS, MAX_TRACK_BOXES, draftToTracks, newTrackId, tracksToDraft } from "@/lib/meta/tracks";
+import { cleanParents, keysToParents, parentChoices, parentsToKeys } from "@/lib/meta/statLinks";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const EMPTY_COUNT = { min: "", max: "" };
 const EMPTY_MODEL = { characteristics: [], skillRollModifier: false, levels: [], pc: { ranges: {}, skills: EMPTY_COUNT, equipment: EMPTY_COUNT }, dice: diceToDraft(null), tracks: [] };
@@ -108,7 +110,7 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
 
   useEffect(() => {
     if (open) {
-      const characteristics = (model?.characteristics || []).map((item) => ({ ...item, _key: nextKey() }));
+      const characteristics = parentsToKeys((model?.characteristics || []).map((item) => ({ ...item, _key: nextKey() })));
       setForm({
         characteristics,
         skillRollModifier: !!model?.skillRollModifier,
@@ -176,7 +178,10 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
   const removeCharacteristic = (index) => {
     setForm((current) => ({
       ...current,
-      characteristics: current.characteristics.filter((_, i) => i !== index),
+      // Une caractéristique supprimée n'est plus proposée comme lien : celles qui lui étaient liées n'ont plus de lien.
+      characteristics: current.characteristics
+        .filter((_, i) => i !== index)
+        .map((item) => (item.parent && item.parent === current.characteristics[index]?._key ? { ...item, parent: "" } : item)),
     }));
   };
 
@@ -194,13 +199,13 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
     const names = form.characteristics.map((item) => item.name.trim()).filter(Boolean);
     if (new Set(names.map((name) => name.toLocaleLowerCase("fr"))).size !== names.length) return;
     if (levelProblems.duplicates) return;
-    const characteristics = form.characteristics
+    const characteristics = cleanParents(keysToParents(form.characteristics)
       .map(({ _key, ...item }) => ({
         ...item,
         name: item.name.trim(),
         field_names: (item.field_names || []).map((fn) => String(fn || "").trim()).filter(Boolean),
       }))
-      .filter((item) => item.name);
+      .filter((item) => item.name));
     onSave({
       characteristics,
       skillRollModifier: !!form.skillRollModifier,
@@ -332,7 +337,7 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
         <details data-tutorial="game-model-characteristics" className="rounded-lg border border-border p-3" open>
           <summary className="cursor-pointer font-display font-semibold">Caractéristiques</summary>
           <div className="mt-3 stack-y-3">
-          <p className="text-xs text-muted-foreground">Définissez les caractéristiques et leurs champs facultatifs proposés sur les fiches.</p>
+          <p className="text-xs text-muted-foreground">Définissez les caractéristiques et leurs champs facultatifs proposés sur les fiches. Une caractéristique peut ajouter la valeur d'une autre à son lancer (ex. Endurance liée à Vigueur : 2 + 3 = 5 dés).</p>
           {form.characteristics.map((item, index) => (
             <div key={item._key || index} className="stack-y-2 rounded-lg border border-border p-3">
               <div className="flex items-center gap-2">
@@ -347,6 +352,21 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
                 <Button variant="ghost" size="icon" aria-label={`Supprimer la caractéristique ${index + 1}`} onClick={() => removeCharacteristic(index)}>
                   <Trash2 className="h-4 w-4 text-muted-foreground" />
                 </Button>
+              </div>
+
+              <div className="flex items-center gap-2 pl-2">
+                <span className="shrink-0 text-xs text-muted-foreground">Ajoute la valeur de</span>
+                <Select value={item.parent || "_none"} onValueChange={(value) => updateCharacteristic(index, "parent", value === "_none" ? "" : value)}>
+                  <SelectTrigger aria-label={`Caractéristique dont la valeur s'ajoute à ${item.name || index + 1}`}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="_none">Aucune</SelectItem>
+                    {parentChoices(form.characteristics, item._key).map((option) => (
+                      <SelectItem key={option._key} value={option._key}>{option.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="stack-y-1.5 pl-2 border-l-2 border-border/60">

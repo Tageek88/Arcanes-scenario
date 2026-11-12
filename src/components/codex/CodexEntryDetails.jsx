@@ -1,13 +1,16 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { MapPin, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { NPC_GENDER_OPTIONS } from "@/lib/meta/codex";
+import { KIND_META, NPC_GENDER_OPTIONS } from "@/lib/meta/codex";
 import { hasFilter } from "@/lib/services/codexSearch";
 import { useCodexLinks } from "@/lib/context/CodexLinksContext";
 import { cleanInventory, inventoryLabel } from "@/lib/meta/inventory";
 import { PartPostItButton } from "@/components/common/PostItButton";
 import RollButton from "@/components/game/RollButton";
 import TrackBoxes from "@/components/game/TrackBoxes";
+import { api } from "@/api/localClient";
+import { useToast } from "@/components/ui/use-toast";
+import { cleanChecks, setChecked } from "@/lib/meta/tracks";
 import { useRollSetup } from "@/hooks/useRollSetup";
 
 const stop = (action) => (event) => {
@@ -100,15 +103,43 @@ function Characteristics({ characteristics, owner, sheet, setup }) {
   );
 }
 
-/** Cases à cocher du modèle de la campagne, avec celles cochées sur la fiche (lecture seule). */
-function Tracks({ tracks, checks }) {
+/**
+ * Cases à cocher du modèle de la campagne, cochables ici même : la fiche (PNJ ou personnage) est enregistrée à chaque clic,
+ * sans ouvrir son formulaire. L'affichage suit tout de suite ; en cas d'échec, la case revient et un message l'indique.
+ */
+function Tracks({ kind, entry, tracks }) {
+  const { toast } = useToast();
+  const [checks, setChecks] = useState(entry.checks);
+  useEffect(() => {
+    setChecks(entry.checks);
+  }, [entry.checks]);
   const rows = list(tracks);
+  const entity = KIND_META[kind]?.entity;
   if (rows.length === 0) return null;
+
+  const change = async (track, next) => {
+    const previous = checks;
+    const updated = setChecked(checks, track.id, next);
+    setChecks(updated);
+    try {
+      await api.entities[entity].update(entry.id, { checks: cleanChecks(updated, rows) });
+    } catch (error) {
+      console.error("Enregistrement des cases cochées impossible :", error);
+      setChecks(previous);
+      toast({ variant: "destructive", title: "Cases non enregistrées", description: "Les cases cochées n’ont pas été enregistrées." });
+    }
+  };
+
   return (
     <Section title="Cases à cocher :">
       <div className="stack-y-1">
         {rows.map((track) => (
-          <TrackBoxes key={track.id} track={track} value={checks?.[track.id]} />
+          <TrackBoxes
+            key={track.id}
+            track={track}
+            value={checks?.[track.id]}
+            onChange={entity && entry.id ? (next) => change(track, next) : undefined}
+          />
         ))}
       </div>
     </Section>
@@ -122,7 +153,7 @@ function Skills({ skills, owner, sheet, setup }) {
     <Section title="Compétences :">
       <ul className="stack-y-1">
         {rows.map(({ skill, rawIndex }) => {
-          const extra = [skill.value ? `valeur ${skill.value}` : "", skill.roll_modifier ? `modif. ${skill.roll_modifier}` : "", fieldsLine(skill.fields)].filter(Boolean).join(" · ");
+          const extra = [skill.roll_modifier ? `modif. ${skill.roll_modifier}` : "", fieldsLine(skill.fields)].filter(Boolean).join(" · ");
           return (
             <li key={rawIndex} className="group flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px]">
               <FilterChip filterKey="competence" value={skill.name} className="px-1.5 py-0.5 text-[11px]" />
@@ -235,7 +266,7 @@ export default function CodexEntryDetails({ kind, entry, locationLabel = "", rel
             </p>
           )}
           <Characteristics characteristics={entry.characteristics} owner={owner} sheet={entry} setup={setup} />
-          <Tracks tracks={setup.tracks} checks={entry.checks} />
+          <Tracks kind={kind} entry={entry} tracks={setup.tracks} />
           <Skills skills={entry.skills} owner={owner} sheet={entry} setup={setup} />
           <Equipment equipment={entry.equipment} owner={owner} />
           <Inventory inventory={entry.inventory} owner={owner} />
@@ -260,7 +291,7 @@ export default function CodexEntryDetails({ kind, entry, locationLabel = "", rel
       {kind === "character" && (
         <>
           <Characteristics characteristics={entry.characteristics} owner={owner} sheet={entry} setup={setup} />
-          <Tracks tracks={setup.tracks} checks={entry.checks} />
+          <Tracks kind={kind} entry={entry} tracks={setup.tracks} />
           <Skills skills={entry.skills} owner={owner} sheet={entry} setup={setup} />
           <Equipment equipment={entry.equipment} owner={owner} />
           <Inventory inventory={entry.inventory} owner={owner} />

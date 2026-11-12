@@ -62,8 +62,7 @@ export function npcSheet(npc, gameSheetModel) {
         .filter((skill) => hasText(skill?.name))
         .map((skill) => {
             const modifier = gameSheetModel?.skillRollModifier && hasText(skill.roll_modifier) ? [skill.roll_modifier.trim()] : [];
-            const own = hasText(skill.value) ? [`valeur ${skill.value.trim()}`] : [];
-            const detail = [...own, ...modifier, ...optionalFields(skill.fields)].join(" · ");
+            const detail = [...modifier, ...optionalFields(skill.fields)].join(" · ");
             return detail ? `${skill.name} (${detail})` : skill.name;
         });
     const equipment = (Array.isArray(npc.equipment) ? npc.equipment : [])

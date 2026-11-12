@@ -1,7 +1,8 @@
 // Pure helpers of the roll dialog (no React, no Dexie): what a roll is made of, and how its result is shown.
 
-import { resolveRollSpec, statValue } from "@/lib/meta/dice.js";
+import { resolveRollSpec } from "@/lib/meta/dice.js";
 import { linkedModifier, skillCharacteristic } from "@/lib/meta/diceLinks.js";
+import { linkedStatValue } from "@/lib/meta/statLinks.js";
 
 const NUMBER = /^[+-]?\d+(\.\d+)?$/;
 
@@ -35,27 +36,21 @@ export function buildRollRequest({ setup, sheet, characteristic = "", skill = nu
 
   const characteristics = sheet?.characteristics && typeof sheet.characteristics === "object" ? sheet.characteristics : {};
   const hasValue = stat ? Object.hasOwn(characteristics, stat) : false;
-  let value = hasValue ? statValue(characteristics[stat]) : 0;
+  // A characteristic linked to another one adds the value of that one: Endurance 2 linked to Vigueur 3 rolls with 5.
+  const linked = linkedStatValue(stat, characteristics, setup?.parents);
+  const value = linked.total;
 
   const warnings = [];
   const notes = [];
   if (spec.warning) warnings.push(spec.warning);
   else if (stat && !hasValue) warnings.push(`La caractéristique « ${stat} » n'a pas de valeur sur cette fiche : valeur 0.`);
 
+  if (linked.parts.length > 1) {
+    notes.push(`Valeur : ${linked.parts.map((part) => `${part.name} ${part.value}`).join(" + ")} = ${linked.total}.`);
+  }
+
   let bonus = 0;
   if (skill) {
-    // A skill has a value of its own (skill.value): it is added to the one of its linked characteristic,
-    // so a secondary stat rolls its own value plus the one of its main stat (e.g. 2 + 3 = 5 dice in a pool).
-    const own = readNumber(skill.value);
-    if (own !== null) {
-      if (own !== 0) {
-        const name = String(skill.name || "").trim();
-        notes.push(stat ? `Valeur : ${stat} ${value} + ${name} ${own} = ${value + own}.` : `Valeur de la compétence : ${own}.`);
-        value += own;
-      }
-    } else if (String(skill.value ?? "").trim()) {
-      warnings.push(`Valeur « ${String(skill.value).trim()} » de la compétence non numérique : ignorée.`);
-    }
     // The modifier of the sheet wins; when it is empty, the one of the catalog applies.
     const text = String(skill.roll_modifier ?? "").trim() || linkedModifier(skill.name, setup?.modifiers);
     const parsed = readNumber(text);
