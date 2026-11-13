@@ -9,8 +9,9 @@ import { cleanDiceConfig, cleanDiceOverride, renameDiceCharacteristic } from "@/
 import { renameSheetLinks } from "@/lib/meta/diceLinks";
 import { renameCharacteristicNotes } from "@/lib/services/notes";
 import { cleanChecks, cleanTracks } from "@/lib/meta/tracks";
+import { cleanTextFields, cleanTexts } from "@/lib/meta/textFields";
 
-const EMPTY_MODEL = { characteristics: [], skillRollModifier: false, scale: { levels: [] }, pcScale: sanitizePcScale(null), dice: null, tracks: [] };
+const EMPTY_MODEL = { characteristics: [], skillRollModifier: false, scale: { levels: [] }, pcScale: sanitizePcScale(null), dice: null, tracks: [], textFields: [] };
 
 // Modèle tel que l'interface l'utilise, à partir de la ligne enregistrée (le barème est optionnel).
 const readModel = (row) => {
@@ -24,6 +25,8 @@ const readModel = (row) => {
     dice: cleanDiceConfig(row?.dice),
     // Pistes de cases à cocher (stress, radiations…) ; aucune par défaut.
     tracks: cleanTracks(row?.tracks),
+    // Champs de texte libres (archétype, âge, talents…) ; aucun par défaut.
+    textFields: cleanTextFields(row?.textFields),
   };
 };
 const normalize = (value) => String(value || "").trim().toLocaleLowerCase("fr");
@@ -117,7 +120,7 @@ export function useGameSheet(campaignId) {
       updatedNames.forEach((newName, previousName) => {
         dice = renameDiceCharacteristic(dice, previousName, newName);
       });
-      const payload = { campaign_id: campaignId, ...modelFields, scale, pc_scale: pcScale, dice, tracks: cleanTracks(nextModel.tracks ?? model.tracks) };
+      const payload = { campaign_id: campaignId, ...modelFields, scale, pc_scale: pcScale, dice, tracks: cleanTracks(nextModel.tracks ?? model.tracks), textFields: cleanTextFields(nextModel.textFields ?? model.textFields) };
       let saved;
       if (modelId) {
         saved = await api.entities.GameSheetModel.update(modelId, payload);
@@ -240,6 +243,8 @@ export function useGameSheet(campaignId) {
       ...(draft.dice_override ? { dice_override: cleanDiceOverride(draft.dice_override) } : {}),
       // Cases cochées par piste : absentes du brouillon, la valeur enregistrée est conservée.
       ...(draft.checks ? { checks: cleanChecks(draft.checks, model.tracks) } : {}),
+      // Textes des champs libres : absents du brouillon, la valeur enregistrée est conservée.
+      ...(draft.texts ? { texts: cleanTexts(draft.texts, model.textFields) } : {}),
     };
     try {
       const saved = draft.id

@@ -1,6 +1,7 @@
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import { cleanInventory, inventoryPrintLine } from "@/lib/meta/inventory";
 import { trackRows } from "@/lib/meta/tracks";
+import { textRows } from "@/lib/meta/textFields";
 
 const PAGE_WIDTH = 595.28;
 const PAGE_HEIGHT = 841.89;
@@ -446,7 +447,7 @@ export async function createEditablePdf(model) {
                 break;
             case "characters":
                 drawHeading("Fiches de personnages");
-                for (const [characterIndex, { character, characteristics, skillRollModifier, tracks = [] }] of block.characters.entries()) {
+                for (const [characterIndex, { character, characteristics, skillRollModifier, tracks = [], textFields = [] }] of block.characters.entries()) {
                     if (characterIndex > 0) addPage();
                     drawHeading(character.name, 2);
                     drawHeading("Caractéristiques", 3);
@@ -460,6 +461,13 @@ export async function createEditablePdf(model) {
                             return { name: definition.name, rows };
                         })
                     );
+                    const textLines = textRows(textFields, character.texts);
+                    if (textLines.length) {
+                        drawHeading("Informations", 3);
+                        for (const row of textLines) {
+                            drawField(row.name, row.value, row.long ? { multiline: true, height: 60 } : {});
+                        }
+                    }
                     const trackLines = trackRows(tracks, character.checks);
                     if (trackLines.length) {
                         drawHeading("Cases à cocher", 3);

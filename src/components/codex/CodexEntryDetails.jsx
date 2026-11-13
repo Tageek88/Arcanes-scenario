@@ -8,6 +8,8 @@ import { cleanInventory, inventoryLabel } from "@/lib/meta/inventory";
 import { PartPostItButton } from "@/components/common/PostItButton";
 import RollButton from "@/components/game/RollButton";
 import TrackBoxes from "@/components/game/TrackBoxes";
+import TextFieldsView from "@/components/game/TextFieldsView";
+import { textRows } from "@/lib/meta/textFields";
 import { api } from "@/api/localClient";
 import { useToast } from "@/components/ui/use-toast";
 import { cleanChecks, setChecked } from "@/lib/meta/tracks";
@@ -146,6 +148,16 @@ function Tracks({ kind, entry, tracks }) {
   );
 }
 
+/** Champs de texte du modèle de la campagne (archétype, talents…), en lecture seule : rien tant qu'ils sont vides. */
+function Texts({ fields, texts }) {
+  if (!textRows(fields, texts).some((row) => row.value)) return null;
+  return (
+    <Section title="Informations :">
+      <TextFieldsView fields={fields} texts={texts} compact />
+    </Section>
+  );
+}
+
 function Skills({ skills, owner, sheet, setup }) {
   const rows = list(skills).map((skill, rawIndex) => ({ skill, rawIndex })).filter(({ skill }) => skill?.name);
   if (rows.length === 0) return null;
@@ -266,6 +278,7 @@ export default function CodexEntryDetails({ kind, entry, locationLabel = "", rel
             </p>
           )}
           <Characteristics characteristics={entry.characteristics} owner={owner} sheet={entry} setup={setup} />
+          <Texts fields={setup.textFields} texts={entry.texts} />
           <Tracks kind={kind} entry={entry} tracks={setup.tracks} />
           <Skills skills={entry.skills} owner={owner} sheet={entry} setup={setup} />
           <Equipment equipment={entry.equipment} owner={owner} />
@@ -291,6 +304,7 @@ export default function CodexEntryDetails({ kind, entry, locationLabel = "", rel
       {kind === "character" && (
         <>
           <Characteristics characteristics={entry.characteristics} owner={owner} sheet={entry} setup={setup} />
+          <Texts fields={setup.textFields} texts={entry.texts} />
           <Tracks kind={kind} entry={entry} tracks={setup.tracks} />
           <Skills skills={entry.skills} owner={owner} sheet={entry} setup={setup} />
           <Equipment equipment={entry.equipment} owner={owner} />

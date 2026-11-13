@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FieldLabel } from "@/components/codex/NpcGeneratorPanel";
@@ -12,6 +13,7 @@ import { useRollSetup } from "@/hooks/useRollSetup";
 import { linkedCharacteristic } from "@/lib/meta/diceLinks";
 import TrackBoxes from "@/components/game/TrackBoxes";
 import { setChecked } from "@/lib/meta/tracks";
+import { setText } from "@/lib/meta/textFields";
 
 const normalize = (value) => String(value || "").trim().toLocaleLowerCase("fr");
 
@@ -197,6 +199,31 @@ export default function NpcSheetFields({ form, set, generator, generation, campa
               );
             })}
           </div>
+        </div>
+      )}
+
+      {roll.textFields?.length > 0 && (
+        <div className="stack-y-2">
+          <Label className="block">Informations</Label>
+          {roll.textFields.map((field) => (
+            <div key={field.id} className="stack-y-1">
+              <Label htmlFor={`npc-text-${field.id}`} className="text-xs text-muted-foreground">{field.name}</Label>
+              {field.long ? (
+                <Textarea
+                  id={`npc-text-${field.id}`}
+                  rows={3}
+                  value={form.texts?.[field.id] ?? ""}
+                  onChange={(event) => set("texts", setText(form.texts, field.id, event.target.value))}
+                />
+              ) : (
+                <Input
+                  id={`npc-text-${field.id}`}
+                  value={form.texts?.[field.id] ?? ""}
+                  onChange={(event) => set("texts", setText(form.texts, field.id, event.target.value))}
+                />
+              )}
+            </div>
+          ))}
         </div>
       )}
 

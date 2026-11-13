@@ -1,6 +1,7 @@
 import { cleanInventory, newItemId } from "@/lib/meta/inventory";
 import { cleanDiceOverride } from "@/lib/meta/dice";
 import { cleanChecks } from "@/lib/meta/tracks";
+import { cleanTexts } from "@/lib/meta/textFields";
 
 export const KIND_META = {
   npc: { entity: "NPC", title: "PNJ", singular: "PNJ", nameLabel: "Nom du PNJ" },
@@ -127,5 +128,7 @@ export function npcSheetPayload(form) {
     ...(form && "dice_override" in form ? { dice_override: cleanDiceOverride(form.dice_override) } : {}),
     // Cases cochées par piste : absentes du formulaire, la valeur enregistrée est conservée.
     ...(form && "checks" in form ? { checks: cleanChecks(form.checks) } : {}),
+    // Textes des champs libres : absents du formulaire, la valeur enregistrée est conservée.
+    ...(form && "texts" in form ? { texts: cleanTexts(form.texts) } : {}),
   };
 }

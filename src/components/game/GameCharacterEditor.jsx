@@ -17,8 +17,9 @@ import DiceOverrideField, { SkillLinkSelect } from "@/components/game/DiceOverri
 import { cleanDiceOverride } from "@/lib/meta/dice";
 import TrackBoxes from "@/components/game/TrackBoxes";
 import { cleanChecks, setChecked } from "@/lib/meta/tracks";
+import { cleanTexts, setText } from "@/lib/meta/textFields";
 
-const EMPTY = { name: "", notes: "", characteristics: {}, skills: [], equipment: [], inventory: [], checks: {} };
+const EMPTY = { name: "", notes: "", characteristics: {}, skills: [], equipment: [], inventory: [], checks: {}, texts: {} };
 const normalize = (value) => String(value || "").trim().toLocaleLowerCase("fr");
 
 const blankCharacteristic = () => ({ value: "", modifier: "", test: "", max: "" });
@@ -80,6 +81,7 @@ export default function GameCharacterEditor({
       equipment: structuredClone(character.equipment || []),
       inventory: structuredClone(character.inventory || []),
       checks: structuredClone(character.checks || {}),
+      texts: structuredClone(character.texts || {}),
     } : {
       ...EMPTY,
       characteristics: initialCharacteristics,
@@ -319,6 +321,7 @@ export default function GameCharacterEditor({
         inventory: cleanInventory(form.inventory),
         dice_override: cleanDiceOverride(form.dice_override),
         checks: cleanChecks(form.checks, model.tracks),
+        texts: cleanTexts(form.texts, model.textFields),
         generation_locks: Object.fromEntries(PC_LOCKABLE_FIELDS.filter((key) => generation.locks[key]).map((key) => [key, true])),
       });
       if (!saved) setSaveError("La fiche n’a pas été enregistrée.");
@@ -424,6 +427,31 @@ export default function GameCharacterEditor({
                 );
               })}
             </div>
+          </section>
+        )}
+
+        {model.textFields?.length > 0 && (
+          <section className="stack-y-3">
+            <h3 className="font-display font-semibold">Informations</h3>
+            {model.textFields.map((field) => (
+              <div key={field.id} className="stack-y-1.5">
+                <Label htmlFor={`text-${field.id}`}>{field.name}</Label>
+                {field.long ? (
+                  <Textarea
+                    id={`text-${field.id}`}
+                    rows={4}
+                    value={form.texts?.[field.id] ?? ""}
+                    onChange={(event) => setForm((current) => ({ ...current, texts: setText(current.texts, field.id, event.target.value) }))}
+                  />
+                ) : (
+                  <Input
+                    id={`text-${field.id}`}
+                    value={form.texts?.[field.id] ?? ""}
+                    onChange={(event) => setForm((current) => ({ ...current, texts: setText(current.texts, field.id, event.target.value) }))}
+                  />
+                )}
+              </div>
+            ))}
           </section>
         )}
 

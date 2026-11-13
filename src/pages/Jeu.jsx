@@ -20,6 +20,7 @@ import GameCatalogPanel, { GameTabBar } from "@/components/game/GameCatalogPanel
 import InventoryPanel from "@/components/game/InventoryPanel";
 import RollButton from "@/components/game/RollButton";
 import TrackBoxes from "@/components/game/TrackBoxes";
+import TextFieldsView from "@/components/game/TextFieldsView";
 import { setChecked } from "@/lib/meta/tracks";
 import { skillLinkMap, skillModifierMap } from "@/lib/meta/diceLinks";
 import { statParentMap } from "@/lib/meta/statLinks";
@@ -299,6 +300,7 @@ export default function Jeu() {
                       })}
                     </dl>
                   )}
+                  <TextFieldsView fields={model.textFields} texts={character.texts} compact className="mt-3" />
                   {model.tracks?.length > 0 && (
                     <div className="mt-3 stack-y-1.5">
                       {model.tracks.map((track) => (
@@ -394,6 +396,7 @@ export default function Jeu() {
             characteristics: model.characteristics,
             skillRollModifier: model.skillRollModifier,
             tracks: model.tracks,
+            textFields: model.textFields,
           }}
         />,
         document.body

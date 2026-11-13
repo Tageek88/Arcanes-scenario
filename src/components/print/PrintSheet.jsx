@@ -3,6 +3,7 @@ import { cleanInventory, inventoryPrintLine } from "@/lib/meta/inventory";
 import { useAppTheme } from "@/lib/context/ThemeContext";
 import { generatePrintCSS } from "@/lib/print/printStyles";
 import { trackRows } from "@/lib/meta/tracks";
+import { textRows } from "@/lib/meta/textFields";
 
 const Lines = ({ label, items }) =>
     items?.length > 0 ? (
@@ -56,7 +57,7 @@ function Block({ block }) {
             return (
                 <section className="prt-section">
                     <h2>Fiches de personnages</h2>
-                    {block.characters.map(({ character, characteristics, skillRollModifier, tracks }) => (
+                    {block.characters.map(({ character, characteristics, skillRollModifier, tracks, textFields }) => (
                         <article className="prt-character" key={character.id}>
                             <h3 className="prt-group">{character.name}</h3>
                             <CharacterContent
@@ -64,6 +65,7 @@ function Block({ block }) {
                                 characteristics={characteristics}
                                 skillRollModifier={skillRollModifier}
                                 tracks={tracks}
+                                textFields={textFields}
                             />
                         </article>
                     ))}
@@ -238,8 +240,9 @@ function Block({ block }) {
     }
 }
 
-function CharacterContent({ character, characteristics, skillRollModifier, tracks = [] }) {
+function CharacterContent({ character, characteristics, skillRollModifier, tracks = [], textFields = [] }) {
     const trackLines = trackRows(tracks, character.checks);
+    const textLines = textRows(textFields, character.texts).filter((row) => row.value);
     const stats = characteristics.map((definition) => {
         const values = character.characteristics?.[definition.name] || {};
         const fields = (values.fields || []).filter((f) => f.name || f.value);
@@ -268,6 +271,16 @@ function CharacterContent({ character, characteristics, skillRollModifier, track
                             </article>
                         ))}
                     </div>
+                </section>
+            )}
+            {textLines.length > 0 && (
+                <section className="prt-section">
+                    <h2>Informations</h2>
+                    {textLines.map((row) => (
+                        <p key={row.id} style={row.long ? { whiteSpace: "pre-wrap" } : undefined}>
+                            <strong>{row.name} :</strong> {row.value}
+                        </p>
+                    ))}
                 </section>
             )}
             {trackLines.length > 0 && (
@@ -332,7 +345,7 @@ export default function PrintSheet({ model }) {
     const css = useMemo(() => generatePrintCSS(resolved.tokens), [resolved.tokens]);
 
     if (model.character) {
-        const { character, campaignName, characteristics, skillRollModifier, tracks } = model;
+        const { character, campaignName, characteristics, skillRollModifier, tracks, textFields } = model;
         return (
             <div className="print-root">
                 <style>{css}</style>
@@ -345,6 +358,7 @@ export default function PrintSheet({ model }) {
                     characteristics={characteristics}
                     skillRollModifier={skillRollModifier}
                     tracks={tracks}
+                    textFields={textFields}
                 />
             </div>
         );

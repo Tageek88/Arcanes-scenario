@@ -5,9 +5,10 @@ import { useToast } from "@/components/ui/use-toast";
 import { cleanDiceConfig } from "@/lib/meta/dice";
 import { skillLinkMap, skillModifierMap } from "@/lib/meta/diceLinks";
 import { cleanTracks } from "@/lib/meta/tracks";
+import { cleanTextFields } from "@/lib/meta/textFields";
 import { statParentMap } from "@/lib/meta/statLinks";
 
-const EMPTY = { dice: null, links: {}, modifiers: {}, tracks: [], parents: {} };
+const EMPTY = { dice: null, links: {}, modifiers: {}, tracks: [], parents: {}, textFields: [] };
 
 // Une liste du Codex affiche beaucoup de fiches d'un coup : elles partagent la même lecture de la campagne.
 // Une lecture n'est partagée que quelques secondes, pour qu'un réglage modifié ailleurs soit relu à la visite suivante.
@@ -28,6 +29,8 @@ function loadSetup(campaignId, refreshKey) {
     modifiers: skillModifierMap(skills.items),
     // Pistes de cases à cocher du modèle : lues avec le réglage des dés, pour les fiches de PNJ et du Codex.
     tracks: cleanTracks(models.items[0]?.tracks),
+    // Champs de texte du modèle : lus avec le réglage des dés, pour les fiches de PNJ et du Codex.
+    textFields: cleanTextFields(models.items[0]?.textFields),
     // Liens entre caractéristiques (une secondaire ajoute la valeur de sa principale au lancer).
     parents: statParentMap(models.items[0]?.characteristics),
   }));

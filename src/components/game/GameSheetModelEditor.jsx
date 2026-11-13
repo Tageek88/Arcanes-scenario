@@ -12,11 +12,12 @@ import { Switch } from "@/components/ui/switch";
 import { DICE_MODES, DICE_MODE_LABELS, DICE_OUTCOMES, DICE_OUTCOME_LABELS, DICE_PRESETS, DICE_RULES, DICE_RULE_LABELS } from "@/lib/meta/dice";
 import { applyPresetToDraft, diceToDraft, draftToDice, updateDiceDraft, updateSingleDie, updateStatDie } from "@/lib/meta/diceDraft";
 import { MAX_TRACKS, MAX_TRACK_BOXES, draftToTracks, newTrackId, tracksToDraft } from "@/lib/meta/tracks";
+import { MAX_TEXT_FIELDS, draftToTextFields, newTextFieldId, textFieldsToDraft } from "@/lib/meta/textFields";
 import { cleanParents, keysToParents, parentChoices, parentsToKeys } from "@/lib/meta/statLinks";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const EMPTY_COUNT = { min: "", max: "" };
-const EMPTY_MODEL = { characteristics: [], skillRollModifier: false, levels: [], pc: { ranges: {}, skills: EMPTY_COUNT, equipment: EMPTY_COUNT }, dice: diceToDraft(null), tracks: [] };
+const EMPTY_MODEL = { characteristics: [], skillRollModifier: false, levels: [], pc: { ranges: {}, skills: EMPTY_COUNT, equipment: EMPTY_COUNT }, dice: diceToDraft(null), tracks: [], textFields: [] };
 
 const RULE_HELP = {
   add: "Le total des dés, plus la valeur de la caractéristique et le bonus du moment, est comparé à la difficulté.",
@@ -118,6 +119,7 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
         pc: pcScaleToDraft(model?.pcScale, characteristics),
         dice: diceToDraft(model?.dice, characteristics),
         tracks: tracksToDraft(model?.tracks),
+        textFields: textFieldsToDraft(model?.textFields),
       });
       setScaleReport("");
       setPcReport("");
@@ -217,6 +219,7 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
       // Rien de configuré et rien touché : on n'envoie rien, le réglage déjà enregistré est conservé.
       dice: draftToDice(form.dice, form.characteristics) ?? undefined,
       tracks: draftToTracks(form.tracks),
+      textFields: draftToTextFields(form.textFields),
     });
   };
 
@@ -275,6 +278,11 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
     setForm((current) => ({ ...current, tracks: current.tracks.map((track, i) => (i === index ? { ...track, ...patch } : track)) }));
   const addTrack = () => setForm((current) => ({ ...current, tracks: [...current.tracks, { id: newTrackId(), name: "", count: "" }] }));
   const removeTrack = (index) => setForm((current) => ({ ...current, tracks: current.tracks.filter((_, i) => i !== index) }));
+
+  const updateTextField = (index, patch) =>
+    setForm((current) => ({ ...current, textFields: current.textFields.map((field, i) => (i === index ? { ...field, ...patch } : field)) }));
+  const addTextField = () => setForm((current) => ({ ...current, textFields: [...current.textFields, { id: newTextFieldId(), name: "", long: false }] }));
+  const removeTextField = (index) => setForm((current) => ({ ...current, textFields: current.textFields.filter((_, i) => i !== index) }));
 
   const dice = form.dice;
   const isPool = dice.rule === "pool";
@@ -449,6 +457,40 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
               <Plus className="h-4 w-4" /> Ajouter une piste
             </Button>
             <p className="text-xs text-muted-foreground">Une piste sans nom, ou sans nombre de cases (de 1 à {MAX_TRACK_BOXES}), n'est pas enregistrée.</p>
+          </div>
+        </details>
+
+        <details className="rounded-lg border border-border p-3" open={form.textFields.length > 0}>
+          <summary className="cursor-pointer font-display font-semibold">Champs de texte</summary>
+          <div className="mt-3 stack-y-3">
+            <p className="text-xs text-muted-foreground">
+              Ajoutez des champs libres à la fiche (archétype, âge, talents, histoire…). Un champ « long » se saisit sur plusieurs lignes. Renommer un champ ne fait perdre aucun texte saisi.
+            </p>
+            {form.textFields.map((field, index) => (
+              <div key={field.id} className="grid grid-cols-[minmax(0,1fr)_auto_2.5rem] items-center gap-2">
+                <Input
+                  aria-label={`Nom du champ de texte ${index + 1}`}
+                  value={field.name}
+                  placeholder="Ex. Archétype"
+                  onChange={(event) => updateTextField(index, { name: event.target.value })}
+                />
+                <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <input
+                    type="checkbox"
+                    checked={field.long}
+                    onChange={(event) => updateTextField(index, { long: event.target.checked })}
+                  />
+                  Long
+                </label>
+                <Button type="button" variant="ghost" size="icon" aria-label={`Supprimer le champ ${field.name || index + 1}`} onClick={() => removeTextField(index)}>
+                  <Trash2 className="h-4 w-4 text-muted-foreground" />
+                </Button>
+              </div>
+            ))}
+            <Button type="button" variant="outline" size="sm" onClick={addTextField} disabled={form.textFields.length >= MAX_TEXT_FIELDS}>
+              <Plus className="h-4 w-4" /> Ajouter un champ
+            </Button>
+            <p className="text-xs text-muted-foreground">Un champ sans nom n'est pas enregistré.</p>
           </div>
         </details>
 

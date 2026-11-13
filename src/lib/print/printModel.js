@@ -7,6 +7,7 @@ import { describeTarget } from "@/lib/meta/postit";
 import { cleanInventory, inventoryOwners, inventoryPrintLine } from "@/lib/meta/inventory";
 import { cleanJournal, journalEntries } from "@/lib/meta/sessionJournal";
 import { trackRows } from "@/lib/meta/tracks";
+import { textRows } from "@/lib/meta/textFields";
 
 export const SECTIONS = [
     { key: "scenes", title: "Scènes et actes", hint: "Chaque scène est imprimée avec ses indices liés." },
@@ -76,6 +77,10 @@ export function npcSheet(npc, gameSheetModel) {
     trackRows(gameSheetModel?.tracks, npc.checks)
         .filter((track) => track.checked > 0)
         .forEach((track) => lines.push(`${track.name} : ${track.checked}/${track.count}`));
+    // Champs de texte du modèle (archétype, talents…) : seuls les champs remplis sont imprimés.
+    textRows(gameSheetModel?.textFields, npc.texts)
+        .filter((field) => field.value)
+        .forEach((field) => lines.push(`${field.name} : ${field.value}`));
     return { lines, stats, skills, equipment, inventory };
 }
 
@@ -438,6 +443,8 @@ export function buildPrintModel(data, sel, opts) {
             skillRollModifier: !!gameSheetModel?.skillRollModifier,
             // Pistes de cases à cocher du modèle, pour imprimer les cases cochées de chaque fiche.
             ...(gameSheetModel?.tracks?.length ? { tracks: gameSheetModel.tracks } : {}),
+            // Champs de texte du modèle, pour imprimer les textes de chaque fiche.
+            ...(gameSheetModel?.textFields?.length ? { textFields: gameSheetModel.textFields } : {}),
         }));
     if (selectedCharacters.length) {
         blocks.push({ kind: "characters", characters: selectedCharacters });
