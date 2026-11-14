@@ -26,6 +26,7 @@ const DATA = {
   textFields: [{ id: "x1", name: "Archétype", long: false }],
   layouts: [{ id: "l1", name: "Metro", columns: 2, blocks: [{ id: "g1", kind: "stat-group", stat: "Vigueur" }] }],
   layoutId: "l1",
+  zones: [{ id: "z1", kind: "stat", ref: "Vigueur", page: 0, x: 0.1, y: 0.1, w: 0.1, h: 0.05, size: 2 }],
 };
 const SYSTEM = { name: "Metro 2033", description: "Survie", data: DATA };
 
@@ -54,7 +55,7 @@ describe("cleanSystemData", () => {
   it("renvoie toujours toutes les clés, même pour une valeur vide", () => {
     const out = cleanSystemData(null);
     expect(Object.keys(out).sort()).toEqual(
-      ["characteristics", "dice", "equipment", "layoutId", "layouts", "pc_scale", "scale", "skillRollModifier", "skills", "textFields", "tracks"]
+      ["characteristics", "dice", "equipment", "layoutId", "layouts", "pc_scale", "scale", "skillRollModifier", "skills", "textFields", "tracks", "zones"]
     );
     expect(out.characteristics).toEqual([]);
     expect(out.dice).toBeNull();
@@ -93,7 +94,7 @@ describe("cleanSystemInfo et describeSystem", () => {
   });
 
   it("compte ce que contient un système", () => {
-    expect(describeSystem(SYSTEM)).toEqual({ stats: 3, links: 1, tracks: 1, textFields: 1, layouts: 1, hasDice: true, skills: 0, equipment: 0 });
+    expect(describeSystem(SYSTEM)).toEqual({ stats: 3, links: 1, tracks: 1, textFields: 1, layouts: 1, zones: 1, hasDice: true, skills: 0, equipment: 0 });
   });
 });
 

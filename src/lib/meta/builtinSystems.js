@@ -96,6 +96,8 @@ export const BUILTIN_SYSTEMS = [
       textFields: METRO_TEXT_FIELDS,
       layouts: [METRO_LAYOUT],
       layoutId: "metro",
+      // Les positions des valeurs sur la feuille viendront avec le fond de chaque utilisateur : aucune par défaut.
+      zones: [],
       skills: [],
       equipment: [],
     },

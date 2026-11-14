@@ -27,6 +27,7 @@ function summary(system) {
   if (info.tracks) parts.push(plural(info.tracks, "piste de cases", "pistes de cases"));
   if (info.textFields) parts.push(plural(info.textFields, "champ de texte", "champs de texte"));
   if (info.layouts) parts.push(plural(info.layouts, "mise en page", "mises en page"));
+  if (info.zones) parts.push(plural(info.zones, "valeur placée sur la feuille", "valeurs placées sur la feuille"));
   if (info.skills) parts.push(plural(info.skills, "compétence", "compétences"));
   if (info.equipment) parts.push(plural(info.equipment, "équipement", "équipements"));
   if (info.hasDice) parts.push("lancer de dés");

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { Copy, FileImage, Library, Pencil, Plus, Printer, Search, Shield, Trash2, UserRound } from "lucide-react";
+import { Copy, FileImage, FileText, Library, Pencil, Plus, Printer, Search, Shield, Trash2, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PrintSheet from "@/components/print/PrintSheet";
@@ -17,6 +17,8 @@ import {
 import GameSheetModelEditor from "@/components/game/GameSheetModelEditor";
 import GameSystemsDialog from "@/components/game/GameSystemsDialog";
 import SheetBackgroundDialog from "@/components/game/SheetBackgroundDialog";
+import SheetFaceDialog from "@/components/game/SheetFaceDialog";
+import SheetZonesDialog from "@/components/game/SheetZonesDialog";
 import GameCharacterEditor from "@/components/game/GameCharacterEditor";
 import GameCatalogPanel, { GameTabBar } from "@/components/game/GameCatalogPanel";
 import InventoryPanel from "@/components/game/InventoryPanel";
@@ -61,6 +63,7 @@ export default function Jeu() {
     saveModel,
     saveCharacter,
     saveChecks,
+    saveZones,
     deleteCharacter: removeCharacter,
   } = useGameSheet(campaignId);
   // Réglage du lancer de dés : déjà chargé avec le modèle, donc toujours à jour après une modification.
@@ -74,6 +77,9 @@ export default function Jeu() {
   const [modelOpen, setModelOpen] = useState(false);
   const [systemsOpen, setSystemsOpen] = useState(false);
   const [backgroundOpen, setBackgroundOpen] = useState(false);
+  const [zonesOpen, setZonesOpen] = useState(false);
+  // Fiche montrée sur sa feuille (ordinateur) : on garde l'identifiant pour suivre les cases cochées.
+  const [faceCharacterId, setFaceCharacterId] = useState("");
   const [characterOpen, setCharacterOpen] = useState(false);
   const [characterDraft, setCharacterDraft] = useState(null);
   const [characterToPrint, setCharacterToPrint] = useState(null);
@@ -279,6 +285,11 @@ export default function Jeu() {
                     </div>
                     <div className="flex shrink-0 items-center gap-1">
                       <PostItButton target={{ kind: "character", id: character.id }} label={character.name} />
+                      {model.zones.length > 0 && (
+                        <Button size="icon" variant="ghost" className="hidden md:inline-flex" aria-label={`Voir la feuille de ${character.name}`} onClick={() => setFaceCharacterId(character.id)}>
+                          <FileText className="h-4 w-4" />
+                        </Button>
+                      )}
                       <Button size="icon" variant="ghost" aria-label={`Imprimer ${character.name}`} onClick={() => setCharacterToPrint(character)}>
                         <Printer className="h-4 w-4" />
                       </Button>
@@ -381,7 +392,24 @@ export default function Jeu() {
         saving={savingModel}
       />
       <GameSystemsDialog open={systemsOpen} onOpenChange={setSystemsOpen} campaignId={campaignId} hasModel={Boolean(modelId)} />
-      <SheetBackgroundDialog open={backgroundOpen} onOpenChange={setBackgroundOpen} campaignId={campaignId} />
+      <SheetBackgroundDialog
+        open={backgroundOpen}
+        onOpenChange={setBackgroundOpen}
+        campaignId={campaignId}
+        onPlaceValues={() => {
+          setBackgroundOpen(false);
+          setZonesOpen(true);
+        }}
+      />
+      <SheetZonesDialog open={zonesOpen} onOpenChange={setZonesOpen} campaignId={campaignId} model={model} zones={model.zones} onSave={saveZones} saving={savingModel} />
+      <SheetFaceDialog
+        open={Boolean(faceCharacterId)}
+        onOpenChange={(next) => { if (!next) setFaceCharacterId(""); }}
+        campaignId={campaignId}
+        model={model}
+        character={characters.find((item) => item.id === faceCharacterId) || null}
+        onChecks={saveChecks}
+      />
       <GameCharacterEditor
         key={characterDraft?.id || (characterDraft ? "duplicate" : "new")}
         open={characterOpen}

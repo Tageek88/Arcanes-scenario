@@ -11,8 +11,9 @@ import { renameCharacteristicNotes } from "@/lib/services/notes";
 import { cleanChecks, cleanTracks } from "@/lib/meta/tracks";
 import { cleanTextFields, cleanTexts } from "@/lib/meta/textFields";
 import { activeLayoutId, cleanLayouts } from "@/lib/meta/layouts";
+import { cleanZones, renameZoneStats } from "@/lib/meta/sheetZones";
 
-const EMPTY_MODEL = { characteristics: [], skillRollModifier: false, scale: { levels: [] }, pcScale: sanitizePcScale(null), dice: null, tracks: [], textFields: [], layouts: [], layoutId: "" };
+const EMPTY_MODEL = { characteristics: [], skillRollModifier: false, scale: { levels: [] }, pcScale: sanitizePcScale(null), dice: null, tracks: [], textFields: [], layouts: [], layoutId: "", zones: [] };
 
 // Modèle tel que l'interface l'utilise, à partir de la ligne enregistrée (le barème est optionnel).
 const readModel = (row) => {
@@ -31,6 +32,8 @@ const readModel = (row) => {
     // Mises en page de la fiche (plusieurs possibles) et celle en cours d'usage ; aucune = la carte classique.
     layouts: cleanLayouts(row?.layouts, { characteristics, tracks: cleanTracks(row?.tracks), textFields: cleanTextFields(row?.textFields) }),
     layoutId: String(row?.layoutId ?? ""),
+    // Zones des valeurs sur le fond de feuille (positions en fractions de page) ; aucune par défaut.
+    zones: cleanZones(row?.zones, { characteristics, tracks: cleanTracks(row?.tracks), textFields: cleanTextFields(row?.textFields) }),
   };
 };
 const normalize = (value) => String(value || "").trim().toLocaleLowerCase("fr");
@@ -137,6 +140,8 @@ export function useGameSheet(campaignId) {
         textFields: nextTextFields,
         layouts: nextLayouts,
         layoutId: activeLayoutId(nextLayouts, nextModel.layoutId ?? model.layoutId),
+        // Les zones suivent les renommages de caractéristiques ; celles dont l'élément a disparu sont retirées.
+        zones: cleanZones(renameZoneStats(nextModel.zones ?? model.zones, updatedNames), { characteristics: nextModel.characteristics, tracks: nextTracks, textFields: nextTextFields }),
       };
       let saved;
       if (modelId) {
@@ -231,6 +236,29 @@ export function useGameSheet(campaignId) {
     } catch (error) {
       console.error("Enregistrement du barème impossible :", error);
       toast({ variant: "destructive", title: "Barème non enregistré", description: "Le barème n’a pas été enregistré." });
+      return false;
+    } finally {
+      setSavingModel(false);
+    }
+  };
+
+  // Enregistre uniquement le placement des valeurs sur le fond de feuille (le modèle de fiche doit déjà exister).
+  const saveZones = async (nextZones) => {
+    if (!campaignId) return false;
+    if (!modelId) {
+      toast({ variant: "destructive", title: "Placement non enregistré", description: "Créez d’abord le modèle de fiche : le placement s’appuie sur ses caractéristiques." });
+      return false;
+    }
+    setSavingModel(true);
+    try {
+      const zones = cleanZones(nextZones, model);
+      const saved = await api.entities.GameSheetModel.update(modelId, { zones });
+      setModel(readModel(saved));
+      toast({ title: "Placement enregistré" });
+      return true;
+    } catch (error) {
+      console.error("Enregistrement du placement impossible :", error);
+      toast({ variant: "destructive", title: "Placement non enregistré", description: "Le placement des valeurs n’a pas été enregistré." });
       return false;
     } finally {
       setSavingModel(false);
@@ -366,6 +394,7 @@ export function useGameSheet(campaignId) {
     savingCharacter,
     saveModel,
     saveScale,
+    saveZones,
     saveCharacter,
     saveChecks,
     deleteCharacter,

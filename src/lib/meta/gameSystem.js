@@ -12,6 +12,7 @@ import { cleanParents } from "@/lib/meta/statLinks";
 import { cleanTracks } from "@/lib/meta/tracks";
 import { cleanTextFields } from "@/lib/meta/textFields";
 import { activeLayoutId, cleanLayouts } from "@/lib/meta/layouts";
+import { cleanZones } from "@/lib/meta/sheetZones";
 
 export const SYSTEM_APP = "arcanes-scenario";
 export const SYSTEM_KIND = "game-system";
@@ -108,6 +109,7 @@ export function cleanSystemData(raw) {
   const tracks = cleanTracks(source.tracks);
   const textFields = cleanTextFields(source.textFields);
   const layouts = cleanLayouts(source.layouts, { characteristics, tracks, textFields });
+  const zones = cleanZones(source.zones, { characteristics, tracks, textFields });
   return {
     characteristics,
     skillRollModifier: source.skillRollModifier === true,
@@ -118,6 +120,7 @@ export function cleanSystemData(raw) {
     textFields,
     layouts,
     layoutId: activeLayoutId(layouts, source.layoutId),
+    zones,
     skills: cleanCatalogSkills(source.skills, names),
     equipment: cleanCatalogEquipment(source.equipment),
   };
@@ -143,6 +146,7 @@ export function describeSystem(system) {
     tracks: data.tracks.length,
     textFields: data.textFields.length,
     layouts: data.layouts.length,
+    zones: data.zones.length,
     hasDice: Boolean(data.dice),
     skills: data.skills.length,
     equipment: data.equipment.length,
@@ -195,6 +199,7 @@ export function parseSystemFile(content, size = String(content ?? "").length) {
     ["case à cocher", "cases à cocher", "e", countDropped(raw.tracks, data.tracks.length)],
     ["champ de texte", "champs de texte", "", countDropped(raw.textFields, data.textFields.length)],
     ["mise en page", "mises en page", "e", countDropped(raw.layouts, data.layouts.length)],
+    ["zone de la feuille", "zones de la feuille", "e", countDropped(raw.zones, data.zones.length)],
     ["compétence", "compétences", "e", countDropped(raw.skills, data.skills.length)],
     ["équipement", "équipements", "", countDropped(raw.equipment, data.equipment.length)],
   ];
