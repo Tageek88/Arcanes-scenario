@@ -32,9 +32,11 @@ function newCanvas(width, height) {
 }
 
 async function renderPdf(file) {
-  const [pdfjs, worker] = await Promise.all([import("pdfjs-dist"), import("pdfjs-dist/build/pdf.worker.min.mjs?url")]);
+  // Version « legacy » de pdfjs : elle fonctionne aussi dans les navigateurs et les Electron un peu anciens (Promise.withResolvers, etc.).
+  const [pdfjs, worker] = await Promise.all([import("pdfjs-dist/legacy/build/pdf.mjs"), import("pdfjs-dist/legacy/build/pdf.worker.min.mjs?url")]);
   pdfjs.GlobalWorkerOptions.workerSrc = worker.default;
-  const document_ = await pdfjs.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
+  const task = pdfjs.getDocument({ data: new Uint8Array(await file.arrayBuffer()) });
+  const document_ = await task.promise;
   try {
     const count = Math.min(document_.numPages, MAX_BACKGROUND_PAGES);
     const pages = [];
@@ -49,7 +51,12 @@ async function renderPdf(file) {
     }
     return { pages, truncated: document_.numPages > count };
   } finally {
-    await document_.destroy();
+    // On libère via la tâche de chargement (présente dans toutes les versions de pdfjs) ; une erreur ici ne doit pas masquer la vraie.
+    try {
+      await task.destroy?.();
+    } catch (error) {
+      console.warn("Libération du PDF impossible :", error);
+    }
   }
 }
 
@@ -86,7 +93,14 @@ export async function importSheetFile(file) {
     return await (isPdfFile(file) ? renderPdf(file) : renderImageFile(file));
   } catch (error) {
     console.error("Conversion de la feuille impossible :", error);
-    throw new Error(isPdfFile(file) ? "Ce PDF n'a pas pu être lu (fichier protégé ou abîmé ?)." : error?.message || "Le fichier n'a pas pu être lu.");
+    if (!isPdfFile(file)) throw new Error(error?.message || "Le fichier n'a pas pu être lu.");
+    const reason =
+      error?.name === "PasswordException"
+        ? "il est protégé par un mot de passe"
+        : error?.name === "InvalidPDFException"
+          ? "il semble abîmé"
+          : String(error?.message || error || "erreur inconnue").slice(0, 160);
+    throw new Error(`Ce PDF n'a pas pu être lu (${reason}).`);
   }
 }
 
