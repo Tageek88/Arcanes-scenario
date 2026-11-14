@@ -1,5 +1,6 @@
 import { api } from "@/api/localClient";
 import { loadRelations } from "@/lib/services/npcRelations";
+import { loadSheetBackground } from "@/lib/services/sheetBackgroundStore";
 
 const LIMIT = 5000;
 
@@ -10,7 +11,7 @@ const LIMIT = 5000;
  */
 export async function loadPrintData(campaignId) {
   const list = (entity) => api.entities[entity].filter({ campaign_id: campaignId }, { limit: LIMIT });
-  const [campaign, quests, acts, scenes, npcs, locations, clues, notes, tables, sessions, characters, models, relations] =
+  const [campaign, quests, acts, scenes, npcs, locations, clues, notes, tables, sessions, characters, models, relations, sheetPages] =
     await Promise.all([
       api.entities.Campaign.get(campaignId).catch(() => null),
       list("Quest"),
@@ -25,6 +26,8 @@ export async function loadPrintData(campaignId) {
       list("GameCharacter"),
       api.entities.GameSheetModel.filter({ campaign_id: campaignId }, { limit: 1 }),
       loadRelations(campaignId),
+      // Fond de la feuille de personnage : sans lui (ou en cas d'erreur), l'impression reste celle par liste.
+      loadSheetBackground(campaignId).catch(() => []),
     ]);
   return {
     campaign,
@@ -40,5 +43,6 @@ export async function loadPrintData(campaignId) {
     characters: characters.items,
     gameSheetModel: models.items[0] || null,
     relations,
+    sheetPages,
   };
 }

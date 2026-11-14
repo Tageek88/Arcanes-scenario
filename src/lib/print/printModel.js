@@ -8,6 +8,7 @@ import { cleanInventory, inventoryOwners, inventoryPrintLine } from "@/lib/meta/
 import { cleanJournal, journalEntries } from "@/lib/meta/sessionJournal";
 import { trackRows } from "@/lib/meta/tracks";
 import { textRows } from "@/lib/meta/textFields";
+import { sheetForPrint } from "@/lib/meta/sheetZones";
 
 export const SECTIONS = [
     { key: "scenes", title: "Scènes et actes", hint: "Chaque scène est imprimée avec ses indices liés." },
@@ -226,7 +227,7 @@ function noteTargetLabel(note, lookup) {
 }
 
 export function buildPrintModel(data, sel, opts) {
-    const { campaign, acts, scenes, npcs, locations, clues, notes, tables = [], sessions = [], relations, characters = [], gameSheetModel } = data;
+    const { campaign, acts, scenes, npcs, locations, clues, notes, tables = [], sessions = [], relations, characters = [], gameSheetModel, sheetPages } = data;
     const sceneById = new Map(scenes.map((s) => [s.id, s]));
     const npcById = new Map(npcs.map((p) => [p.id, p]));
     const clueById = new Map(clues.map((c) => [c.id, c]));
@@ -434,6 +435,8 @@ export function buildPrintModel(data, sel, opts) {
 
     // 8. Fiches de personnages
     const characterIds = sel.characters || new Set();
+    // Feuille de la campagne (fond + zones) : posée sous les valeurs de chaque fiche quand le placement est fait.
+    const printSheet = sheetForPrint(gameSheetModel, sheetPages);
     const selectedCharacters = characters
         .filter((character) => characterIds.has(character.id))
         .sort(byName)
@@ -445,6 +448,7 @@ export function buildPrintModel(data, sel, opts) {
             ...(gameSheetModel?.tracks?.length ? { tracks: gameSheetModel.tracks } : {}),
             // Champs de texte du modèle, pour imprimer les textes de chaque fiche.
             ...(gameSheetModel?.textFields?.length ? { textFields: gameSheetModel.textFields } : {}),
+            ...(printSheet ? { sheet: printSheet } : {}),
         }));
     if (selectedCharacters.length) {
         blocks.push({ kind: "characters", characters: selectedCharacters });

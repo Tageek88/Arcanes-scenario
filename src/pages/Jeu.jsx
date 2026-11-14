@@ -19,6 +19,8 @@ import GameSystemsDialog from "@/components/game/GameSystemsDialog";
 import SheetBackgroundDialog from "@/components/game/SheetBackgroundDialog";
 import SheetFaceDialog from "@/components/game/SheetFaceDialog";
 import SheetZonesDialog from "@/components/game/SheetZonesDialog";
+import { loadSheetBackground } from "@/lib/services/sheetBackgroundStore";
+import { sheetForPrint } from "@/lib/meta/sheetZones";
 import GameCharacterEditor from "@/components/game/GameCharacterEditor";
 import GameCatalogPanel, { GameTabBar } from "@/components/game/GameCatalogPanel";
 import InventoryPanel from "@/components/game/InventoryPanel";
@@ -83,6 +85,8 @@ export default function Jeu() {
   const [characterOpen, setCharacterOpen] = useState(false);
   const [characterDraft, setCharacterDraft] = useState(null);
   const [characterToPrint, setCharacterToPrint] = useState(null);
+  // Pages du fond de feuille chargées pour l'impression d'une fiche (vide s'il n'y a pas de placement).
+  const [printPages, setPrintPages] = useState([]);
   const [pendingDelete, setPendingDelete] = useState(null);
   const [gameTab, setGameTab] = useState("characters");
 
@@ -90,16 +94,28 @@ export default function Jeu() {
     if (!characterToPrint) return;
     let cancelled = false;
     const print = async () => {
-      await new Promise((resolve) => setTimeout(resolve, 80));
+      let delay = 80;
+      if (model.zones.length > 0) {
+        const pages = await loadSheetBackground(campaignId).catch(() => []);
+        if (cancelled) return;
+        setPrintPages(pages);
+        // Les grandes images ont besoin d'un instant pour s'afficher avant l'impression.
+        if (pages.length > 0) delay = 400;
+      }
+      await new Promise((resolve) => setTimeout(resolve, delay));
       if (!cancelled) window.print();
     };
     print();
-    const done = () => setCharacterToPrint(null);
+    const done = () => {
+      setCharacterToPrint(null);
+      setPrintPages([]);
+    };
     window.addEventListener("afterprint", done);
     return () => {
       cancelled = true;
       window.removeEventListener("afterprint", done);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [characterToPrint]);
 
   const openNewCharacter = () => {
@@ -444,6 +460,7 @@ export default function Jeu() {
             skillRollModifier: model.skillRollModifier,
             tracks: model.tracks,
             textFields: model.textFields,
+            sheet: sheetForPrint(model, printPages),
           }}
         />,
         document.body

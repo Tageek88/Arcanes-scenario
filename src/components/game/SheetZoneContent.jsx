@@ -8,17 +8,19 @@ const INK = "#111827";
  * de l'élément à la place de la valeur. Les cases d'une piste se cochent quand `onToggle(zone, index)` est fourni.
  * `px(taille)` donne la taille en pixels ; `longIds` est l'ensemble des champs de texte longs (ils passent à la ligne).
  */
-export default function SheetZoneContent({ zone, sheet, tracks, longIds, px, preview, onToggle }) {
+export default function SheetZoneContent({ zone, sheet, tracks, longIds, px, preview, onToggle, unit = "px" }) {
   const fontSize = px(zone.size);
+  const css = (value) => `${value}${unit}`;
+  const exact = { WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" };
   if (zone.kind === "track") {
     const { count, checked } = zoneBoxes(zone, tracks, preview ? {} : sheet);
-    const box = Math.max(4, fontSize);
+    const box = unit === "px" ? Math.max(4, fontSize) : fontSize;
     const trackName = (tracks || []).find((item) => item.id === zone.ref)?.name || "Case";
     return (
-      <div className="flex h-full w-full flex-wrap content-start items-start" style={{ gap: box * 0.25 }}>
+      <div className="flex h-full w-full flex-wrap content-start items-start" style={{ gap: css(box * 0.25) }}>
         {Array.from({ length: count }, (_, index) => {
           const on = index < checked;
-          const style = { width: box, height: box, border: `1px solid ${INK}`, background: on ? INK : "transparent", borderRadius: 2 };
+          const style = { width: css(box), height: css(box), border: `1px solid ${INK}`, background: on ? INK : "transparent", borderRadius: 2, ...exact };
           return onToggle && !preview ? (
             <button
               key={index}
@@ -43,7 +45,7 @@ export default function SheetZoneContent({ zone, sheet, tracks, longIds, px, pre
     <div
       className="flex h-full w-full overflow-hidden"
       style={{
-        fontSize,
+        fontSize: css(fontSize),
         lineHeight: 1.15,
         color: INK,
         alignItems: isLong ? "flex-start" : "center",

@@ -4,6 +4,7 @@ import { useAppTheme } from "@/lib/context/ThemeContext";
 import { generatePrintCSS } from "@/lib/print/printStyles";
 import { trackRows } from "@/lib/meta/tracks";
 import { textRows } from "@/lib/meta/textFields";
+import SheetPrintPages from "@/components/print/SheetPrintPages";
 
 const Lines = ({ label, items }) =>
     items?.length > 0 ? (
@@ -57,7 +58,7 @@ function Block({ block }) {
             return (
                 <section className="prt-section">
                     <h2>Fiches de personnages</h2>
-                    {block.characters.map(({ character, characteristics, skillRollModifier, tracks, textFields }) => (
+                    {block.characters.map(({ character, characteristics, skillRollModifier, tracks, textFields, sheet }) => (
                         <article className="prt-character" key={character.id}>
                             <h3 className="prt-group">{character.name}</h3>
                             <CharacterContent
@@ -66,6 +67,7 @@ function Block({ block }) {
                                 skillRollModifier={skillRollModifier}
                                 tracks={tracks}
                                 textFields={textFields}
+                                sheet={sheet}
                             />
                         </article>
                     ))}
@@ -240,9 +242,11 @@ function Block({ block }) {
     }
 }
 
-function CharacterContent({ character, characteristics, skillRollModifier, tracks = [], textFields = [] }) {
-    const trackLines = trackRows(tracks, character.checks);
-    const textLines = textRows(textFields, character.texts).filter((row) => row.value);
+function CharacterContent({ character, characteristics, skillRollModifier, tracks = [], textFields = [], sheet = null }) {
+    // Quand la feuille couvre tout le modèle, ses pages remplacent la liste des caractéristiques, des textes et des cases.
+    const covered = sheet?.covers === true;
+    const trackLines = covered ? [] : trackRows(tracks, character.checks);
+    const textLines = covered ? [] : textRows(textFields, character.texts).filter((row) => row.value);
     const stats = characteristics.map((definition) => {
         const values = character.characteristics?.[definition.name] || {};
         const fields = (values.fields || []).filter((f) => f.name || f.value);
@@ -251,7 +255,8 @@ function CharacterContent({ character, characteristics, skillRollModifier, track
 
     return (
         <>
-            {stats.length > 0 && (
+            {sheet && <SheetPrintPages sheet={sheet} character={character} tracks={tracks} textFields={textFields} />}
+            {stats.length > 0 && !covered && (
                 <section className="prt-section">
                     <h2>Caractéristiques</h2>
                     <div className="prt-character-grid">
@@ -345,7 +350,7 @@ export default function PrintSheet({ model }) {
     const css = useMemo(() => generatePrintCSS(resolved.tokens), [resolved.tokens]);
 
     if (model.character) {
-        const { character, campaignName, characteristics, skillRollModifier, tracks, textFields } = model;
+        const { character, campaignName, characteristics, skillRollModifier, tracks, textFields, sheet } = model;
         return (
             <div className="print-root">
                 <style>{css}</style>
@@ -359,6 +364,7 @@ export default function PrintSheet({ model }) {
                     skillRollModifier={skillRollModifier}
                     tracks={tracks}
                     textFields={textFields}
+                    sheet={sheet}
                 />
             </div>
         );

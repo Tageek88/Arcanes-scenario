@@ -188,6 +188,20 @@ export function zoneBoxes(zone, tracks, sheet) {
   return { count: track.count, checked: checkedCount(checks[track.id], track.count) };
 }
 
+/**
+ * La feuille à imprimer pour un modèle et les pages du fond : { pages, zones, covers }, ou null s'il n'y a rien à poser
+ * (aucune zone, aucun fond, ou aucune zone sur une page existante). `covers` : toutes les valeurs du modèle sont placées
+ * sur la feuille, l'impression peut donc se passer de la liste des caractéristiques, des textes et des cases.
+ */
+export function sheetForPrint(model, pages) {
+  const zones = Array.isArray(model?.zones) ? model.zones : [];
+  const list = Array.isArray(pages) ? pages : [];
+  if (zones.length === 0 || list.length === 0) return null;
+  const onPages = zones.filter((zone) => zone.page < list.length);
+  if (onPages.length === 0) return null;
+  return { pages: list, zones: onPages, covers: onPages.length === zones.length && unplacedItems(model, zones).length === 0 };
+}
+
 /** Résumé pour l'éditeur : « 12 valeurs placées sur 34 ». */
 export function zonesSummary(model, zones) {
   const total = placeableItems(model).length;

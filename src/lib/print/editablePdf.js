@@ -2,6 +2,7 @@ import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import { cleanInventory, inventoryPrintLine } from "@/lib/meta/inventory";
 import { trackRows } from "@/lib/meta/tracks";
 import { textRows } from "@/lib/meta/textFields";
+import { drawSheetPages } from "@/lib/print/sheetPdf";
 
 const PAGE_WIDTH = 595.28;
 const PAGE_HEIGHT = 841.89;
@@ -21,7 +22,8 @@ const safeFieldText = (value) =>
         .replace(/…/g, "...")
         .replace(/[•·]/g, "-")
         // eslint-disable-next-line no-control-regex
-        .replace(/[^\u0000-\u00FF]/g, "?");
+        // Les lettres de l'encodage WinAnsi hors Latin-1 (œ, Œ, š, ž, Ÿ, €, ™…) s'impriment bien : seul le reste devient « ? ».
+        .replace(/[^\u0000-\u00FF\u0152\u0153\u0160\u0161\u0178\u017D\u017E\u0192\u02C6\u02DC\u2020\u2021\u2030\u2039\u203A\u20AC\u2122]/g, "?");
 
 const fileSafe = (value) =>
     // eslint-disable-next-line no-control-regex
@@ -447,11 +449,17 @@ export async function createEditablePdf(model) {
                 break;
             case "characters":
                 drawHeading("Fiches de personnages");
-                for (const [characterIndex, { character, characteristics, skillRollModifier, tracks = [], textFields = [] }] of block.characters.entries()) {
+                for (const [characterIndex, { character, characteristics, skillRollModifier, tracks = [], textFields = [], sheet = null }] of block.characters.entries()) {
                     if (characterIndex > 0) addPage();
+                    if (sheet) {
+                        // La page de travail encore vierge laisse la place aux pages de la feuille.
+                        if (page && cursorY === PAGE_HEIGHT - MARGIN && document.getPageCount() > 1) document.removePage(document.getPageCount() - 1);
+                        await drawSheetPages(document, regular, sheet, character, { tracks, textFields }, { embed: embedImage, clean: safeFieldText, wrap: wrapText });
+                        addPage();
+                    }
                     drawHeading(character.name, 2);
-                    drawHeading("Caractéristiques", 3);
-                    drawCharacteristics(
+                    if (!sheet?.covers) drawHeading("Caractéristiques", 3);
+                    if (!sheet?.covers) drawCharacteristics(
                         characteristics.map((definition) => {
                             const values = character.characteristics?.[definition.name] || {};
                             const rows = [["Valeur", values.value]];
@@ -461,14 +469,14 @@ export async function createEditablePdf(model) {
                             return { name: definition.name, rows };
                         })
                     );
-                    const textLines = textRows(textFields, character.texts);
+                    const textLines = sheet?.covers ? [] : textRows(textFields, character.texts);
                     if (textLines.length) {
                         drawHeading("Informations", 3);
                         for (const row of textLines) {
                             drawField(row.name, row.value, row.long ? { multiline: true, height: 60 } : {});
                         }
                     }
-                    const trackLines = trackRows(tracks, character.checks);
+                    const trackLines = sheet?.covers ? [] : trackRows(tracks, character.checks);
                     if (trackLines.length) {
                         drawHeading("Cases à cocher", 3);
                         drawTracks(trackLines);
