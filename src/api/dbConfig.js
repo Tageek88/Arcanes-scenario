@@ -20,13 +20,15 @@ const VERSION_8_TABLES = [...VERSION_7_TABLES, "Trash"];
 // Suivi de rencontre (initiative, PV, tour de jeu) : une ligne par rencontre d'une campagne (voir `lib/meta/encounter.js`).
 const VERSION_9_TABLES = [...VERSION_8_TABLES, "Encounter"];
 // Systèmes de jeu : modèles de fiche réutilisables, enregistrés hors campagne (voir `lib/meta/gameSystem.js`).
-export const TABLES = [...VERSION_9_TABLES, "GameSystem"];
+const VERSION_10_TABLES = [...VERSION_9_TABLES, "GameSystem"];
+// Fond de feuille de personnage (pages d'image, une ligne par campagne ; voir `lib/meta/sheetBackground.js`).
+export const TABLES = [...VERSION_10_TABLES, "SheetBackground"];
 // Tables dont le contenu n'est pas supprimé avec la campagne (la corbeille garde justement ce qu'elle a supprimé).
 export const NON_CAMPAIGN_TABLES = ["Campaign", "AppSettings", "Trash", "GameSystem"];
 // Tables propres à cet appareil : ni dans les sauvegardes, ni dans la sauvegarde automatique, et une restauration les laisse intactes.
 export const LOCAL_ONLY_TABLES = ["Trash"];
 // Tables lourdes : exclues de la sauvegarde automatique, laissées intactes par une restauration qui ne les contient pas.
-export const FILE_TABLES = ["CampaignDocumentFile"];
+export const FILE_TABLES = ["CampaignDocumentFile", "SheetBackground"];
 
 // === SECTION DATABASE INITIALIZATION ===  
 export const db = new Dexie("arcanes_scenario");
@@ -41,7 +43,9 @@ db.version(7).stores(Object.fromEntries(VERSION_7_TABLES.map((t) => [t, "id, cam
 db.version(8).stores(Object.fromEntries(VERSION_8_TABLES.map((t) => [t, "id, campaign_id"])));
 db.version(9).stores(Object.fromEntries(VERSION_9_TABLES.map((t) => [t, "id, campaign_id"])));
 // La version 10 ajoute les systèmes de jeu, qui n'ont pas de campagne : indexés par nom.
-db.version(10).stores(Object.fromEntries(TABLES.map((t) => [t, t === "GameSystem" ? "id, name" : "id, campaign_id"])));
+db.version(10).stores(Object.fromEntries(VERSION_10_TABLES.map((t) => [t, t === "GameSystem" ? "id, name" : "id, campaign_id"])));
+// La version 11 ajoute le fond de feuille (un fichier lourd : voir FILE_TABLES).
+db.version(11).stores(Object.fromEntries(TABLES.map((t) => [t, t === "GameSystem" ? "id, name" : "id, campaign_id"])));
 
 try {
   navigator.storage?.persist?.();

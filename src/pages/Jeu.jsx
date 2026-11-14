@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { Copy, Library, Pencil, Plus, Printer, Search, Shield, Trash2, UserRound } from "lucide-react";
+import { Copy, FileImage, Library, Pencil, Plus, Printer, Search, Shield, Trash2, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PrintSheet from "@/components/print/PrintSheet";
@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import GameSheetModelEditor from "@/components/game/GameSheetModelEditor";
 import GameSystemsDialog from "@/components/game/GameSystemsDialog";
+import SheetBackgroundDialog from "@/components/game/SheetBackgroundDialog";
 import GameCharacterEditor from "@/components/game/GameCharacterEditor";
 import GameCatalogPanel, { GameTabBar } from "@/components/game/GameCatalogPanel";
 import InventoryPanel from "@/components/game/InventoryPanel";
@@ -72,6 +73,7 @@ export default function Jeu() {
 
   const [modelOpen, setModelOpen] = useState(false);
   const [systemsOpen, setSystemsOpen] = useState(false);
+  const [backgroundOpen, setBackgroundOpen] = useState(false);
   const [characterOpen, setCharacterOpen] = useState(false);
   const [characterDraft, setCharacterDraft] = useState(null);
   const [characterToPrint, setCharacterToPrint] = useState(null);
@@ -169,6 +171,11 @@ export default function Jeu() {
           {campaignId && (
             <Button variant="outline" onClick={() => setSystemsOpen(true)}>
               <Library className="h-4 w-4" /> Systèmes
+            </Button>
+          )}
+          {campaignId && (
+            <Button variant="outline" onClick={() => setBackgroundOpen(true)}>
+              <FileImage className="h-4 w-4" /> Fond de feuille
             </Button>
           )}
           <Button data-tutorial="game-new" onClick={openNewCharacter} disabled={!campaignId || !modelId}>
@@ -374,6 +381,7 @@ export default function Jeu() {
         saving={savingModel}
       />
       <GameSystemsDialog open={systemsOpen} onOpenChange={setSystemsOpen} campaignId={campaignId} hasModel={Boolean(modelId)} />
+      <SheetBackgroundDialog open={backgroundOpen} onOpenChange={setBackgroundOpen} campaignId={campaignId} />
       <GameCharacterEditor
         key={characterDraft?.id || (characterDraft ? "duplicate" : "new")}
         open={characterOpen}
