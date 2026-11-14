@@ -54,7 +54,7 @@ describe("cleanSystemData", () => {
   it("renvoie toujours toutes les clés, même pour une valeur vide", () => {
     const out = cleanSystemData(null);
     expect(Object.keys(out).sort()).toEqual(
-      ["characteristics", "dice", "layoutId", "layouts", "pc_scale", "scale", "skillRollModifier", "textFields", "tracks"]
+      ["characteristics", "dice", "equipment", "layoutId", "layouts", "pc_scale", "scale", "skillRollModifier", "skills", "textFields", "tracks"]
     );
     expect(out.characteristics).toEqual([]);
     expect(out.dice).toBeNull();
@@ -93,7 +93,7 @@ describe("cleanSystemInfo et describeSystem", () => {
   });
 
   it("compte ce que contient un système", () => {
-    expect(describeSystem(SYSTEM)).toEqual({ stats: 3, links: 1, tracks: 1, textFields: 1, layouts: 1, hasDice: true });
+    expect(describeSystem(SYSTEM)).toEqual({ stats: 3, links: 1, tracks: 1, textFields: 1, layouts: 1, hasDice: true, skills: 0, equipment: 0 });
   });
 });
 

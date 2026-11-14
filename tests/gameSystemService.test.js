@@ -36,7 +36,7 @@ describe("systèmes de jeu (service)", () => {
     const source = await campaignWithModel();
     const system = await saveCampaignModelAsSystem(source.id, { name: "Metro" });
     const target = await makeCampaign("Cible");
-    expect(await applyGameSystemToCampaign(system.id, target.id)).toEqual({ replaced: false });
+    expect(await applyGameSystemToCampaign(system.id, target.id)).toEqual({ replaced: false, skills: 0, equipment: 0 });
     const rows = (await api.entities.GameSheetModel.filter({ campaign_id: target.id })).items;
     expect(rows).toHaveLength(1);
     expect(rows[0].characteristics.map((item) => item.name)).toEqual(["Vigueur", "Endurance"]);
@@ -49,7 +49,7 @@ describe("systèmes de jeu (service)", () => {
     const target = await makeCampaign("Cible");
     await api.entities.GameSheetModel.create({ campaign_id: target.id, characteristics: [{ name: "Force", field_names: [] }] });
     await api.entities.GameCharacter.create({ campaign_id: target.id, name: "Hero", characteristics: { Force: { value: "3" } } });
-    expect(await applyGameSystemToCampaign(system.id, target.id)).toEqual({ replaced: true });
+    expect(await applyGameSystemToCampaign(system.id, target.id)).toEqual({ replaced: true, skills: 0, equipment: 0 });
     const models = (await api.entities.GameSheetModel.filter({ campaign_id: target.id })).items;
     expect(models).toHaveLength(1);
     expect(models[0].characteristics.map((item) => item.name)).toEqual(["Vigueur", "Endurance"]);

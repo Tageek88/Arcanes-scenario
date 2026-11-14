@@ -24,6 +24,9 @@ export const MAX_CHARACTERISTICS = 60;
 export const MAX_CHARACTERISTIC_NAME_LENGTH = 80;
 export const MAX_FIELD_NAMES = 20;
 export const MAX_FIELD_NAME_LENGTH = 60;
+export const MAX_CATALOG_ITEMS = 300;
+export const MAX_CATALOG_NAME_LENGTH = 80;
+export const MAX_CATALOG_TEXT_LENGTH = 100;
 
 const text = (value) => String(value ?? "").trim();
 const isObject = (value) => Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -50,6 +53,50 @@ export function cleanCharacteristics(raw) {
   return cleanParents(out);
 }
 
+const normalize = (value) => text(value).toLocaleLowerCase("fr");
+
+/**
+ * Catalog skills of a system: { name, roll_modifier, characteristic? }. A repeated name is dropped, and a link to a
+ * characteristic the system does not have is removed (the skill is kept).
+ */
+export function cleanCatalogSkills(raw, characteristicNames = []) {
+  const known = new Set(characteristicNames);
+  const out = [];
+  const seen = new Set();
+  for (const item of Array.isArray(raw) ? raw : []) {
+    if (out.length >= MAX_CATALOG_ITEMS) break;
+    const name = text(item?.name).slice(0, MAX_CATALOG_NAME_LENGTH);
+    const key = normalize(name);
+    if (!name || key === "__proto__" || seen.has(key)) continue;
+    seen.add(key);
+    const entry = { name, roll_modifier: text(item?.roll_modifier).slice(0, MAX_CATALOG_TEXT_LENGTH) };
+    const characteristic = text(item?.characteristic);
+    if (characteristic && known.has(characteristic)) entry.characteristic = characteristic;
+    out.push(entry);
+  }
+  return out;
+}
+
+/**
+ * Catalog equipment of a system: { name, type, field_names, fields }. Only the names of the fields are kept: their values
+ * belong to each sheet. A repeated name is dropped.
+ */
+export function cleanCatalogEquipment(raw) {
+  const out = [];
+  const seen = new Set();
+  for (const item of Array.isArray(raw) ? raw : []) {
+    if (out.length >= MAX_CATALOG_ITEMS) break;
+    const name = text(item?.name).slice(0, MAX_CATALOG_NAME_LENGTH);
+    const key = normalize(name);
+    if (!name || key === "__proto__" || seen.has(key)) continue;
+    seen.add(key);
+    const source = Array.isArray(item?.field_names) ? item.field_names : (Array.isArray(item?.fields) ? item.fields.map((field) => field?.name) : []);
+    const fieldNames = [...new Set(source.map((value) => text(value).slice(0, MAX_FIELD_NAME_LENGTH)).filter(Boolean))].slice(0, MAX_FIELD_NAMES);
+    out.push({ name, type: text(item?.type).slice(0, MAX_CATALOG_TEXT_LENGTH), field_names: fieldNames, fields: fieldNames.map((fieldName) => ({ name: fieldName, value: "" })) });
+  }
+  return out;
+}
+
 /**
  * The content of a system, cleaned and bounded, from a model row or a file (`pc_scale` or `pcScale` both read).
  * Always returns every key, so a copy into a campaign overwrites the whole model.
@@ -71,6 +118,8 @@ export function cleanSystemData(raw) {
     textFields,
     layouts,
     layoutId: activeLayoutId(layouts, source.layoutId),
+    skills: cleanCatalogSkills(source.skills, names),
+    equipment: cleanCatalogEquipment(source.equipment),
   };
 }
 
@@ -95,6 +144,8 @@ export function describeSystem(system) {
     textFields: data.textFields.length,
     layouts: data.layouts.length,
     hasDice: Boolean(data.dice),
+    skills: data.skills.length,
+    equipment: data.equipment.length,
   };
 }
 
@@ -144,6 +195,8 @@ export function parseSystemFile(content, size = String(content ?? "").length) {
     ["case à cocher", "cases à cocher", "e", countDropped(raw.tracks, data.tracks.length)],
     ["champ de texte", "champs de texte", "", countDropped(raw.textFields, data.textFields.length)],
     ["mise en page", "mises en page", "e", countDropped(raw.layouts, data.layouts.length)],
+    ["compétence", "compétences", "e", countDropped(raw.skills, data.skills.length)],
+    ["équipement", "équipements", "", countDropped(raw.equipment, data.equipment.length)],
   ];
   for (const [one, many, feminine, count] of dropped) {
     if (count > 0) issues.push(`${count} ${count > 1 ? many : one} ignoré${feminine}${count > 1 ? "s" : ""}`);

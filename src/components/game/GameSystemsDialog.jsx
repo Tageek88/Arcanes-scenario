@@ -6,8 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { describeSystem } from "@/lib/meta/gameSystem";
+import { BUILTIN_SYSTEMS } from "@/lib/meta/builtinSystems";
 import {
+  applyBuiltinSystemToCampaign,
   applyGameSystemToCampaign,
+  copyBuiltinSystem,
   deleteGameSystem,
   exportGameSystem,
   importGameSystemFromFile,
@@ -24,6 +27,8 @@ function summary(system) {
   if (info.tracks) parts.push(plural(info.tracks, "piste de cases", "pistes de cases"));
   if (info.textFields) parts.push(plural(info.textFields, "champ de texte", "champs de texte"));
   if (info.layouts) parts.push(plural(info.layouts, "mise en page", "mises en page"));
+  if (info.skills) parts.push(plural(info.skills, "compétence", "compétences"));
+  if (info.equipment) parts.push(plural(info.equipment, "équipement", "équipements"));
   if (info.hasDice) parts.push("lancer de dés");
   return parts.join(" · ");
 }
@@ -91,7 +96,7 @@ export default function GameSystemsDialog({ open, onOpenChange, campaignId, hasM
       return;
     }
     setConfirm(null);
-    const done = await run(() => applyGameSystemToCampaign(system.id, campaignId));
+    const done = await run(() => (system.builtin ? applyBuiltinSystemToCampaign(system.id, campaignId) : applyGameSystemToCampaign(system.id, campaignId)));
     if (done) {
       toast({ title: "Système appliqué", description: `« ${system.name} » est maintenant le modèle de fiche de cette campagne.` });
       onOpenChange(false);
@@ -148,7 +153,7 @@ export default function GameSystemsDialog({ open, onOpenChange, campaignId, hasM
 
         <section className="stack-y-2">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h3 className="font-display font-semibold">Systèmes enregistrés</h3>
+            <h3 className="font-display font-semibold">Systèmes</h3>
             <Button variant="outline" size="sm" disabled={busy} onClick={() => fileRef.current?.click()}>
               <Upload className="h-4 w-4" /> Importer un fichier
             </Button>
@@ -157,14 +162,17 @@ export default function GameSystemsDialog({ open, onOpenChange, campaignId, hasM
           {loading && systems.length === 0 && <p className="text-sm text-muted-foreground">Chargement…</p>}
           {!loading && systems.length === 0 && (
             <p className="rounded-lg border border-dashed border-border p-4 text-center text-sm text-muted-foreground">
-              Aucun système enregistré. {hasModel ? "Enregistrez le modèle de cette campagne, ou importez un fichier." : "Importez un fichier pour commencer."}
+              Aucun système à vous pour l'instant. {hasModel ? "Enregistrez le modèle de cette campagne (avec son catalogue de compétences et d'équipements), ou importez un fichier." : "Importez un fichier pour commencer."}
             </p>
           )}
           <ul className="stack-y-2">
-            {systems.map((system) => (
+            {[...BUILTIN_SYSTEMS, ...systems].map((system) => (
               <li key={system.id} className="stack-y-2 rounded-lg border border-border p-3">
                 <div>
-                  <p className="font-medium">{system.name}</p>
+                  <p className="font-medium">
+                    {system.name}
+                    {system.builtin && <span className="ml-2 tag border border-border text-muted-foreground">Fourni</span>}
+                  </p>
                   {system.description && <p className="text-xs text-muted-foreground">{system.description}</p>}
                   <p className="mt-1 text-xs text-muted-foreground">{summary(system)}</p>
                 </div>
@@ -172,7 +180,7 @@ export default function GameSystemsDialog({ open, onOpenChange, campaignId, hasM
                   <div className="stack-y-2 rounded-md bg-secondary/50 p-2">
                     <p className="text-xs">
                       {confirm.kind === "apply"
-                        ? "Le modèle de fiche actuel de cette campagne sera remplacé. Les fiches gardent leurs valeurs, mais seules les caractéristiques de même nom s'affichent."
+                        ? "Le modèle de fiche actuel de cette campagne sera remplacé. Les fiches gardent leurs valeurs, mais seules les caractéristiques de même nom s'affichent. Les compétences et équipements du système sont ajoutés au catalogue, sans rien supprimer."
                         : "Supprimer ce système ? Les campagnes qui l'ont utilisé gardent leur copie. Exportez-le d'abord pour le conserver."}
                     </p>
                     <div className="flex gap-2">
@@ -185,12 +193,20 @@ export default function GameSystemsDialog({ open, onOpenChange, campaignId, hasM
                 ) : (
                   <div className="flex flex-wrap gap-2">
                     <Button size="sm" disabled={busy || !campaignId} onClick={() => applySystem(system)}>Utiliser pour cette campagne</Button>
-                    <Button size="sm" variant="outline" disabled={busy} onClick={() => run(() => exportGameSystem(system))}>
-                      <Download className="h-4 w-4" /> Exporter
-                    </Button>
-                    <Button size="icon" variant="ghost" aria-label={`Supprimer le système ${system.name}`} disabled={busy} onClick={() => removeSystem(system)}>
-                      <Trash2 className="h-4 w-4 text-muted-foreground" />
-                    </Button>
+                    {system.builtin ? (
+                      <Button size="sm" variant="outline" disabled={busy} onClick={() => run(() => copyBuiltinSystem(system.id), "Ajouté à vos systèmes")}>
+                        Ajouter à mes systèmes
+                      </Button>
+                    ) : (
+                      <>
+                        <Button size="sm" variant="outline" disabled={busy} onClick={() => run(() => exportGameSystem(system))}>
+                          <Download className="h-4 w-4" /> Exporter
+                        </Button>
+                        <Button size="icon" variant="ghost" aria-label={`Supprimer le système ${system.name}`} disabled={busy} onClick={() => removeSystem(system)}>
+                          <Trash2 className="h-4 w-4 text-muted-foreground" />
+                        </Button>
+                      </>
+                    )}
                   </div>
                 )}
               </li>
