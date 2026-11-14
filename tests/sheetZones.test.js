@@ -38,7 +38,7 @@ const zone = (over = {}) => ({ id: "z1", kind: "stat", ref: "Vigueur", page: 0, 
 
 describe("placeableItems", () => {
   it("liste les caractéristiques, leurs champs, les textes et les pistes dans l'ordre du modèle", () => {
-    expect(placeableItems(MODEL).map((item) => item.label)).toEqual(["Vigueur", "Vigueur · Maximum", "Agilité", "Nom", "Notes", "Stress"]);
+    expect(placeableItems(MODEL).map((item) => item.label)).toEqual(["Nom du personnage", "Notes du personnage", "Compétences (liste)", "Équipement (liste)", "Armes (liste)", "Protections (liste)", "Inventaire (liste)", "Vigueur", "Vigueur · Maximum", "Agilité", "Nom", "Notes", "Stress"]);
   });
   it("sait si un texte est long et combien une piste a de cases", () => {
     const items = placeableItems(MODEL);
@@ -46,8 +46,8 @@ describe("placeableItems", () => {
     expect(items.find((item) => item.ref === "t1").count).toBe(5);
   });
   it("accepte un modèle vide", () => {
-    expect(placeableItems()).toEqual([]);
-    expect(placeableItems({ characteristics: [{ name: "  " }] })).toEqual([]);
+    expect(placeableItems().map((item) => item.kind)).toEqual(["info", "info", "info", "info", "info", "info", "info"]);
+    expect(placeableItems({ characteristics: [{ name: "  " }] })).toHaveLength(7);
   });
 });
 
@@ -134,14 +134,14 @@ describe("liste de zones", () => {
     expect(created).toMatchObject({ kind: "text", ref: "f2", page: 1, size: DEFAULT_TEXT_SIZE });
     expect(created.x + created.w).toBeLessThanOrEqual(1);
     expect(created.h).toBeGreaterThan(0.05);
-    expect(newZoneFor(placeableItems(MODEL)[1]).field).toBe("Maximum");
+    expect(newZoneFor(placeableItems(MODEL).find((entry) => entry.field)).field).toBe("Maximum");
   });
   it("reconnaît les éléments pas encore placés", () => {
-    expect(unplacedItems(MODEL, [zone()]).map((item) => item.label)).toEqual(["Vigueur · Maximum", "Agilité", "Nom", "Notes", "Stress"]);
-    expect(unplacedItems(MODEL, [])).toHaveLength(6);
+    expect(unplacedItems(MODEL, [zone()]).map((item) => item.label)).toEqual(["Nom du personnage", "Notes du personnage", "Compétences (liste)", "Équipement (liste)", "Armes (liste)", "Protections (liste)", "Inventaire (liste)", "Vigueur · Maximum", "Agilité", "Nom", "Notes", "Stress"]);
+    expect(unplacedItems(MODEL, [])).toHaveLength(13);
   });
   it("résume le nombre de valeurs placées", () => {
-    expect(zonesSummary(MODEL, [zone(), zone({ id: "z2", kind: "track", ref: "t1" })])).toEqual({ placed: 2, total: 6 });
+    expect(zonesSummary(MODEL, [zone(), zone({ id: "z2", kind: "track", ref: "t1" })])).toEqual({ placed: 2, total: 13 });
   });
   it("filtre par page et modifie une zone par identifiant", () => {
     const zones = [zone(), zone({ id: "z2", kind: "text", ref: "f1", page: 1 })];

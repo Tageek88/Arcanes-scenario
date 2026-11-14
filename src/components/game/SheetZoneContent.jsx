@@ -1,5 +1,5 @@
 import React from "react";
-import { zoneBoxes, zoneText } from "@/lib/meta/sheetZones";
+import { isLongZone, zoneBoxes, zoneText } from "@/lib/meta/sheetZones";
 
 const INK = "#111827";
 
@@ -39,7 +39,7 @@ export default function SheetZoneContent({ zone, sheet, tracks, longIds, px, pre
     );
   }
 
-  const isLong = zone.kind === "text" && longIds?.has(zone.ref);
+  const isLong = isLongZone(zone, longIds);
   const value = preview ? preview : zoneText(zone, sheet);
   return (
     <div

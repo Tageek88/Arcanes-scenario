@@ -12,9 +12,21 @@
 
 import { MAX_BACKGROUND_PAGES } from "@/lib/meta/sheetBackground";
 import { checkedCount } from "@/lib/meta/tracks";
+import { cleanInventory, inventoryPrintLine } from "@/lib/meta/inventory";
 
 export const MAX_ZONES = 150;
-export const ZONE_KINDS = ["stat", "text", "track"];
+export const ZONE_KINDS = ["stat", "text", "track", "info"];
+
+// Informations propres à chaque fiche (hors modèle) qu'on peut aussi placer : `long` = texte sur plusieurs lignes.
+export const INFO_ITEMS = [
+  { ref: "name", label: "Nom du personnage", long: false },
+  { ref: "notes", label: "Notes du personnage", long: true },
+  { ref: "skills", label: "Compétences (liste)", long: true },
+  { ref: "equipment", label: "Équipement (liste)", long: true },
+  { ref: "weapons", label: "Armes (liste)", long: true },
+  { ref: "protections", label: "Protections (liste)", long: true },
+  { ref: "inventory", label: "Inventaire (liste)", long: true },
+];
 export const MIN_ZONE_SIZE = 0.01;
 export const MIN_TEXT_SIZE = 0.6;
 export const MAX_TEXT_SIZE = 6;
@@ -59,7 +71,7 @@ export const zoneKey = (zone) => `${zone?.kind}|${zone?.ref}|${zone?.field || ""
  * [{ key, kind, ref, field?, label }] dans l'ordre du modèle : caractéristiques (et leurs champs), textes, pistes.
  */
 export function placeableItems(model = {}) {
-  const items = [];
+  const items = INFO_ITEMS.map((info) => ({ key: zoneKey({ kind: "info", ref: info.ref }), kind: "info", ref: info.ref, label: info.label, long: info.long }));
   for (const stat of model.characteristics || []) {
     const name = text(stat?.name);
     if (!name) continue;
@@ -121,7 +133,8 @@ export function renameZoneStats(zones, renames) {
 
 /** Une zone neuve pour un élément (`item` vient de placeableItems), posée au milieu de la page `page`. */
 export function newZoneFor(item, page = 0) {
-  const base = item.kind === "track" ? { w: 0.24, h: 0.03 } : item.kind === "text" && item.long ? { w: 0.4, h: 0.12 } : item.kind === "text" ? { w: 0.25, h: 0.03 } : { w: 0.08, h: 0.03 };
+  const wide = item.kind === "text" || item.kind === "info";
+  const base = item.kind === "track" ? { w: 0.24, h: 0.03 } : wide && item.long ? { w: 0.4, h: 0.15 } : wide ? { w: 0.25, h: 0.03 } : { w: 0.08, h: 0.03 };
   const rect = clampRect({ ...base, x: 0.5 - base.w / 2, y: 0.5 - base.h / 2 });
   const zone = { id: newZoneId(), kind: item.kind, ref: item.ref, page, ...rect, size: DEFAULT_TEXT_SIZE };
   if (item.field) zone.field = item.field;
@@ -164,8 +177,50 @@ export function pointerFraction(clientX, clientY, rect) {
   return { x: fraction((clientX - rect.left) / width, 0), y: fraction((clientY - rect.top) / height, 0) };
 }
 
-/** Texte affiché par une zone « stat » ou « text » pour un personnage ou un PNJ ("" si rien n'est saisi). */
+const fieldsText = (fields) =>
+  (Array.isArray(fields) ? fields : [])
+    .filter((field) => text(field?.name) || text(field?.value))
+    .map((field) => (text(field.name) && text(field.value) ? `${text(field.name)} ${text(field.value)}` : text(field.name) || text(field.value)))
+    .join(", ");
+const itemLine = (item, extra = "") => {
+  const detail = [extra, fieldsText(item?.fields)].filter(Boolean).join(", ");
+  return detail ? `${text(item?.name)} (${detail})` : text(item?.name);
+};
+
+const plain = (value) => text(value).normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
+
+/**
+ * Sorte d'un objet d'équipement d'après son type : "weapon" (type commençant par « arme »), "protection" (« protection »,
+ * « armure », « gilet »…) ou "other". Le type reste un texte libre : « Arme à feu » ou « Armes » comptent comme armes.
+ */
+export function equipmentKind(item) {
+  const type = plain(item?.type);
+  if (/^arme/.test(type)) return "weapon";
+  if (/^(protection|armure|gilet|blindage)/.test(type)) return "protection";
+  return "other";
+}
+
+/** Texte d'une information de la fiche : nom, notes, ou liste (une ligne par compétence, objet d'équipement ou d'inventaire). */
+export function infoText(ref, sheet) {
+  if (ref === "name") return text(sheet?.name);
+  if (ref === "notes") return String(sheet?.notes ?? "").trim();
+  const source = ref === "weapons" || ref === "protections" ? "equipment" : ref;
+  const list = Array.isArray(sheet?.[source]) ? sheet[source] : [];
+  if (ref === "skills") return list.map((skill) => itemLine(skill)).filter(Boolean).join("\n");
+  if (ref === "equipment") return list.map((item) => itemLine(item, text(item?.type))).filter(Boolean).join("\n");
+  // Armes et protections : le type est connu par la liste elle-même, la ligne ne le répète pas.
+  if (ref === "weapons") return list.filter((item) => equipmentKind(item) === "weapon").map((item) => itemLine(item)).filter(Boolean).join("\n");
+  if (ref === "protections") return list.filter((item) => equipmentKind(item) === "protection").map((item) => itemLine(item)).filter(Boolean).join("\n");
+  if (ref === "inventory") return cleanInventory(sheet?.inventory).map((item) => text(inventoryPrintLine(item))).filter(Boolean).map((line) => `- ${line}`).join("\n");
+  return "";
+}
+
+/** La zone s'écrit-elle sur plusieurs lignes ? (champ de texte long, notes et listes) */
+export const isLongZone = (zone, longIds) => (zone?.kind === "text" ? Boolean(longIds?.has(zone.ref)) : zone?.kind === "info" ? zone.ref !== "name" : false);
+
+/** Texte affiché par une zone « stat », « text » ou « info » pour un personnage ou un PNJ ("" si rien n'est saisi). */
 export function zoneText(zone, sheet) {
+  if (zone?.kind === "info") return infoText(zone.ref, sheet);
   if (zone?.kind === "text") {
     const texts = isObject(sheet?.texts) ? sheet.texts : {};
     return Object.hasOwn(texts, zone.ref) ? text(texts[zone.ref]) : "";
@@ -189,9 +244,8 @@ export function zoneBoxes(zone, tracks, sheet) {
 }
 
 /**
- * La feuille à imprimer pour un modèle et les pages du fond : { pages, zones, covers }, ou null s'il n'y a rien à poser
- * (aucune zone, aucun fond, ou aucune zone sur une page existante). `covers` : toutes les valeurs du modèle sont placées
- * sur la feuille, l'impression peut donc se passer de la liste des caractéristiques, des textes et des cases.
+ * La feuille à imprimer pour un modèle et les pages du fond : { pages, zones }, ou null s'il n'y a rien à poser
+ * (aucune zone, aucun fond, ou aucune zone sur une page existante). Avec une feuille, seule elle s'imprime.
  */
 export function sheetForPrint(model, pages) {
   const zones = Array.isArray(model?.zones) ? model.zones : [];
@@ -199,7 +253,7 @@ export function sheetForPrint(model, pages) {
   if (zones.length === 0 || list.length === 0) return null;
   const onPages = zones.filter((zone) => zone.page < list.length);
   if (onPages.length === 0) return null;
-  return { pages: list, zones: onPages, covers: onPages.length === zones.length && unplacedItems(model, zones).length === 0 };
+  return { pages: list, zones: onPages };
 }
 
 /** Résumé pour l'éditeur : « 12 valeurs placées sur 34 ». */

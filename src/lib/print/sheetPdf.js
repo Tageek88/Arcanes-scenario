@@ -1,5 +1,5 @@
 import { rgb } from "pdf-lib";
-import { zoneBoxes, zoneText, zonesOnPage } from "@/lib/meta/sheetZones";
+import { isLongZone, zoneBoxes, zoneText, zonesOnPage } from "@/lib/meta/sheetZones";
 
 // Pages de feuille du PDF : le fond de la campagne en pleine page, les valeurs de la fiche posées aux zones choisies.
 
@@ -39,7 +39,7 @@ function drawZone(page, font, zone, character, model, helpers) {
     return;
   }
 
-  const isLong = zone.kind === "text" && model.longIds.has(zone.ref);
+  const isLong = isLongZone(zone, model.longIds);
   let value = helpers.clean(zoneText(zone, character));
   if (!value) return;
   if (!isLong) value = value.replace(/\s*\n\s*/g, " ");

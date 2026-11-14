@@ -17,13 +17,4 @@ describe("sheetForPrint", () => {
     expect(out.zones.map((item) => item.id)).toEqual(["z1"]);
     expect(out.pages).toEqual(PAGES);
   });
-  it("dit si la feuille couvre tout le modèle", () => {
-    const all = [zone(), zone({ id: "z2", kind: "track", ref: "t1" })];
-    expect(sheetForPrint({ ...MODEL, zones: all }, PAGES).covers).toBe(true);
-    expect(sheetForPrint({ ...MODEL, zones: [zone()] }, PAGES).covers).toBe(false);
-  });
-  it("ne couvre pas tout si une zone est sur une page absente", () => {
-    const all = [zone(), zone({ id: "z2", kind: "track", ref: "t1", page: 3 })];
-    expect(sheetForPrint({ ...MODEL, zones: all }, PAGES).covers).toBe(false);
-  });
 });

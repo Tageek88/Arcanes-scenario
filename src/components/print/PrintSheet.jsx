@@ -60,7 +60,7 @@ function Block({ block }) {
                     <h2>Fiches de personnages</h2>
                     {block.characters.map(({ character, characteristics, skillRollModifier, tracks, textFields, sheet }) => (
                         <article className="prt-character" key={character.id}>
-                            <h3 className="prt-group">{character.name}</h3>
+                            {!sheet && <h3 className="prt-group">{character.name}</h3>}
                             <CharacterContent
                                 character={character}
                                 characteristics={characteristics}
@@ -243,10 +243,10 @@ function Block({ block }) {
 }
 
 function CharacterContent({ character, characteristics, skillRollModifier, tracks = [], textFields = [], sheet = null }) {
-    // Quand la feuille couvre tout le modèle, ses pages remplacent la liste des caractéristiques, des textes et des cases.
-    const covered = sheet?.covers === true;
-    const trackLines = covered ? [] : trackRows(tracks, character.checks);
-    const textLines = covered ? [] : textRows(textFields, character.texts).filter((row) => row.value);
+    // Avec une feuille, l'impression se limite à ses pages (fond + valeurs) : pas de seconde version en liste.
+    if (sheet) return <SheetPrintPages sheet={sheet} character={character} tracks={tracks} textFields={textFields} />;
+    const trackLines = trackRows(tracks, character.checks);
+    const textLines = textRows(textFields, character.texts).filter((row) => row.value);
     const stats = characteristics.map((definition) => {
         const values = character.characteristics?.[definition.name] || {};
         const fields = (values.fields || []).filter((f) => f.name || f.value);
@@ -255,8 +255,7 @@ function CharacterContent({ character, characteristics, skillRollModifier, track
 
     return (
         <>
-            {sheet && <SheetPrintPages sheet={sheet} character={character} tracks={tracks} textFields={textFields} />}
-            {stats.length > 0 && !covered && (
+            {stats.length > 0 && (
                 <section className="prt-section">
                     <h2>Caractéristiques</h2>
                     <div className="prt-character-grid">
@@ -354,10 +353,12 @@ export default function PrintSheet({ model }) {
         return (
             <div className="print-root">
                 <style>{css}</style>
-                <header className="prt-header">
-                    <h1>{character.name}</h1>
-                    <p>{campaignName} · Fiche de personnage</p>
-                </header>
+                {!sheet && (
+                    <header className="prt-header">
+                        <h1>{character.name}</h1>
+                        <p>{campaignName} · Fiche de personnage</p>
+                    </header>
+                )}
                 <CharacterContent
                     character={character}
                     characteristics={characteristics}

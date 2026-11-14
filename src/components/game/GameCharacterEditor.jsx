@@ -98,7 +98,8 @@ export default function GameCharacterEditor({
     [equipmentCatalog]
   );
   const equipmentTypes = useMemo(
-    () => [...new Set(equipmentCatalog.map((item) => item.type).filter(Boolean))],
+    // « Arme » et « Protection » sont toujours proposés : la feuille les place séparément.
+    () => [...new Set(["Arme", "Protection", ...equipmentCatalog.map((item) => item.type).filter(Boolean)])],
     [equipmentCatalog]
   );
 
@@ -210,8 +211,8 @@ export default function GameCharacterEditor({
     if (!known) return;
     const accepted = await confirm({
       title: "Compétence déjà connue",
-      description: `La compétence « ${known.name} » existe déjà dans le catalogue. Reprendre ses champs ?`,
-      confirmLabel: "Reprendre",
+      description: `La compétence « ${known.name} » existe déjà dans le catalogue. Compléter avec ses champs ?`,
+      confirmLabel: "Compléter",
       cancelLabel: "Garder ma saisie",
     });
     if (!accepted) return;
@@ -244,8 +245,8 @@ export default function GameCharacterEditor({
     if (!known) return;
     const accepted = await confirm({
       title: "Équipement déjà connu",
-      description: `L’équipement « ${known.name} » existe déjà dans le catalogue. Reprendre ses champs ?`,
-      confirmLabel: "Reprendre",
+      description: `L’équipement « ${known.name} » existe déjà dans le catalogue. Compléter avec ses champs ?`,
+      confirmLabel: "Compléter",
       cancelLabel: "Garder ma saisie",
     });
     if (!accepted) return;
@@ -539,7 +540,7 @@ export default function GameCharacterEditor({
           <div className="flex items-center justify-between gap-2">
             <div>
               <LockedHeading label="Équipement" locked={!!generation.locks.equipment} onToggle={() => generation.toggleLock("equipment")} />
-              <p className="text-xs text-muted-foreground">Les champs facultatifs déjà connus pour un type sont proposés vides pour un nouvel objet.</p>
+              <p className="text-xs text-muted-foreground">Les champs facultatifs déjà connus pour un type sont proposés vides pour un nouvel objet. Les types « Arme » et « Protection » se placent séparément sur la feuille.</p>
             </div>
             <Button type="button" variant="outline" size="sm" onClick={() => setForm((current) => ({ ...current, equipment: [...current.equipment, { name: "", type: "", fields: [] }] }))}>
               <Plus className="h-4 w-4" /> Ajouter
