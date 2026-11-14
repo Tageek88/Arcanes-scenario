@@ -10,8 +10,9 @@ import { renameSheetLinks } from "@/lib/meta/diceLinks";
 import { renameCharacteristicNotes } from "@/lib/services/notes";
 import { cleanChecks, cleanTracks } from "@/lib/meta/tracks";
 import { cleanTextFields, cleanTexts } from "@/lib/meta/textFields";
+import { activeLayoutId, cleanLayouts } from "@/lib/meta/layouts";
 
-const EMPTY_MODEL = { characteristics: [], skillRollModifier: false, scale: { levels: [] }, pcScale: sanitizePcScale(null), dice: null, tracks: [], textFields: [] };
+const EMPTY_MODEL = { characteristics: [], skillRollModifier: false, scale: { levels: [] }, pcScale: sanitizePcScale(null), dice: null, tracks: [], textFields: [], layouts: [], layoutId: "" };
 
 // Modèle tel que l'interface l'utilise, à partir de la ligne enregistrée (le barème est optionnel).
 const readModel = (row) => {
@@ -27,6 +28,9 @@ const readModel = (row) => {
     tracks: cleanTracks(row?.tracks),
     // Champs de texte libres (archétype, âge, talents…) ; aucun par défaut.
     textFields: cleanTextFields(row?.textFields),
+    // Mises en page de la fiche (plusieurs possibles) et celle en cours d'usage ; aucune = la carte classique.
+    layouts: cleanLayouts(row?.layouts, { characteristics, tracks: cleanTracks(row?.tracks), textFields: cleanTextFields(row?.textFields) }),
+    layoutId: String(row?.layoutId ?? ""),
   };
 };
 const normalize = (value) => String(value || "").trim().toLocaleLowerCase("fr");
@@ -120,7 +124,20 @@ export function useGameSheet(campaignId) {
       updatedNames.forEach((newName, previousName) => {
         dice = renameDiceCharacteristic(dice, previousName, newName);
       });
-      const payload = { campaign_id: campaignId, ...modelFields, scale, pc_scale: pcScale, dice, tracks: cleanTracks(nextModel.tracks ?? model.tracks), textFields: cleanTextFields(nextModel.textFields ?? model.textFields) };
+      const nextTracks = cleanTracks(nextModel.tracks ?? model.tracks);
+      const nextTextFields = cleanTextFields(nextModel.textFields ?? model.textFields);
+      const nextLayouts = cleanLayouts(nextModel.layouts ?? model.layouts, { characteristics: nextModel.characteristics, tracks: nextTracks, textFields: nextTextFields });
+      const payload = {
+        campaign_id: campaignId,
+        ...modelFields,
+        scale,
+        pc_scale: pcScale,
+        dice,
+        tracks: nextTracks,
+        textFields: nextTextFields,
+        layouts: nextLayouts,
+        layoutId: activeLayoutId(nextLayouts, nextModel.layoutId ?? model.layoutId),
+      };
       let saved;
       if (modelId) {
         saved = await api.entities.GameSheetModel.update(modelId, payload);

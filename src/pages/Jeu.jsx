@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { Copy, Pencil, Plus, Printer, Search, Shield, Trash2, UserRound } from "lucide-react";
+import { Copy, Library, Pencil, Plus, Printer, Search, Shield, Trash2, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PrintSheet from "@/components/print/PrintSheet";
@@ -15,12 +15,14 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import GameSheetModelEditor from "@/components/game/GameSheetModelEditor";
+import GameSystemsDialog from "@/components/game/GameSystemsDialog";
 import GameCharacterEditor from "@/components/game/GameCharacterEditor";
 import GameCatalogPanel, { GameTabBar } from "@/components/game/GameCatalogPanel";
 import InventoryPanel from "@/components/game/InventoryPanel";
 import RollButton from "@/components/game/RollButton";
 import TrackBoxes from "@/components/game/TrackBoxes";
-import TextFieldsView from "@/components/game/TextFieldsView";
+import SheetLayoutView from "@/components/game/SheetLayoutView";
+import { resolveLayout } from "@/lib/meta/layouts";
 import { setChecked } from "@/lib/meta/tracks";
 import { skillLinkMap, skillModifierMap } from "@/lib/meta/diceLinks";
 import { statParentMap } from "@/lib/meta/statLinks";
@@ -65,8 +67,11 @@ export default function Jeu() {
     () => ({ dice: model.dice, links: skillLinkMap(skillCatalog), modifiers: skillModifierMap(skillCatalog), parents: statParentMap(model.characteristics) }),
     [model.dice, model.characteristics, skillCatalog]
   );
+  // Mise en page de la fiche en cours d'usage (la carte classique tant qu'aucune n'est choisie).
+  const sheetLayout = useMemo(() => resolveLayout(model.layouts, model.layoutId, model), [model]);
 
   const [modelOpen, setModelOpen] = useState(false);
+  const [systemsOpen, setSystemsOpen] = useState(false);
   const [characterOpen, setCharacterOpen] = useState(false);
   const [characterDraft, setCharacterDraft] = useState(null);
   const [characterToPrint, setCharacterToPrint] = useState(null);
@@ -159,6 +164,11 @@ export default function Jeu() {
           {campaignId && (
             <Button data-tutorial="game-model" variant="outline" onClick={() => setModelOpen(true)}>
               <Shield className="h-4 w-4" /> {modelId ? "Modifier le modèle" : "Définir le modèle"}
+            </Button>
+          )}
+          {campaignId && (
+            <Button variant="outline" onClick={() => setSystemsOpen(true)}>
+              <Library className="h-4 w-4" /> Systèmes
             </Button>
           )}
           <Button data-tutorial="game-new" onClick={openNewCharacter} disabled={!campaignId || !modelId}>
@@ -276,43 +286,43 @@ export default function Jeu() {
                       </Button>
                     </div>
                   </div>
-                  {model.characteristics.length > 0 && (
-                    <dl className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
-                      {model.characteristics.map((item) => {
-                        const values = character.characteristics?.[item.name] || {};
-                        const fields = (values.fields || []).filter((field) => field.name || field.value);
-                        return (
-                          <div key={item.name} className="group relative rounded-md bg-secondary/50 px-3 py-2">
-                            <PartPostItButton owner={{ kind: "character", id: character.id }} partKind="characteristic" part={{ name: item.name }} label={`la caractéristique ${item.name}`} className="absolute right-1 top-1" />
-                            <dt className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{item.name}</dt>
-                            {item.parent && <dd className="text-[10px] text-muted-foreground">+ {item.parent}</dd>}
-                            <dd className="mt-1 flex items-center justify-between gap-1 text-sm font-semibold">
-                              <span>{values.value || "—"}</span>
-                              <RollButton setup={rollSetup} sheet={character} characteristic={item.name} />
+                  <SheetLayoutView
+                    layout={sheetLayout}
+                    characteristics={model.characteristics}
+                    texts={character.texts}
+                    renderStat={(item, { main } = {}) => {
+                      const values = character.characteristics?.[item.name] || {};
+                      const fields = (values.fields || []).filter((field) => field.name || field.value);
+                      return (
+                        <div className={`group relative rounded-md px-3 py-2 ${main ? "bg-secondary" : "bg-secondary/50"}`}>
+                          <PartPostItButton owner={{ kind: "character", id: character.id }} partKind="characteristic" part={{ name: item.name }} label={`la caractéristique ${item.name}`} className="absolute right-1 top-1" />
+                          <dt className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{item.name}</dt>
+                          {item.parent && <dd className="text-[10px] text-muted-foreground">+ {item.parent}</dd>}
+                          <dd className="mt-1 flex items-center justify-between gap-1 text-sm font-semibold">
+                            <span>{values.value || "—"}</span>
+                            <RollButton setup={rollSetup} sheet={character} characteristic={item.name} />
+                          </dd>
+                          {fields.map((field, fieldIndex) => (
+                            <dd key={fieldIndex} className="mt-0.5 text-xs text-muted-foreground">
+                              <span>{field.name}</span>{field.value && <span> : {field.value}</span>}
                             </dd>
-                            {fields.map((field, fieldIndex) => (
-                              <dd key={fieldIndex} className="mt-0.5 text-xs text-muted-foreground">
-                                <span>{field.name}</span>{field.value && <span> : {field.value}</span>}
-                              </dd>
-                            ))}
-                          </div>
-                        );
-                      })}
-                    </dl>
-                  )}
-                  <TextFieldsView fields={model.textFields} texts={character.texts} compact className="mt-3" />
-                  {model.tracks?.length > 0 && (
-                    <div className="mt-3 stack-y-1.5">
-                      {model.tracks.map((track) => (
-                        <TrackBoxes
-                          key={track.id}
-                          track={track}
-                          value={character.checks?.[track.id]}
-                          onChange={(next) => saveChecks(character, setChecked(character.checks, track.id, next))}
-                        />
-                      ))}
-                    </div>
-                  )}
+                          ))}
+                        </div>
+                      );
+                    }}
+                    renderTracks={(tracks) => (
+                      <div className="stack-y-1.5">
+                        {tracks.map((track) => (
+                          <TrackBoxes
+                            key={track.id}
+                            track={track}
+                            value={character.checks?.[track.id]}
+                            onChange={(next) => saveChecks(character, setChecked(character.checks, track.id, next))}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  />
                   {(character.skills || []).length > 0 && (
                     <div className="mt-3">
                       <h3 className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Compétences</h3>
@@ -363,6 +373,7 @@ export default function Jeu() {
         onSave={handleSaveModel}
         saving={savingModel}
       />
+      <GameSystemsDialog open={systemsOpen} onOpenChange={setSystemsOpen} campaignId={campaignId} hasModel={Boolean(modelId)} />
       <GameCharacterEditor
         key={characterDraft?.id || (characterDraft ? "duplicate" : "new")}
         open={characterOpen}

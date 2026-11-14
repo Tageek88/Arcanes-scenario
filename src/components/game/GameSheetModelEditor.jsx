@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Download, Plus, Sparkles, Trash2, Upload } from "lucide-react";
+import { ArrowDown, ArrowUp, Download, Plus, Sparkles, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ResponsiveDialog from "@/components/common/ResponsiveDialog";
@@ -13,11 +13,12 @@ import { DICE_MODES, DICE_MODE_LABELS, DICE_OUTCOMES, DICE_OUTCOME_LABELS, DICE_
 import { applyPresetToDraft, diceToDraft, draftToDice, updateDiceDraft, updateSingleDie, updateStatDie } from "@/lib/meta/diceDraft";
 import { MAX_TRACKS, MAX_TRACK_BOXES, draftToTracks, newTrackId, tracksToDraft } from "@/lib/meta/tracks";
 import { MAX_TEXT_FIELDS, draftToTextFields, newTextFieldId, textFieldsToDraft } from "@/lib/meta/textFields";
+import { BLOCK_KINDS, BLOCK_KIND_LABELS, MAX_BLOCKS, MAX_COLUMNS, MAX_LAYOUTS, draftToLayouts, layoutsToDraft, moveItem, newBlockId, newLayoutId } from "@/lib/meta/layouts";
 import { cleanParents, keysToParents, parentChoices, parentsToKeys } from "@/lib/meta/statLinks";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const EMPTY_COUNT = { min: "", max: "" };
-const EMPTY_MODEL = { characteristics: [], skillRollModifier: false, levels: [], pc: { ranges: {}, skills: EMPTY_COUNT, equipment: EMPTY_COUNT }, dice: diceToDraft(null), tracks: [], textFields: [] };
+const EMPTY_MODEL = { characteristics: [], skillRollModifier: false, levels: [], pc: { ranges: {}, skills: EMPTY_COUNT, equipment: EMPTY_COUNT }, dice: diceToDraft(null), tracks: [], textFields: [], layouts: [], layoutId: "" };
 
 const RULE_HELP = {
   add: "Le total des dés, plus la valeur de la caractéristique et le bonus du moment, est comparé à la difficulté.",
@@ -120,6 +121,8 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
         dice: diceToDraft(model?.dice, characteristics),
         tracks: tracksToDraft(model?.tracks),
         textFields: textFieldsToDraft(model?.textFields),
+        layouts: layoutsToDraft(model?.layouts, characteristics),
+        layoutId: model?.layoutId || "",
       });
       setScaleReport("");
       setPcReport("");
@@ -220,6 +223,8 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
       dice: draftToDice(form.dice, form.characteristics) ?? undefined,
       tracks: draftToTracks(form.tracks),
       textFields: draftToTextFields(form.textFields),
+      layouts: draftToLayouts(form.layouts, form.characteristics),
+      layoutId: form.layoutId,
     });
   };
 
@@ -283,6 +288,48 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
     setForm((current) => ({ ...current, textFields: current.textFields.map((field, i) => (i === index ? { ...field, ...patch } : field)) }));
   const addTextField = () => setForm((current) => ({ ...current, textFields: [...current.textFields, { id: newTextFieldId(), name: "", long: false }] }));
   const removeTextField = (index) => setForm((current) => ({ ...current, textFields: current.textFields.filter((_, i) => i !== index) }));
+
+  // Mises en page : chaque changement remplace la liste ; les blocs désignent une caractéristique par sa clé d'édition.
+  const changeLayouts = (change) => setForm((current) => ({ ...current, layouts: change(current.layouts) }));
+  const updateLayout = (layoutIndex, patch) =>
+    changeLayouts((layouts) => layouts.map((layout, i) => (i === layoutIndex ? { ...layout, ...patch } : layout)));
+  const changeBlocks = (layoutIndex, change) =>
+    changeLayouts((layouts) => layouts.map((layout, i) => (i === layoutIndex ? { ...layout, blocks: change(layout.blocks) } : layout)));
+  const updateBlock = (layoutIndex, blockIndex, patch) =>
+    changeBlocks(layoutIndex, (blocks) => blocks.map((block, i) => (i === blockIndex ? { ...block, ...patch } : block)));
+  const addBlock = (layoutIndex, kind) =>
+    changeBlocks(layoutIndex, (blocks) => (blocks.length >= MAX_BLOCKS ? blocks : [...blocks, { id: newBlockId(), kind, ...(kind === "stat-group" ? { stat: "" } : {}) }]));
+  const removeBlock = (layoutIndex, blockIndex) => changeBlocks(layoutIndex, (blocks) => blocks.filter((_, i) => i !== blockIndex));
+  const moveBlock = (layoutIndex, blockIndex, delta) => changeBlocks(layoutIndex, (blocks) => moveItem(blocks, blockIndex, delta));
+  const toggleBlockId = (layoutIndex, blockIndex, id) =>
+    changeBlocks(layoutIndex, (blocks) =>
+      blocks.map((block, i) => {
+        if (i !== blockIndex) return block;
+        const ids = block.ids || [];
+        return { ...block, ids: ids.includes(id) ? ids.filter((value) => value !== id) : [...ids, id] };
+      })
+    );
+  const addLayout = () =>
+    setForm((current) => {
+      if (current.layouts.length >= MAX_LAYOUTS) return current;
+      const layout = { id: newLayoutId(), name: `Mise en page ${current.layouts.length + 1}`, columns: 1, blocks: [{ id: newBlockId(), kind: "stats" }] };
+      return { ...current, layouts: [...current.layouts, layout], layoutId: current.layoutId || layout.id };
+    });
+  const removeLayout = (layoutIndex) =>
+    setForm((current) => ({
+      ...current,
+      layouts: current.layouts.filter((_, i) => i !== layoutIndex),
+      layoutId: current.layoutId === current.layouts[layoutIndex]?.id ? "" : current.layoutId,
+    }));
+  // Un groupe par attribut qui a des secondaires liées (celles dont `parent` est sa clé), sans doubler ceux déjà présents.
+  const addGroupsFor = (layoutIndex) =>
+    changeBlocks(layoutIndex, (blocks) => {
+      const present = new Set(blocks.filter((block) => block.kind === "stat-group").map((block) => block.stat));
+      const mains = form.characteristics.filter(
+        (item) => item.name.trim() && !item.parent && !present.has(item._key) && form.characteristics.some((other) => other.parent === item._key)
+      );
+      return [...blocks, ...mains.map((item) => ({ id: newBlockId(), kind: "stat-group", stat: item._key }))].slice(0, MAX_BLOCKS);
+    });
 
   const dice = form.dice;
   const isPool = dice.rule === "pool";
@@ -491,6 +538,124 @@ export default function GameSheetModelEditor({ open, onOpenChange, model, charac
               <Plus className="h-4 w-4" /> Ajouter un champ
             </Button>
             <p className="text-xs text-muted-foreground">Un champ sans nom n'est pas enregistré.</p>
+          </div>
+        </details>
+
+        <details className="rounded-lg border border-border p-3" open={form.layouts.length > 0}>
+          <summary className="cursor-pointer font-display font-semibold">Mises en page de la fiche</summary>
+          <div className="mt-3 stack-y-3">
+            <p className="text-xs text-muted-foreground">
+              Rangez la fiche en blocs : un attribut avec ses secondaires liées, les champs de texte, les cases à cocher. Sur ordinateur les blocs se répartissent en colonnes, sur mobile ils s'empilent. Sans mise en page, la fiche garde son affichage actuel.
+            </p>
+            {form.layouts.length > 0 && (
+              <div className="stack-y-1.5">
+                <Label>Mise en page utilisée</Label>
+                <Select value={form.layoutId || "_default"} onValueChange={(value) => setForm((current) => ({ ...current, layoutId: value === "_default" ? "" : value }))}>
+                  <SelectTrigger aria-label="Mise en page utilisée">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="_default">Affichage actuel (par défaut)</SelectItem>
+                    {form.layouts.map((layout) => (
+                      <SelectItem key={layout.id} value={layout.id}>{layout.name || "Sans nom"}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            {form.layouts.map((layout, layoutIndex) => (
+              <div key={layout.id} className="stack-y-2 rounded-lg border border-border p-3">
+                <div className="grid grid-cols-[minmax(0,1fr)_7rem_2.5rem] items-center gap-2">
+                  <Input
+                    aria-label={`Nom de la mise en page ${layoutIndex + 1}`}
+                    value={layout.name}
+                    placeholder="Ex. Feuille Metro"
+                    onChange={(event) => updateLayout(layoutIndex, { name: event.target.value })}
+                  />
+                  <Select value={String(layout.columns || 1)} onValueChange={(value) => updateLayout(layoutIndex, { columns: Number(value) })}>
+                    <SelectTrigger aria-label={`Colonnes de ${layout.name || "la mise en page"}`}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: MAX_COLUMNS }, (_, i) => i + 1).map((count) => (
+                        <SelectItem key={count} value={String(count)}>{count} colonne{count > 1 ? "s" : ""}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button type="button" variant="ghost" size="icon" aria-label={`Supprimer la mise en page ${layout.name || layoutIndex + 1}`} onClick={() => removeLayout(layoutIndex)}>
+                    <Trash2 className="h-4 w-4 text-muted-foreground" />
+                  </Button>
+                </div>
+                {layout.blocks.map((block, blockIndex) => (
+                  <div key={block.id} className="stack-y-1.5 rounded-md bg-secondary/40 p-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-xs font-medium">{BLOCK_KIND_LABELS[block.kind] || block.kind}</span>
+                      <div className="ml-auto flex items-center">
+                        <Button type="button" variant="ghost" size="icon" aria-label="Monter le bloc" disabled={blockIndex === 0} onClick={() => moveBlock(layoutIndex, blockIndex, -1)}>
+                          <ArrowUp className="h-4 w-4" />
+                        </Button>
+                        <Button type="button" variant="ghost" size="icon" aria-label="Descendre le bloc" disabled={blockIndex === layout.blocks.length - 1} onClick={() => moveBlock(layoutIndex, blockIndex, 1)}>
+                          <ArrowDown className="h-4 w-4" />
+                        </Button>
+                        <Button type="button" variant="ghost" size="icon" aria-label="Supprimer le bloc" onClick={() => removeBlock(layoutIndex, blockIndex)}>
+                          <Trash2 className="h-4 w-4 text-muted-foreground" />
+                        </Button>
+                      </div>
+                    </div>
+                    {block.kind === "stat-group" && (
+                      <Select value={block.stat || "_none"} onValueChange={(value) => updateBlock(layoutIndex, blockIndex, { stat: value === "_none" ? "" : value })}>
+                        <SelectTrigger aria-label="Attribut du groupe">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="_none">Choisir un attribut</SelectItem>
+                          {form.characteristics.filter((item) => item.name.trim()).map((item) => (
+                            <SelectItem key={item._key} value={item._key}>{item.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                    {(block.kind === "texts" || block.kind === "tracks") && (
+                      <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                        <span>{(block.ids || []).length === 0 ? "Tous :" : "Seulement :"}</span>
+                        {(block.kind === "texts" ? form.textFields : form.tracks).filter((item) => item.name.trim()).map((item) => (
+                          <label key={item.id} className="flex items-center gap-1">
+                            <input type="checkbox" checked={(block.ids || []).includes(item.id)} onChange={() => toggleBlockId(layoutIndex, blockIndex, item.id)} />
+                            {item.name}
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
+                      <Input
+                        aria-label="Titre du bloc (facultatif)"
+                        value={block.title || ""}
+                        placeholder="Titre du bloc (facultatif)"
+                        onChange={(event) => updateBlock(layoutIndex, blockIndex, { title: event.target.value })}
+                      />
+                      <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <input type="checkbox" checked={block.wide === true} onChange={(event) => updateBlock(layoutIndex, blockIndex, { wide: event.target.checked })} />
+                        Pleine largeur
+                      </label>
+                    </div>
+                  </div>
+                ))}
+                <div className="flex flex-wrap gap-2">
+                  {BLOCK_KINDS.map((kind) => (
+                    <Button key={kind} type="button" variant="outline" size="sm" disabled={layout.blocks.length >= MAX_BLOCKS} onClick={() => addBlock(layoutIndex, kind)}>
+                      <Plus className="h-4 w-4" /> {BLOCK_KIND_LABELS[kind]}
+                    </Button>
+                  ))}
+                  <Button type="button" variant="secondary" size="sm" onClick={() => addGroupsFor(layoutIndex)}>
+                    Un groupe par attribut lié
+                  </Button>
+                </div>
+              </div>
+            ))}
+            <Button type="button" variant="outline" size="sm" onClick={addLayout} disabled={form.layouts.length >= MAX_LAYOUTS}>
+              <Plus className="h-4 w-4" /> Ajouter une mise en page
+            </Button>
+            <p className="text-xs text-muted-foreground">Une mise en page sans nom n'est pas enregistrée. Les caractéristiques qu'aucun groupe ne montre vont dans le bloc « Autres caractéristiques ».</p>
           </div>
         </details>
 

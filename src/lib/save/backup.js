@@ -40,7 +40,8 @@ export async function restoreFromPayload(parsed) {
       // La corbeille est propre à cet appareil : une restauration ne la touche pas.
       if (LOCAL_ONLY_TABLES.includes(t)) continue;
       // Une sauvegarde sans le contenu des PDF (sauvegarde automatique, ancienne version) ne les efface pas.
-      if (FILE_TABLES.includes(t) && parsed.data[t] == null) continue;
+      // Il en va de même des systèmes de jeu : une sauvegarde d'avant leur création ne les efface pas.
+      if ((FILE_TABLES.includes(t) || t === "GameSystem") && parsed.data[t] == null) continue;
       await db.table(t).clear();
       const rows = parsed.data[t] || [];
       if (rows.length) await db.table(t).bulkPut(rows);

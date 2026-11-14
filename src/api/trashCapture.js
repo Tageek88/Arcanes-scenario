@@ -9,7 +9,8 @@ import { db } from "./dbConfig";
 export const TRASH = "Trash";
 
 // Jamais copiés : réglages, la corbeille elle-même, PDF de campagne (jusqu'à 50 Mo) et sondages (secret `owner_token`, service distant).
-const NEVER = new Set(["AppSettings", TRASH, "CampaignDocument", "CampaignDocumentFile", "SessionPoll"]);
+const NEVER = new Set(["AppSettings", TRASH, "CampaignDocument", "CampaignDocumentFile", "SessionPoll", "GameSystem"]);
+// (GameSystem : sans campagne, un système se met en sécurité en l'exportant en fichier avant de le supprimer.)
 // Copiés seulement dans un groupe (supprimer un PNJ emporte ses relations ; supprimer une relation seule n'a pas d'intérêt).
 const IN_GROUP_ONLY = new Set(["NPCRelation"]);
 
