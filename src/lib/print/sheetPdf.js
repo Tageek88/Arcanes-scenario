@@ -40,7 +40,7 @@ function drawZone(page, font, zone, character, model, helpers) {
   }
 
   const isLong = isLongZone(zone, model.longIds);
-  let value = helpers.clean(zoneText(zone, character));
+  let value = helpers.clean(zoneText(zone, character, model.zones));
   if (!value) return;
   if (!isLong) value = value.replace(/\s*\n\s*/g, " ");
   if (isLong) {
@@ -62,7 +62,7 @@ function drawZone(page, font, zone, character, model, helpers) {
  * `sheet` = { pages, zones } ; `model` = { tracks, textFields } ; `helpers` = { embed(document, url), clean(text), wrap(text, font, size, width) }.
  */
 export async function drawSheetPages(document, font, sheet, character, model, helpers) {
-  const context = { tracks: model.tracks || [], longIds: new Set((model.textFields || []).filter((field) => field.long).map((field) => field.id)) };
+  const context = { zones: sheet.zones || [], tracks: model.tracks || [], longIds: new Set((model.textFields || []).filter((field) => field.long).map((field) => field.id)) };
   for (const [pageIndex, background] of sheet.pages.entries()) {
     const width = SHEET_PAGE_WIDTH;
     const height = (width * background.height) / background.width;

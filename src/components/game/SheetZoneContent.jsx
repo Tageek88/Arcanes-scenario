@@ -8,7 +8,7 @@ const INK = "#111827";
  * de l'élément à la place de la valeur. Les cases d'une piste se cochent quand `onToggle(zone, index)` est fourni.
  * `px(taille)` donne la taille en pixels ; `longIds` est l'ensemble des champs de texte longs (ils passent à la ligne).
  */
-export default function SheetZoneContent({ zone, sheet, tracks, longIds, px, preview, onToggle, unit = "px" }) {
+export default function SheetZoneContent({ zone, zones, sheet, tracks, longIds, px, preview, onToggle, unit = "px" }) {
   const fontSize = px(zone.size);
   const css = (value) => `${value}${unit}`;
   const exact = { WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" };
@@ -40,7 +40,7 @@ export default function SheetZoneContent({ zone, sheet, tracks, longIds, px, pre
   }
 
   const isLong = isLongZone(zone, longIds);
-  const value = preview ? preview : zoneText(zone, sheet);
+  const value = preview ? preview : zoneText(zone, sheet, zones);
   return (
     <div
       className="flex h-full w-full overflow-hidden"

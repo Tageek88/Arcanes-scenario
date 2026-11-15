@@ -28,7 +28,7 @@ export default function SheetPrintPages({ sheet, character, tracks, textFields }
             <img src={page.url} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", ...EXACT }} />
             {zonesOnPage(sheet.zones, pageIndex).map((zone) => (
               <div key={zone.id} style={{ position: "absolute", left: `${zone.x * 100}%`, top: `${zone.y * 100}%`, width: `${zone.w * 100}%`, height: `${zone.h * 100}%` }}>
-                <SheetZoneContent zone={zone} sheet={character} tracks={tracks} longIds={longIds} px={mm} unit="mm" />
+                <SheetZoneContent zone={zone} zones={sheet.zones} sheet={character} tracks={tracks} longIds={longIds} px={mm} unit="mm" />
               </div>
             ))}
           </div>

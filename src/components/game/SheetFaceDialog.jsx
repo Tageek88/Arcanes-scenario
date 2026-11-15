@@ -67,7 +67,7 @@ export default function SheetFaceDialog({ open, onOpenChange, campaignId, model,
                       className="absolute"
                       style={{ left: `${zone.x * 100}%`, top: `${zone.y * 100}%`, width: `${zone.w * 100}%`, height: `${zone.h * 100}%` }}
                     >
-                      <SheetZoneContent zone={zone} sheet={character} tracks={model.tracks} longIds={longIds} px={px} onToggle={onChecks ? toggle : undefined} />
+                      <SheetZoneContent zone={zone} zones={zones} sheet={character} tracks={model.tracks} longIds={longIds} px={px} onToggle={onChecks ? toggle : undefined} />
                     </div>
                   ))
                 }

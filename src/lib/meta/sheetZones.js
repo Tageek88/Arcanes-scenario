@@ -200,14 +200,32 @@ export function equipmentKind(item) {
   return "other";
 }
 
-/** Texte d'une information de la fiche : nom, notes, ou liste (une ligne par compétence, objet d'équipement ou d'inventaire). */
-export function infoText(ref, sheet) {
+/**
+ * Les listes de la feuille déjà posées à part : { weapons, protections } (true si une zone « armes » ou « protections » existe).
+ * Elles servent à ne pas répéter ces objets dans la zone « équipement ».
+ */
+export function placedLists(zones) {
+  const refs = new Set((Array.isArray(zones) ? zones : []).filter((zone) => zone?.kind === "info").map((zone) => zone.ref));
+  return { weapons: refs.has("weapons"), protections: refs.has("protections") };
+}
+
+/**
+ * Texte d'une information de la fiche : nom, notes, ou liste (une ligne par compétence, objet d'équipement ou d'inventaire).
+ * `placed` (voir placedLists) retire de la liste « équipement » les armes et les protections qui ont leur propre zone.
+ */
+export function infoText(ref, sheet, placed) {
   if (ref === "name") return text(sheet?.name);
   if (ref === "notes") return String(sheet?.notes ?? "").trim();
   const source = ref === "weapons" || ref === "protections" ? "equipment" : ref;
   const list = Array.isArray(sheet?.[source]) ? sheet[source] : [];
   if (ref === "skills") return list.map((skill) => itemLine(skill)).filter(Boolean).join("\n");
-  if (ref === "equipment") return list.map((item) => itemLine(item, text(item?.type))).filter(Boolean).join("\n");
+  if (ref === "equipment") {
+    const kept = list.filter((item) => {
+      const kind = equipmentKind(item);
+      return !((kind === "weapon" && placed?.weapons) || (kind === "protection" && placed?.protections));
+    });
+    return kept.map((item) => itemLine(item, text(item?.type))).filter(Boolean).join("\n");
+  }
   // Armes et protections : le type est connu par la liste elle-même, la ligne ne le répète pas.
   if (ref === "weapons") return list.filter((item) => equipmentKind(item) === "weapon").map((item) => itemLine(item)).filter(Boolean).join("\n");
   if (ref === "protections") return list.filter((item) => equipmentKind(item) === "protection").map((item) => itemLine(item)).filter(Boolean).join("\n");
@@ -218,9 +236,12 @@ export function infoText(ref, sheet) {
 /** La zone s'écrit-elle sur plusieurs lignes ? (champ de texte long, notes et listes) */
 export const isLongZone = (zone, longIds) => (zone?.kind === "text" ? Boolean(longIds?.has(zone.ref)) : zone?.kind === "info" ? zone.ref !== "name" : false);
 
-/** Texte affiché par une zone « stat », « text » ou « info » pour un personnage ou un PNJ ("" si rien n'est saisi). */
-export function zoneText(zone, sheet) {
-  if (zone?.kind === "info") return infoText(zone.ref, sheet);
+/**
+ * Texte affiché par une zone « stat », « text » ou « info » pour un personnage ou un PNJ ("" si rien n'est saisi).
+ * `zones` = toutes les zones de la feuille : la zone « équipement » ne répète pas ce qui est déjà dans « armes » ou « protections ».
+ */
+export function zoneText(zone, sheet, zones) {
+  if (zone?.kind === "info") return infoText(zone.ref, sheet, zone.ref === "equipment" ? placedLists(zones) : undefined);
   if (zone?.kind === "text") {
     const texts = isObject(sheet?.texts) ? sheet.texts : {};
     return Object.hasOwn(texts, zone.ref) ? text(texts[zone.ref]) : "";
