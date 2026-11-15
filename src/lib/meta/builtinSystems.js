@@ -119,22 +119,6 @@ const METRO_ZONES = [
   { id: "za9e62954f9a5", kind: "info", ref: "equipment", page: 0, x: 0.0403, y: 0.3521, w: 0.1779, h: 0.2228, size: 1.6 },
 ];
 
-// Équipement d'exemple : des armes et une protection avec les champs de la feuille (valeurs à saisir selon le livre de règles).
-const METRO_EQUIPMENT = [
-  { name: "Objet contondant", type: "Arme", field_names: ["Prise", "Bonus", "Dégâts", "Fiabilité", "Portée", "Notes"], fields: [{"name": "Prise", "value": ""}, {"name": "Bonus", "value": ""}, {"name": "Dégâts", "value": ""}, {"name": "Fiabilité", "value": ""}, {"name": "Portée", "value": ""}, {"name": "Notes", "value": ""}] },
-  { name: "Couteau", type: "Arme", field_names: ["Prise", "Bonus", "Dégâts", "Fiabilité", "Portée", "Notes"], fields: [{"name": "Prise", "value": ""}, {"name": "Bonus", "value": ""}, {"name": "Dégâts", "value": ""}, {"name": "Fiabilité", "value": ""}, {"name": "Portée", "value": ""}, {"name": "Notes", "value": ""}] },
-  { name: "Hache", type: "Arme", field_names: ["Prise", "Bonus", "Dégâts", "Fiabilité", "Portée", "Notes"], fields: [{"name": "Prise", "value": ""}, {"name": "Bonus", "value": ""}, {"name": "Dégâts", "value": ""}, {"name": "Fiabilité", "value": ""}, {"name": "Portée", "value": ""}, {"name": "Notes", "value": ""}] },
-  { name: "Pistolet", type: "Arme", field_names: ["Prise", "Bonus", "Dégâts", "Fiabilité", "Portée", "Notes"], fields: [{"name": "Prise", "value": ""}, {"name": "Bonus", "value": ""}, {"name": "Dégâts", "value": ""}, {"name": "Fiabilité", "value": ""}, {"name": "Portée", "value": ""}, {"name": "Notes", "value": ""}] },
-  { name: "Pistolet lourd", type: "Arme", field_names: ["Prise", "Bonus", "Dégâts", "Fiabilité", "Portée", "Notes"], fields: [{"name": "Prise", "value": ""}, {"name": "Bonus", "value": ""}, {"name": "Dégâts", "value": ""}, {"name": "Fiabilité", "value": ""}, {"name": "Portée", "value": ""}, {"name": "Notes", "value": ""}] },
-  { name: "Revolver", type: "Arme", field_names: ["Prise", "Bonus", "Dégâts", "Fiabilité", "Portée", "Notes"], fields: [{"name": "Prise", "value": ""}, {"name": "Bonus", "value": ""}, {"name": "Dégâts", "value": ""}, {"name": "Fiabilité", "value": ""}, {"name": "Portée", "value": ""}, {"name": "Notes", "value": ""}] },
-  { name: "Fusil", type: "Arme", field_names: ["Prise", "Bonus", "Dégâts", "Fiabilité", "Portée", "Notes"], fields: [{"name": "Prise", "value": ""}, {"name": "Bonus", "value": ""}, {"name": "Dégâts", "value": ""}, {"name": "Fiabilité", "value": ""}, {"name": "Portée", "value": ""}, {"name": "Notes", "value": ""}] },
-  { name: "Fusil à lunette", type: "Arme", field_names: ["Prise", "Bonus", "Dégâts", "Fiabilité", "Portée", "Notes"], fields: [{"name": "Prise", "value": ""}, {"name": "Bonus", "value": ""}, {"name": "Dégâts", "value": ""}, {"name": "Fiabilité", "value": ""}, {"name": "Portée", "value": ""}, {"name": "Notes", "value": ""}] },
-  { name: "Fusil avec silencieux", type: "Arme", field_names: ["Prise", "Bonus", "Dégâts", "Fiabilité", "Portée", "Notes"], fields: [{"name": "Prise", "value": ""}, {"name": "Bonus", "value": ""}, {"name": "Dégâts", "value": ""}, {"name": "Fiabilité", "value": ""}, {"name": "Portée", "value": ""}, {"name": "Notes", "value": ""}] },
-  { name: "Fusil d'assaut", type: "Arme", field_names: ["Prise", "Bonus", "Dégâts", "Fiabilité", "Portée", "Notes"], fields: [{"name": "Prise", "value": ""}, {"name": "Bonus", "value": ""}, {"name": "Dégâts", "value": ""}, {"name": "Fiabilité", "value": ""}, {"name": "Portée", "value": ""}, {"name": "Notes", "value": ""}] },
-  { name: "Sarbacane de fortune", type: "Arme", field_names: ["Prise", "Bonus", "Dégâts", "Fiabilité", "Portée", "Notes"], fields: [{"name": "Prise", "value": ""}, {"name": "Bonus", "value": ""}, {"name": "Dégâts", "value": ""}, {"name": "Fiabilité", "value": ""}, {"name": "Portée", "value": ""}, {"name": "Notes", "value": ""}] },
-  { name: "Gilet pare-balles", type: "Protection", field_names: ["Protection", "Modificateur"], fields: [{"name": "Protection", "value": ""}, {"name": "Modificateur", "value": ""}] },
-];
-
 export const BUILTIN_SYSTEMS = [
   {
     id: "builtin-metro-2033",
@@ -163,7 +147,7 @@ export const BUILTIN_SYSTEMS = [
       layoutId: "metro",
       zones: METRO_ZONES,
       skills: [],
-      equipment: METRO_EQUIPMENT,
+      equipment: [],
     },
   },
 ];

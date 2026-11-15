@@ -447,7 +447,7 @@ export async function createEditablePdf(model) {
                     for (const line of owner.items) drawText(`- ${line}`);
                 }
                 break;
-            case "characters":
+            case "characters": {
                 if (!block.characters[0]?.sheet) drawHeading("Fiches de personnages");
                 // Une page de feuille (fond + valeurs) remplace la fiche en liste : seule elle est imprimée.
                 let sheetDrawn = false;
@@ -521,6 +521,7 @@ export async function createEditablePdf(model) {
                     drawField("Notes", character.notes || "", { multiline: true, height: 96 });
                 }
                 break;
+            }
             default:
                 throw new Error(`Type de section PDF inconnu : ${block.kind}`);
         }

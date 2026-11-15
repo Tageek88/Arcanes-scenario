@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { BUILTIN_SYSTEMS, getBuiltinSystem } from "@/lib/meta/builtinSystems.js";
 import { cleanSystemData, describeSystem, parseSystemFile, exportSystemFile } from "@/lib/meta/gameSystem.js";
 import { resolveLayout } from "@/lib/meta/layouts.js";
-import { cleanZones, equipmentKind } from "@/lib/meta/sheetZones.js";
+import { cleanZones } from "@/lib/meta/sheetZones.js";
 
 describe("systèmes fournis", () => {
   it("chaque système fourni a un identifiant unique, un nom et le drapeau builtin", () => {
@@ -60,13 +60,6 @@ describe("Metro 2033", () => {
     const { zones } = metro.data;
     expect(zones.length).toBeGreaterThan(0);
     expect(cleanZones(zones, metro.data)).toEqual(zones);
-  });
-
-  it("l'équipement d'exemple sépare armes et protections par le type", () => {
-    const kinds = metro.data.equipment.map((item) => equipmentKind(item));
-    expect(kinds.filter((kind) => kind === "weapon").length).toBeGreaterThan(0);
-    expect(kinds).toContain("protection");
-    expect(kinds.includes("other")).toBe(false);
   });
 
   it("la mise en page montre tout : quatre groupes, et chaque piste et chaque champ une fois", () => {
