@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Copy, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,7 @@ import { linkedCharacteristic } from "@/lib/meta/diceLinks";
 import TrackBoxes from "@/components/game/TrackBoxes";
 import { setChecked } from "@/lib/meta/tracks";
 import { setText } from "@/lib/meta/textFields";
+import { resolveLayout } from "@/lib/meta/layouts";
 import useConfirm from "@/hooks/useConfirm";
 import { EQUIPMENT_GROUPS, newEquipmentItem } from "@/lib/meta/equipmentGroups";
 import EquipmentGroupHeadings, { equipmentOrder } from "@/components/game/EquipmentGroupHeadings";
@@ -173,6 +174,70 @@ export default function NpcSheetFields({ form, set, generator, generation, campa
   };
   const levelOptions = generator.levelNames.includes(form.level) || !form.level ? generator.levelNames : [form.level, ...generator.levelNames];
 
+  // La mise en page du modèle (par défaut : caractéristiques, informations, cases à cocher) range les trois sortes de saisies.
+  const layoutStats = names.map((name) => (roll.characteristics || []).find((item) => item.name === name) || { name });
+  const layout = useMemo(
+    () => resolveLayout(roll.layouts, roll.layoutId, { characteristics: layoutStats, tracks: roll.tracks, textFields: roll.textFields }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [roll.layouts, roll.layoutId, roll.characteristics, roll.tracks, roll.textFields, names.join("|")]
+  );
+  const renderStat = (name) => {
+              const range = rangeOf(name);
+              const entry = characteristics[name] || {};
+              return (
+                <div key={name} className="stack-y-2 rounded-lg border border-border p-3">
+                  <label className="stack-y-1">
+                    <span className="block text-xs font-medium text-foreground">{name}</span>
+                    <Input
+                      aria-label={`${name} valeur`}
+                      value={entry.value ?? ""}
+                      placeholder={range ? `${range.min} à ${range.max}` : "Valeur principale"}
+                      onChange={(event) => setCharacteristic(name, { value: event.target.value })}
+                    />
+                  </label>
+                  <OptionalFields
+                    subject={name}
+                    fields={entry.fields || []}
+                    suggested={fieldSuggestions[name] || []}
+                    onChange={(fields) => setCharacteristic(name, { fields })}
+                  />
+                  <DiceOverrideField
+                    characteristic={name}
+                    config={roll.dice}
+                    override={form.dice_override}
+                    onChange={(next) => set("dice_override", next)}
+                  />
+                </div>
+              );
+  };
+  const renderText = (field) => (
+            <div key={field.id} className="stack-y-1">
+              <Label htmlFor={`npc-text-${field.id}`} className="text-xs text-muted-foreground">{field.name}</Label>
+              {field.long ? (
+                <Textarea
+                  id={`npc-text-${field.id}`}
+                  rows={3}
+                  value={form.texts?.[field.id] ?? ""}
+                  onChange={(event) => set("texts", setText(form.texts, field.id, event.target.value))}
+                />
+              ) : (
+                <Input
+                  id={`npc-text-${field.id}`}
+                  value={form.texts?.[field.id] ?? ""}
+                  onChange={(event) => set("texts", setText(form.texts, field.id, event.target.value))}
+                />
+              )}
+            </div>
+  );
+  const renderTrack = (track) => (
+            <TrackBoxes
+              key={track.id}
+              track={track}
+              value={form.checks?.[track.id]}
+              onChange={(next) => set("checks", setChecked(form.checks, track.id, next))}
+            />
+  );
+
   return (
     <>
       {(levelOptions.length > 0 || form.level) && (
@@ -209,81 +274,27 @@ export default function NpcSheetFields({ form, set, generator, generation, campa
         <Input id="npc-appearance" value={form.appearance || ""} onChange={(event) => set("appearance", event.target.value)} />
       </div>
 
-      {names.length > 0 && (
-        <div className="stack-y-2">
-          <FieldLabel label="Caractéristiques" locked={!!locks.characteristics} onToggle={() => toggleLock("characteristics")} />
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {names.map((name) => {
-              const range = rangeOf(name);
-              const entry = characteristics[name] || {};
-              return (
-                <div key={name} className="stack-y-2 rounded-lg border border-border p-3">
-                  <label className="stack-y-1">
-                    <span className="block text-xs font-medium text-foreground">{name}</span>
-                    <Input
-                      aria-label={`${name} valeur`}
-                      value={entry.value ?? ""}
-                      placeholder={range ? `${range.min} à ${range.max}` : "Valeur principale"}
-                      onChange={(event) => setCharacteristic(name, { value: event.target.value })}
-                    />
-                  </label>
-                  <OptionalFields
-                    subject={name}
-                    fields={entry.fields || []}
-                    suggested={fieldSuggestions[name] || []}
-                    onChange={(fields) => setCharacteristic(name, { fields })}
-                  />
-                  <DiceOverrideField
-                    characteristic={name}
-                    config={roll.dice}
-                    override={form.dice_override}
-                    onChange={(next) => set("dice_override", next)}
-                  />
-                </div>
-              );
-            })}
+      {layout.blocks.map((block) => {
+        const statBlock = block.kind === "stat-group" || block.kind === "stats";
+        const firstStatBlock = statBlock && !layout.blocks.slice(0, layout.blocks.indexOf(block)).some((other) => other.kind === "stat-group" || other.kind === "stats");
+        const title = block.title || (block.kind === "stat-group" ? block.stat : block.kind === "stats" ? "Caractéristiques" : block.kind === "texts" ? "Informations" : "Cases à cocher");
+        return (
+          <div key={block.id} className="stack-y-2">
+            {firstStatBlock ? (
+              <FieldLabel label={title} locked={!!locks.characteristics} onToggle={() => toggleLock("characteristics")} />
+            ) : (
+              <Label className="block">{title}</Label>
+            )}
+            {statBlock && (
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {(block.kind === "stat-group" ? [block.stat, ...block.children] : block.stats).map((name) => renderStat(name))}
+              </div>
+            )}
+            {block.kind === "texts" && block.fields.map((field) => renderText(field))}
+            {block.kind === "tracks" && block.tracks.map((track) => renderTrack(track))}
           </div>
-        </div>
-      )}
-
-      {roll.textFields?.length > 0 && (
-        <div className="stack-y-2">
-          <Label className="block">Informations</Label>
-          {roll.textFields.map((field) => (
-            <div key={field.id} className="stack-y-1">
-              <Label htmlFor={`npc-text-${field.id}`} className="text-xs text-muted-foreground">{field.name}</Label>
-              {field.long ? (
-                <Textarea
-                  id={`npc-text-${field.id}`}
-                  rows={3}
-                  value={form.texts?.[field.id] ?? ""}
-                  onChange={(event) => set("texts", setText(form.texts, field.id, event.target.value))}
-                />
-              ) : (
-                <Input
-                  id={`npc-text-${field.id}`}
-                  value={form.texts?.[field.id] ?? ""}
-                  onChange={(event) => set("texts", setText(form.texts, field.id, event.target.value))}
-                />
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {roll.tracks?.length > 0 && (
-        <div className="stack-y-2">
-          <Label className="block">Cases à cocher</Label>
-          {roll.tracks.map((track) => (
-            <TrackBoxes
-              key={track.id}
-              track={track}
-              value={form.checks?.[track.id]}
-              onChange={(next) => set("checks", setChecked(form.checks, track.id, next))}
-            />
-          ))}
-        </div>
-      )}
+        );
+      })}
 
       <div className="stack-y-2">
         <FieldLabel label="Compétences" locked={!!locks.skills} onToggle={() => toggleLock("skills")} />
