@@ -9,6 +9,7 @@ import { cleanJournal, journalEntries } from "@/lib/meta/sessionJournal";
 import { trackRows } from "@/lib/meta/tracks";
 import { textRows } from "@/lib/meta/textFields";
 import { sheetForPrint } from "@/lib/meta/sheetZones";
+import { resolveLayout } from "@/lib/meta/layouts";
 
 export const SECTIONS = [
     { key: "scenes", title: "Scènes et actes", hint: "Chaque scène est imprimée avec ses indices liés." },
@@ -449,6 +450,8 @@ export function buildPrintModel(data, sel, opts) {
             // Champs de texte du modèle, pour imprimer les textes de chaque fiche.
             ...(gameSheetModel?.textFields?.length ? { textFields: gameSheetModel.textFields } : {}),
             ...(printSheet ? { sheet: printSheet } : {}),
+            // Mise en page du modèle : les valeurs s'impriment dans l'ordre des blocs de la fiche.
+            layout: resolveLayout(gameSheetModel?.layouts, gameSheetModel?.layoutId, gameSheetModel || {}),
         }));
     if (selectedCharacters.length) {
         blocks.push({ kind: "characters", characters: selectedCharacters });

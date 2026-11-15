@@ -6,6 +6,7 @@ import { trackRows } from "@/lib/meta/tracks";
 import { textRows } from "@/lib/meta/textFields";
 import SheetPrintPages from "@/components/print/SheetPrintPages";
 import { groupEquipment } from "@/lib/meta/equipmentGroups";
+import { resolveLayout } from "@/lib/meta/layouts";
 
 const Lines = ({ label, items }) =>
     items?.length > 0 ? (
@@ -59,7 +60,7 @@ function Block({ block }) {
             return (
                 <section className="prt-section">
                     <h2>Fiches de personnages</h2>
-                    {block.characters.map(({ character, characteristics, skillRollModifier, tracks, textFields, sheet }) => (
+                    {block.characters.map(({ character, characteristics, skillRollModifier, tracks, textFields, sheet, layout }) => (
                         <article className="prt-character" key={character.id}>
                             {!sheet && <h3 className="prt-group">{character.name}</h3>}
                             <CharacterContent
@@ -69,6 +70,7 @@ function Block({ block }) {
                                 tracks={tracks}
                                 textFields={textFields}
                                 sheet={sheet}
+                                layout={layout}
                             />
                         </article>
                     ))}
@@ -243,62 +245,77 @@ function Block({ block }) {
     }
 }
 
-function CharacterContent({ character, characteristics, skillRollModifier, tracks = [], textFields = [], sheet = null }) {
+function CharacterContent({ character, characteristics, skillRollModifier, tracks = [], textFields = [], sheet = null, layout = null }) {
     // Avec une feuille, l'impression se limite à ses pages (fond + valeurs) : pas de seconde version en liste.
     if (sheet) return <SheetPrintPages sheet={sheet} character={character} tracks={tracks} textFields={textFields} />;
-    const trackLines = trackRows(tracks, character.checks);
-    const textLines = textRows(textFields, character.texts).filter((row) => row.value);
     const stats = characteristics.map((definition) => {
         const values = character.characteristics?.[definition.name] || {};
         const fields = (values.fields || []).filter((f) => f.name || f.value);
         return { name: definition.name, value: values.value, fields };
     });
+    // Les blocs de la mise en page du modèle (par défaut : caractéristiques, informations, cases à cocher).
+    const blocks = (layout?.blocks ? layout : resolveLayout([], "", { characteristics, tracks, textFields })).blocks;
+    const statByName = new Map(stats.map((stat) => [stat.name, stat]));
 
     return (
         <>
-            {stats.length > 0 && (
-                <section className="prt-section">
-                    <h2>Caractéristiques</h2>
-                    <div className="prt-character-grid">
-                        {stats.map((stat) => (
-                            <article className="prt-character-stat" key={stat.name}>
-                                <h3>{stat.name}</h3>
-                                <p>
-                                    <strong>Valeur :</strong>{" "}
-                                    {hasValue(stat.value) ? stat.value : <span className="prt-blank" />}
-                                </p>
-                                {stat.fields.map((field, fieldIndex) => (
-                                    <p key={`${field.name}-${fieldIndex}`}>
-                                        <strong>{field.name} :</strong>{" "}
-                                        {hasValue(field.value) ? field.value : <span className="prt-blank" />}
-                                    </p>
+            {blocks.map((block) => {
+                const title = block.title || (block.kind === "stat-group" ? block.stat : block.kind === "stats" ? "Caractéristiques" : block.kind === "texts" ? "Informations" : "Cases à cocher");
+                if (block.kind === "stat-group" || block.kind === "stats") {
+                    const names = block.kind === "stat-group" ? [block.stat, ...block.children] : block.stats;
+                    const list = names.map((name) => statByName.get(name)).filter(Boolean);
+                    if (list.length === 0) return null;
+                    return (
+                        <section className="prt-section" key={block.id}>
+                            <h2>{title}</h2>
+                            <div className="prt-character-grid">
+                                {list.map((stat) => (
+                                    <article className="prt-character-stat" key={stat.name}>
+                                        <h3>{stat.name}</h3>
+                                        <p>
+                                            <strong>Valeur :</strong>{" "}
+                                            {hasValue(stat.value) ? stat.value : <span className="prt-blank" />}
+                                        </p>
+                                        {stat.fields.map((field, fieldIndex) => (
+                                            <p key={`${field.name}-${fieldIndex}`}>
+                                                <strong>{field.name} :</strong>{" "}
+                                                {hasValue(field.value) ? field.value : <span className="prt-blank" />}
+                                            </p>
+                                        ))}
+                                    </article>
                                 ))}
-                            </article>
+                            </div>
+                        </section>
+                    );
+                }
+                if (block.kind === "texts") {
+                    const lines = textRows(block.fields, character.texts).filter((row) => row.value);
+                    if (lines.length === 0) return null;
+                    return (
+                        <section className="prt-section" key={block.id}>
+                            <h2>{title}</h2>
+                            {lines.map((row) => (
+                                <p key={row.id} style={row.long ? { whiteSpace: "pre-wrap" } : undefined}>
+                                    <strong>{row.name} :</strong> {row.value}
+                                </p>
+                            ))}
+                        </section>
+                    );
+                }
+                const lines = trackRows(block.tracks, character.checks);
+                if (lines.length === 0) return null;
+                return (
+                    <section className="prt-section" key={block.id}>
+                        <h2>{title}</h2>
+                        {lines.map((track) => (
+                            <div className="prt-character-item" key={track.id}>
+                                <span className="prt-title">{track.name}</span>{" "}
+                                {Array.from({ length: track.count }, (_, index) => (index < track.checked ? "☑" : "☐")).join(" ")}
+                            </div>
                         ))}
-                    </div>
-                </section>
-            )}
-            {textLines.length > 0 && (
-                <section className="prt-section">
-                    <h2>Informations</h2>
-                    {textLines.map((row) => (
-                        <p key={row.id} style={row.long ? { whiteSpace: "pre-wrap" } : undefined}>
-                            <strong>{row.name} :</strong> {row.value}
-                        </p>
-                    ))}
-                </section>
-            )}
-            {trackLines.length > 0 && (
-                <section className="prt-section">
-                    <h2>Cases à cocher</h2>
-                    {trackLines.map((track) => (
-                        <div className="prt-character-item" key={track.id}>
-                            <span className="prt-title">{track.name}</span>{" "}
-                            {Array.from({ length: track.count }, (_, index) => (index < track.checked ? "☑" : "☐")).join(" ")}
-                        </div>
-                    ))}
-                </section>
-            )}
+                    </section>
+                );
+            })}
             {(character.skills || []).length > 0 && (
                 <section className="prt-section">
                     <h2>Compétences</h2>
@@ -355,7 +372,7 @@ export default function PrintSheet({ model }) {
     const css = useMemo(() => generatePrintCSS(resolved.tokens), [resolved.tokens]);
 
     if (model.character) {
-        const { character, campaignName, characteristics, skillRollModifier, tracks, textFields, sheet } = model;
+        const { character, campaignName, characteristics, skillRollModifier, tracks, textFields, sheet, layout } = model;
         return (
             <div className="print-root">
                 <style>{css}</style>
@@ -372,6 +389,7 @@ export default function PrintSheet({ model }) {
                     tracks={tracks}
                     textFields={textFields}
                     sheet={sheet}
+                    layout={layout}
                 />
             </div>
         );

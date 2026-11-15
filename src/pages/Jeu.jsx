@@ -462,6 +462,7 @@ export default function Jeu() {
             tracks: model.tracks,
             textFields: model.textFields,
             sheet: sheetForPrint(model, printPages),
+            layout: sheetLayout,
           }}
         />,
         document.body

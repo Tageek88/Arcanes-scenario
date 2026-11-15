@@ -4,6 +4,7 @@ import { trackRows } from "@/lib/meta/tracks";
 import { textRows } from "@/lib/meta/textFields";
 import { drawSheetPages } from "@/lib/print/sheetPdf";
 import { groupEquipment } from "@/lib/meta/equipmentGroups";
+import { resolveLayout } from "@/lib/meta/layouts";
 
 const PAGE_WIDTH = 595.28;
 const PAGE_HEIGHT = 841.89;
@@ -452,7 +453,7 @@ export async function createEditablePdf(model) {
                 if (!block.characters[0]?.sheet) drawHeading("Fiches de personnages");
                 // Une page de feuille (fond + valeurs) remplace la fiche en liste : seule elle est imprimée.
                 let sheetDrawn = false;
-                for (const [characterIndex, { character, characteristics, skillRollModifier, tracks = [], textFields = [], sheet = null }] of block.characters.entries()) {
+                for (const [characterIndex, { character, characteristics, skillRollModifier, tracks = [], textFields = [], sheet = null, layout = null }] of block.characters.entries()) {
                     if (sheet) {
                         // La page de travail encore vierge laisse la place aux pages de la feuille.
                         if (!sheetDrawn && page && cursorY === PAGE_HEIGHT - MARGIN && document.getPageCount() > 1) document.removePage(document.getPageCount() - 1);
@@ -463,28 +464,38 @@ export async function createEditablePdf(model) {
                     if (characterIndex > 0 || sheetDrawn) addPage();
                     sheetDrawn = false;
                     drawHeading(character.name, 2);
-                    drawHeading("Caractéristiques", 3);
-                    drawCharacteristics(
-                        characteristics.map((definition) => {
-                            const values = character.characteristics?.[definition.name] || {};
-                            const rows = [["Valeur", values.value]];
-                            (values.fields || []).forEach((field) => {
-                                if (field.name || field.value) rows.push([field.name, field.value]);
-                            });
-                            return { name: definition.name, rows };
-                        })
-                    );
-                    const textLines = textRows(textFields, character.texts);
-                    if (textLines.length) {
-                        drawHeading("Informations", 3);
-                        for (const row of textLines) {
-                            drawField(row.name, row.value, row.long ? { multiline: true, height: 60 } : {});
+                    // Les blocs de la mise en page du modèle (par défaut : caractéristiques, informations, cases à cocher).
+                    const blocks = (layout?.blocks ? layout : resolveLayout([], "", { characteristics, tracks, textFields })).blocks;
+                    for (const block of blocks) {
+                        const title = block.title || (block.kind === "stat-group" ? block.stat : block.kind === "stats" ? "Caractéristiques" : block.kind === "texts" ? "Informations" : "Cases à cocher");
+                        if (block.kind === "stat-group" || block.kind === "stats") {
+                            const names = block.kind === "stat-group" ? [block.stat, ...block.children] : block.stats;
+                            const definitions = names.map((name) => characteristics.find((definition) => definition.name === name)).filter(Boolean);
+                            if (definitions.length === 0) continue;
+                            drawHeading(title, 3);
+                            drawCharacteristics(
+                                definitions.map((definition) => {
+                                    const values = character.characteristics?.[definition.name] || {};
+                                    const rows = [["Valeur", values.value]];
+                                    (values.fields || []).forEach((field) => {
+                                        if (field.name || field.value) rows.push([field.name, field.value]);
+                                    });
+                                    return { name: definition.name, rows };
+                                })
+                            );
+                        } else if (block.kind === "texts") {
+                            const textLines = textRows(block.fields, character.texts);
+                            if (textLines.length === 0) continue;
+                            drawHeading(title, 3);
+                            for (const row of textLines) {
+                                drawField(row.name, row.value, row.long ? { multiline: true, height: 60 } : {});
+                            }
+                        } else {
+                            const trackLines = trackRows(block.tracks, character.checks);
+                            if (trackLines.length === 0) continue;
+                            drawHeading(title, 3);
+                            drawTracks(trackLines);
                         }
-                    }
-                    const trackLines = trackRows(tracks, character.checks);
-                    if (trackLines.length) {
-                        drawHeading("Cases à cocher", 3);
-                        drawTracks(trackLines);
                     }
                     drawHeading("Compétences", 3);
                     for (const skill of character.skills || []) {
