@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Download } from "lucide-react";
+import { Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { exportCampaignModelAsSystem } from "@/lib/services/gameSystems";
@@ -27,7 +27,7 @@ export default function ExportSystemButton({ campaignId, campaignName, disabled 
 
   return (
     <Button type="button" variant="outline" size="sm" className={className} disabled={disabled || busy || !campaignId} onClick={run}>
-      <Download className="h-4 w-4" /> Exporter ce système
+      <Upload className="h-4 w-4" /> Exporter ce système
     </Button>
   );
 }

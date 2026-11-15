@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Crosshair, RotateCw, Trash2, Upload } from "lucide-react";
+import { Crosshair, Download, RotateCw, Trash2 } from "lucide-react";
 import ResponsiveDialog from "@/components/common/ResponsiveDialog";
 import { Button } from "@/components/ui/button";
 import ExportSystemButton from "@/components/game/ExportSystemButton";
@@ -123,7 +123,7 @@ export default function SheetBackgroundDialog({ open, onOpenChange, campaignId, 
         </p>
         <div className="flex flex-wrap items-center gap-2">
           <Button variant="outline" size="sm" disabled={busy || !campaignId} onClick={() => fileRef.current?.click()}>
-            <Upload className="h-4 w-4" /> {pages.length ? "Remplacer le fond" : "Importer une feuille"}
+            <Download className="h-4 w-4" /> {pages.length ? "Remplacer le fond" : "Importer une feuille"}
           </Button>
           <input ref={fileRef} type="file" accept={SOURCE_ACCEPT} className="hidden" onChange={chooseFile} />
           {onPlaceValues && pages.length > 0 && !changed && (
