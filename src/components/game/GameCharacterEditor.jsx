@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Copy, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -256,19 +256,47 @@ export default function GameCharacterEditor({
     });
   };
 
-  const prepareEquipmentFields = (index) => {
+  // Type d'équipement au moment où on entre dans son champ, et types dont on a refusé les champs (par objet) : on ne repose pas la question.
+  const typeAtFocus = useRef({});
+  const ignoredTypeFields = useRef(new Set());
+
+  // Quand le type d'un objet change, propose d'ajouter les champs que le catalogue d'équipement connaît pour ce type (sans rien écraser).
+  const offerTypeFields = async (index) => {
     const item = form.equipment[index];
-    if (!item?.type) return;
-    const names = fieldNamesForType(item.type);
-    if (!names.length) return;
-    setEquipment(index, (current) => ({
-      fields: names.map((name) => ({
-        name,
-        value: normalize(current.type) === normalize(item.type)
-          ? current.fields?.find((field) => field.name === name)?.value || ""
-          : "",
-      })),
-    }));
+    const type = String(item?.type || "").trim();
+    const before = typeAtFocus.current[index];
+    typeAtFocus.current[index] = undefined;
+    if (!type || normalize(before) === normalize(type)) return;
+    const key = `${index}|${normalize(type)}`;
+    if (ignoredTypeFields.current.has(key)) return;
+    const present = new Set((item.fields || []).map((field) => normalize(field.name)));
+    const missing = fieldNamesForType(type).filter((name) => !present.has(normalize(name)));
+    if (!missing.length) return;
+    const accepted = await confirm({
+      title: "Champs connus pour ce type",
+      description: `Le catalogue d’équipement connaît pour le type « ${type} » les champs : ${missing.join(", ")}. Les ajouter à cet objet ?`,
+      confirmLabel: "Compléter",
+      cancelLabel: "Ignorer",
+    });
+    if (!accepted) {
+      ignoredTypeFields.current.add(key);
+      return;
+    }
+    setEquipment(index, (current) => {
+      const have = new Set((current.fields || []).map((field) => normalize(field.name)));
+      return { fields: [...(current.fields || []), ...missing.filter((name) => !have.has(normalize(name))).map((name) => ({ name, value: "" }))] };
+    });
+  };
+
+  // Copie un objet (valeurs comprises) juste après lui : pratique pour une seconde arme du même genre.
+  const duplicateEquipment = (index) => {
+    ignoredTypeFields.current.clear();
+    setForm((current) => {
+      const source = current.equipment[index];
+      if (!source) return current;
+      const copy = { ...source, fields: structuredClone(source.fields || []) };
+      return { ...current, equipment: [...current.equipment.slice(0, index + 1), copy, ...current.equipment.slice(index + 1)] };
+    });
   };
 
   const setEquipmentField = (equipmentIndex, fieldIndex, key, value) => {
@@ -566,18 +594,13 @@ export default function GameCharacterEditor({
                   <label className="stack-y-1 text-xs text-muted-foreground">
                     Type
                     <Input
-                      list={`equipment-types-${index}`}
+list={`equipment-types-${index}`}
                       value={item.type || ""}
-                      onChange={(event) => {
-                        const type = event.target.value;
-                        setEquipment(index, (current) => ({
-                          type,
-                          fields: normalize(current.type) === normalize(type)
-                            ? current.fields
-                            : fieldNamesForType(type).map((name) => ({ name, value: "" })),
-                        }));
+                      onFocus={() => {
+                        typeAtFocus.current[index] = item.type || "";
                       }}
-                      onBlur={() => prepareEquipmentFields(index)}
+                      onChange={(event) => setEquipment(index, { type: event.target.value })}
+                      onBlur={() => offerTypeFields(index)}
                       placeholder="Ex. Arme"
                     />
                     <datalist id={`equipment-types-${index}`}>
@@ -585,9 +608,14 @@ export default function GameCharacterEditor({
                     </datalist>
                   </label>
                 </div>
-                <Button type="button" variant="ghost" size="icon" aria-label={`Supprimer l'équipement ${item.name || index + 1}`} onClick={() => setForm((current) => ({ ...current, equipment: current.equipment.filter((_, i) => i !== index) }))}>
-                  <Trash2 className="h-4 w-4 text-muted-foreground" />
-                </Button>
+                <div className="flex">
+                  <Button type="button" variant="ghost" size="icon" aria-label={`Dupliquer l'équipement ${item.name || index + 1}`} onClick={() => duplicateEquipment(index)}>
+                    <Copy className="h-4 w-4 text-muted-foreground" />
+                  </Button>
+                  <Button type="button" variant="ghost" size="icon" aria-label={`Supprimer l'équipement ${item.name || index + 1}`} onClick={() => { ignoredTypeFields.current.clear(); setForm((current) => ({ ...current, equipment: current.equipment.filter((_, i) => i !== index) })); }}>
+                    <Trash2 className="h-4 w-4 text-muted-foreground" />
+                  </Button>
+                </div>
               </div>
               <div className="stack-y-2">
                 {item.fields.map((field, fieldIndex) => (
