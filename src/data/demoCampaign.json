@@ -576,42 +576,84 @@
      "value": "3",
      "fields": [
       {
-       "name": "Max",
+       "name": "Maximum",
        "value": "3"
       }
      ]
     },
-    "Agilité": {
-     "value": "2",
-     "fields": [
-      {
-       "name": "Max",
-       "value": "2"
-      }
-     ]
+    "Bricolage": {
+     "value": "3",
+     "fields": []
+    },
+    "Corps à corps": {
+     "value": "3",
+     "fields": []
     },
     "Endurance": {
      "value": "3",
      "fields": []
     },
-    "Perception": {
+    "Agilité": {
+     "value": "2",
+     "fields": [
+      {
+       "name": "Maximum",
+       "value": "2"
+      }
+     ]
+    },
+    "Furtivité": {
      "value": "2",
      "fields": []
     },
-    "Débrouillardise": {
-     "value": "3",
+    "Réaction": {
+     "value": "2",
      "fields": []
     },
-    "Sang-froid": {
+    "Tir": {
      "value": "2",
      "fields": []
     },
     "Empathie": {
      "value": "4",
+     "fields": [
+      {
+       "name": "Maximum",
+       "value": "4"
+      }
+     ]
+    },
+    "Analyse": {
+     "value": "2",
      "fields": []
     },
-    "Savoir": {
+    "Manipulation": {
+     "value": "4",
+     "fields": []
+    },
+    "Soins": {
      "value": "2",
+     "fields": []
+    },
+    "Esprit": {
+     "value": "2",
+     "fields": [
+      {
+       "name": "Maximum",
+       "value": "2"
+      }
+     ]
+    },
+    "Observation": {
+     "value": "2",
+     "fields": []
+    },
+    "Compréhension": {
+     "value": "2",
+     "fields": []
+    },
+    "Survie": {
+     "value": "3",
      "fields": []
     }
    },
@@ -669,42 +711,84 @@
      "value": "4",
      "fields": [
       {
-       "name": "Max",
+       "name": "Maximum",
        "value": "4"
       }
      ]
     },
-    "Agilité": {
+    "Bricolage": {
+     "value": "5",
+     "fields": []
+    },
+    "Corps à corps": {
      "value": "4",
-     "fields": [
-      {
-       "name": "Max",
-       "value": "4"
-      }
-     ]
+     "fields": []
     },
     "Endurance": {
      "value": "4",
      "fields": []
     },
-    "Perception": {
+    "Agilité": {
+     "value": "4",
+     "fields": [
+      {
+       "name": "Maximum",
+       "value": "4"
+      }
+     ]
+    },
+    "Furtivité": {
+     "value": "4",
+     "fields": []
+    },
+    "Réaction": {
      "value": "5",
      "fields": []
     },
-    "Débrouillardise": {
-     "value": "5",
-     "fields": []
-    },
-    "Sang-froid": {
+    "Tir": {
      "value": "5",
      "fields": []
     },
     "Empathie": {
      "value": "2",
+     "fields": [
+      {
+       "name": "Maximum",
+       "value": "2"
+      }
+     ]
+    },
+    "Analyse": {
+     "value": "4",
      "fields": []
     },
-    "Savoir": {
+    "Manipulation": {
+     "value": "2",
+     "fields": []
+    },
+    "Soins": {
      "value": "4",
+     "fields": []
+    },
+    "Esprit": {
+     "value": "5",
+     "fields": [
+      {
+       "name": "Maximum",
+       "value": "5"
+      }
+     ]
+    },
+    "Observation": {
+     "value": "5",
+     "fields": []
+    },
+    "Compréhension": {
+     "value": "4",
+     "fields": []
+    },
+    "Survie": {
+     "value": "5",
      "fields": []
     }
    },
@@ -724,16 +808,32 @@
    ],
    "equipment": [
     {
-     "name": "Revolver rafistolé",
-     "type": "Armes à feu",
+     "name": "Revolver",
+     "type": "Arme",
      "fields": [
+      {
+       "name": "Prise",
+       "value": "1 main"
+      },
+      {
+       "name": "Bonus",
+       "value": "0"
+      },
       {
        "name": "Dégâts",
        "value": "2"
       },
       {
+       "name": "Fiabilité",
+       "value": "2"
+      },
+      {
        "name": "Portée",
        "value": "Courte"
+      },
+      {
+       "name": "Notes",
+       "value": ""
       }
      ]
     }
@@ -784,42 +884,84 @@
      "value": "1",
      "fields": [
       {
-       "name": "Max",
+       "name": "Maximum",
        "value": "1"
       }
      ]
     },
-    "Agilité": {
+    "Bricolage": {
      "value": "2",
-     "fields": [
-      {
-       "name": "Max",
-       "value": "2"
-      }
-     ]
+     "fields": []
+    },
+    "Corps à corps": {
+     "value": "1",
+     "fields": []
     },
     "Endurance": {
      "value": "2",
      "fields": []
     },
-    "Perception": {
-     "value": "3",
-     "fields": []
+    "Agilité": {
+     "value": "2",
+     "fields": [
+      {
+       "name": "Maximum",
+       "value": "2"
+      }
+     ]
     },
-    "Débrouillardise": {
+    "Furtivité": {
      "value": "2",
      "fields": []
     },
-    "Sang-froid": {
-     "value": "1",
+    "Réaction": {
+     "value": "3",
+     "fields": []
+    },
+    "Tir": {
+     "value": "3",
      "fields": []
     },
     "Empathie": {
      "value": "3",
+     "fields": [
+      {
+       "name": "Maximum",
+       "value": "3"
+      }
+     ]
+    },
+    "Analyse": {
+     "value": "3",
      "fields": []
     },
-    "Savoir": {
+    "Manipulation": {
      "value": "3",
+     "fields": []
+    },
+    "Soins": {
+     "value": "3",
+     "fields": []
+    },
+    "Esprit": {
+     "value": "1",
+     "fields": [
+      {
+       "name": "Maximum",
+       "value": "1"
+      }
+     ]
+    },
+    "Observation": {
+     "value": "3",
+     "fields": []
+    },
+    "Compréhension": {
+     "value": "3",
+     "fields": []
+    },
+    "Survie": {
+     "value": "2",
      "fields": []
     }
    },
@@ -898,41 +1040,83 @@
      "value": "4",
      "fields": [
       {
-       "name": "Max",
+       "name": "Maximum",
        "value": "4"
       }
      ]
     },
-    "Agilité": {
-     "value": "3",
-     "fields": [
-      {
-       "name": "Max",
-       "value": "3"
-      }
-     ]
+    "Bricolage": {
+     "value": "2",
+     "fields": []
+    },
+    "Corps à corps": {
+     "value": "4",
+     "fields": []
     },
     "Endurance": {
      "value": "3",
      "fields": []
     },
-    "Perception": {
+    "Agilité": {
+     "value": "3",
+     "fields": [
+      {
+       "name": "Maximum",
+       "value": "3"
+      }
+     ]
+    },
+    "Furtivité": {
      "value": "3",
      "fields": []
     },
-    "Débrouillardise": {
-     "value": "2",
+    "Réaction": {
+     "value": "3",
      "fields": []
     },
-    "Sang-froid": {
+    "Tir": {
      "value": "3",
      "fields": []
     },
     "Empathie": {
      "value": "2",
+     "fields": [
+      {
+       "name": "Maximum",
+       "value": "2"
+      }
+     ]
+    },
+    "Analyse": {
+     "value": "2",
      "fields": []
     },
-    "Savoir": {
+    "Manipulation": {
+     "value": "2",
+     "fields": []
+    },
+    "Soins": {
+     "value": "2",
+     "fields": []
+    },
+    "Esprit": {
+     "value": "3",
+     "fields": [
+      {
+       "name": "Maximum",
+       "value": "3"
+      }
+     ]
+    },
+    "Observation": {
+     "value": "3",
+     "fields": []
+    },
+    "Compréhension": {
+     "value": "2",
+     "fields": []
+    },
+    "Survie": {
      "value": "2",
      "fields": []
     }
@@ -946,16 +1130,32 @@
    ],
    "equipment": [
     {
-     "name": "Fusil de chasse",
-     "type": "Armes à feu",
+     "name": "Fusil",
+     "type": "Arme",
      "fields": [
+      {
+       "name": "Prise",
+       "value": "2 mains"
+      },
+      {
+       "name": "Bonus",
+       "value": "0"
+      },
       {
        "name": "Dégâts",
        "value": "3"
       },
       {
+       "name": "Fiabilité",
+       "value": "2"
+      },
+      {
        "name": "Portée",
-       "value": "Moyenne"
+       "value": "Longue"
+      },
+      {
+       "name": "Notes",
+       "value": ""
       }
      ]
     }
@@ -988,41 +1188,83 @@
      "value": "3",
      "fields": [
       {
-       "name": "Max",
+       "name": "Maximum",
        "value": "3"
       }
      ]
     },
-    "Agilité": {
-     "value": "4",
-     "fields": [
-      {
-       "name": "Max",
-       "value": "4"
-      }
-     ]
+    "Bricolage": {
+     "value": "2",
+     "fields": []
+    },
+    "Corps à corps": {
+     "value": "3",
+     "fields": []
     },
     "Endurance": {
      "value": "3",
      "fields": []
     },
-    "Perception": {
+    "Agilité": {
+     "value": "4",
+     "fields": [
+      {
+       "name": "Maximum",
+       "value": "4"
+      }
+     ]
+    },
+    "Furtivité": {
      "value": "4",
      "fields": []
     },
-    "Débrouillardise": {
-     "value": "2",
+    "Réaction": {
+     "value": "4",
      "fields": []
     },
-    "Sang-froid": {
-     "value": "3",
+    "Tir": {
+     "value": "4",
      "fields": []
     },
     "Empathie": {
      "value": "3",
+     "fields": [
+      {
+       "name": "Maximum",
+       "value": "3"
+      }
+     ]
+    },
+    "Analyse": {
+     "value": "2",
      "fields": []
     },
-    "Savoir": {
+    "Manipulation": {
+     "value": "3",
+     "fields": []
+    },
+    "Soins": {
+     "value": "2",
+     "fields": []
+    },
+    "Esprit": {
+     "value": "3",
+     "fields": [
+      {
+       "name": "Maximum",
+       "value": "3"
+      }
+     ]
+    },
+    "Observation": {
+     "value": "4",
+     "fields": []
+    },
+    "Compréhension": {
+     "value": "2",
+     "fields": []
+    },
+    "Survie": {
      "value": "2",
      "fields": []
     }
@@ -1036,12 +1278,32 @@
    ],
    "equipment": [
     {
-     "name": "Couteau de survie",
-     "type": "Corps à corps",
+     "name": "Couteau",
+     "type": "Arme",
      "fields": [
+      {
+       "name": "Prise",
+       "value": "1 main"
+      },
+      {
+       "name": "Bonus",
+       "value": "0"
+      },
       {
        "name": "Dégâts",
        "value": "1"
+      },
+      {
+       "name": "Fiabilité",
+       "value": "3"
+      },
+      {
+       "name": "Portée",
+       "value": "Contact"
+      },
+      {
+       "name": "Notes",
+       "value": ""
       }
      ]
     }
@@ -1097,42 +1359,84 @@
      "value": "3",
      "fields": [
       {
-       "name": "Max",
+       "name": "Maximum",
        "value": "3"
       }
      ]
     },
-    "Agilité": {
+    "Bricolage": {
+     "value": "4",
+     "fields": []
+    },
+    "Corps à corps": {
      "value": "3",
-     "fields": [
-      {
-       "name": "Max",
-       "value": "3"
-      }
-     ]
+     "fields": []
     },
     "Endurance": {
      "value": "4",
      "fields": []
     },
-    "Perception": {
+    "Agilité": {
+     "value": "3",
+     "fields": [
+      {
+       "name": "Maximum",
+       "value": "3"
+      }
+     ]
+    },
+    "Furtivité": {
      "value": "3",
      "fields": []
     },
-    "Débrouillardise": {
-     "value": "4",
+    "Réaction": {
+     "value": "3",
      "fields": []
     },
-    "Sang-froid": {
+    "Tir": {
      "value": "3",
      "fields": []
     },
     "Empathie": {
      "value": "3",
+     "fields": [
+      {
+       "name": "Maximum",
+       "value": "3"
+      }
+     ]
+    },
+    "Analyse": {
+     "value": "3",
      "fields": []
     },
-    "Savoir": {
+    "Manipulation": {
      "value": "3",
+     "fields": []
+    },
+    "Soins": {
+     "value": "3",
+     "fields": []
+    },
+    "Esprit": {
+     "value": "3",
+     "fields": [
+      {
+       "name": "Maximum",
+       "value": "3"
+      }
+     ]
+    },
+    "Observation": {
+     "value": "3",
+     "fields": []
+    },
+    "Compréhension": {
+     "value": "3",
+     "fields": []
+    },
+    "Survie": {
+     "value": "4",
      "fields": []
     }
    },
@@ -1959,63 +2263,87 @@
    "characteristics": [
     {
      "name": "Vigueur",
-     "modifier": false,
-     "test": false,
-     "max": true,
      "field_names": [
-      "Max"
+      "Maximum"
      ]
     },
     {
-     "name": "Agilité",
-     "modifier": false,
-     "test": false,
-     "max": true,
-     "field_names": [
-      "Max"
-     ]
+     "name": "Bricolage",
+     "field_names": [],
+     "parent": "Vigueur"
+    },
+    {
+     "name": "Corps à corps",
+     "field_names": [],
+     "parent": "Vigueur"
     },
     {
      "name": "Endurance",
-     "modifier": false,
-     "test": false,
-     "max": false,
-     "field_names": []
+     "field_names": [],
+     "parent": "Vigueur"
     },
     {
-     "name": "Perception",
-     "modifier": false,
-     "test": false,
-     "max": false,
-     "field_names": []
+     "name": "Agilité",
+     "field_names": [
+      "Maximum"
+     ]
     },
     {
-     "name": "Débrouillardise",
-     "modifier": false,
-     "test": false,
-     "max": false,
-     "field_names": []
+     "name": "Furtivité",
+     "field_names": [],
+     "parent": "Agilité"
     },
     {
-     "name": "Sang-froid",
-     "modifier": false,
-     "test": false,
-     "max": false,
-     "field_names": []
+     "name": "Réaction",
+     "field_names": [],
+     "parent": "Agilité"
+    },
+    {
+     "name": "Tir",
+     "field_names": [],
+     "parent": "Agilité"
     },
     {
      "name": "Empathie",
-     "modifier": false,
-     "test": false,
-     "max": false,
-     "field_names": []
+     "field_names": [
+      "Maximum"
+     ]
     },
     {
-     "name": "Savoir",
-     "modifier": false,
-     "test": false,
-     "max": false,
-     "field_names": []
+     "name": "Analyse",
+     "field_names": [],
+     "parent": "Empathie"
+    },
+    {
+     "name": "Manipulation",
+     "field_names": [],
+     "parent": "Empathie"
+    },
+    {
+     "name": "Soins",
+     "field_names": [],
+     "parent": "Empathie"
+    },
+    {
+     "name": "Esprit",
+     "field_names": [
+      "Maximum"
+     ]
+    },
+    {
+     "name": "Observation",
+     "field_names": [],
+     "parent": "Esprit"
+    },
+    {
+     "name": "Compréhension",
+     "field_names": [],
+     "parent": "Esprit"
+    },
+    {
+     "name": "Survie",
+     "field_names": [],
+     "parent": "Esprit"
     }
    ],
    "skillRollModifier": false,
@@ -2028,7 +2356,11 @@
         "min": 1,
         "max": 3
        },
-       "Agilité": {
+       "Bricolage": {
+        "min": 1,
+        "max": 3
+       },
+       "Corps à corps": {
         "min": 1,
         "max": 3
        },
@@ -2036,15 +2368,19 @@
         "min": 1,
         "max": 3
        },
-       "Perception": {
+       "Agilité": {
         "min": 1,
         "max": 3
        },
-       "Débrouillardise": {
+       "Furtivité": {
         "min": 1,
         "max": 3
        },
-       "Sang-froid": {
+       "Réaction": {
+        "min": 1,
+        "max": 3
+       },
+       "Tir": {
         "min": 1,
         "max": 3
        },
@@ -2052,7 +2388,31 @@
         "min": 1,
         "max": 3
        },
-       "Savoir": {
+       "Analyse": {
+        "min": 1,
+        "max": 3
+       },
+       "Manipulation": {
+        "min": 1,
+        "max": 3
+       },
+       "Soins": {
+        "min": 1,
+        "max": 3
+       },
+       "Esprit": {
+        "min": 1,
+        "max": 3
+       },
+       "Observation": {
+        "min": 1,
+        "max": 3
+       },
+       "Compréhension": {
+        "min": 1,
+        "max": 3
+       },
+       "Survie": {
         "min": 1,
         "max": 3
        }
@@ -2069,7 +2429,11 @@
         "min": 2,
         "max": 4
        },
-       "Agilité": {
+       "Bricolage": {
+        "min": 2,
+        "max": 4
+       },
+       "Corps à corps": {
         "min": 2,
         "max": 4
        },
@@ -2077,15 +2441,19 @@
         "min": 2,
         "max": 4
        },
-       "Perception": {
+       "Agilité": {
         "min": 2,
         "max": 4
        },
-       "Débrouillardise": {
+       "Furtivité": {
         "min": 2,
         "max": 4
        },
-       "Sang-froid": {
+       "Réaction": {
+        "min": 2,
+        "max": 4
+       },
+       "Tir": {
         "min": 2,
         "max": 4
        },
@@ -2093,7 +2461,31 @@
         "min": 2,
         "max": 4
        },
-       "Savoir": {
+       "Analyse": {
+        "min": 2,
+        "max": 4
+       },
+       "Manipulation": {
+        "min": 2,
+        "max": 4
+       },
+       "Soins": {
+        "min": 2,
+        "max": 4
+       },
+       "Esprit": {
+        "min": 2,
+        "max": 4
+       },
+       "Observation": {
+        "min": 2,
+        "max": 4
+       },
+       "Compréhension": {
+        "min": 2,
+        "max": 4
+       },
+       "Survie": {
         "min": 2,
         "max": 4
        }
@@ -2110,7 +2502,11 @@
         "min": 4,
         "max": 6
        },
-       "Agilité": {
+       "Bricolage": {
+        "min": 4,
+        "max": 6
+       },
+       "Corps à corps": {
         "min": 4,
         "max": 6
        },
@@ -2118,15 +2514,19 @@
         "min": 4,
         "max": 6
        },
-       "Perception": {
+       "Agilité": {
         "min": 4,
         "max": 6
        },
-       "Débrouillardise": {
+       "Furtivité": {
         "min": 4,
         "max": 6
        },
-       "Sang-froid": {
+       "Réaction": {
+        "min": 4,
+        "max": 6
+       },
+       "Tir": {
         "min": 4,
         "max": 6
        },
@@ -2134,7 +2534,31 @@
         "min": 4,
         "max": 6
        },
-       "Savoir": {
+       "Analyse": {
+        "min": 4,
+        "max": 6
+       },
+       "Manipulation": {
+        "min": 4,
+        "max": 6
+       },
+       "Soins": {
+        "min": 4,
+        "max": 6
+       },
+       "Esprit": {
+        "min": 4,
+        "max": 6
+       },
+       "Observation": {
+        "min": 4,
+        "max": 6
+       },
+       "Compréhension": {
+        "min": 4,
+        "max": 6
+       },
+       "Survie": {
         "min": 4,
         "max": 6
        }
@@ -2152,7 +2576,11 @@
       "min": 3,
       "max": 5
      },
-     "Agilité": {
+     "Bricolage": {
+      "min": 3,
+      "max": 5
+     },
+     "Corps à corps": {
       "min": 3,
       "max": 5
      },
@@ -2160,15 +2588,19 @@
       "min": 3,
       "max": 5
      },
-     "Perception": {
+     "Agilité": {
       "min": 3,
       "max": 5
      },
-     "Débrouillardise": {
+     "Furtivité": {
       "min": 3,
       "max": 5
      },
-     "Sang-froid": {
+     "Réaction": {
+      "min": 3,
+      "max": 5
+     },
+     "Tir": {
       "min": 3,
       "max": 5
      },
@@ -2176,7 +2608,31 @@
       "min": 3,
       "max": 5
      },
-     "Savoir": {
+     "Analyse": {
+      "min": 3,
+      "max": 5
+     },
+     "Manipulation": {
+      "min": 3,
+      "max": 5
+     },
+     "Soins": {
+      "min": 3,
+      "max": 5
+     },
+     "Esprit": {
+      "min": 3,
+      "max": 5
+     },
+     "Observation": {
+      "min": 3,
+      "max": 5
+     },
+     "Compréhension": {
+      "min": 3,
+      "max": 5
+     },
+     "Survie": {
       "min": 3,
       "max": 5
      }
@@ -2193,23 +2649,760 @@
    "dice": {
     "enabled": true,
     "mode": "single",
-    "rule": "add",
+    "rule": "pool",
     "single": {
      "count": 1,
-     "sides": 20
+     "sides": 6
     },
     "perStat": {},
     "crit": {
      "success": null,
      "failure": null
     },
-    "outcome": "both",
-    "difficulty": 12
+    "outcome": "success",
+    "difficulty": 6
    },
    "created_date": "2026-10-19T10:00:00.000Z",
    "updated_date": "2026-10-19T10:00:00.000Z",
    "created_by_id": "local-user",
-   "created_by": "local@arcanes"
+   "created_by": "local@arcanes",
+   "tracks": [
+    {
+     "id": "stress",
+     "name": "Stress",
+     "count": 5
+    },
+    {
+     "id": "sang-froid",
+     "name": "Sang-froid",
+     "count": 7
+    },
+    {
+     "id": "radiations",
+     "name": "Radiations",
+     "count": 10
+    },
+    {
+     "id": "affame",
+     "name": "Affamé",
+     "count": 1
+    },
+    {
+     "id": "deshydrate",
+     "name": "Déshydraté",
+     "count": 1
+    },
+    {
+     "id": "epuise",
+     "name": "Épuisé",
+     "count": 1
+    },
+    {
+     "id": "gele",
+     "name": "Gelé",
+     "count": 1
+    },
+    {
+     "id": "eau",
+     "name": "Eau",
+     "count": 10
+    },
+    {
+     "id": "nourriture",
+     "name": "Nourriture",
+     "count": 10
+    },
+    {
+     "id": "filtres",
+     "name": "Filtres",
+     "count": 10
+    },
+    {
+     "id": "energie",
+     "name": "Énergie",
+     "count": 10
+    }
+   ],
+   "textFields": [
+    {
+     "id": "archetype",
+     "name": "Archétype",
+     "long": false
+    },
+    {
+     "id": "age",
+     "name": "Âge",
+     "long": false
+    },
+    {
+     "id": "experience",
+     "name": "Expérience",
+     "long": false
+    },
+    {
+     "id": "fierte",
+     "name": "Fierté",
+     "long": false
+    },
+    {
+     "id": "honte",
+     "name": "Honte",
+     "long": false
+    },
+    {
+     "id": "apparence",
+     "name": "Apparence",
+     "long": false
+    },
+    {
+     "id": "protection-max",
+     "name": "Protection max",
+     "long": false
+    },
+    {
+     "id": "protection",
+     "name": "Protection actuelle",
+     "long": false
+    },
+    {
+     "id": "camarade",
+     "name": "Camarade",
+     "long": false
+    },
+    {
+     "id": "pote",
+     "name": "Pote",
+     "long": false
+    },
+    {
+     "id": "rival",
+     "name": "Rival",
+     "long": false
+    },
+    {
+     "id": "blessures",
+     "name": "Blessures critiques",
+     "long": true
+    },
+    {
+     "id": "traumatismes",
+     "name": "Traumatismes psychiques",
+     "long": true
+    },
+    {
+     "id": "notes",
+     "name": "Notes",
+     "long": true
+    }
+   ],
+   "layouts": [
+    {
+     "id": "metro",
+     "name": "Feuille Metro",
+     "columns": 2,
+     "blocks": [
+      {
+       "id": "identite",
+       "kind": "texts",
+       "title": "Identité",
+       "wide": true,
+       "ids": [
+        "archetype",
+        "age",
+        "experience",
+        "fierte",
+        "honte",
+        "apparence"
+       ]
+      },
+      {
+       "id": "vigueur",
+       "kind": "stat-group",
+       "stat": "Vigueur"
+      },
+      {
+       "id": "agilite",
+       "kind": "stat-group",
+       "stat": "Agilité"
+      },
+      {
+       "id": "empathie",
+       "kind": "stat-group",
+       "stat": "Empathie"
+      },
+      {
+       "id": "esprit",
+       "kind": "stat-group",
+       "stat": "Esprit"
+      },
+      {
+       "id": "pistes",
+       "kind": "tracks",
+       "title": "Stress, sang-froid, radiations",
+       "wide": true,
+       "ids": [
+        "stress",
+        "sang-froid",
+        "radiations"
+       ]
+      },
+      {
+       "id": "etats",
+       "kind": "tracks",
+       "title": "États",
+       "ids": [
+        "affame",
+        "deshydrate",
+        "epuise",
+        "gele"
+       ]
+      },
+      {
+       "id": "consommables",
+       "kind": "tracks",
+       "title": "Consommables",
+       "ids": [
+        "eau",
+        "nourriture",
+        "filtres",
+        "energie"
+       ]
+      },
+      {
+       "id": "protection",
+       "kind": "texts",
+       "title": "Protection",
+       "ids": [
+        "protection-max",
+        "protection"
+       ]
+      },
+      {
+       "id": "liens",
+       "kind": "texts",
+       "title": "Liens",
+       "ids": [
+        "camarade",
+        "pote",
+        "rival"
+       ]
+      },
+      {
+       "id": "suite",
+       "kind": "texts",
+       "title": "Talents, blessures et notes",
+       "wide": true,
+       "ids": [
+        "blessures",
+        "traumatismes",
+        "notes"
+       ]
+      }
+     ]
+    }
+   ],
+   "layoutId": "metro",
+   "zones": [
+    {
+     "id": "zb360c85f503d",
+     "kind": "stat",
+     "ref": "Vigueur",
+     "field": "Maximum",
+     "page": 0,
+     "x": 0.487,
+     "y": 0.4136,
+     "w": 0.0295,
+     "h": 0.03,
+     "size": 1.6
+    },
+    {
+     "id": "za622f0493891",
+     "kind": "stat",
+     "ref": "Bricolage",
+     "page": 0,
+     "x": 0.3978,
+     "y": 0.3454,
+     "w": 0.0248,
+     "h": 0.0315,
+     "size": 1.6
+    },
+    {
+     "id": "zb3d806b5d9b0",
+     "kind": "stat",
+     "ref": "Corps à corps",
+     "page": 0,
+     "x": 0.4894,
+     "y": 0.3044,
+     "w": 0.0248,
+     "h": 0.03,
+     "size": 1.6
+    },
+    {
+     "id": "z2f53321bde6f",
+     "kind": "stat",
+     "ref": "Endurance",
+     "page": 0,
+     "x": 0.5811,
+     "y": 0.3469,
+     "w": 0.0271,
+     "h": 0.0346,
+     "size": 1.6
+    },
+    {
+     "id": "z73ce9e33ddb8",
+     "kind": "stat",
+     "ref": "Agilité",
+     "field": "Maximum",
+     "page": 0,
+     "x": 0.5469,
+     "y": 0.4835,
+     "w": 0.0248,
+     "h": 0.033,
+     "size": 1.6
+    },
+    {
+     "id": "zfc40614a4c33",
+     "kind": "stat",
+     "ref": "Furtivité",
+     "page": 0,
+     "x": 0.6457,
+     "y": 0.4334,
+     "w": 0.0248,
+     "h": 0.03,
+     "size": 1.6
+    },
+    {
+     "id": "z578fe0adf6c7",
+     "kind": "stat",
+     "ref": "Réaction",
+     "page": 0,
+     "x": 0.6857,
+     "y": 0.4835,
+     "w": 0.0294,
+     "h": 0.0315,
+     "size": 1.6
+    },
+    {
+     "id": "zb965a7c453b9",
+     "kind": "stat",
+     "ref": "Tir",
+     "page": 0,
+     "x": 0.6421,
+     "y": 0.5336,
+     "w": 0.0318,
+     "h": 0.0361,
+     "size": 1.6
+    },
+    {
+     "id": "z63f8759eba66",
+     "kind": "stat",
+     "ref": "Empathie",
+     "field": "Maximum",
+     "page": 0,
+     "x": 0.4882,
+     "y": 0.5563,
+     "w": 0.0271,
+     "h": 0.03,
+     "size": 1.6
+    },
+    {
+     "id": "ze6fd26d742a9",
+     "kind": "stat",
+     "ref": "Analyse",
+     "page": 0,
+     "x": 0.3965,
+     "y": 0.6216,
+     "w": 0.0283,
+     "h": 0.03,
+     "size": 1.6
+    },
+    {
+     "id": "zc88944f4b9fe",
+     "kind": "stat",
+     "ref": "Manipulation",
+     "page": 0,
+     "x": 0.4894,
+     "y": 0.6626,
+     "w": 0.0236,
+     "h": 0.0346,
+     "size": 1.6
+    },
+    {
+     "id": "zcf197a7886bd",
+     "kind": "stat",
+     "ref": "Soins",
+     "page": 0,
+     "x": 0.5799,
+     "y": 0.6246,
+     "w": 0.0248,
+     "h": 0.03,
+     "size": 1.6
+    },
+    {
+     "id": "z48c69b8db8b7",
+     "kind": "stat",
+     "ref": "Esprit",
+     "field": "Maximum",
+     "page": 0,
+     "x": 0.4295,
+     "y": 0.4835,
+     "w": 0.0283,
+     "h": 0.0361,
+     "size": 1.6
+    },
+    {
+     "id": "z794894a30b15",
+     "kind": "stat",
+     "ref": "Observation",
+     "page": 0,
+     "x": 0.2908,
+     "y": 0.4819,
+     "w": 0.0248,
+     "h": 0.033,
+     "size": 1.6
+    },
+    {
+     "id": "z240e20f37bb2",
+     "kind": "stat",
+     "ref": "Compréhension",
+     "page": 0,
+     "x": 0.3307,
+     "y": 0.4319,
+     "w": 0.0236,
+     "h": 0.0346,
+     "size": 1.6
+    },
+    {
+     "id": "zc80d6655200e",
+     "kind": "stat",
+     "ref": "Survie",
+     "page": 0,
+     "x": 0.3296,
+     "y": 0.5366,
+     "w": 0.0259,
+     "h": 0.03,
+     "size": 1.6
+    },
+    {
+     "id": "z0ea1f12512a0",
+     "kind": "text",
+     "ref": "archetype",
+     "page": 0,
+     "x": 0.5066,
+     "y": 0.0327,
+     "w": 0.1489,
+     "h": 0.0315,
+     "size": 1.6
+    },
+    {
+     "id": "z2df9962c79f9",
+     "kind": "text",
+     "ref": "age",
+     "page": 0,
+     "x": 0.3491,
+     "y": 0.0828,
+     "w": 0.1454,
+     "h": 0.027,
+     "size": 1.6
+    },
+    {
+     "id": "z4227593d3fa2",
+     "kind": "text",
+     "ref": "experience",
+     "page": 0,
+     "x": 0.5043,
+     "y": 0.0874,
+     "w": 0.1466,
+     "h": 0.0239,
+     "size": 1.6
+    },
+    {
+     "id": "z3bf91b0bdadb",
+     "kind": "text",
+     "ref": "fierte",
+     "page": 0,
+     "x": 0.3503,
+     "y": 0.139,
+     "w": 0.25,
+     "h": 0.03,
+     "size": 1.6
+    },
+    {
+     "id": "ze1c6be2bb98d",
+     "kind": "text",
+     "ref": "honte",
+     "page": 0,
+     "x": 0.348,
+     "y": 0.1921,
+     "w": 0.25,
+     "h": 0.03,
+     "size": 1.6
+    },
+    {
+     "id": "z4ef291cef6c8",
+     "kind": "text",
+     "ref": "apparence",
+     "page": 0,
+     "x": 0.3468,
+     "y": 0.2406,
+     "w": 0.25,
+     "h": 0.03,
+     "size": 1.6
+    },
+    {
+     "id": "z755173bb11ee",
+     "kind": "text",
+     "ref": "camarade",
+     "page": 0,
+     "x": 0.0777,
+     "y": 0.2406,
+     "w": 0.25,
+     "h": 0.03,
+     "size": 1.6
+    },
+    {
+     "id": "z577ee175160c",
+     "kind": "text",
+     "ref": "pote",
+     "page": 0,
+     "x": 0.0554,
+     "y": 0.189,
+     "w": 0.25,
+     "h": 0.03,
+     "size": 1.6
+    },
+    {
+     "id": "z7fc6c9a2ee30",
+     "kind": "text",
+     "ref": "rival",
+     "page": 0,
+     "x": 0.0601,
+     "y": 0.268,
+     "w": 0.25,
+     "h": 0.03,
+     "size": 1.6
+    },
+    {
+     "id": "z0eb1e9f72ac3",
+     "kind": "text",
+     "ref": "blessures",
+     "page": 0,
+     "x": 0.7759,
+     "y": 0.5538,
+     "w": 0.2073,
+     "h": 0.0563,
+     "size": 1.6
+    },
+    {
+     "id": "zda27a0eae48e",
+     "kind": "text",
+     "ref": "traumatismes",
+     "page": 0,
+     "x": 0.7795,
+     "y": 0.6297,
+     "w": 0.2014,
+     "h": 0.073,
+     "size": 1.6
+    },
+    {
+     "id": "z8b1b2173a897",
+     "kind": "text",
+     "ref": "notes",
+     "page": 0,
+     "x": 0.6302,
+     "y": 0.8437,
+     "w": 0.3471,
+     "h": 0.1276,
+     "size": 1.6
+    },
+    {
+     "id": "z9b1c60991cca",
+     "kind": "track",
+     "ref": "stress",
+     "page": 0,
+     "x": 0.78,
+     "y": 0.5108,
+     "w": 0.0884,
+     "h": 0.03,
+     "size": 1.6
+    },
+    {
+     "id": "zb86887e22a80",
+     "kind": "track",
+     "ref": "sang-froid",
+     "page": 0,
+     "x": 0.8736,
+     "y": 0.5093,
+     "w": 0.1119,
+     "h": 0.0391,
+     "size": 1.6
+    },
+    {
+     "id": "z2c0c8a603233",
+     "kind": "track",
+     "ref": "radiations",
+     "page": 0,
+     "x": 0.7929,
+     "y": 0.4668,
+     "w": 0.166,
+     "h": 0.033,
+     "size": 1.6
+    },
+    {
+     "id": "z40d83d4cbbbe",
+     "kind": "track",
+     "ref": "affame",
+     "page": 0,
+     "x": 0.7924,
+     "y": 0.4152,
+     "w": 0.0285,
+     "h": 0.03,
+     "size": 1.6
+    },
+    {
+     "id": "z53a845ab2965",
+     "kind": "track",
+     "ref": "deshydrate",
+     "page": 0,
+     "x": 0.8536,
+     "y": 0.4137,
+     "w": 0.0297,
+     "h": 0.0315,
+     "size": 1.6
+    },
+    {
+     "id": "z4f44c99a970d",
+     "kind": "track",
+     "ref": "epuise",
+     "page": 0,
+     "x": 0.9123,
+     "y": 0.4152,
+     "w": 0.0297,
+     "h": 0.033,
+     "size": 1.6
+    },
+    {
+     "id": "z5f88a755ff8f",
+     "kind": "track",
+     "ref": "gele",
+     "page": 0,
+     "x": 0.957,
+     "y": 0.4167,
+     "w": 0.032,
+     "h": 0.0391,
+     "size": 1.6
+    },
+    {
+     "id": "z974cc4ba3e04",
+     "kind": "track",
+     "ref": "eau",
+     "page": 0,
+     "x": 0.7654,
+     "y": 0.2741,
+     "w": 0.0837,
+     "h": 0.0392,
+     "size": 1.6
+    },
+    {
+     "id": "z0d24f3e3ada4",
+     "kind": "track",
+     "ref": "nourriture",
+     "page": 0,
+     "x": 0.8359,
+     "y": 0.2755,
+     "w": 0.0825,
+     "h": 0.0512,
+     "size": 1.6
+    },
+    {
+     "id": "z56b3e782f098",
+     "kind": "track",
+     "ref": "filtres",
+     "page": 0,
+     "x": 0.7596,
+     "y": 0.3195,
+     "w": 0.0861,
+     "h": 0.0528,
+     "size": 1.6
+    },
+    {
+     "id": "zc214829d8010",
+     "kind": "track",
+     "ref": "energie",
+     "page": 0,
+     "x": 0.8375,
+     "y": 0.3195,
+     "w": 0.0802,
+     "h": 0.0527,
+     "size": 1.6
+    },
+    {
+     "id": "z1146161624d5",
+     "kind": "info",
+     "ref": "name",
+     "page": 0,
+     "x": 0.3456,
+     "y": 0.0342,
+     "w": 0.1548,
+     "h": 0.027,
+     "size": 1.6
+    },
+    {
+     "id": "z2cbfb5c0eda5",
+     "kind": "info",
+     "ref": "skills",
+     "page": 0,
+     "x": 0.6901,
+     "y": 0.0395,
+     "w": 0.2884,
+     "h": 0.1652,
+     "size": 1.6
+    },
+    {
+     "id": "z22219f8a1ba4",
+     "kind": "info",
+     "ref": "inventory",
+     "page": 0,
+     "x": 0.0262,
+     "y": 0.6026,
+     "w": 0.1979,
+     "h": 0.0923,
+     "size": 1.6
+    },
+    {
+     "id": "z64dd4840adae",
+     "kind": "info",
+     "ref": "weapons",
+     "page": 0,
+     "x": 0.0262,
+     "y": 0.7574,
+     "w": 0.5704,
+     "h": 0.2122,
+     "size": 1.6
+    },
+    {
+     "id": "za8d2f8ff7f48",
+     "kind": "info",
+     "ref": "protections",
+     "page": 0,
+     "x": 0.6294,
+     "y": 0.7482,
+     "w": 0.353,
+     "h": 0.0438,
+     "size": 1.6
+    },
+    {
+     "id": "za9e62954f9a5",
+     "kind": "info",
+     "ref": "equipment",
+     "page": 0,
+     "x": 0.0403,
+     "y": 0.3521,
+     "w": 0.1779,
+     "h": 0.2228,
+     "size": 1.6
+    }
+   ]
   }
  ],
  "GameCharacter": [
@@ -2223,41 +3416,83 @@
      "value": "5",
      "fields": [
       {
-       "name": "Max",
+       "name": "Maximum",
        "value": "5"
       }
      ]
     },
-    "Agilité": {
+    "Bricolage": {
      "value": "3",
-     "fields": [
-      {
-       "name": "Max",
-       "value": "3"
-      }
-     ]
+     "fields": []
+    },
+    "Corps à corps": {
+     "value": "5",
+     "fields": []
     },
     "Endurance": {
      "value": "5",
      "fields": []
     },
-    "Perception": {
+    "Agilité": {
+     "value": "3",
+     "fields": [
+      {
+       "name": "Maximum",
+       "value": "3"
+      }
+     ]
+    },
+    "Furtivité": {
      "value": "3",
      "fields": []
     },
-    "Débrouillardise": {
+    "Réaction": {
      "value": "3",
      "fields": []
     },
-    "Sang-froid": {
-     "value": "4",
+    "Tir": {
+     "value": "3",
      "fields": []
     },
     "Empathie": {
      "value": "3",
+     "fields": [
+      {
+       "name": "Maximum",
+       "value": "3"
+      }
+     ]
+    },
+    "Analyse": {
+     "value": "3",
      "fields": []
     },
-    "Savoir": {
+    "Manipulation": {
+     "value": "3",
+     "fields": []
+    },
+    "Soins": {
+     "value": "3",
+     "fields": []
+    },
+    "Esprit": {
+     "value": "4",
+     "fields": [
+      {
+       "name": "Maximum",
+       "value": "4"
+      }
+     ]
+    },
+    "Observation": {
+     "value": "3",
+     "fields": []
+    },
+    "Compréhension": {
+     "value": "3",
+     "fields": []
+    },
+    "Survie": {
      "value": "3",
      "fields": []
     }
@@ -2276,22 +3511,46 @@
    ],
    "equipment": [
     {
-     "name": "Barre de fer",
-     "type": "Corps à corps",
+     "name": "Objet contondant",
+     "type": "Arme",
      "fields": [
       {
+       "name": "Prise",
+       "value": "1 main"
+      },
+      {
+       "name": "Bonus",
+       "value": "0"
+      },
+      {
        "name": "Dégâts",
-       "value": "2"
+       "value": "1"
+      },
+      {
+       "name": "Fiabilité",
+       "value": "3"
+      },
+      {
+       "name": "Portée",
+       "value": "Contact"
+      },
+      {
+       "name": "Notes",
+       "value": ""
       }
      ]
     },
     {
-     "name": "Veste matelassée",
-     "type": "Armure",
+     "name": "Gilet pare-balles",
+     "type": "Protection",
      "fields": [
       {
        "name": "Protection",
        "value": "1"
+      },
+      {
+       "name": "Modificateur",
+       "value": "0"
       }
      ]
     }
@@ -2310,7 +3569,25 @@
    "created_date": "2026-10-19T10:00:00.000Z",
    "updated_date": "2026-10-19T10:00:00.000Z",
    "created_by_id": "local-user",
-   "created_by": "local@arcanes"
+   "created_by": "local@arcanes",
+   "texts": {
+    "archetype": "Porteur",
+    "age": "34",
+    "fierte": "Protéger le groupe",
+    "honte": "Ne sait pas demander de l'aide",
+    "camarade": "Baronov",
+    "pote": "Shadrov",
+    "apparence": "Large, silencieux, mains marquées par les charges"
+   },
+   "checks": {
+    "stress": 1,
+    "sang-froid": 0,
+    "radiations": 0,
+    "eau": 6,
+    "nourriture": 5,
+    "filtres": 3,
+    "energie": 4
+   }
   },
   {
    "id": "7cad6213-c940-5b50-9b72-dc2333edc59f",
@@ -2322,41 +3599,83 @@
      "value": "2",
      "fields": [
       {
-       "name": "Max",
+       "name": "Maximum",
        "value": "2"
       }
      ]
     },
-    "Agilité": {
-     "value": "4",
-     "fields": [
-      {
-       "name": "Max",
-       "value": "4"
-      }
-     ]
+    "Bricolage": {
+     "value": "5",
+     "fields": []
+    },
+    "Corps à corps": {
+     "value": "2",
+     "fields": []
     },
     "Endurance": {
      "value": "3",
      "fields": []
     },
-    "Perception": {
+    "Agilité": {
+     "value": "4",
+     "fields": [
+      {
+       "name": "Maximum",
+       "value": "4"
+      }
+     ]
+    },
+    "Furtivité": {
      "value": "4",
      "fields": []
     },
-    "Débrouillardise": {
-     "value": "5",
+    "Réaction": {
+     "value": "4",
      "fields": []
     },
-    "Sang-froid": {
-     "value": "3",
+    "Tir": {
+     "value": "4",
      "fields": []
     },
     "Empathie": {
      "value": "4",
+     "fields": [
+      {
+       "name": "Maximum",
+       "value": "4"
+      }
+     ]
+    },
+    "Analyse": {
+     "value": "5",
      "fields": []
     },
-    "Savoir": {
+    "Manipulation": {
+     "value": "4",
+     "fields": []
+    },
+    "Soins": {
+     "value": "5",
+     "fields": []
+    },
+    "Esprit": {
+     "value": "3",
+     "fields": [
+      {
+       "name": "Maximum",
+       "value": "3"
+      }
+     ]
+    },
+    "Observation": {
+     "value": "4",
+     "fields": []
+    },
+    "Compréhension": {
+     "value": "5",
+     "fields": []
+    },
+    "Survie": {
      "value": "5",
      "fields": []
     }
@@ -2408,7 +3727,25 @@
    "created_date": "2026-10-19T10:00:00.000Z",
    "updated_date": "2026-10-19T10:00:00.000Z",
    "created_by_id": "local-user",
-   "created_by": "local@arcanes"
+   "created_by": "local@arcanes",
+   "texts": {
+    "archetype": "Mécano",
+    "age": "41",
+    "fierte": "Tout réparer",
+    "honte": "A déjà vendu des pièces défectueuses",
+    "camarade": "Buldov",
+    "pote": "Shadrov",
+    "apparence": "Menu, vif, toujours un outil dans la poche"
+   },
+   "checks": {
+    "stress": 2,
+    "sang-froid": 1,
+    "radiations": 1,
+    "eau": 4,
+    "nourriture": 3,
+    "filtres": 6,
+    "energie": 7
+   }
   },
   {
    "id": "3afc962d-fe2b-5fb5-b0d7-ab5ae543b16f",
@@ -2420,41 +3757,83 @@
      "value": "3",
      "fields": [
       {
-       "name": "Max",
+       "name": "Maximum",
        "value": "3"
       }
      ]
     },
-    "Agilité": {
-     "value": "5",
-     "fields": [
-      {
-       "name": "Max",
-       "value": "5"
-      }
-     ]
+    "Bricolage": {
+     "value": "3",
+     "fields": []
+    },
+    "Corps à corps": {
+     "value": "3",
+     "fields": []
     },
     "Endurance": {
      "value": "4",
      "fields": []
     },
-    "Perception": {
+    "Agilité": {
+     "value": "5",
+     "fields": [
+      {
+       "name": "Maximum",
+       "value": "5"
+      }
+     ]
+    },
+    "Furtivité": {
      "value": "5",
      "fields": []
     },
-    "Débrouillardise": {
-     "value": "3",
+    "Réaction": {
+     "value": "5",
      "fields": []
     },
-    "Sang-froid": {
-     "value": "4",
+    "Tir": {
+     "value": "5",
      "fields": []
     },
     "Empathie": {
      "value": "3",
+     "fields": [
+      {
+       "name": "Maximum",
+       "value": "3"
+      }
+     ]
+    },
+    "Analyse": {
+     "value": "3",
      "fields": []
     },
-    "Savoir": {
+    "Manipulation": {
+     "value": "3",
+     "fields": []
+    },
+    "Soins": {
+     "value": "3",
+     "fields": []
+    },
+    "Esprit": {
+     "value": "4",
+     "fields": [
+      {
+       "name": "Maximum",
+       "value": "4"
+      }
+     ]
+    },
+    "Observation": {
+     "value": "5",
+     "fields": []
+    },
+    "Compréhension": {
+     "value": "3",
+     "fields": []
+    },
+    "Survie": {
      "value": "3",
      "fields": []
     }
@@ -2473,26 +3852,62 @@
    ],
    "equipment": [
     {
-     "name": "Couteau de survie",
-     "type": "Corps à corps",
+     "name": "Couteau",
+     "type": "Arme",
      "fields": [
+      {
+       "name": "Prise",
+       "value": "1 main"
+      },
+      {
+       "name": "Bonus",
+       "value": "0"
+      },
       {
        "name": "Dégâts",
        "value": "1"
+      },
+      {
+       "name": "Fiabilité",
+       "value": "3"
+      },
+      {
+       "name": "Portée",
+       "value": "Contact"
+      },
+      {
+       "name": "Notes",
+       "value": ""
       }
      ]
     },
     {
-     "name": "Revolver rafistolé",
-     "type": "Armes à feu",
+     "name": "Revolver",
+     "type": "Arme",
      "fields": [
+      {
+       "name": "Prise",
+       "value": "1 main"
+      },
+      {
+       "name": "Bonus",
+       "value": "0"
+      },
       {
        "name": "Dégâts",
        "value": "2"
       },
       {
+       "name": "Fiabilité",
+       "value": "2"
+      },
+      {
        "name": "Portée",
        "value": "Courte"
+      },
+      {
+       "name": "Notes",
+       "value": ""
       }
      ]
     }
@@ -2511,7 +3926,25 @@
    "created_date": "2026-10-19T10:00:00.000Z",
    "updated_date": "2026-10-19T10:00:00.000Z",
    "created_by_id": "local-user",
-   "created_by": "local@arcanes"
+   "created_by": "local@arcanes",
+   "texts": {
+    "archetype": "Éclaireur",
+    "age": "27",
+    "fierte": "Connaître chaque tunnel",
+    "honte": "S'est enfui une fois",
+    "camarade": "Buldov",
+    "pote": "Baronov",
+    "apparence": "Mince, capuche baissée, regard fuyant"
+   },
+   "checks": {
+    "stress": 3,
+    "sang-froid": 2,
+    "radiations": 0,
+    "eau": 5,
+    "nourriture": 4,
+    "filtres": 4,
+    "energie": 3
+   }
   }
  ],
  "SkillCatalog": [
@@ -2628,109 +4061,512 @@
  ],
  "EquipmentCatalog": [
   {
-   "id": "fec1809b-ecb9-5947-812c-52fcf8dc5b2c",
+   "id": "774814d3-639d-5fc3-8828-a39908296ebc",
    "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
-   "name": "Couteau de survie",
-   "type": "Corps à corps",
-   "fields": [
-    {
-     "name": "Dégâts",
-     "value": ""
-    }
-   ],
-   "field_names": [
-    "Dégâts"
-   ],
    "created_date": "2026-10-19T10:00:00.000Z",
    "updated_date": "2026-10-19T10:00:00.000Z",
    "created_by_id": "local-user",
-   "created_by": "local@arcanes"
-  },
-  {
-   "id": "70fee023-5d63-5016-891f-67d98d79e090",
-   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
-   "name": "Barre de fer",
-   "type": "Corps à corps",
+   "created_by": "local@arcanes",
+   "name": "Objet contondant",
+   "type": "Arme",
    "fields": [
     {
-     "name": "Dégâts",
+     "name": "Prise",
      "value": ""
-    }
-   ],
-   "field_names": [
-    "Dégâts"
-   ],
-   "created_date": "2026-10-19T10:00:00.000Z",
-   "updated_date": "2026-10-19T10:00:00.000Z",
-   "created_by_id": "local-user",
-   "created_by": "local@arcanes"
-  },
-  {
-   "id": "fe49470c-48a1-50d1-bc30-37e8144ca44e",
-   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
-   "name": "Revolver rafistolé",
-   "type": "Armes à feu",
-   "fields": [
+    },
+    {
+     "name": "Bonus",
+     "value": ""
+    },
     {
      "name": "Dégâts",
      "value": ""
     },
     {
-     "name": "Portée",
-     "value": ""
-    }
-   ],
-   "field_names": [
-    "Dégâts",
-    "Portée"
-   ],
-   "created_date": "2026-10-19T10:00:00.000Z",
-   "updated_date": "2026-10-19T10:00:00.000Z",
-   "created_by_id": "local-user",
-   "created_by": "local@arcanes"
-  },
-  {
-   "id": "2e09406d-7a1f-5e41-b251-262cf91c220d",
-   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
-   "name": "Fusil de chasse",
-   "type": "Armes à feu",
-   "fields": [
-    {
-     "name": "Dégâts",
+     "name": "Fiabilité",
      "value": ""
     },
     {
      "name": "Portée",
      "value": ""
+    },
+    {
+     "name": "Notes",
+     "value": ""
     }
    ],
    "field_names": [
+    "Prise",
+    "Bonus",
     "Dégâts",
-    "Portée"
-   ],
+    "Fiabilité",
+    "Portée",
+    "Notes"
+   ]
+  },
+  {
+   "id": "4a073f69-640b-583f-a9f7-c170aab8a8dc",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
    "created_date": "2026-10-19T10:00:00.000Z",
    "updated_date": "2026-10-19T10:00:00.000Z",
    "created_by_id": "local-user",
-   "created_by": "local@arcanes"
+   "created_by": "local@arcanes",
+   "name": "Couteau",
+   "type": "Arme",
+   "fields": [
+    {
+     "name": "Prise",
+     "value": ""
+    },
+    {
+     "name": "Bonus",
+     "value": ""
+    },
+    {
+     "name": "Dégâts",
+     "value": ""
+    },
+    {
+     "name": "Fiabilité",
+     "value": ""
+    },
+    {
+     "name": "Portée",
+     "value": ""
+    },
+    {
+     "name": "Notes",
+     "value": ""
+    }
+   ],
+   "field_names": [
+    "Prise",
+    "Bonus",
+    "Dégâts",
+    "Fiabilité",
+    "Portée",
+    "Notes"
+   ]
   },
   {
-   "id": "2215b2ff-7c66-5be8-bcc0-de9a6a777d51",
+   "id": "f1fe1af4-2f84-5539-a773-94761a289af5",
    "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
-   "name": "Veste matelassée",
-   "type": "Armure",
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes",
+   "name": "Hache",
+   "type": "Arme",
+   "fields": [
+    {
+     "name": "Prise",
+     "value": ""
+    },
+    {
+     "name": "Bonus",
+     "value": ""
+    },
+    {
+     "name": "Dégâts",
+     "value": ""
+    },
+    {
+     "name": "Fiabilité",
+     "value": ""
+    },
+    {
+     "name": "Portée",
+     "value": ""
+    },
+    {
+     "name": "Notes",
+     "value": ""
+    }
+   ],
+   "field_names": [
+    "Prise",
+    "Bonus",
+    "Dégâts",
+    "Fiabilité",
+    "Portée",
+    "Notes"
+   ]
+  },
+  {
+   "id": "28e13400-1592-52c7-9ccb-f3232939704e",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes",
+   "name": "Pistolet",
+   "type": "Arme",
+   "fields": [
+    {
+     "name": "Prise",
+     "value": ""
+    },
+    {
+     "name": "Bonus",
+     "value": ""
+    },
+    {
+     "name": "Dégâts",
+     "value": ""
+    },
+    {
+     "name": "Fiabilité",
+     "value": ""
+    },
+    {
+     "name": "Portée",
+     "value": ""
+    },
+    {
+     "name": "Notes",
+     "value": ""
+    }
+   ],
+   "field_names": [
+    "Prise",
+    "Bonus",
+    "Dégâts",
+    "Fiabilité",
+    "Portée",
+    "Notes"
+   ]
+  },
+  {
+   "id": "9b55cf03-e9b4-565b-83ee-16bdd8e5494d",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes",
+   "name": "Pistolet lourd",
+   "type": "Arme",
+   "fields": [
+    {
+     "name": "Prise",
+     "value": ""
+    },
+    {
+     "name": "Bonus",
+     "value": ""
+    },
+    {
+     "name": "Dégâts",
+     "value": ""
+    },
+    {
+     "name": "Fiabilité",
+     "value": ""
+    },
+    {
+     "name": "Portée",
+     "value": ""
+    },
+    {
+     "name": "Notes",
+     "value": ""
+    }
+   ],
+   "field_names": [
+    "Prise",
+    "Bonus",
+    "Dégâts",
+    "Fiabilité",
+    "Portée",
+    "Notes"
+   ]
+  },
+  {
+   "id": "0f658aa2-7f82-5915-bf5c-9b2f35cacf60",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes",
+   "name": "Revolver",
+   "type": "Arme",
+   "fields": [
+    {
+     "name": "Prise",
+     "value": ""
+    },
+    {
+     "name": "Bonus",
+     "value": ""
+    },
+    {
+     "name": "Dégâts",
+     "value": ""
+    },
+    {
+     "name": "Fiabilité",
+     "value": ""
+    },
+    {
+     "name": "Portée",
+     "value": ""
+    },
+    {
+     "name": "Notes",
+     "value": ""
+    }
+   ],
+   "field_names": [
+    "Prise",
+    "Bonus",
+    "Dégâts",
+    "Fiabilité",
+    "Portée",
+    "Notes"
+   ]
+  },
+  {
+   "id": "82bb130b-c832-5333-ba04-cb509309a156",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes",
+   "name": "Fusil",
+   "type": "Arme",
+   "fields": [
+    {
+     "name": "Prise",
+     "value": ""
+    },
+    {
+     "name": "Bonus",
+     "value": ""
+    },
+    {
+     "name": "Dégâts",
+     "value": ""
+    },
+    {
+     "name": "Fiabilité",
+     "value": ""
+    },
+    {
+     "name": "Portée",
+     "value": ""
+    },
+    {
+     "name": "Notes",
+     "value": ""
+    }
+   ],
+   "field_names": [
+    "Prise",
+    "Bonus",
+    "Dégâts",
+    "Fiabilité",
+    "Portée",
+    "Notes"
+   ]
+  },
+  {
+   "id": "3238e6c2-272c-5a6a-b426-c95a2da5e0dc",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes",
+   "name": "Fusil à lunette",
+   "type": "Arme",
+   "fields": [
+    {
+     "name": "Prise",
+     "value": ""
+    },
+    {
+     "name": "Bonus",
+     "value": ""
+    },
+    {
+     "name": "Dégâts",
+     "value": ""
+    },
+    {
+     "name": "Fiabilité",
+     "value": ""
+    },
+    {
+     "name": "Portée",
+     "value": ""
+    },
+    {
+     "name": "Notes",
+     "value": ""
+    }
+   ],
+   "field_names": [
+    "Prise",
+    "Bonus",
+    "Dégâts",
+    "Fiabilité",
+    "Portée",
+    "Notes"
+   ]
+  },
+  {
+   "id": "9a7c06fd-a84e-5e30-a2a5-58a39dae576d",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes",
+   "name": "Fusil avec silencieux",
+   "type": "Arme",
+   "fields": [
+    {
+     "name": "Prise",
+     "value": ""
+    },
+    {
+     "name": "Bonus",
+     "value": ""
+    },
+    {
+     "name": "Dégâts",
+     "value": ""
+    },
+    {
+     "name": "Fiabilité",
+     "value": ""
+    },
+    {
+     "name": "Portée",
+     "value": ""
+    },
+    {
+     "name": "Notes",
+     "value": ""
+    }
+   ],
+   "field_names": [
+    "Prise",
+    "Bonus",
+    "Dégâts",
+    "Fiabilité",
+    "Portée",
+    "Notes"
+   ]
+  },
+  {
+   "id": "89c61e4f-8a7f-5d9d-b032-63347d118ca9",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes",
+   "name": "Fusil d'assaut",
+   "type": "Arme",
+   "fields": [
+    {
+     "name": "Prise",
+     "value": ""
+    },
+    {
+     "name": "Bonus",
+     "value": ""
+    },
+    {
+     "name": "Dégâts",
+     "value": ""
+    },
+    {
+     "name": "Fiabilité",
+     "value": ""
+    },
+    {
+     "name": "Portée",
+     "value": ""
+    },
+    {
+     "name": "Notes",
+     "value": ""
+    }
+   ],
+   "field_names": [
+    "Prise",
+    "Bonus",
+    "Dégâts",
+    "Fiabilité",
+    "Portée",
+    "Notes"
+   ]
+  },
+  {
+   "id": "5f9ca78b-0621-52ec-ace8-e094f6003a6b",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes",
+   "name": "Sarbacane de fortune",
+   "type": "Arme",
+   "fields": [
+    {
+     "name": "Prise",
+     "value": ""
+    },
+    {
+     "name": "Bonus",
+     "value": ""
+    },
+    {
+     "name": "Dégâts",
+     "value": ""
+    },
+    {
+     "name": "Fiabilité",
+     "value": ""
+    },
+    {
+     "name": "Portée",
+     "value": ""
+    },
+    {
+     "name": "Notes",
+     "value": ""
+    }
+   ],
+   "field_names": [
+    "Prise",
+    "Bonus",
+    "Dégâts",
+    "Fiabilité",
+    "Portée",
+    "Notes"
+   ]
+  },
+  {
+   "id": "d7c8609e-6c6a-5737-b01b-26a70ea15ae3",
+   "campaign_id": "d508df0e-2495-5001-96a0-e488fc86799d",
+   "created_date": "2026-10-19T10:00:00.000Z",
+   "updated_date": "2026-10-19T10:00:00.000Z",
+   "created_by_id": "local-user",
+   "created_by": "local@arcanes",
+   "name": "Gilet pare-balles",
+   "type": "Protection",
    "fields": [
     {
      "name": "Protection",
      "value": ""
+    },
+    {
+     "name": "Modificateur",
+     "value": ""
     }
    ],
    "field_names": [
-    "Protection"
-   ],
-   "created_date": "2026-10-19T10:00:00.000Z",
-   "updated_date": "2026-10-19T10:00:00.000Z",
-   "created_by_id": "local-user",
-   "created_by": "local@arcanes"
+    "Protection",
+    "Modificateur"
+   ]
   },
   {
    "id": "5bc977a9-4ba4-5f52-8732-4940efac4ffb",
