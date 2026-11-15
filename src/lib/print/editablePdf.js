@@ -3,6 +3,7 @@ import { cleanInventory, inventoryPrintLine } from "@/lib/meta/inventory";
 import { trackRows } from "@/lib/meta/tracks";
 import { textRows } from "@/lib/meta/textFields";
 import { drawSheetPages } from "@/lib/print/sheetPdf";
+import { groupEquipment } from "@/lib/meta/equipmentGroups";
 
 const PAGE_WIDTH = 595.28;
 const PAGE_HEIGHT = 841.89;
@@ -500,7 +501,10 @@ export async function createEditablePdf(model) {
                     drawHeading("Équipement", 3);
                     const equipment = character.equipment || [];
                     if (equipment.length === 0) drawField("Équipement", "", { multiline: true, height: 48 });
-                    for (const item of equipment) {
+                    const equipmentGroups = groupEquipment(equipment);
+                    for (const group of equipmentGroups) {
+                    if (equipmentGroups.length > 1) drawText(group.label, { size: 9, font: bold, color: MUTED_COLOR });
+                    for (const { item } of group.entries) {
                         const details = [
                             item.name || "",
                             item.type || "",
@@ -512,6 +516,7 @@ export async function createEditablePdf(model) {
                             multiline: true,
                             height: Math.max(38, Math.min(100, 26 + details.length * 12)),
                         });
+                    }
                     }
                     drawHeading("Inventaire", 3);
                     const inventory = cleanInventory(character.inventory);

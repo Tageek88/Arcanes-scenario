@@ -15,6 +15,8 @@ import TrackBoxes from "@/components/game/TrackBoxes";
 import { setChecked } from "@/lib/meta/tracks";
 import { setText } from "@/lib/meta/textFields";
 import useConfirm from "@/hooks/useConfirm";
+import { EQUIPMENT_GROUPS, newEquipmentItem } from "@/lib/meta/equipmentGroups";
+import EquipmentGroupHeadings, { equipmentOrder } from "@/components/game/EquipmentGroupHeadings";
 
 const normalize = (value) => String(value || "").trim().toLocaleLowerCase("fr");
 
@@ -332,8 +334,10 @@ export default function NpcSheetFields({ form, set, generator, generation, campa
 
       <div className="stack-y-2">
         <Label className="block">Équipement</Label>
+        <div className="flex flex-col gap-3">
+        <EquipmentGroupHeadings equipment={equipment} />
         {equipment.map((item, index) => (
-          <div key={index} className="stack-y-2 rounded-lg border border-border p-3">
+          <div key={index} className="stack-y-2 rounded-lg border border-border p-3" style={equipmentOrder(item)}>
             <div className="flex items-center gap-2">
               <Input
                 list="npc-equipment-names"
@@ -370,6 +374,7 @@ export default function NpcSheetFields({ form, set, generator, generation, campa
             />
           </div>
         ))}
+        </div>
         <datalist id="npc-equipment-names">
           {[...new Set(equipmentPool.map((item) => item.name))].map((name) => (
             <option key={name} value={name} />
@@ -380,9 +385,19 @@ export default function NpcSheetFields({ form, set, generator, generation, campa
             <option key={type} value={type} />
           ))}
         </datalist>
-        <Button type="button" variant="outline" size="sm" onClick={() => set("equipment", [...equipment, { name: "", type: "", fields: [] }])}>
-          <Plus className="mr-2 h-4 w-4" /> Ajouter un équipement
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          {EQUIPMENT_GROUPS.map((group) => (
+            <Button
+              key={group.id}
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => set("equipment", [...equipment, newEquipmentItem(group.id, group.type ? fieldNamesForType(group.type) : [])])}
+            >
+              <Plus className="mr-2 h-4 w-4" /> {group.add}
+            </Button>
+          ))}
+        </div>
       </div>
 
       <div className="stack-y-2">

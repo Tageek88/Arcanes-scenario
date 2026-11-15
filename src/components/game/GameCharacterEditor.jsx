@@ -8,6 +8,8 @@ import ResponsiveDialog from "@/components/common/ResponsiveDialog";
 import useConfirm from "@/hooks/useConfirm";
 import InventoryField from "@/components/common/InventoryField";
 import { cleanInventory } from "@/lib/meta/inventory";
+import { EQUIPMENT_GROUPS, newEquipmentItem } from "@/lib/meta/equipmentGroups";
+import EquipmentGroupHeadings, { equipmentOrder } from "@/components/game/EquipmentGroupHeadings";
 import { FieldLabel } from "@/components/codex/NpcGeneratorPanel";
 import PcGeneratorPanel, { LockedHeading } from "@/components/game/PcGeneratorPanel";
 import { useNpcGenerator } from "@/hooks/useNpcGenerator";
@@ -299,6 +301,13 @@ export default function GameCharacterEditor({
     });
   };
 
+  // Ajoute un objet vide dans un groupe (arme, protection ou autre) : le type du groupe et les champs connus pour ce type sont repris.
+  const addEquipment = (groupId) => {
+    ignoredTypeFields.current.clear();
+    const group = EQUIPMENT_GROUPS.find((entry) => entry.id === groupId);
+    setForm((current) => ({ ...current, equipment: [...current.equipment, newEquipmentItem(groupId, group?.type ? fieldNamesForType(group.type) : [])] }));
+  };
+
   const setEquipmentField = (equipmentIndex, fieldIndex, key, value) => {
     setEquipment(equipmentIndex, (item) => ({
       fields: item.fields.map((field, index) =>
@@ -570,12 +579,18 @@ export default function GameCharacterEditor({
               <LockedHeading label="Équipement" locked={!!generation.locks.equipment} onToggle={() => generation.toggleLock("equipment")} />
               <p className="text-xs text-muted-foreground">Les champs facultatifs déjà connus pour un type sont proposés vides pour un nouvel objet. Les types « Arme » et « Protection » se placent séparément sur la feuille.</p>
             </div>
-            <Button type="button" variant="outline" size="sm" onClick={() => setForm((current) => ({ ...current, equipment: [...current.equipment, { name: "", type: "", fields: [] }] }))}>
-              <Plus className="h-4 w-4" /> Ajouter
-            </Button>
+            <div className="flex flex-wrap justify-end gap-2">
+              {EQUIPMENT_GROUPS.map((group) => (
+                <Button key={group.id} type="button" variant="outline" size="sm" onClick={() => addEquipment(group.id)}>
+                  <Plus className="h-4 w-4" /> {group.add}
+                </Button>
+              ))}
+            </div>
           </div>
+          <div className="flex flex-col gap-3">
+          <EquipmentGroupHeadings equipment={form.equipment} />
           {form.equipment.map((item, index) => (
-            <div key={index} className="stack-y-3 rounded-lg border border-border p-3">
+            <div key={index} className="stack-y-3 rounded-lg border border-border p-3" style={equipmentOrder(item)}>
               <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-2">
                 <div className="grid gap-2 sm:grid-cols-2">
                   <label className="stack-y-1 text-xs text-muted-foreground">
@@ -633,6 +648,7 @@ list={`equipment-types-${index}`}
               </div>
             </div>
           ))}
+          </div>
         </section>
 
         <section className="stack-y-3">

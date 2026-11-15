@@ -5,6 +5,7 @@ import { generatePrintCSS } from "@/lib/print/printStyles";
 import { trackRows } from "@/lib/meta/tracks";
 import { textRows } from "@/lib/meta/textFields";
 import SheetPrintPages from "@/components/print/SheetPrintPages";
+import { groupEquipment } from "@/lib/meta/equipmentGroups";
 
 const Lines = ({ label, items }) =>
     items?.length > 0 ? (
@@ -315,7 +316,10 @@ function CharacterContent({ character, characteristics, skillRollModifier, track
             {(character.equipment || []).length > 0 && (
                 <section className="prt-section">
                     <h2>Équipement</h2>
-                    {character.equipment.map((item, index) => (
+                    {groupEquipment(character.equipment).map((group, groupPosition, groups) => (
+                        <React.Fragment key={group.id}>
+                            {groups.length > 1 && <h3 className="prt-title">{group.label}</h3>}
+                            {group.entries.map(({ item, index }) => (
                         <div className="prt-character-item" key={`${item.name}-${index}`}>
                             <div className="prt-title">{item.name}</div>
                             {item.type && <div className="prt-meta">{item.type}</div>}
@@ -323,6 +327,8 @@ function CharacterContent({ character, characteristics, skillRollModifier, track
                                 <p key={`${field.name}-${fieldIndex}`}><strong>{field.name}</strong>{hasValue(field.value) && ` : ${field.value}`}</p>
                             ))}
                         </div>
+                            ))}
+                        </React.Fragment>
                     ))}
                 </section>
             )}
