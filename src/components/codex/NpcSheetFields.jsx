@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Plus, X } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { Copy, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,6 +14,7 @@ import { linkedCharacteristic } from "@/lib/meta/diceLinks";
 import TrackBoxes from "@/components/game/TrackBoxes";
 import { setChecked } from "@/lib/meta/tracks";
 import { setText } from "@/lib/meta/textFields";
+import useConfirm from "@/hooks/useConfirm";
 
 const normalize = (value) => String(value || "").trim().toLocaleLowerCase("fr");
 
@@ -86,6 +87,7 @@ function ListInput({ value, onChange, placeholder, id }) {
  */
 export default function NpcSheetFields({ form, set, generator, generation, campaignId = "" }) {
   const { locks, toggleLock } = generation;
+  const { confirm, confirmDialog } = useConfirm();
   const traits = form.traits || [];
   const skills = form.skills || [];
   const equipment = form.equipment || [];
@@ -115,7 +117,8 @@ export default function NpcSheetFields({ form, set, generator, generation, campa
     if (linked && !skill.characteristic) setSkill(index, { characteristic: linked });
   };
   const setEquipment = (index, patch) => set("equipment", equipment.map((item, i) => (i === index ? { ...item, ...patch } : item)));
-  const equipmentTypes = [...new Set(equipmentPool.map((item) => item.type).filter(Boolean))];
+  // « Arme » et « Protection » sont toujours proposés : la feuille les place séparément.
+  const equipmentTypes = [...new Set(["Arme", "Protection", ...equipmentPool.map((item) => item.type).filter(Boolean)])];
   const fieldNamesForType = (type) => [...new Set(
     equipmentPool.filter((item) => normalize(item.type) === normalize(type)).flatMap((item) => item.fieldNames)
   )];
@@ -126,6 +129,45 @@ export default function NpcSheetFields({ form, set, generator, generation, campa
     if (known && !item.type && (item.fields || []).length === 0) {
       setEquipment(index, { type: known.type, fields: known.fieldNames.map((name) => ({ name, value: "" })) });
     }
+  };
+  // Type d'équipement au moment où on entre dans son champ, et types dont on a refusé les champs (par objet) : on ne repose pas la question.
+  const typeAtFocus = useRef({});
+  const ignoredTypeFields = useRef(new Set());
+  // Quand le type d'un objet change, propose d'ajouter les champs que le catalogue d'équipement connaît pour ce type (sans rien écraser).
+  const offerTypeFields = async (index) => {
+    const item = equipment[index];
+    const type = String(item?.type || "").trim();
+    const before = typeAtFocus.current[index];
+    typeAtFocus.current[index] = undefined;
+    if (!type || normalize(before) === normalize(type)) return;
+    const key = `${index}|${normalize(type)}`;
+    if (ignoredTypeFields.current.has(key)) return;
+    const present = new Set((item.fields || []).map((field) => normalize(field.name)));
+    const missing = fieldNamesForType(type).filter((name) => !present.has(normalize(name)));
+    if (!missing.length) return;
+    const accepted = await confirm({
+      title: "Champs connus pour ce type",
+      description: `Le catalogue d’équipement connaît pour le type « ${type} » les champs : ${missing.join(", ")}. Les ajouter à cet objet ?`,
+      confirmLabel: "Compléter",
+      cancelLabel: "Ignorer",
+    });
+    if (!accepted) {
+      ignoredTypeFields.current.add(key);
+      return;
+    }
+    setEquipment(index, { fields: [...(item.fields || []), ...missing.map((name) => ({ name, value: "" }))] });
+  };
+  // Copie un objet (valeurs comprises) juste après lui : pratique pour une seconde arme du même genre.
+  const duplicateEquipment = (index) => {
+    const source = equipment[index];
+    if (!source) return;
+    ignoredTypeFields.current.clear();
+    const copy = { ...source, fields: (source.fields || []).map((field) => ({ ...field })) };
+    set("equipment", [...equipment.slice(0, index + 1), copy, ...equipment.slice(index + 1)]);
+  };
+  const removeEquipment = (index) => {
+    ignoredTypeFields.current.clear();
+    set("equipment", equipment.filter((_, i) => i !== index));
   };
   const levelOptions = generator.levelNames.includes(form.level) || !form.level ? generator.levelNames : [form.level, ...generator.levelNames];
 
@@ -307,9 +349,16 @@ export default function NpcSheetFields({ form, set, generator, generation, campa
                 aria-label={`Type de l'équipement ${index + 1}`}
                 value={item.type || ""}
                 placeholder="Type"
+                onFocus={() => {
+                  typeAtFocus.current[index] = item.type || "";
+                }}
                 onChange={(event) => setEquipment(index, { type: event.target.value })}
+                onBlur={() => offerTypeFields(index)}
               />
-              <Button type="button" variant="ghost" size="icon" className="h-8 w-8 shrink-0" aria-label={`Retirer l'équipement ${index + 1}`} onClick={() => set("equipment", equipment.filter((_, i) => i !== index))}>
+              <Button type="button" variant="ghost" size="icon" className="h-8 w-8 shrink-0" aria-label={`Dupliquer l'équipement ${item.name || index + 1}`} onClick={() => duplicateEquipment(index)}>
+                <Copy className="h-4 w-4 text-muted-foreground" />
+              </Button>
+              <Button type="button" variant="ghost" size="icon" className="h-8 w-8 shrink-0" aria-label={`Retirer l'équipement ${index + 1}`} onClick={() => removeEquipment(index)}>
                 <X className="h-4 w-4" />
               </Button>
             </div>
@@ -370,6 +419,7 @@ export default function NpcSheetFields({ form, set, generator, generation, campa
           <p className="text-xs text-muted-foreground">Ces remarques sont des indications : rien n'empêche d'enregistrer.</p>
         </div>
       )}
+      {confirmDialog}
     </>
   );
 }
