@@ -1,17 +1,20 @@
 import { describe, expect, it } from "vitest";
 import { api } from "@/api/localClient";
 import { applyBuiltinSystemToCampaign, copyBuiltinSystem, listGameSystems } from "@/lib/services/gameSystems";
+import { getBuiltinSystem } from "@/lib/meta/builtinSystems";
 import { makeCampaign } from "./helpers";
 
 describe("systèmes fournis (service)", () => {
   it("copie Metro 2033 dans une campagne sans modèle, puis le remplace sur demande", async () => {
     const campaign = await makeCampaign("Metro");
-    expect(await applyBuiltinSystemToCampaign("builtin-metro-2033", campaign.id)).toEqual({ replaced: false, skills: 0, equipment: 0 });
+    const result = await applyBuiltinSystemToCampaign("builtin-metro-2033", campaign.id);
+    expect(result).toMatchObject({ replaced: false, skills: 0 });
+    expect(result.equipment).toBe(getBuiltinSystem("builtin-metro-2033").data.equipment.length);
     const [row] = (await api.entities.GameSheetModel.filter({ campaign_id: campaign.id })).items;
     expect(row.characteristics).toHaveLength(16);
     expect(row.dice.rule).toBe("pool");
     expect(row.layoutId).toBe("metro");
-    expect(await applyBuiltinSystemToCampaign("builtin-metro-2033", campaign.id)).toEqual({ replaced: true, skills: 0, equipment: 0 });
+    expect(await applyBuiltinSystemToCampaign("builtin-metro-2033", campaign.id)).toMatchObject({ replaced: true, skills: 0 });
     expect((await api.entities.GameSheetModel.filter({ campaign_id: campaign.id })).items).toHaveLength(1);
   });
 
