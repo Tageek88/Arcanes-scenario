@@ -20,6 +20,7 @@ import { cleanDiceOverride } from "@/lib/meta/dice";
 import TrackBoxes from "@/components/game/TrackBoxes";
 import { cleanChecks, setChecked } from "@/lib/meta/tracks";
 import { cleanTexts, setText } from "@/lib/meta/textFields";
+import { resolveLayout } from "@/lib/meta/layouts";
 
 const EMPTY = { name: "", notes: "", characteristics: {}, skills: [], equipment: [], inventory: [], checks: {}, texts: {} };
 const normalize = (value) => String(value || "").trim().toLocaleLowerCase("fr");
@@ -369,37 +370,12 @@ export default function GameCharacterEditor({
     }
   };
 
-  const footer = (
-    <div className="flex justify-end gap-2">
-      <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Annuler</Button>
-      <Button type="submit" form="game-character-form" disabled={saving || !form.name.trim()}>
-        {saving ? "Enregistrement…" : "Enregistrer la fiche"}
-      </Button>
-    </div>
-  );
+  // La mise en page du modèle (par défaut : caractéristiques, informations, cases à cocher).
+  const layout = useMemo(() => resolveLayout(model.layouts, model.layoutId, model), [model]);
 
-  return (
-    <>
-    <ResponsiveDialog
-      open={open}
-      onOpenChange={onOpenChange}
-      title={character?.id ? "Modifier la fiche personnage" : "Nouvelle fiche personnage"}
-      description="Les seuils « Test » sont renseignés manuellement. Ils sont conservés à la duplication."
-      footer={footer}
-    >
-      <form id="game-character-form" onSubmit={submit} className="stack-y-5 py-1">
-        <div className="stack-y-2">
-          <FieldLabel label="Nom du personnage" locked={!!generation.locks.name} onToggle={() => generation.toggleLock("name")} htmlFor="game-character-name" />
-          <Input id="game-character-name" data-tutorial="game-character-name" autoFocus value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} />
-        </div>
-
-        <PcGeneratorPanel generator={generator} generation={generation} issues={issues} />
-
-        {model.characteristics.length > 0 && (
-          <section className="stack-y-3">
-            <LockedHeading label="Caractéristiques" locked={!!generation.locks.characteristics} onToggle={() => generation.toggleLock("characteristics")} />
-            <div className="stack-y-3">
-              {model.characteristics.map((item) => {
+  // Les trois sortes d'éditeurs de la fiche, rangés ensuite selon la mise en page du modèle (voir `layout`).
+  const statByName = new Map(model.characteristics.map((item) => [item.name, item]));
+  const renderStatEditor = (item) => {
                 const values = form.characteristics[item.name] || { value: "", fields: [] };
                 const fields = values.fields || [];
                 return (
@@ -463,15 +439,8 @@ export default function GameCharacterEditor({
                     />
                   </div>
                 );
-              })}
-            </div>
-          </section>
-        )}
-
-        {model.textFields?.length > 0 && (
-          <section className="stack-y-3">
-            <h3 className="font-display font-semibold">Informations</h3>
-            {model.textFields.map((field) => (
+  };
+  const renderTextEditor = (field) => (
               <div key={field.id} className="stack-y-1.5">
                 <Label htmlFor={`text-${field.id}`}>{field.name}</Label>
                 {field.long ? (
@@ -489,23 +458,64 @@ export default function GameCharacterEditor({
                   />
                 )}
               </div>
-            ))}
-          </section>
-        )}
-
-        {model.tracks?.length > 0 && (
-          <section className="stack-y-3">
-            <h3 className="font-display font-semibold">Cases à cocher</h3>
-            {model.tracks.map((track) => (
+  );
+  const renderTrackEditor = (track) => (
               <TrackBoxes
                 key={track.id}
                 track={track}
                 value={form.checks?.[track.id]}
                 onChange={(next) => setForm((current) => ({ ...current, checks: setChecked(current.checks, track.id, next) }))}
               />
-            ))}
-          </section>
-        )}
+  );
+
+  const footer = (
+    <div className="flex justify-end gap-2">
+      <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Annuler</Button>
+      <Button type="submit" form="game-character-form" disabled={saving || !form.name.trim()}>
+        {saving ? "Enregistrement…" : "Enregistrer la fiche"}
+      </Button>
+    </div>
+  );
+
+  return (
+    <>
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={character?.id ? "Modifier la fiche personnage" : "Nouvelle fiche personnage"}
+      description="Les seuils « Test » sont renseignés manuellement. Ils sont conservés à la duplication."
+      footer={footer}
+    >
+      <form id="game-character-form" onSubmit={submit} className="stack-y-5 py-1">
+        <div className="stack-y-2">
+          <FieldLabel label="Nom du personnage" locked={!!generation.locks.name} onToggle={() => generation.toggleLock("name")} htmlFor="game-character-name" />
+          <Input id="game-character-name" data-tutorial="game-character-name" autoFocus value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} />
+        </div>
+
+        <PcGeneratorPanel generator={generator} generation={generation} issues={issues} />
+
+        {layout.blocks.map((block) => {
+          const statBlock = block.kind === "stat-group" || block.kind === "stats";
+          const firstStatBlock = statBlock && !layout.blocks.slice(0, layout.blocks.indexOf(block)).some((other) => other.kind === "stat-group" || other.kind === "stats");
+          const title = block.title || (block.kind === "stat-group" ? block.stat : block.kind === "stats" ? "Caractéristiques" : block.kind === "texts" ? "Informations" : "Cases à cocher");
+          return (
+            <section key={block.id} className="stack-y-3">
+              {firstStatBlock ? (
+                <LockedHeading label={title} locked={!!generation.locks.characteristics} onToggle={() => generation.toggleLock("characteristics")} />
+              ) : (
+                <h3 className="font-display font-semibold">{title}</h3>
+              )}
+              {block.kind === "stat-group" && (
+                <div className="stack-y-3">
+                  {[block.stat, ...block.children].map((name) => (statByName.get(name) ? renderStatEditor(statByName.get(name)) : null))}
+                </div>
+              )}
+              {block.kind === "stats" && <div className="stack-y-3">{block.stats.map((name) => renderStatEditor(statByName.get(name)))}</div>}
+              {block.kind === "texts" && block.fields.map((field) => renderTextEditor(field))}
+              {block.kind === "tracks" && block.tracks.map((track) => renderTrackEditor(track))}
+            </section>
+          );
+        })}
 
         <section className="stack-y-3">
           <div className="flex items-center justify-between gap-2">
