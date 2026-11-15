@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Check, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import ExportSystemButton from "@/components/game/ExportSystemButton";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import SheetPageCanvas from "@/components/game/SheetPageCanvas";
@@ -29,7 +30,7 @@ const NUDGE_BIG = 0.01;
  * le glisse à l'endroit voulu de la page et on tire son coin pour l'agrandir. Les positions sont des fractions de la page :
  * elles suivent le système de jeu, pas le fond (qui reste sur l'appareil). Pensé pour un ordinateur (souris ou écran tactile large).
  */
-export default function SheetZonesDialog({ open, onOpenChange, campaignId, model, zones, onSave, saving }) {
+export default function SheetZonesDialog({ open, onOpenChange, campaignId, campaignName, model, zones, onSave, saving }) {
   const [pages, setPages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [draft, setDraft] = useState([]);
@@ -263,6 +264,7 @@ export default function SheetZonesDialog({ open, onOpenChange, campaignId, model
         )}
 
         <DialogFooter>
+          <ExportSystemButton campaignId={campaignId} campaignName={campaignName} disabled={saving || changed} />
           <Button variant="ghost" onClick={() => onOpenChange(false)}>Fermer</Button>
           <Button onClick={save} disabled={saving || !changed}>Enregistrer le placement</Button>
         </DialogFooter>

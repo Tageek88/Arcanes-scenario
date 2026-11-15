@@ -412,12 +412,13 @@ export default function Jeu() {
         open={backgroundOpen}
         onOpenChange={setBackgroundOpen}
         campaignId={campaignId}
+        campaignName={campaign?.name}
         onPlaceValues={() => {
           setBackgroundOpen(false);
           setZonesOpen(true);
         }}
       />
-      <SheetZonesDialog open={zonesOpen} onOpenChange={setZonesOpen} campaignId={campaignId} model={model} zones={model.zones} onSave={saveZones} saving={savingModel} />
+      <SheetZonesDialog open={zonesOpen} onOpenChange={setZonesOpen} campaignId={campaignId} campaignName={campaign?.name} model={model} zones={model.zones} onSave={saveZones} saving={savingModel} />
       <SheetFaceDialog
         open={Boolean(faceCharacterId)}
         onOpenChange={(next) => { if (!next) setFaceCharacterId(""); }}

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Crosshair, RotateCw, Trash2, Upload } from "lucide-react";
 import ResponsiveDialog from "@/components/common/ResponsiveDialog";
 import { Button } from "@/components/ui/button";
+import ExportSystemButton from "@/components/game/ExportSystemButton";
 import { useToast } from "@/components/ui/use-toast";
 import { MAX_BACKGROUND_PAGES, SOURCE_ACCEPT, backgroundSizeLabel } from "@/lib/meta/sheetBackground";
 import { importSheetFile, rotatePage } from "@/lib/services/sheetImport";
@@ -11,7 +12,7 @@ import { loadSheetBackground, removeSheetBackground, saveSheetBackground } from 
  * Fond de la feuille de personnage d'une campagne : importer un PDF ou une image (convertis en pages d'image), tourner une
  * page, retirer une page ou tout le fond. Le fond reste sur cet appareil ; il n'est pas inclus dans les systèmes exportés.
  */
-export default function SheetBackgroundDialog({ open, onOpenChange, campaignId, onPlaceValues }) {
+export default function SheetBackgroundDialog({ open, onOpenChange, campaignId, campaignName, onPlaceValues }) {
   const { toast } = useToast();
   const fileRef = useRef(null);
   const [pages, setPages] = useState([]);
@@ -130,6 +131,7 @@ export default function SheetBackgroundDialog({ open, onOpenChange, campaignId, 
               <Crosshair className="h-4 w-4" /> Placer les valeurs
             </Button>
           )}
+          <ExportSystemButton campaignId={campaignId} campaignName={campaignName} disabled={busy} />
           {pages.length > 0 && <span className="text-xs text-muted-foreground">{pages.length} page{pages.length > 1 ? "s" : ""} · {backgroundSizeLabel(pages)}</span>}
           {busy && <span className="text-xs text-muted-foreground">Traitement…</span>}
         </div>

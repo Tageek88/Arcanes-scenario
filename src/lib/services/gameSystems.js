@@ -28,16 +28,26 @@ async function createSystem(info, data) {
 
 /** Enregistre le modèle de fiche d'une campagne comme système (une copie : la campagne n'est pas modifiée). */
 export async function saveCampaignModelAsSystem(campaignId, info) {
+  return createSystem(info, await campaignSystemData(campaignId));
+}
+
+// Les données d'un système prises dans une campagne : son modèle de fiche, plus les compétences et équipements de son catalogue.
+async function campaignSystemData(campaignId) {
   const row = await modelOf(campaignId);
   if (!row) throw new Error("Cette campagne n'a pas de modèle de fiche.");
-  // Le système emporte aussi les compétences et équipements du catalogue de la campagne.
   const [skills, equipment] = await Promise.all([
     api.entities.SkillCatalog.filter({ campaign_id: campaignId }, { limit: 1000 }),
     api.entities.EquipmentCatalog.filter({ campaign_id: campaignId }, { limit: 1000 }),
   ]);
   const data = cleanSystemData({ ...row, skills: skills.items, equipment: equipment.items });
   if (data.characteristics.length === 0) throw new Error("Le modèle de cette campagne n'a aucune caractéristique.");
-  return createSystem(info, data);
+  return data;
+}
+
+/** Exporte le modèle d'une campagne en fichier de système, sans l'enregistrer dans la liste des systèmes. */
+export async function exportCampaignModelAsSystem(campaignId, name) {
+  const data = await campaignSystemData(campaignId);
+  return exportGameSystem({ name: String(name || "").trim() || "Système de jeu", description: "", data });
 }
 
 /**
