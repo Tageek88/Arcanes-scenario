@@ -8,7 +8,7 @@ import { cleanTracks } from "@/lib/meta/tracks";
 import { cleanTextFields } from "@/lib/meta/textFields";
 import { statParentMap } from "@/lib/meta/statLinks";
 
-const EMPTY = { dice: null, links: {}, modifiers: {}, tracks: [], parents: {}, textFields: [] };
+const EMPTY = { dice: null, links: {}, modifiers: {}, tracks: [], parents: {}, textFields: [], layouts: [], layoutId: "", characteristics: [] };
 
 // Une liste du Codex affiche beaucoup de fiches d'un coup : elles partagent la même lecture de la campagne.
 // Une lecture n'est partagée que quelques secondes, pour qu'un réglage modifié ailleurs soit relu à la visite suivante.
@@ -33,6 +33,14 @@ function loadSetup(campaignId, refreshKey) {
     textFields: cleanTextFields(models.items[0]?.textFields),
     // Liens entre caractéristiques (une secondaire ajoute la valeur de sa principale au lancer).
     parents: statParentMap(models.items[0]?.characteristics),
+    // Mise en page de la fiche et caractéristiques (nom, lien, champs) : le Codex range les fiches comme la carte de Jeu.
+    layouts: Array.isArray(models.items[0]?.layouts) ? models.items[0].layouts : [],
+    layoutId: models.items[0]?.layoutId || "",
+    characteristics: (Array.isArray(models.items[0]?.characteristics) ? models.items[0].characteristics : []).map((item) => ({
+      name: item.name,
+      parent: item.parent || "",
+      field_names: Array.isArray(item.field_names) ? item.field_names : [],
+    })),
   }));
   shared.set(key, { at: Date.now(), promise });
   // Une lecture en échec n'est jamais réutilisée.

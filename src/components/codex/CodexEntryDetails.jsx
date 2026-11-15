@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { MapPin, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { KIND_META, NPC_GENDER_OPTIONS } from "@/lib/meta/codex";
@@ -14,6 +14,7 @@ import { api } from "@/api/localClient";
 import { useToast } from "@/components/ui/use-toast";
 import { cleanChecks, setChecked } from "@/lib/meta/tracks";
 import { useRollSetup } from "@/hooks/useRollSetup";
+import { resolveLayout } from "@/lib/meta/layouts";
 
 const stop = (action) => (event) => {
   event.stopPropagation();
@@ -81,11 +82,13 @@ function Section({ title, children }) {
   );
 }
 
-function Characteristics({ characteristics, owner, sheet, setup }) {
-  const entries = Object.entries(characteristics && typeof characteristics === "object" ? characteristics : {});
+function Characteristics({ characteristics, owner, sheet, setup, only, title = "Caractéristiques :" }) {
+  const values = characteristics && typeof characteristics === "object" ? characteristics : {};
+  // `only` : les caractéristiques d'un bloc de la mise en page, dans son ordre ; sinon toutes celles de la fiche.
+  const entries = only ? only.filter((name) => Object.hasOwn(values, name)).map((name) => [name, values[name]]) : Object.entries(values);
   if (entries.length === 0) return null;
   return (
-    <Section title="Caractéristiques :">
+    <Section title={title}>
       <div className="grid grid-cols-2 gap-1 font-mono text-[11px]">
         {entries.map(([name, entry]) => (
           <div key={name} className="group relative min-w-0 rounded bg-secondary/50 px-1.5 py-1">
@@ -108,8 +111,10 @@ function Characteristics({ characteristics, owner, sheet, setup }) {
 /**
  * Cases à cocher du modèle de la campagne, cochables ici même : la fiche (PNJ ou personnage) est enregistrée à chaque clic,
  * sans ouvrir son formulaire. L'affichage suit tout de suite ; en cas d'échec, la case revient et un message l'indique.
+ * L'état est commun à tous les blocs de la fiche (une même fiche peut répartir ses pistes dans plusieurs blocs) :
+ * `tracks` = toutes les pistes du modèle, c'est elles qui servent au nettoyage de l'enregistrement.
  */
-function Tracks({ kind, entry, tracks }) {
+function useEntryChecks(kind, entry, tracks) {
   const { toast } = useToast();
   const [checks, setChecks] = useState(entry.checks);
   useEffect(() => {
@@ -117,7 +122,6 @@ function Tracks({ kind, entry, tracks }) {
   }, [entry.checks]);
   const rows = list(tracks);
   const entity = KIND_META[kind]?.entity;
-  if (rows.length === 0) return null;
 
   const change = async (track, next) => {
     const previous = checks;
@@ -132,15 +136,21 @@ function Tracks({ kind, entry, tracks }) {
     }
   };
 
+  return { checks, change: entity && entry.id ? change : undefined };
+}
+
+function Tracks({ tracks, checks, onChange, title = "Cases à cocher :" }) {
+  const rows = list(tracks);
+  if (rows.length === 0) return null;
   return (
-    <Section title="Cases à cocher :">
+    <Section title={title}>
       <div className="stack-y-1">
         {rows.map((track) => (
           <TrackBoxes
             key={track.id}
             track={track}
             value={checks?.[track.id]}
-            onChange={entity && entry.id ? (next) => change(track, next) : undefined}
+            onChange={onChange ? (next) => onChange(track, next) : undefined}
           />
         ))}
       </div>
@@ -148,11 +158,43 @@ function Tracks({ kind, entry, tracks }) {
   );
 }
 
+/**
+ * Caractéristiques, textes et cases à cocher d'une fiche, rangés selon la mise en page du modèle de la campagne
+ * (par défaut : caractéristiques, informations, cases à cocher). Sans caractéristique dans le modèle, l'ancien affichage.
+ */
+function SheetBlocks({ kind, entry, owner, setup }) {
+  const { checks, change } = useEntryChecks(kind, entry, setup.tracks);
+  const layout = useMemo(
+    () => resolveLayout(setup.layouts, setup.layoutId, { characteristics: setup.characteristics, tracks: setup.tracks, textFields: setup.textFields }),
+    [setup.layouts, setup.layoutId, setup.characteristics, setup.tracks, setup.textFields]
+  );
+  const known = list(setup.characteristics).length > 0;
+  if (!known) {
+    return (
+      <>
+        <Characteristics characteristics={entry.characteristics} owner={owner} sheet={entry} setup={setup} />
+        <Texts fields={setup.textFields} texts={entry.texts} />
+        <Tracks tracks={setup.tracks} checks={checks} onChange={change} />
+      </>
+    );
+  }
+  return layout.blocks.map((block) => {
+    if (block.kind === "stat-group") {
+      return <Characteristics key={block.id} characteristics={entry.characteristics} only={[block.stat, ...block.children]} title={`${block.title || block.stat} :`} owner={owner} sheet={entry} setup={setup} />;
+    }
+    if (block.kind === "stats") {
+      return <Characteristics key={block.id} characteristics={entry.characteristics} only={block.stats} title={`${block.title || "Caractéristiques"} :`} owner={owner} sheet={entry} setup={setup} />;
+    }
+    if (block.kind === "texts") return <Texts key={block.id} fields={block.fields} texts={entry.texts} title={`${block.title || "Informations"} :`} />;
+    return <Tracks key={block.id} tracks={block.tracks} checks={checks} onChange={change} title={`${block.title || "Cases à cocher"} :`} />;
+  });
+}
+
 /** Champs de texte du modèle de la campagne (archétype, talents…), en lecture seule : rien tant qu'ils sont vides. */
-function Texts({ fields, texts }) {
+function Texts({ fields, texts, title = "Informations :" }) {
   if (!textRows(fields, texts).some((row) => row.value)) return null;
   return (
-    <Section title="Informations :">
+    <Section title={title}>
       <TextFieldsView fields={fields} texts={texts} compact />
     </Section>
   );
@@ -277,9 +319,7 @@ export default function CodexEntryDetails({ kind, entry, locationLabel = "", rel
               {entry.appearance}
             </p>
           )}
-          <Characteristics characteristics={entry.characteristics} owner={owner} sheet={entry} setup={setup} />
-          <Texts fields={setup.textFields} texts={entry.texts} />
-          <Tracks kind={kind} entry={entry} tracks={setup.tracks} />
+          <SheetBlocks kind={kind} entry={entry} owner={owner} setup={setup} />
           <Skills skills={entry.skills} owner={owner} sheet={entry} setup={setup} />
           <Equipment equipment={entry.equipment} owner={owner} />
           <Inventory inventory={entry.inventory} owner={owner} />
@@ -303,9 +343,7 @@ export default function CodexEntryDetails({ kind, entry, locationLabel = "", rel
 
       {kind === "character" && (
         <>
-          <Characteristics characteristics={entry.characteristics} owner={owner} sheet={entry} setup={setup} />
-          <Texts fields={setup.textFields} texts={entry.texts} />
-          <Tracks kind={kind} entry={entry} tracks={setup.tracks} />
+          <SheetBlocks kind={kind} entry={entry} owner={owner} setup={setup} />
           <Skills skills={entry.skills} owner={owner} sheet={entry} setup={setup} />
           <Equipment equipment={entry.equipment} owner={owner} />
           <Inventory inventory={entry.inventory} owner={owner} />
