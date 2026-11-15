@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from "react";
-import { Pencil, Plus, Search, Trash2, X } from "lucide-react";
+import React, { useMemo, useRef, useState } from "react";
+import { Copy, Pencil, Plus, Search, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import ResponsiveDialog from "@/components/common/ResponsiveDialog";
 import { useGameCatalog } from "@/hooks/useGameCatalog";
+import useConfirm from "@/hooks/useConfirm";
 
 export const GAME_TABS = [
   { id: "characters", label: "Personnages" },
@@ -58,6 +59,9 @@ export default function GameCatalogPanel({ campaignId, kind, skillRollModifier =
   const [query, setQuery] = useState("");
   const [draft, setDraft] = useState(null);
   const [pendingDelete, setPendingDelete] = useState(null);
+  const { confirm, confirmDialog } = useConfirm();
+  // Type de l'équipement au moment où on entre dans le champ « Type » : on ne propose les champs que si le type a changé.
+  const typeAtFocus = useRef("");
 
   const shown = useMemo(() => {
     const needle = searchable(query).trim();
@@ -75,6 +79,46 @@ export default function GameCatalogPanel({ campaignId, kind, skillRollModifier =
     type: item.type || "",
     field_names: [...(item.field_names || (item.fields || []).map((field) => field.name))],
   });
+
+  // Une copie (nom « … (copie) », même type et mêmes champs) s'ouvre dans la fenêtre d'ajout, pour être renommée avant d'être enregistrée.
+  const openDuplicate = (item) => setDraft({
+    id: undefined,
+    name: `${item.name || ""} (copie)`.slice(0, 120),
+    roll_modifier: item.roll_modifier || "",
+    characteristic: item.characteristic || "",
+    type: item.type || "",
+    field_names: [...(item.field_names || (item.fields || []).map((field) => field.name))],
+  });
+
+  // Champs que les autres équipements du catalogue ont pour ce type.
+  const fieldsKnownForType = (type, ownId) => [...new Set(
+    items
+      .filter((item) => item.id !== ownId && searchable(item.type).trim() === searchable(type).trim())
+      .flatMap((item) => item.field_names || (item.fields || []).map((field) => field.name))
+      .map((name) => String(name || "").trim())
+      .filter(Boolean)
+  )];
+
+  // Quand le type change, propose d'ajouter les champs connus pour ce type (sans rien retirer).
+  const offerTypeFields = async () => {
+    const type = String(draft?.type || "").trim();
+    if (!type || searchable(typeAtFocus.current).trim() === searchable(type)) return;
+    const present = new Set(draft.field_names.map((name) => searchable(name).trim()).filter(Boolean));
+    const missing = fieldsKnownForType(type, draft.id).filter((name) => !present.has(searchable(name)));
+    if (!missing.length) return;
+    const accepted = await confirm({
+      title: "Champs connus pour ce type",
+      description: `Les autres équipements de type « ${type} » ont les champs : ${missing.join(", ")}. Les ajouter à celui-ci ?`,
+      confirmLabel: "Compléter",
+      cancelLabel: "Ignorer",
+    });
+    if (!accepted) return;
+    setDraft((current) => {
+      if (!current) return current;
+      const have = new Set(current.field_names.map((name) => searchable(name).trim()));
+      return { ...current, field_names: [...current.field_names, ...missing.filter((name) => !have.has(searchable(name)))] };
+    });
+  };
 
   const setFieldName = (index, value) => setDraft((current) => ({
     ...current,
@@ -135,6 +179,9 @@ export default function GameCatalogPanel({ campaignId, kind, skillRollModifier =
                     )}
                   </div>
                   <div className="flex shrink-0 gap-1">
+                    <Button size="icon" variant="ghost" aria-label={`Dupliquer ${item.name}`} onClick={() => openDuplicate(item)}>
+                      <Copy className="h-4 w-4" />
+                    </Button>
                     <Button size="icon" variant="ghost" aria-label={`Modifier ${item.name}`} onClick={() => openEdit(item)}>
                       <Pencil className="h-4 w-4" />
                     </Button>
@@ -220,7 +267,11 @@ export default function GameCatalogPanel({ campaignId, kind, skillRollModifier =
                   <Input
                     id="catalog-type"
                     value={draft.type}
+                    onFocus={() => {
+                      typeAtFocus.current = draft.type;
+                    }}
                     onChange={(event) => setDraft({ ...draft, type: event.target.value })}
+                    onBlur={offerTypeFields}
                     maxLength={80}
                   />
                 </div>
@@ -255,6 +306,8 @@ export default function GameCatalogPanel({ campaignId, kind, skillRollModifier =
           </div>
         )}
       </ResponsiveDialog>
+
+      {confirmDialog}
 
       <AlertDialog open={!!pendingDelete} onOpenChange={(open) => !open && setPendingDelete(null)}>
         <AlertDialogContent>
