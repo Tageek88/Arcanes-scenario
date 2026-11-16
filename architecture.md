@@ -303,3 +303,13 @@ flowchart LR
 - Visionneuse, PDF de campagne et notes de version (1.7.1) : testés à la main sous Windows (31/10/2026) ; non testés sous Android (feuille de partage, PDF) ; les tests de base de données ne tournent que chez l'utilisateur.
 - Post-it (1.7.0) : testés à la main sous Windows (31/10/2026) ; tests de base de données seulement chez l'utilisateur ; non testé sous Android.
 - Inventaire : testé à la main sous Windows (29/10/2026) ; les tests du service ne tournent que sur le PC de l'utilisateur (IndexedDB simulée) ; non testé sous Android.
+
+## Version 1.15.0 : bibliothèque de systèmes et mises en page des fiches
+
+- **Périmètre.** Pas de nouveau système de comptage : on personnalise le modèle de jeu existant (`GameSheetModel`). Les nouveaux champs sont facultatifs et rangés avec le modèle : `tracks` (cases à cocher, cochées dans `GameCharacter.checks`), `textFields` (champs de texte, valeurs dans `texts`), `characteristics[].parent` (lien entre statistiques : la valeur de l'une s'ajoute au lancer de l'autre), `layouts` + `layoutId`, `zones`.
+- **Mises en page** : `lib/meta/layouts.js` (`resolveLayout` : blocs `stat-group`, `stats`, `texts`, `tracks`) et `SheetLayoutView.jsx`. Mêmes blocs dans la carte de Jeu, l'éditeur de personnage, `CodexEntryDetails`, l'éditeur de PNJ, l'impression en liste et le PDF. Sans mise en page, l'affichage d'origine (stats, textes, pistes) est conservé.
+- **Systèmes hors campagne** : table `GameSystem` (`db.version(10)`), `lib/meta/gameSystem.js`, `lib/services/gameSystems.js`, `GameSystemsDialog.jsx`, export et import JSON, `ExportSystemButton.jsx`. Un système emporte le modèle et les catalogues de compétences et d'équipements. `lib/meta/builtinSystems.js` : systèmes fournis (Metro sans compétences, objets, armes ni protections, ni fond).
+- **Feuille** : table `SheetBackground` (`db.version(11)`, dans `FILE_TABLES`) alimentée par `lib/services/sheetImport.js` (pdfjs-dist, chargé à la demande) ; `lib/meta/sheetZones.js` (zones `stat|text|track|info` en fractions de page) ; écrans `SheetBackgroundDialog`, `SheetZonesDialog`, `SheetFaceDialog`, `SheetPageCanvas`, `SheetZoneContent`. Impression et PDF : `SheetPrintPages.jsx` et `lib/print/sheetPdf.js` (avec une feuille, seule elle est imprimée).
+- **Équipement** : `lib/meta/equipmentGroups.js` et `EquipmentGroupHeadings.jsx` (armes / protections / autres, déduits du type).
+- Le fond de feuille n'est jamais exporté avec un système (droits des éditeurs) ; les zones le sont.
+- Tests : `sheetZonesPlaced`, `sheetZonesInfo`, `sheetZonesEquipment`, `equipmentGroups`, `textFields`, `builtinSystems`, `gameSystemBuiltin`, `gameSystemService`, `gameSystemCatalogService`, `tours`.

@@ -161,3 +161,25 @@ Ensuite, idées pour la suite, sans ordre imposé (à choisir avec l'utilisateur
 ## 8. Message de démarrage conseillé
 
 > Je reprends le projet Arcanes & Scénario (React + Vite + Dexie + Electron + Capacitor). Voici la passation (PASSATION.md), AGENTS.md, architecture.md et le code. Lis-les d'abord, puis propose-moi la suite à partir de la liste « Reste à faire ». Réponds en français, avec des fichiers complets, et des commandes PowerShell.
+
+## Bibliothèque de systèmes de jeu (lots 1 à 9d, 11 au 15/11/2026) : à publier en 1.15.0
+
+Tout est livré par des scripts `apply-*.mjs` tout-ou-rien (retouches comptées, `--dry`, fichiers neufs jamais écrasés sans `--force`) ; chaque lot a été testé et commité par l'utilisateur. Le numéro de version n'est pas décidé (1.15.0 proposé ; le dépôt public était à 1.14.1 le 11/11).
+
+| Lot | Contenu |
+|---|---|
+| 1, 1b | Cases à cocher (pistes du modèle, cases cochées des PJ et PNJ, impression multiple) |
+| 2b | Lien entre statistiques (`characteristics[].parent`) ; le lot 2 « valeur de compétence » est abandonné ; pas de `skillRollModifier` |
+| 3a, 3b | Champs de texte ; mises en page en blocs |
+| 4, 4b | Systèmes hors campagne (`GameSystem`, `db.version(10)`), export et import JSON, catalogues de compétences et d'équipements emportés |
+| 5a à 5g | Fond de feuille PDF ou image (`SheetBackground`, `db.version(11)`, pdfjs-dist), zones et glisser-déposer, impression et PDF (seule la feuille s'imprime), zones « info », armes et protections, Dupliquer, rappel des champs du type (Compléter / Ignorer), catalogue d'équipement |
+| 6 (6b à 6f) | Metro fourni (positions des valeurs, feuilles vierges sans fond, dés) ; sans compétences, objets, armes ni protections ; filtre anti double impression des listes ; campagne d'exemple passée à Metro avec armes et protections ; compétences du catalogue reliées aux stats Metro |
+| 7a, 7b | Équipement des PNJ (Dupliquer, types Arme / Protection, rappel des champs) ; équipement rangé en armes / protections / autres, impression et PDF compris |
+| 8a, 8b | Bouton « Exporter ce système » ; icônes Exporter / Remplacer le fond inversées |
+| 9a à 9d | Mise en page appliquée à l'éditeur de personnage, au Codex, à l'éditeur de PNJ, à l'impression en liste et au PDF |
+
+Décisions en vigueur : pas de nouveau système de comptage ; pas de `skillRollModifier` ; liens entre STATS ; pool de dés = valeur courante ; Metro livré sans illustration (© Arkhane Asylum, chaque utilisateur importe sa feuille) ; le fond n'est pas exporté avec les systèmes ; un système fourni ne contient que placements, feuilles vierges et dés ; la campagne d'exemple du tutoriel utilise Metro.
+
+Non vérifié : les valeurs « Maximum » qui ne s'imprimaient pas (signalé au lot 5c) n'ont jamais été reproduites ; l'interface (pdfjs, canvas, glisser-déposer, impression) n'a été vue que par l'utilisateur ; les tests de base de données ne tournent que chez lui ; rien n'a été testé sous Android pour cette bibliothèque.
+
+Reste possible : proposer Metro à la création d'une campagne ; autres systèmes un par un (D&D 5, Cthulhu, Chroniques Oubliées, Pathfinder, Star Wars, The Division : vérifier les droits) ; import de PDF avec détection de champs ; génération aléatoire adaptée aux systèmes ; documents « Cadrage » et « Conception — Étape 1 » dans Claude Docs.

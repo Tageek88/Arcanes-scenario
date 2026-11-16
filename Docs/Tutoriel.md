@@ -20,3 +20,6 @@ Three guided tours, started from Settings › Tutoriel. A tour NEVER makes the u
 - The demo campaign is user data: it is in backups, and removing it deletes everything it contains (nothing goes to the trash).
 - Radix modal dialogs dismiss on outside pointerdown/focus: the bubble is a portal and stops propagation of both. Escape is deliberately not bound by the tour.
 - A step that depends on a feature only shown in some states (for example the « Toutes les campagnes » switch needs 2+ campaigns) simply shows its bubble without a ring after 1.2 s.
+
+## Demo campaign on Metro (1.15.0)
+- The demo campaign now uses the built-in Metro system (stats, zones, equipment catalog with weapons and protections). Its layout name must not contain « 2033 » (no-brand test of `demoCampaign`), and every `SkillCatalog` skill must point to a valid characteristic (`tests/tours.test.js`). A tour step that cites a stat, skill or item name must follow the Metro names.
