@@ -8,6 +8,7 @@ import SheetPageCanvas from "@/components/game/SheetPageCanvas";
 import SheetZoneContent from "@/components/game/SheetZoneContent";
 import { loadSheetBackgroundData } from "@/lib/services/sheetBackgroundStore";
 import { fieldRect, fieldsFor, fieldsOnPage, fieldsSummary, snapTarget } from "@/lib/meta/pdfFields";
+import { placeByFieldNames, snapAllZones } from "@/lib/meta/pdfFieldMatch";
 import {
   MAX_TEXT_SIZE,
   MIN_TEXT_SIZE,
@@ -41,6 +42,7 @@ export default function SheetZonesDialog({ open, onOpenChange, campaignId, campa
   const [fields, setFields] = useState([]);
   const [showFields, setShowFields] = useState(true);
   const [magnet, setMagnet] = useState(true);
+  const [report, setReport] = useState("");
   const drag = useRef(null);
 
   useEffect(() => {
@@ -49,6 +51,7 @@ export default function SheetZonesDialog({ open, onOpenChange, campaignId, campa
     setDraft(zones || []);
     setChanged(false);
     setSelectedId("");
+    setReport("");
     setPageIndex(0);
     setLoading(true);
     loadSheetBackgroundData(campaignId)
@@ -101,6 +104,20 @@ export default function SheetZonesDialog({ open, onOpenChange, campaignId, campa
   const remove = (id) => {
     edit(draft.filter((zone) => zone.id !== id));
     setSelectedId("");
+  };
+
+  // « Aimanter tout » : chaque zone déjà posée se colle sur le champ du PDF le plus proche.
+  const snapEverything = () => {
+    const out = snapAllZones(draft, fields, { tracks: model.tracks });
+    if (out.snapped > 0) edit(out.zones);
+    setReport(`${out.snapped} zone${out.snapped > 1 ? "s" : ""} collée${out.snapped > 1 ? "s" : ""} sur un champ, ${out.unmatched} sans champ proche.`);
+  };
+
+  // « Placer d'après les noms » : les éléments pas encore placés prennent le champ du PDF dont le nom leur ressemble.
+  const placeByNames = () => {
+    const out = placeByFieldNames(model, draft, fields);
+    if (out.added > 0) edit(out.zones);
+    setReport(out.added > 0 ? `${out.added} élément${out.added > 1 ? "s" : ""} placé${out.added > 1 ? "s" : ""} d'après les noms : ${out.labels.slice(0, 6).join(", ")}${out.labels.length > 6 ? "…" : ""}.` : "Aucun nom de champ ne ressemble à un élément non placé.");
   };
 
   // Un clic sur un champ du PDF pose la zone choisie exactement dessus.
@@ -219,6 +236,9 @@ export default function SheetZonesDialog({ open, onOpenChange, campaignId, campa
                     Aimanter les zones
                   </label>
                   <span>Choisissez une zone, puis cliquez sur un champ pour la poser dessus.</span>
+                  <Button size="sm" variant="outline" onClick={snapEverything}>Aimanter tout</Button>
+                  <Button size="sm" variant="outline" onClick={placeByNames}>Placer d'après les noms</Button>
+                  {report && <span role="status" className="basis-full text-foreground">{report}</span>}
                 </div>
               ) : (
                 <p className="mb-2 text-xs text-muted-foreground">Astuce : importez un PDF éditable (à champs de formulaire) pour aimanter les zones sur ses champs.</p>
