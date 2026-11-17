@@ -6,7 +6,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { cn } from "@/lib/utils";
 import SheetPageCanvas from "@/components/game/SheetPageCanvas";
 import SheetZoneContent from "@/components/game/SheetZoneContent";
-import { loadSheetBackground } from "@/lib/services/sheetBackgroundStore";
+import { loadSheetBackgroundData } from "@/lib/services/sheetBackgroundStore";
+import { fieldRect, fieldsFor, fieldsOnPage, fieldsSummary, snapTarget } from "@/lib/meta/pdfFields";
 import {
   MAX_TEXT_SIZE,
   MIN_TEXT_SIZE,
@@ -37,6 +38,9 @@ export default function SheetZonesDialog({ open, onOpenChange, campaignId, campa
   const [pageIndex, setPageIndex] = useState(0);
   const [selectedId, setSelectedId] = useState("");
   const [changed, setChanged] = useState(false);
+  const [fields, setFields] = useState([]);
+  const [showFields, setShowFields] = useState(true);
+  const [magnet, setMagnet] = useState(true);
   const drag = useRef(null);
 
   useEffect(() => {
@@ -47,13 +51,17 @@ export default function SheetZonesDialog({ open, onOpenChange, campaignId, campa
     setSelectedId("");
     setPageIndex(0);
     setLoading(true);
-    loadSheetBackground(campaignId)
+    loadSheetBackgroundData(campaignId)
       .then((loaded) => {
-        if (!cancelled) setPages(loaded);
+        if (cancelled) return;
+        setPages(loaded.pages);
+        setFields(loaded.fields);
       })
       .catch((error) => {
         console.error("Lecture du fond de feuille impossible :", error);
-        if (!cancelled) setPages([]);
+        if (cancelled) return;
+        setPages([]);
+        setFields([]);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -70,6 +78,8 @@ export default function SheetZonesDialog({ open, onOpenChange, campaignId, campa
   const page = pages[pageIndex];
   const selected = draft.find((zone) => zone.id === selectedId) || null;
   const labelOf = (zone) => items.find((item) => item.key === zoneKey(zone))?.label || zone.ref;
+  // Champs du PDF affichés : ceux qui conviennent à la zone choisie (cases pour une piste, zones de saisie pour le reste).
+  const shownFields = showFields ? (selected ? fieldsFor(fields, pageIndex, selected.kind) : fieldsOnPage(fields, pageIndex)) : [];
 
   const edit = (next) => {
     setDraft(next);
@@ -93,6 +103,12 @@ export default function SheetZonesDialog({ open, onOpenChange, campaignId, campa
     setSelectedId("");
   };
 
+  // Un clic sur un champ du PDF pose la zone choisie exactement dessus.
+  const snapToField = (field) => {
+    if (!selected) return;
+    edit(updateZone(draft, selected.id, { page: field.page, ...fieldRect(field) }));
+  };
+
   const startDrag = (event, zone, mode, rect) => {
     event.stopPropagation();
     event.preventDefault();
@@ -112,7 +128,14 @@ export default function SheetZonesDialog({ open, onOpenChange, campaignId, campa
   };
 
   const endDrag = () => {
+    const state = drag.current;
     drag.current = null;
+    if (!state || state.mode !== "move" || !magnet) return;
+    // Une zone déplacée puis lâchée sur (ou près d') un champ du PDF s'y colle.
+    const zone = draft.find((entry) => entry.id === state.id);
+    if (!zone || (zone.x === state.origin.x && zone.y === state.origin.y)) return;
+    const target = snapTarget(fieldsFor(fields, zone.page, zone.kind), zone);
+    if (target) edit(updateZone(draft, zone.id, fieldRect(target)));
   };
 
   const keyboard = (event, zone) => {
@@ -185,6 +208,21 @@ export default function SheetZonesDialog({ open, onOpenChange, campaignId, campa
                   ))}
                 </div>
               )}
+              {fields.length > 0 ? (
+                <div className="mb-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                  <label className="flex items-center gap-1">
+                    <input type="checkbox" checked={showFields} onChange={(event) => setShowFields(event.target.checked)} />
+                    Champs du PDF{fieldsOnPage(fields, pageIndex).length ? ` (${fieldsSummary(fieldsOnPage(fields, pageIndex))})` : ""}
+                  </label>
+                  <label className="flex items-center gap-1">
+                    <input type="checkbox" checked={magnet} onChange={(event) => setMagnet(event.target.checked)} />
+                    Aimanter les zones
+                  </label>
+                  <span>Choisissez une zone, puis cliquez sur un champ pour la poser dessus.</span>
+                </div>
+              ) : (
+                <p className="mb-2 text-xs text-muted-foreground">Astuce : importez un PDF éditable (à champs de formulaire) pour aimanter les zones sur ses champs.</p>
+              )}
               {selected && (
                 <div className="mb-2 flex flex-wrap items-center gap-2 rounded-md bg-secondary/50 p-2 text-sm">
                   <span className="font-medium">{labelOf(selected)}</span>
@@ -225,8 +263,22 @@ export default function SheetZonesDialog({ open, onOpenChange, campaignId, campa
               )}
               {page && (
                 <SheetPageCanvas page={page} className="touch-none" key={page.id}>
-                  {({ px, rect }) =>
-                    zonesOnPage(draft, pageIndex).map((zone) => (
+                  {({ px, rect }) => [
+                    ...shownFields.map((field) => (
+                      <button
+                        key={`field-${field.id}`}
+                        type="button"
+                        title={`${field.name || "Champ du PDF"}${field.count > 1 ? ` · ${field.count} cases` : ""}`}
+                        aria-label={`Champ du PDF ${field.name || ""}${field.count > 1 ? `, ${field.count} cases` : ""} : poser la zone choisie dessus`}
+                        onClick={() => snapToField(field)}
+                        className={cn(
+                          "absolute rounded-sm border border-dashed bg-sky-500/10",
+                          selected ? "cursor-pointer border-sky-600 hover:bg-sky-500/25" : "pointer-events-none border-sky-400/60"
+                        )}
+                        style={{ left: `${field.x * 100}%`, top: `${field.y * 100}%`, width: `${field.w * 100}%`, height: `${field.h * 100}%` }}
+                      />
+                    )),
+                    ...zonesOnPage(draft, pageIndex).map((zone) => (
                       <div
                         key={zone.id}
                         role="button"
@@ -254,8 +306,8 @@ export default function SheetZonesDialog({ open, onOpenChange, campaignId, campa
                           className="absolute -bottom-1 -right-1 h-3 w-3 cursor-nwse-resize rounded-sm border border-primary bg-background"
                         />
                       </div>
-                    ))
-                  }
+                    )),
+                  ]}
                 </SheetPageCanvas>
               )}
               <p className="mt-2 text-xs text-muted-foreground">Clavier : flèches pour déplacer (Maj : plus vite), Alt + flèches pour redimensionner, Suppr pour retirer.</p>

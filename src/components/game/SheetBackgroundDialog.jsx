@@ -6,7 +6,8 @@ import ExportSystemButton from "@/components/game/ExportSystemButton";
 import { useToast } from "@/components/ui/use-toast";
 import { MAX_BACKGROUND_PAGES, SOURCE_ACCEPT, backgroundSizeLabel } from "@/lib/meta/sheetBackground";
 import { importSheetFile, rotatePage } from "@/lib/services/sheetImport";
-import { loadSheetBackground, removeSheetBackground, saveSheetBackground } from "@/lib/services/sheetBackgroundStore";
+import { loadSheetBackgroundData, removeSheetBackground, saveSheetBackground } from "@/lib/services/sheetBackgroundStore";
+import { fieldsSummary, removePageFields, rotateFields } from "@/lib/meta/pdfFields";
 
 /**
  * Fond de la feuille de personnage d'une campagne : importer un PDF ou une image (convertis en pages d'image), tourner une
@@ -16,6 +17,7 @@ export default function SheetBackgroundDialog({ open, onOpenChange, campaignId, 
   const { toast } = useToast();
   const fileRef = useRef(null);
   const [pages, setPages] = useState([]);
+  const [fields, setFields] = useState([]);
   const [changed, setChanged] = useState(false);
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -27,9 +29,11 @@ export default function SheetBackgroundDialog({ open, onOpenChange, campaignId, 
     setChanged(false);
     setConfirmRemove(false);
     setLoading(true);
-    loadSheetBackground(campaignId)
+    loadSheetBackgroundData(campaignId)
       .then((loaded) => {
-        if (!cancelled) setPages(loaded);
+        if (cancelled) return;
+        setPages(loaded.pages);
+        setFields(loaded.fields);
       })
       .catch((error) => {
         console.error("Lecture du fond de feuille impossible :", error);
@@ -63,24 +67,28 @@ export default function SheetBackgroundDialog({ open, onOpenChange, campaignId, 
     const result = await guard(() => importSheetFile(file));
     if (!result) return;
     setPages(result.pages);
+    setFields(result.fields || []);
     setChanged(true);
     if (result.truncated) toast({ title: "PDF long", description: `Seules les ${MAX_BACKGROUND_PAGES} premières pages sont gardées.` });
+    if (result.fields?.length) toast({ title: "Champs du PDF repérés", description: `${fieldsSummary(result.fields)} : ils serviront à aimanter les zones.` });
   };
 
   const rotate = async (index) => {
     const rotated = await guard(() => rotatePage(pages[index], 1));
     if (!rotated) return;
     setPages((current) => current.map((page, i) => (i === index ? rotated : page)));
+    setFields((current) => rotateFields(current, index, 1));
     setChanged(true);
   };
 
   const removePage = (index) => {
     setPages((current) => current.filter((_, i) => i !== index));
+    setFields((current) => removePageFields(current, index));
     setChanged(true);
   };
 
   const save = async () => {
-    const saved = await guard(() => saveSheetBackground(campaignId, pages));
+    const saved = await guard(() => saveSheetBackground(campaignId, pages, fields));
     if (!saved) return;
     setPages(saved);
     setChanged(false);
@@ -96,6 +104,7 @@ export default function SheetBackgroundDialog({ open, onOpenChange, campaignId, 
     await guard(async () => {
       await removeSheetBackground(campaignId);
       setPages([]);
+      setFields([]);
       setChanged(false);
       toast({ title: "Fond retiré" });
     });
@@ -120,6 +129,7 @@ export default function SheetBackgroundDialog({ open, onOpenChange, campaignId, 
         <p className="text-xs text-muted-foreground">
           Le PDF est converti en images ({MAX_BACKGROUND_PAGES} pages au plus) et reste sur cet appareil ; il n'est pas inclus dans les systèmes exportés.
           Les droits de la feuille appartiennent à son éditeur : importez votre propre exemplaire.
+          Avec un PDF éditable (à champs de formulaire), les zones de saisie et les cases sont repérées pour aimanter les valeurs au placement.
         </p>
         <div className="flex flex-wrap items-center gap-2">
           <Button variant="outline" size="sm" disabled={busy || !campaignId} onClick={() => fileRef.current?.click()}>
@@ -133,6 +143,7 @@ export default function SheetBackgroundDialog({ open, onOpenChange, campaignId, 
           )}
           <ExportSystemButton campaignId={campaignId} campaignName={campaignName} disabled={busy} />
           {pages.length > 0 && <span className="text-xs text-muted-foreground">{pages.length} page{pages.length > 1 ? "s" : ""} · {backgroundSizeLabel(pages)}</span>}
+          {fields.length > 0 && <span className="text-xs text-muted-foreground">{fieldsSummary(fields)}</span>}
           {busy && <span className="text-xs text-muted-foreground">Traitement…</span>}
         </div>
 

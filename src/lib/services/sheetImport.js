@@ -9,6 +9,7 @@ import {
   rotatedSize,
   sourceRejection,
 } from "@/lib/meta/sheetBackground";
+import { fieldsFromAnnotations, groupChecks } from "@/lib/meta/pdfFields";
 
 // Conversion d'une feuille (PDF ou image) en pages d'image pour servir de fond. Code de navigateur : il ne tourne pas
 // dans les tests. pdfjs-dist n'est chargé qu'au moment d'importer un PDF.
@@ -31,6 +32,16 @@ function newCanvas(width, height) {
   return { canvas, context };
 }
 
+// Les champs de formulaire d'un PDF éditable (zones de saisie, cases à cocher) : leur lecture ne doit jamais empêcher l'import.
+async function readFields(page, viewport, index) {
+  try {
+    return fieldsFromAnnotations(await page.getAnnotations({ intent: "display" }), viewport, index);
+  } catch (error) {
+    console.warn("Champs du PDF illisibles :", error);
+    return [];
+  }
+}
+
 async function renderPdf(file) {
   // Version « legacy » de pdfjs : elle fonctionne aussi dans les navigateurs et les Electron un peu anciens (Promise.withResolvers, etc.).
   const [pdfjs, worker] = await Promise.all([import("pdfjs-dist/legacy/build/pdf.mjs"), import("pdfjs-dist/legacy/build/pdf.worker.min.mjs?url")]);
@@ -40,16 +51,18 @@ async function renderPdf(file) {
   try {
     const count = Math.min(document_.numPages, MAX_BACKGROUND_PAGES);
     const pages = [];
+    const found = [];
     for (let number = 1; number <= count; number += 1) {
       const page = await document_.getPage(number);
       const base = page.getViewport({ scale: 1 });
+      found.push(...(await readFields(page, base, number - 1)));
       const viewport = page.getViewport({ scale: fitScale(base.width, base.height, PAGE_LONG_SIDE, true) });
       const { canvas, context } = newCanvas(viewport.width, viewport.height);
       await page.render({ canvasContext: context, viewport }).promise;
       pages.push(toPage(canvas));
       page.cleanup();
     }
-    return { pages, truncated: document_.numPages > count };
+    return { pages, truncated: document_.numPages > count, fields: groupChecks(found) };
   } finally {
     // On libère via la tâche de chargement (présente dans toutes les versions de pdfjs) ; une erreur ici ne doit pas masquer la vraie.
     try {
@@ -76,7 +89,7 @@ async function renderImageFile(file) {
     const scale = fitScale(image.naturalWidth, image.naturalHeight, PAGE_LONG_SIDE, false);
     const { canvas, context } = newCanvas(image.naturalWidth * scale, image.naturalHeight * scale);
     context.drawImage(image, 0, 0, canvas.width, canvas.height);
-    return { pages: [toPage(canvas)], truncated: false };
+    return { pages: [toPage(canvas)], truncated: false, fields: [] };
   } finally {
     URL.revokeObjectURL(url);
   }
@@ -84,7 +97,8 @@ async function renderImageFile(file) {
 
 /**
  * Convertit un fichier choisi par l'utilisateur en pages d'image (les 4 premières pages d'un PDF).
- * @returns {Promise<{ pages: { id: string, width: number, height: number, url: string }[], truncated: boolean }>}
+ * Un PDF éditable fournit aussi ses champs de formulaire (voir lib/meta/pdfFields) : zones de saisie et rangées de cases.
+ * @returns {Promise<{ pages: { id: string, width: number, height: number, url: string }[], truncated: boolean, fields: object[] }>}
  */
 export async function importSheetFile(file) {
   const refusal = sourceRejection(file);
