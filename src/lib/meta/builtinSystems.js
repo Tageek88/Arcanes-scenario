@@ -2,6 +2,8 @@
 // A shipped system has the same shape as a saved one ({ id, name, description, data }) plus `builtin: true`;
 // the user copies it into a campaign or into their own systems, then adapts it freely.
 
+import { DND5_SYSTEM } from "@/lib/meta/builtinDnd5.js";
+
 const ATTRIBUTES = {
   Vigueur: ["Bricolage", "Corps à corps", "Endurance"],
   Agilité: ["Furtivité", "Réaction", "Tir"],
@@ -100,23 +102,23 @@ const METRO_ZONES = [
   { id: "z0eb1e9f72ac3", kind: "text", ref: "blessures", page: 0, x: 0.7759, y: 0.5538, w: 0.2073, h: 0.0563, size: 1.6 },
   { id: "zda27a0eae48e", kind: "text", ref: "traumatismes", page: 0, x: 0.7795, y: 0.6297, w: 0.2014, h: 0.073, size: 1.6 },
   { id: "z8b1b2173a897", kind: "text", ref: "notes", page: 0, x: 0.6302, y: 0.8437, w: 0.3471, h: 0.1276, size: 1.6 },
-  { id: "z9b1c60991cca", kind: "track", ref: "stress", page: 0, x: 0.78, y: 0.5108, w: 0.0884, h: 0.03, size: 1.6 },
-  { id: "zb86887e22a80", kind: "track", ref: "sang-froid", page: 0, x: 0.8736, y: 0.5093, w: 0.1119, h: 0.0391, size: 1.6 },
-  { id: "z2c0c8a603233", kind: "track", ref: "radiations", page: 0, x: 0.7929, y: 0.4668, w: 0.166, h: 0.033, size: 1.6 },
+  { id: "z9b1c60991cca", kind: "track", ref: "stress", page: 0, x: 0.7835, y: 0.5093, w: 0.0884, h: 0.03, size: 1.6 },
+  { id: "zb86887e22a80", kind: "track", ref: "sang-froid", page: 0, x: 0.8748, y: 0.5093, w: 0.1119, h: 0.0391, size: 1.6 },
+  { id: "z2c0c8a603233", kind: "track", ref: "radiations", page: 0, x: 0.7964, y: 0.4668, w: 0.166, h: 0.033, size: 1.6 },
   { id: "z40d83d4cbbbe", kind: "track", ref: "affame", page: 0, x: 0.7924, y: 0.4152, w: 0.0285, h: 0.03, size: 1.6 },
   { id: "z53a845ab2965", kind: "track", ref: "deshydrate", page: 0, x: 0.8536, y: 0.4137, w: 0.0297, h: 0.0315, size: 1.6 },
-  { id: "z4f44c99a970d", kind: "track", ref: "epuise", page: 0, x: 0.9123, y: 0.4152, w: 0.0297, h: 0.033, size: 1.6 },
-  { id: "z5f88a755ff8f", kind: "track", ref: "gele", page: 0, x: 0.957, y: 0.4167, w: 0.032, h: 0.0391, size: 1.6 },
-  { id: "z974cc4ba3e04", kind: "track", ref: "eau", page: 0, x: 0.7654, y: 0.2741, w: 0.0837, h: 0.0392, size: 1.6 },
-  { id: "z0d24f3e3ada4", kind: "track", ref: "nourriture", page: 0, x: 0.8359, y: 0.2755, w: 0.0825, h: 0.0512, size: 1.6 },
-  { id: "z56b3e782f098", kind: "track", ref: "filtres", page: 0, x: 0.7596, y: 0.3195, w: 0.0861, h: 0.0528, size: 1.6 },
-  { id: "zc214829d8010", kind: "track", ref: "energie", page: 0, x: 0.8375, y: 0.3195, w: 0.0802, h: 0.0527, size: 1.6 },
+  { id: "z4f44c99a970d", kind: "track", ref: "epuise", page: 0, x: 0.9146, y: 0.4137, w: 0.0297, h: 0.033, size: 1.6 },
+  { id: "z5f88a755ff8f", kind: "track", ref: "gele", page: 0, x: 0.9605, y: 0.4152, w: 0.032, h: 0.0391, size: 1.6 },
+  { id: "z974cc4ba3e04", kind: "track", ref: "eau", page: 0, x: 0.7537, y: 0.2726, w: 0.0849, h: 0.0452, size: 1.6 },
+  { id: "z0d24f3e3ada4", kind: "track", ref: "nourriture", page: 0, x: 0.8359, y: 0.2725, w: 0.0825, h: 0.0512, size: 1.6 },
+  { id: "z56b3e782f098", kind: "track", ref: "filtres", page: 0, x: 0.7536, y: 0.318, w: 0.0861, h: 0.0528, size: 1.6 },
+  { id: "zc214829d8010", kind: "track", ref: "energie", page: 0, x: 0.8353, y: 0.3195, w: 0.0802, h: 0.0527, size: 1.6 },
   { id: "z1146161624d5", kind: "info", ref: "name", page: 0, x: 0.3456, y: 0.0342, w: 0.1548, h: 0.027, size: 1.6 },
   { id: "z2cbfb5c0eda5", kind: "info", ref: "skills", page: 0, x: 0.6901, y: 0.0395, w: 0.2884, h: 0.1652, size: 1.6 },
   { id: "z22219f8a1ba4", kind: "info", ref: "inventory", page: 0, x: 0.0262, y: 0.6026, w: 0.1979, h: 0.0923, size: 1.6 },
   { id: "z64dd4840adae", kind: "info", ref: "weapons", page: 0, x: 0.0262, y: 0.7574, w: 0.5704, h: 0.2122, size: 1.6 },
   { id: "za8d2f8ff7f48", kind: "info", ref: "protections", page: 0, x: 0.6294, y: 0.7482, w: 0.353, h: 0.0438, size: 1.6 },
-  { id: "za9e62954f9a5", kind: "info", ref: "equipment", page: 0, x: 0.0403, y: 0.3521, w: 0.1779, h: 0.2228, size: 1.6 },
+  { id: "z03a529d4dc66", kind: "info", ref: "equipment", page: 0, x: 0.0403, y: 0.3552, w: 0.1779, h: 0.2137, size: 1.6 },
 ];
 
 export const BUILTIN_SYSTEMS = [
@@ -150,6 +152,7 @@ export const BUILTIN_SYSTEMS = [
       equipment: [],
     },
   },
+  DND5_SYSTEM,
 ];
 
 /** A shipped system by id, or null. */
