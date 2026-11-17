@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { AlertCircle, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -6,6 +6,9 @@ import ResponsiveDialog from "@/components/common/ResponsiveDialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import CampaignThemeSection from "@/components/theme/CampaignThemeSection";
 import { UNIVERSE_TYPES, DEFAULT_UNIVERSE } from '@/lib/meta/universeMeta';
+import { BUILTIN_SYSTEMS } from "@/lib/meta/builtinSystems";
+import { NO_SYSTEM, systemChoices } from "@/lib/meta/systemChoice";
+import { listGameSystems } from "@/lib/services/gameSystems";
 
 const TypedInput = /** @type {React.ComponentType<React.InputHTMLAttributes<HTMLInputElement>>} */ (Input);
 const TypedTextarea = /** @type {React.ComponentType<React.TextareaHTMLAttributes<HTMLTextAreaElement>>} */ (Textarea);
@@ -14,7 +17,7 @@ const TypedTextarea = /** @type {React.ComponentType<React.TextareaHTMLAttribute
  * @typedef {Object} CampaignDialogProps
  * @property {boolean} open
  * @property {(value: boolean) => void} onOpenChange
- * @property {{ name: string, system: string, summary: string, universe_type: string }} form
+ * @property {{ name: string, system: string, summary: string, universe_type: string, sheet_system?: string }} form
  * @property {(field: string, value: string) => void} setField
  * @property {boolean} saving
  * @property {() => void} onSave
@@ -26,6 +29,28 @@ const TypedTextarea = /** @type {React.ComponentType<React.TextareaHTMLAttribute
 
 /** @param {CampaignDialogProps} props */
 export default function CampaignDialog({ open, onOpenChange, form, setField, saving, onSave, editing = false, onDelete, campaignId, onCustomizeTheme }) {
+  // Modèle de fiche choisi à la création : les systèmes fournis, puis ceux de l'utilisateur (lus à l'ouverture).
+  const [savedSystems, setSavedSystems] = useState([]);
+  useEffect(() => {
+    if (!open || editing) return undefined;
+    let cancelled = false;
+    listGameSystems()
+      .then((list) => {
+        if (!cancelled) setSavedSystems(Array.isArray(list) ? list : []);
+      })
+      .catch((error) => console.warn("Systèmes de jeu illisibles :", error));
+    return () => {
+      cancelled = true;
+    };
+  }, [open, editing]);
+  const choices = systemChoices(BUILTIN_SYSTEMS, savedSystems);
+  const chosen = choices.find((item) => item.id === form.sheet_system) || null;
+  const chooseSheetSystem = (value) => {
+    const choice = choices.find((item) => item.id === value) || null;
+    setField("sheet_system", choice ? choice.id : "");
+    if (choice && !form.system?.trim()) setField("system", choice.name);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!form.name?.trim()) return;
@@ -118,6 +143,31 @@ export default function CampaignDialog({ open, onOpenChange, form, setField, sav
             placeholder="Ex. D&D 5e, Call of Cthulhu, Chroniques Oubliées…"
           />
         </div>
+        {!editing && (
+          <div className="stack-y-2">
+            <label htmlFor="campaign-sheet-system" className="text-sm font-medium leading-none">
+              Modèle de fiche (facultatif)
+            </label>
+            <Select value={chosen ? chosen.id : NO_SYSTEM} onValueChange={chooseSheetSystem}>
+              <SelectTrigger id="campaign-sheet-system">
+                <SelectValue placeholder="Aucun" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NO_SYSTEM}>Aucun (modèle vide)</SelectItem>
+                {choices.map((choice) => (
+                  <SelectItem key={choice.id} value={choice.id}>
+                    {choice.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              {chosen
+                ? "Le modèle est copié dans la campagne et reste modifiable. Les feuilles PDF ne sont pas fournies : importez la vôtre dans Jeu › Fond de feuille."
+                : "Vous pourrez aussi choisir ou construire un modèle plus tard, dans la page Jeu › Systèmes."}
+            </p>
+          </div>
+        )}
         <div className="stack-y-2">
           <label htmlFor="campaign-summary" className="text-sm font-medium leading-none">
             Synopsis

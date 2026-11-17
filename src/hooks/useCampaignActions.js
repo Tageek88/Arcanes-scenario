@@ -3,6 +3,19 @@ import { api } from "@/api/localClient";
 import { useToast } from "@/components/ui/use-toast";
 import { setSelectedCampaignId } from "@/lib/context/campaignStore";
 import { countCampaignContent, deleteCampaignCascade } from "@/lib/services/campaignDelete";
+import { applyChosenSystemToCampaign } from "@/lib/services/gameSystems";
+import { chosenSystemNotice, splitCampaignForm } from "@/lib/meta/systemChoice";
+
+// Le système choisi à la création est copié dans la campagne neuve. Un échec ne retire pas la campagne : on le dit, et le système
+// reste à choisir dans Jeu › Systèmes.
+async function applyChosenSystem(systemId, campaignId) {
+  try {
+    return { failed: false, description: chosenSystemNotice(await applyChosenSystemToCampaign(systemId, campaignId)) };
+  } catch (error) {
+    console.error("Application du système choisi impossible :", error);
+    return { failed: true, description: "Le modèle de fiche choisi n'a pas pu être appliqué : vous pourrez le choisir dans Jeu › Systèmes." };
+  }
+}
 
 /**
  * Création, modification et suppression (en cascade) des campagnes.
@@ -28,7 +41,9 @@ export function useCampaignActions({ campaigns, setCampaigns, setCampaignId, rel
    */
   const saveCampaign = async (form, editingId, onSaved) => {
     setSavingCampaign(true);
-    const payload = { ...form, name: form.name.trim() };
+    // `sheet_system` (système de fiche choisi à la création) n'est pas un champ de la campagne.
+    const { fields, sheetSystemId } = splitCampaignForm(form);
+    const payload = { ...fields, name: form.name.trim() };
 
     if (editingId) {
       try {
@@ -58,10 +73,12 @@ export function useCampaignActions({ campaigns, setCampaigns, setCampaignId, rel
     try {
       const created = await api.entities.Campaign.create(payload);
       setCampaigns((prev) => prev.map((c) => (c.id === optimistic.id ? created : c)));
+      // Le modèle est en place avant que la campagne ne soit sélectionnée : la page Jeu le trouve dès son ouverture.
+      const notice = sheetSystemId ? await applyChosenSystem(sheetSystemId, created.id) : null;
       setCampaignId(created.id);
       setSelectedCampaignId(created.id);
       resetActiveScene();
-      toast({ title: "Campagne créée" });
+      toast(notice ? { title: "Campagne créée", description: notice.description, variant: notice.failed ? "destructive" : undefined } : { title: "Campagne créée" });
     } catch {
       setCampaigns(previous);
       toast({

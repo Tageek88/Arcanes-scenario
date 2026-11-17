@@ -5,6 +5,7 @@ import {
   MAX_SYSTEMS,
   cleanSystemData,
   cleanSystemInfo,
+  describeSystem,
   exportSystemFile,
   modelFieldsFromSystem,
   parseSystemFile,
@@ -94,6 +95,18 @@ const builtinOrThrow = (id) => {
 /** Copie un système fourni avec l'application dans une campagne (voir `applyGameSystemToCampaign`). */
 export async function applyBuiltinSystemToCampaign(id, campaignId) {
   return applySystemDataToCampaign(builtinOrThrow(id), campaignId);
+}
+
+/**
+ * Applique à une campagne neuve le système choisi à sa création : un système fourni ou un système de l'utilisateur (même copie que
+ * « Utiliser pour cette campagne »). Lève une erreur si le système n'existe plus ou n'a aucune caractéristique.
+ * @returns {Promise<{ name: string, zones: number, replaced: boolean, skills: number, equipment: number }>} `zones` : valeurs déjà placées sur la feuille
+ */
+export async function applyChosenSystemToCampaign(systemId, campaignId) {
+  const system = getBuiltinSystem(systemId) || (await api.entities.GameSystem.get(systemId));
+  if (!system) throw new Error("Ce système n'existe plus.");
+  const result = await applySystemDataToCampaign(system, campaignId);
+  return { ...result, name: String(system.name || ""), zones: describeSystem(system).zones };
 }
 
 /** Ajoute un système fourni à ceux de l'utilisateur, pour l'adapter ou l'exporter. */

@@ -51,7 +51,7 @@ const EMPTY_SCENE = {
   recurring: false,
 };
 
-const EMPTY_CAMPAIGN = { name: "", system: "", summary: "", universe_type: "arcanes" };
+const EMPTY_CAMPAIGN = { name: "", system: "", summary: "", universe_type: "arcanes", sheet_system: "" };
 
 export default function Home() {
   const { toast } = useToast();
@@ -229,6 +229,7 @@ export default function Home() {
       system: campaign.system || "",
       summary: campaign.summary || "",
       universe_type: campaign.universe_type || "arcanes",
+      sheet_system: "",
     });
     setCampaignOpen(true);
   };

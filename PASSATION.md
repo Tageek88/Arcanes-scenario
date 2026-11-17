@@ -191,3 +191,11 @@ Reste possible : proposer Metro à la création d'une campagne ; autres système
 - Metro 2033 reste dans « Fourni » mais n'est pas un système appliqué par défaut.
 - Ajouter un autre système fourni : voir `AGENTS.md`, section « BUILT-IN SYSTEM: DONJONS & DRAGONS 5 ». Vérifier les droits de chaque éditeur avant l'ajout. Systèmes encore prévus : Cthulhu, Chroniques Oubliées, Pathfinder, Star Wars, The Division.
 - Non vérifié : les positions D&D 5 sur le PDF réel de chaque utilisateur (feuille officielle française 2024 supposée) ; rien testé sous Android.
+
+## Version 1.15.2 : import des champs d'un PDF éditable et aimantation (17/11/2026)
+
+- Lot 11 : les systèmes fournis sont des fichiers JSON dans `src/data/systems` (Metro 2033, D&D 5) ; ajouter un système = déposer un fichier (voir `Docs/Ajouter-un-systeme.md`). Testé et commité.
+- Lot 12 : à l'import d'un PDF éditable, les champs de formulaire (zones de saisie, cases à cocher) sont lus et gardés avec le fond ; les cases voisines d'une même ligne forment une seule rangée avec leur nombre. Dans « Placer les valeurs », les champs s'affichent, un clic pose la zone choisie dessus et une zone lâchée près d'un champ s'y colle. Testé et commité.
+- Lot 13 : « Aimanter tout » (chaque zone posée se colle sur le champ le plus proche) et « Placer d'après les noms » (les éléments non placés prennent le champ de même nom). Testé et commité.
+- À savoir : un fond importé avant la 1.15.2 n'a pas de champs ; il faut réimporter le PDF éditable une fois. Les champs ne sont pas exportés avec les systèmes (ils restent avec le fond, sur l'appareil).
+- Non vérifié : le comportement sur d'autres PDF éditables que la feuille D&D 5 française de 2024 ; les cases en colonne ne sont pas regroupées ; rien testé sous Android.
