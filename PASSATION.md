@@ -183,3 +183,11 @@ Décisions en vigueur : pas de nouveau système de comptage ; pas de `skillRollM
 Non vérifié : les valeurs « Maximum » qui ne s'imprimaient pas (signalé au lot 5c) n'ont jamais été reproduites ; l'interface (pdfjs, canvas, glisser-déposer, impression) n'a été vue que par l'utilisateur ; les tests de base de données ne tournent que chez lui ; rien n'a été testé sous Android pour cette bibliothèque.
 
 Reste possible : proposer Metro à la création d'une campagne ; autres systèmes un par un (D&D 5, Cthulhu, Chroniques Oubliées, Pathfinder, Star Wars, The Division : vérifier les droits) ; import de PDF avec détection de champs ; génération aléatoire adaptée aux systèmes ; documents « Cadrage » et « Conception — Étape 1 » dans Claude Docs.
+
+## Version 1.15.1 : D&D 5 ajouté au catalogue (16/11/2026)
+
+- Lot 10a : système fourni « Donjons & Dragons 5 » (règles 2024, feuille officielle française de 2 pages) : 6 caractéristiques avec leur sauvegarde, initiative, 18 compétences liées, d20 + valeur, 16 pistes, 35 champs de texte, mise en page à 3 colonnes, 91 positions. Sans illustration, sans texte de règles, sans compétences ni objets du catalogue. Testé et commité.
+- Lot 10b : positions de Metro 2033 et de D&D 5 ajustées à la main dans l'application, puis reprises depuis les exports.
+- Metro 2033 reste dans « Fourni » mais n'est pas un système appliqué par défaut.
+- Ajouter un autre système fourni : voir `AGENTS.md`, section « BUILT-IN SYSTEM: DONJONS & DRAGONS 5 ». Vérifier les droits de chaque éditeur avant l'ajout. Systèmes encore prévus : Cthulhu, Chroniques Oubliées, Pathfinder, Star Wars, The Division.
+- Non vérifié : les positions D&D 5 sur le PDF réel de chaque utilisateur (feuille officielle française 2024 supposée) ; rien testé sous Android.

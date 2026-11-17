@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BUILTIN_SYSTEMS, getBuiltinSystem } from "@/lib/meta/builtinSystems.js";
+import { BUILTIN_PROBLEMS, BUILTIN_SYSTEMS, getBuiltinSystem } from "@/lib/meta/builtinSystems.js";
 import { cleanSystemData, describeSystem, parseSystemFile, exportSystemFile } from "@/lib/meta/gameSystem.js";
 import { resolveLayout } from "@/lib/meta/layouts.js";
 import { cleanZones } from "@/lib/meta/sheetZones.js";
@@ -14,6 +14,17 @@ describe("systèmes fournis", () => {
     }
     expect(getBuiltinSystem("builtin-metro-2033").name).toBe("Metro 2033");
     expect(getBuiltinSystem("zz")).toBeNull();
+  });
+
+  it("tous les fichiers de src/data/systems sont lus sans problème, sans compétences ni équipements", () => {
+    expect(BUILTIN_PROBLEMS).toEqual([]);
+    const ids = BUILTIN_SYSTEMS.map((system) => system.id);
+    expect(ids.includes("builtin-metro-2033")).toBe(true);
+    expect(ids.includes("builtin-dnd-5")).toBe(true);
+    for (const system of BUILTIN_SYSTEMS) {
+      expect(system.data.skills).toEqual([]);
+      expect(system.data.equipment).toEqual([]);
+    }
   });
 
   it("le nettoyage ne retire rien : les données fournies sont déjà valides", () => {
