@@ -177,6 +177,22 @@ describe("visites guidées : cohérence des définitions", () => {
     }
   });
 
+  it("chaque visite se déroule page par page : une page quittée n'est jamais revisitée (sauf l'étape finale)", () => {
+    for (const tour of TOURS) {
+      for (const mobile of [false, true]) {
+        const steps = stepsFor(tour, mobile).slice(0, -1);
+        const seen = new Set();
+        let current = null;
+        for (const step of steps) {
+          if (!step.route || step.route === current) continue;
+          expect(seen.has(step.route) ? `${tour.id}/${step.id} revient sur ${step.route}` : step.id).toBe(step.id);
+          seen.add(step.route);
+          current = step.route;
+        }
+      }
+    }
+  });
+
   it("les étapes qui montrent une section des Paramètres ouvrent d'abord son onglet", () => {
     const TAB_OF = {
       "section-appearance": "Apparence",

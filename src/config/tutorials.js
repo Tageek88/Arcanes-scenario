@@ -205,6 +205,13 @@ const SECOND_TOUR = {
       text: "Quand une scène est sélectionnée, le panneau Codex affiche ses PNJ, lieux et indices sans quitter l'arborescence.",
     },
     {
+      id: "print",
+      route: "/",
+      target: "home-print",
+      title: "Impression d'une page",
+      text: "Chaque page imprime son contenu, ou l'exporte en PDF modifiable.",
+    },
+    {
       id: "npc-relations",
       route: "/codex",
       target: "npc-relations",
@@ -290,13 +297,6 @@ const SECOND_TOUR = {
       text: "Sept ambiances au choix, et une ambiance différente par campagne : l'exemple utilise Dark fantasy.",
     },
     {
-      id: "print",
-      route: "/",
-      target: "home-print",
-      title: "Impression d'une page",
-      text: "Chaque page imprime son contenu, ou l'exporte en PDF modifiable.",
-    },
-    {
       id: "end",
       route: "/",
       title: "Fin de la phase 2",
@@ -333,14 +333,6 @@ const THIRD_TOUR = {
       selector: '[data-expandable-card="scene:6fe6448d-0a00-5842-9ca7-4da444e8c27a"]',
       title: "Scènes récurrentes",
       text: "Une scène qui revient à plusieurs endroits de la campagne se déclare récurrente : ses exemplaires sont regroupés et restent cohérents.",
-    },
-    {
-      id: "acts-rows",
-      route: "/settings",
-      target: "campaign-layout",
-      run: [openTab("Apparence")],
-      title: "Actes en lignes",
-      text: "Dans Paramètres › Apparence, les actes peuvent s'afficher en colonnes ou en lignes, selon la place dont vous avez besoin. Ce choix est propre à chaque campagne.",
     },
     {
       id: "global-search",
@@ -449,6 +441,22 @@ const THIRD_TOUR = {
       text: "Le calendrier peut afficher les séances de toutes vos campagnes, pour éviter les chevauchements.",
     },
     {
+      id: "acts-rows",
+      route: "/settings",
+      target: "campaign-layout",
+      run: [openTab("Apparence")],
+      title: "Actes en lignes",
+      text: "Dans Paramètres › Apparence, les actes peuvent s'afficher en colonnes ou en lignes, selon la place dont vous avez besoin. Ce choix est propre à chaque campagne.",
+    },
+    {
+      id: "table-mode",
+      route: "/settings",
+      target: "game-table-mode",
+      run: [openTab("Apparence")],
+      title: "Mode table de jeu",
+      text: "Le mode table renforce les contrastes, grossit un peu le texte et retire les animations, pour rester lisible à la table de jeu. Désactivé, tout revient comme avant.",
+    },
+    {
       id: "trash",
       route: "/settings",
       selector: "section.rounded-xl",
@@ -464,14 +472,6 @@ const THIRD_TOUR = {
       run: [openTab("Sauvegarde")],
       title: "Sauvegarde automatique",
       text: "L'application peut enregistrer une copie de vos données à intervalle régulier, sur l'appareil.",
-    },
-    {
-      id: "table-mode",
-      route: "/settings",
-      target: "game-table-mode",
-      run: [openTab("Apparence")],
-      title: "Mode table de jeu",
-      text: "Le mode table renforce les contrastes, grossit un peu le texte et retire les animations, pour rester lisible à la table de jeu. Désactivé, tout revient comme avant.",
     },
     {
       id: "updates",
