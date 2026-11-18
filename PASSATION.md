@@ -206,3 +206,12 @@ Reste possible : proposer Metro à la création d'une campagne ; autres système
 - Lot 15 : dans une rencontre, « Lancer » (par combattant) et « Lancer les initiatives manquantes » tirent l'initiative avec les dés du système ; sélecteur « Lancer l'initiative avec » par campagne. Une initiative déjà saisie n'est jamais écrasée. Metro 2033 n'a pas de caractéristique Initiative : saisie manuelle conservée (décision de l'utilisateur). Testé et commité.
 - Non vérifié : comportement sous Android ; les dialogues eux-mêmes (pas de tests de composants).
 - Numéro de version et versionCode : 1.15.3 → 253.
+
+## Version 1.15.4 : tutoriel page par page, étape sur les systèmes, dépendances (18/11/2026)
+
+- Lot 16 : les trois visites (phases 1, 2 et 3) se déroulent page par page : une page est terminée avant la suivante, sans retour. Textes inchangés. Un test le vérifie. Testé et commité.
+- Lot 17 : nouvelle étape « Systèmes de jeu » dans la phase 3 (22 étapes), texte approuvé tel quel. Testé et commité.
+- Dépendances : Capacitor 8.6.2, vite, vitest, plugin-react et electron-builder mis à jour. Audit : runtime 0 ; complet 16 alertes (7 modérées, 9 hautes), toutes à la construction et acceptées (voir AGENTS.md). Testé, APK reconstruit et commité.
+- Abandonné : choisir le modèle de fiche depuis le Calendrier (décision de l'utilisateur).
+- Reste au backlog : génération aléatoire par système, revue générale de l'appli, typecheck (23 erreurs implicit any), SignPath, mises à jour majeures (React 19, ESLint 10, TypeScript 7, Electron 45).
+- Numéro de version et versionCode : 1.15.4 → 254.
