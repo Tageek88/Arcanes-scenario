@@ -152,7 +152,7 @@ export default function GameSystemsDialog({ open, onOpenChange, campaignId, hasM
           </section>
         )}
 
-        <section className="stack-y-2">
+        <section data-tutorial="game-systems" className="stack-y-2">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h3 className="font-display font-semibold">Systèmes</h3>
             <Button variant="outline" size="sm" disabled={busy} onClick={() => fileRef.current?.click()}>

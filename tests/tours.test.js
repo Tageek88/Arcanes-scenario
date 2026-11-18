@@ -149,11 +149,11 @@ describe("visites guidées : cohérence des définitions", () => {
     for (const match of text.matchAll(/Séance \d/g)) expect(demo.GameSession.some((row) => row.title.includes(match[0]))).toBe(true);
   });
 
-  it("la phase 3 existe, utilise la campagne d'exemple et a ses 21 étapes", () => {
+  it("la phase 3 existe, utilise la campagne d'exemple et a ses 22 étapes", () => {
     const tour = getTour(THIRD_TOUR_ID);
     expect(tour.needsDemo).toBe(true);
-    expect(stepsFor(tour, false)).toHaveLength(21);
-    expect(stepsFor(tour, true)).toHaveLength(21);
+    expect(stepsFor(tour, false)).toHaveLength(22);
+    expect(stepsFor(tour, true)).toHaveLength(22);
     expect(tour.steps[0].id).toBe("intro");
     expect(tour.steps[tour.steps.length - 1].id).toBe("end");
   });

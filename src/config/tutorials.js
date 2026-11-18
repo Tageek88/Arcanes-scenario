@@ -394,6 +394,15 @@ const THIRD_TOUR = {
       undo: CLOSE_DIALOG,
     },
     {
+      id: "game-systems",
+      route: "/jeu",
+      target: "game-systems",
+      title: "Systèmes de jeu",
+      text: "Un modèle de fiche se réutilise d'une campagne à l'autre. Des systèmes sont fournis, et vous pouvez enregistrer le vôtre ou l'importer et l'exporter par fichier. Chaque campagne garde sa propre copie.",
+      run: [{ demo: "dom.click", args: { selector: '[data-tutorial="game-systems-open"]', blur: true } }],
+      undo: CLOSE_DIALOG,
+    },
+    {
       id: "pc-generator",
       route: "/jeu",
       target: "pc-generator",

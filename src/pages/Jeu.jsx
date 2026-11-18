@@ -191,7 +191,7 @@ export default function Jeu() {
             </Button>
           )}
           {campaignId && (
-            <Button variant="outline" onClick={() => setSystemsOpen(true)}>
+            <Button data-tutorial="game-systems-open" variant="outline" onClick={() => setSystemsOpen(true)}>
               <Library className="h-4 w-4" /> Systèmes
             </Button>
           )}
