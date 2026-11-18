@@ -199,3 +199,10 @@ Reste possible : proposer Metro à la création d'une campagne ; autres système
 - Lot 13 : « Aimanter tout » (chaque zone posée se colle sur le champ le plus proche) et « Placer d'après les noms » (les éléments non placés prennent le champ de même nom). Testé et commité.
 - À savoir : un fond importé avant la 1.15.2 n'a pas de champs ; il faut réimporter le PDF éditable une fois. Les champs ne sont pas exportés avec les systèmes (ils restent avec le fond, sur l'appareil).
 - Non vérifié : le comportement sur d'autres PDF éditables que la feuille D&D 5 française de 2024 ; les cases en colonne ne sont pas regroupées ; rien testé sous Android.
+
+## Version 1.15.3 : choix du système à la création d'une campagne, initiative des rencontres (18/11/2026)
+
+- Lot 14 : à la création d'une campagne, on peut choisir un « Modèle de fiche (facultatif) » (Aucun, systèmes fournis, ses propres systèmes). Le modèle est copié avant que la campagne soit sélectionnée ; si la copie échoue, la campagne reste créée et un message le signale. Testé et commité.
+- Lot 15 : dans une rencontre, « Lancer » (par combattant) et « Lancer les initiatives manquantes » tirent l'initiative avec les dés du système ; sélecteur « Lancer l'initiative avec » par campagne. Une initiative déjà saisie n'est jamais écrasée. Metro 2033 n'a pas de caractéristique Initiative : saisie manuelle conservée (décision de l'utilisateur). Testé et commité.
+- Non vérifié : comportement sous Android ; les dialogues eux-mêmes (pas de tests de composants).
+- Numéro de version et versionCode : 1.15.3 → 253.
