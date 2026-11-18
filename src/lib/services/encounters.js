@@ -65,6 +65,8 @@ export async function loadEncounterSources(campaignId) {
     id: row.id,
     name: row.name || "",
     characteristics: row.characteristics && typeof row.characteristics === "object" ? row.characteristics : {},
+    // Dés propres à la fiche (réglés par le MJ) : le jet d'initiative les respecte.
+    dice_override: row.dice_override && typeof row.dice_override === "object" ? row.dice_override : {},
   });
   const names = (models.items[0]?.characteristics || [])
     .map((definition) => definition?.name)

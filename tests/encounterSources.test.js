@@ -111,7 +111,7 @@ describe("rencontre : fiches d'une campagne (service)", () => {
     expect(sources.characteristics).toEqual(["PV", "Force"]);
     expect(sources.characters.map((item) => item.name)).toEqual(["Mira"]);
     expect(sources.npcs).toHaveLength(1);
-    expect(Object.keys(sources.npcs[0]).sort()).toEqual(["characteristics", "id", "name"]);
+    expect(Object.keys(sources.npcs[0]).sort()).toEqual(["characteristics", "dice_override", "id", "name"]);
     expect(hpFromCharacteristic(sources.npcs[0], "PV")).toBe(8);
   });
 

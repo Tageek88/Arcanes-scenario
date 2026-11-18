@@ -10,6 +10,9 @@ import OwnerPicker from "@/components/common/OwnerPicker";
 import useConfirm from "@/hooks/useConfirm";
 import { useEncounters } from "@/hooks/useEncounters";
 import { useEncounterSources } from "@/hooks/useEncounterSources";
+import { useRollSetup } from "@/hooks/useRollSetup";
+import { hasDiceConfig } from "@/lib/meta/dice";
+import { INITIATIVE_AUTO, INITIATIVE_MANUAL, findInitiativeStat, initiativeStat, rollCombatants } from "@/lib/meta/encounterInitiative";
 import {
   DEFAULT_ENCOUNTER_TITLE,
   ENCOUNTER_LIMITS,
@@ -22,6 +25,7 @@ import {
   renameEncounter,
   resetEncounter,
   setActive,
+  setInitiatives,
   updateCombatant,
 } from "@/lib/meta/encounter";
 
@@ -96,7 +100,7 @@ function TitleField({ title, onCommit }) {
   );
 }
 
-function CombatantRow({ combatant, active, apply }) {
+function CombatantRow({ combatant, active, apply, onRoll }) {
   const { id, name } = combatant;
   const down = isDown(combatant);
   const tracked = combatant.hp_max !== null;
@@ -120,6 +124,11 @@ function CombatantRow({ combatant, active, apply }) {
           onCommit={(value) => change({ initiative: value })}
           className="w-16"
         />
+        {onRoll && (
+          <Button type="button" size="sm" variant="outline" className="h-8 min-touch" aria-label={`Lancer l'initiative de ${name}`} onClick={() => onRoll(combatant)}>
+            Lancer
+          </Button>
+        )}
         <button
           type="button"
           aria-label={`Donner la main à ${name}`}
@@ -361,11 +370,54 @@ function AddFromSheets({ campaignId, sources, sceneNpcIds, full, onAdd }) {
           )}
         </div>
         <p className="text-xs text-muted-foreground">
-          Les PV max sont la valeur de la caractéristique choisie sur la fiche. Un clic sur un nom l'ajoute (autant de fois que « Nombre ») ; l'initiative reste à saisir.
+          Les PV max sont la valeur de la caractéristique choisie sur la fiche. Un clic sur un nom l'ajoute (autant de fois que « Nombre ») ; l'initiative se saisit ou se lance.
         </p>
         <OwnerPicker owners={owners} value="" onChange={addOne} label="Fiche à ajouter" />
       </div>
     </details>
+  );
+}
+
+// Caractéristique qui sert au jet d'initiative, retenue par campagne sur cet appareil ("" : celle nommée « Initiative »).
+const readInitiativeChoice = (campaignId) => {
+  try {
+    return window.localStorage.getItem("arcanes_encounter_initiative:" + campaignId) || "";
+  } catch {
+    return "";
+  }
+};
+
+const writeInitiativeChoice = (campaignId, value) => {
+  try {
+    if (value) window.localStorage.setItem("arcanes_encounter_initiative:" + campaignId, value);
+    else window.localStorage.removeItem("arcanes_encounter_initiative:" + campaignId);
+  } catch {
+    // Stockage indisponible : le choix ne vaut que pour cette fenêtre.
+  }
+};
+
+/** Choix de la caractéristique du jet d'initiative : automatique (« Initiative »), saisie à la main, ou une caractéristique du modèle. */
+function InitiativeSetting({ characteristics, choice, onChange }) {
+  const auto = findInitiativeStat(characteristics);
+  const value = choice === INITIATIVE_MANUAL ? INITIATIVE_MANUAL : characteristics.includes(choice) ? choice : INITIATIVE_AUTO;
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <Label htmlFor="encounter-initiative-stat" className="text-xs">Lancer l'initiative avec</Label>
+      <Select value={value} onValueChange={(next) => onChange(next === INITIATIVE_AUTO ? "" : next)}>
+        <SelectTrigger id="encounter-initiative-stat" aria-label="Caractéristique de l'initiative" className="h-8 w-full sm:w-64">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={INITIATIVE_AUTO}>{auto ? `Automatique (« ${auto} »)` : "Automatique (aucune « Initiative »)"}</SelectItem>
+          <SelectItem value={INITIATIVE_MANUAL}>Saisie à la main</SelectItem>
+          {characteristics.map((name) => (
+            <SelectItem key={name} value={name}>
+              {name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
   );
 }
 
@@ -378,6 +430,14 @@ function AddFromSheets({ campaignId, sources, sceneNpcIds, full, onAdd }) {
 export default function EncounterDialog({ open, onOpenChange, campaignId, sceneNpcIds = NO_IDS }) {
   const { encounters, encounter, order, loading, select, create, remove, apply, addFighter, addFromSheets } = useEncounters(campaignId, { enabled: open });
   const sources = useEncounterSources(campaignId, { enabled: open });
+  const rollSetup = useRollSetup(campaignId);
+  const [initiativeChoice, setInitiativeChoice] = useState(() => readInitiativeChoice(campaignId));
+  const [rollNote, setRollNote] = useState("");
+
+  useEffect(() => {
+    setInitiativeChoice(readInitiativeChoice(campaignId));
+    setRollNote("");
+  }, [campaignId]);
   const { confirm, confirmDialog } = useConfirm();
   const active = encounter ? activeCombatant(encounter) : null;
   const full = encounter ? encounter.combatants.length >= ENCOUNTER_LIMITS.combatants : false;
@@ -404,6 +464,29 @@ export default function EncounterDialog({ open, onOpenChange, campaignId, sceneN
       cancelLabel: "Annuler",
     });
     if (yes) await apply(resetEncounter);
+  };
+
+  // Jet d'initiative : les dés du système sur la caractéristique choisie (par défaut « Initiative »). Sans caractéristique ou sans
+  // réglage de dés (Metro, par exemple), il n'y a pas de bouton : l'initiative se saisit à la main.
+  const diceReady = hasDiceConfig(rollSetup.dice);
+  const rollStat = initiativeStat(initiativeChoice, sources.characteristics);
+  const canRoll = diceReady && Boolean(rollStat);
+  const missing = order.filter((combatant) => combatant.initiative === null);
+
+  const changeInitiativeChoice = (value) => {
+    setInitiativeChoice(value);
+    writeInitiativeChoice(campaignId, value);
+  };
+
+  const rollFor = async (list) => {
+    const rolled = rollCombatants(list, sources, rollSetup, rollStat);
+    if (rolled.rolled === 0) {
+      setRollNote("Rien n'a pu être lancé : vérifiez le réglage des dés du système.");
+      return;
+    }
+    // Les valeurs sont tirées ici, une seule fois : le changement appliqué à l'écran et à l'enregistrement est identique.
+    const saved = await apply((current) => setInitiatives(current, rolled.values));
+    setRollNote(saved ? rolled.lines.join(" · ") : "");
   };
 
   const footer = (
@@ -485,6 +568,11 @@ export default function EncounterDialog({ open, onOpenChange, campaignId, sceneN
                 <Button type="button" size="sm" variant="ghost" onClick={backToStart} disabled={atStart}>
                   <RotateCcw /> Round 1
                 </Button>
+                {canRoll && (
+                  <Button type="button" size="sm" variant="outline" onClick={() => rollFor(missing)} disabled={missing.length === 0}>
+                    Lancer les initiatives manquantes ({missing.length})
+                  </Button>
+                )}
                 <Button type="button" size="sm" onClick={() => apply(nextTurn)} disabled={order.length === 0}>
                   <SkipForward /> Tour suivant
                 </Button>
@@ -495,12 +583,26 @@ export default function EncounterDialog({ open, onOpenChange, campaignId, sceneN
               ) : (
                 <ul className="stack-y-2">
                   {order.map((combatant) => (
-                    <CombatantRow key={combatant.id} combatant={combatant} active={combatant.id === encounter.active_id} apply={apply} />
+                    <CombatantRow
+                      key={combatant.id}
+                      combatant={combatant}
+                      active={combatant.id === encounter.active_id}
+                      apply={apply}
+                      onRoll={canRoll ? (item) => rollFor([item]) : undefined}
+                    />
                   ))}
                 </ul>
               )}
               {order.length > 0 && (
                 <p className="text-xs text-muted-foreground">Un combattant à 0 PV est grisé mais garde son tour. Les combattants sans initiative passent en dernier.</p>
+              )}
+              {diceReady && sources.characteristics.length > 0 && (
+                <InitiativeSetting characteristics={sources.characteristics} choice={initiativeChoice} onChange={changeInitiativeChoice} />
+              )}
+              {rollNote && (
+                <p role="status" className="text-xs text-foreground">
+                  {rollNote}
+                </p>
               )}
 
               <AddFighterForm full={full} onAdd={addFighter} />

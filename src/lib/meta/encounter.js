@@ -180,6 +180,13 @@ export const resetEncounter = (encounter) => ({ ...encounter, round: 1, active_i
 
 export const renameEncounter = (encounter, title) => ({ ...encounter, title: cleanTitle(title) });
 
+/** Range des initiatives (`values` : identifiant du combattant -> initiative) ; un identifiant inconnu est ignoré. */
+export function setInitiatives(encounter, values) {
+  let current = encounter;
+  for (const [id, value] of Object.entries(values && typeof values === "object" ? values : {})) current = updateCombatant(current, id, { initiative: value });
+  return current;
+}
+
 // --- Combattants venus des fiches (PNJ et personnages) ---
 
 /**
